@@ -1,0 +1,144 @@
+'use client'
+
+import { Leaf, Facebook, Instagram, Linkedin, Youtube, Phone, Mail, MapPin } from 'lucide-react'
+
+const serviceLinks = [
+  'Aeropuerto', 'Ejecutivo', 'Corporativo', 'Eventos',
+  'Turismo', 'Envíos', 'Mudanza', 'Logística',
+]
+
+const workLinks = [
+  'Agencias de viaje', 'Organizadores de eventos', 'Socios de transporte',
+  'Afiliados', 'Conductores', 'Aerolíneas',
+]
+
+const benefitLinks = [
+  'Plan de millas', 'Descuentos especiales', 'Servicios especiales', 'Promociones',
+]
+
+export function Footer() {
+  return (
+    <footer className="relative bg-[#060a12] border-t border-white/5">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
+          {/* Brand Column */}
+          <div className="lg:col-span-2">
+            <img
+              src="https://static.wixstatic.com/media/93e1f3_ab4f7e0b7c2e4f4ba3e0be8f1c2a8f44~mv2.png/v1/fill/w_247,h_104,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/Logo%20Vector%20Ecotaxi.png"
+              alt="Ecotaxi Logo"
+              className="h-10 w-auto mb-4"
+            />
+            <p className="text-white/40 text-sm leading-relaxed mb-6 max-w-xs">
+              Eco Taxi es un servicio de O&C Ingeniería y Representaciones SRL. Primera empresa de transporte
+              en Bolivia con plan de neutralización de CO2.
+            </p>
+
+            {/* Contact Info */}
+            <div className="space-y-2 mb-6">
+              <div className="flex items-center gap-2 text-white/40 text-sm">
+                <Phone className="w-4 h-4 text-[#0077BD]" />
+                <span>(+591) 3 3296885</span>
+              </div>
+              <div className="flex items-center gap-2 text-white/40 text-sm">
+                <Mail className="w-4 h-4 text-[#0077BD]" />
+                <span>info@ecotaxi-bo.com</span>
+              </div>
+              <div className="flex items-center gap-2 text-white/40 text-sm">
+                <MapPin className="w-4 h-4 text-[#0077BD]" />
+                <span>Santa Cruz de la Sierra, Bolivia</span>
+              </div>
+            </div>
+
+            {/* Social Links */}
+            <div className="flex items-center gap-3">
+              {[
+                { icon: Facebook, href: 'https://facebook.com/ecotaxibolivia' },
+                { icon: Instagram, href: 'https://instagram.com/ecotaxibo' },
+                { icon: Linkedin, href: 'https://linkedin.com/company/ecotaxibolivia' },
+                { icon: Youtube, href: '#' },
+              ].map((social, i) => (
+                <a
+                  key={i}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-xl bg-white/[0.05] flex items-center justify-center text-white/40 hover:text-[#00E676] hover:bg-white/[0.08] transition-all duration-300"
+                >
+                  <social.icon className="w-5 h-5" />
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Services Column */}
+          <div>
+            <h3 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">Servicios</h3>
+            <ul className="space-y-2">
+              {serviceLinks.map((link) => (
+                <li key={link}>
+                  <a href="#servicios" className="text-white/40 hover:text-[#00E676] text-sm transition-colors duration-200">
+                    {link}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Work With Us Column */}
+          <div>
+            <h3 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">Trabaja con Nosotros</h3>
+            <ul className="space-y-2">
+              {workLinks.map((link) => (
+                <li key={link}>
+                  <a href="#inicio" className="text-white/40 hover:text-[#00E676] text-sm transition-colors duration-200">
+                    {link}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Benefits Column */}
+          <div>
+            <h3 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">Beneficios</h3>
+            <ul className="space-y-2">
+              {benefitLinks.map((link) => (
+                <li key={link}>
+                  <a href="#inicio" className="text-white/40 hover:text-[#00E676] text-sm transition-colors duration-200">
+                    {link}
+                  </a>
+                </li>
+              ))}
+            </ul>
+
+            {/* Eco Badge */}
+            <div className="mt-8 p-4 rounded-2xl bg-[#00E676]/5 border border-[#00E676]/10">
+              <div className="flex items-center gap-2 mb-2">
+                <Leaf className="w-5 h-5 text-[#00E676]" />
+                <span className="text-sm font-semibold text-[#00E676]">Certificación Eco</span>
+              </div>
+              <p className="text-xs text-white/30">
+                Plan de Medición, Reducción y Neutralización de emisiones GEI
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Bar */}
+        <div className="mt-12 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-white/20 text-xs">
+            &copy; {new Date().getFullYear()} ecotaxi-bo.com — Todos los derechos reservados
+          </p>
+          <div className="flex items-center gap-4">
+            <a href="#" className="text-white/20 hover:text-white/40 text-xs transition-colors">
+              Política de Privacidad
+            </a>
+            <a href="#" className="text-white/20 hover:text-white/40 text-xs transition-colors">
+              Términos de Uso
+            </a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  )
+}
