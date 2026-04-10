@@ -1,26 +1,70 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
-import { ChevronDown, Leaf, Car, Shield, Zap } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { ChevronDown, Leaf, Car, Shield, Zap, ChevronLeft, ChevronRight } from 'lucide-react'
+
+const slides = [
+  {
+    image: '/hero-taxi-1.png',
+    title: 'Transporte Inteligente,',
+    highlight: 'Compromiso Ecológico',
+    subtitle: 'Somos la primera empresa de transporte en Bolivia con un plan de medición, reducción y neutralización de emisiones de gases de efecto invernadero.',
+  },
+  {
+    image: '/hero-taxi-2.png',
+    title: 'Tu Viaje,',
+    highlight: 'Nuestra Misión Verde',
+    subtitle: 'Cada trayecto con Ecotaxi es un paso hacia un planeta más limpio. Viaja con nosotros y reduce tu huella de carbono automáticamente.',
+  },
+]
 
 export function Hero() {
-  const canvasRef = useRef<HTMLDivElement>(null)
+  const parallaxRef = useRef<HTMLDivElement>(null)
+  const [currentSlide, setCurrentSlide] = useState(0)
 
+  // Parallax effect
   useEffect(() => {
-    const el = canvasRef.current
+    const el = parallaxRef.current
     if (!el) return
     const handleScroll = () => {
-      const scrollY = window.scrollY
-      el.style.transform = `translateY(${scrollY * 0.3}px)`
+      el.style.transform = `translateY(${window.scrollY * 0.3}px)`
     }
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+  // Auto-slide
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % slides.length)
+    }, 6000)
+    return () => clearInterval(interval)
+  }, [])
+
+  const goToSlide = (index: number) => setCurrentSlide(index)
+  const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length)
+  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % slides.length)
+
   return (
     <section id="inicio" className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Animated Background */}
-      <div ref={canvasRef} className="absolute inset-0 z-0">
+      {/* Background Images Carousel */}
+      <div ref={parallaxRef} className="absolute inset-0 z-0">
+        {slides.map((slide, i) => (
+          <div
+            key={i}
+            className="absolute inset-0 transition-opacity duration-1000"
+            style={{ opacity: currentSlide === i ? 1 : 0 }}
+          >
+            <div
+              className="absolute inset-0 bg-cover bg-center"
+              style={{ backgroundImage: `url(${slide.image})` }}
+            />
+            {/* Dark overlay */}
+            <div className="absolute inset-0 bg-[#0a0e17]/75" />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17]/50 via-transparent to-[#0a0e17]" />
+          </div>
+        ))}
+
         {/* Grid Pattern */}
         <div
           className="absolute inset-0 opacity-[0.03]"
@@ -29,33 +73,48 @@ export function Hero() {
             backgroundSize: '60px 60px',
           }}
         />
+
         {/* Gradient Orbs */}
-        <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full bg-[#0077BD]/20 blur-[120px] animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full bg-[#00E676]/15 blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full bg-[#1D6988]/20 blur-[100px] animate-pulse" style={{ animationDelay: '2s' }} />
+        <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full bg-[#0077BD]/15 blur-[120px] animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full bg-[#00E676]/10 blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
       </div>
+
+      {/* Carousel Navigation Arrows */}
+      <button
+        onClick={prevSlide}
+        className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all backdrop-blur-sm"
+        aria-label="Slide anterior"
+      >
+        <ChevronLeft className="w-5 h-5" />
+      </button>
+      <button
+        onClick={nextSlide}
+        className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all backdrop-blur-sm"
+        aria-label="Slide siguiente"
+      >
+        <ChevronRight className="w-5 h-5" />
+      </button>
 
       {/* Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-20">
         {/* Badge */}
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-8 animate-fade-in">
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-8 animate-fade-in backdrop-blur-sm">
           <Leaf className="w-4 h-4 text-[#00E676]" />
           <span className="text-sm text-white/80">Primeros en Bolivia con neutralización de CO2</span>
         </div>
 
-        {/* Main Heading */}
+        {/* Main Heading - animated per slide */}
         <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6 animate-fade-in-up">
-          Transporte Inteligente,
+          {slides[currentSlide].title}
           <br />
           <span className="bg-gradient-to-r from-[#00E676] via-[#0077BD] to-[#00E676] bg-clip-text text-transparent">
-            Compromiso Ecológico
+            {slides[currentSlide].highlight}
           </span>
         </h1>
 
         {/* Subtitle */}
         <p className="text-lg md:text-xl text-white/60 max-w-2xl mx-auto mb-10 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-          Somos la primera empresa de transporte en Bolivia con un plan de medición, reducción y neutralización
-          de emisiones de gases de efecto invernadero. Viaja con nosotros y reduce tu huella de carbono.
+          {slides[currentSlide].subtitle}
         </p>
 
         {/* CTA Buttons */}
@@ -72,6 +131,22 @@ export function Hero() {
           >
             Nuestros Servicios
           </a>
+        </div>
+
+        {/* Slide Indicators */}
+        <div className="flex items-center justify-center gap-2 mb-12">
+          {slides.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => goToSlide(i)}
+              className={`h-1.5 rounded-full transition-all duration-500 ${
+                currentSlide === i
+                  ? 'w-8 bg-[#00E676]'
+                  : 'w-4 bg-white/20 hover:bg-white/40'
+              }`}
+              aria-label={`Ir al slide ${i + 1}`}
+            />
+          ))}
         </div>
 
         {/* Stats Bar */}

@@ -8,6 +8,7 @@ const navLinks = [
   { label: 'Servicios', href: '#servicios' },
   { label: 'Flota', href: '#flota' },
   { label: 'Arbolímetro', href: '#arbolimetro' },
+  { label: 'Canales', href: '#multicanal' },
   { label: 'Reservas', href: '#reservas' },
 ]
 

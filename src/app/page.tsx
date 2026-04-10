@@ -5,6 +5,7 @@ import { Hero } from '@/components/ecotaxi/hero'
 import { Services } from '@/components/ecotaxi/services'
 import { Fleet } from '@/components/ecotaxi/fleet'
 import { Arbolimetro } from '@/components/ecotaxi/arbolimetro'
+import { Multicanal } from '@/components/ecotaxi/multicanal'
 import { Reservas } from '@/components/ecotaxi/reservas'
 import { Footer } from '@/components/ecotaxi/footer'
 
@@ -17,6 +18,7 @@ export default function Home() {
         <Services />
         <Fleet />
         <Arbolimetro />
+        <Multicanal />
         <Reservas />
       </main>
       <Footer />

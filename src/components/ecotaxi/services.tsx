@@ -3,7 +3,7 @@
 import {
   DoorOpen, Bus, Plane, Clock, Route, Map, Building2,
   Calendar, GraduationCap, Heart, Briefcase, PawPrint,
-  Package, Truck, Warehouse, Wrench, HardHat, Mountain
+  Package, Truck, Warehouse, Wrench, HardHat, Mountain, ChevronDown
 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
@@ -31,6 +31,7 @@ const services = [
 export function Services() {
   const sectionRef = useRef<HTMLDivElement>(null)
   const [visible, setVisible] = useState(false)
+  const [expandedService, setExpandedService] = useState<string | null>(null)
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -66,36 +67,68 @@ export function Services() {
             </span>
           </h2>
           <p className="text-white/50 max-w-2xl mx-auto text-lg">
-            Más de 17 servicios de transporte diseñados para cubrir cada necesidad, con el compromiso ecológico que nos distingue.
+            Más de 17 servicios de transporte diseñados para cubrir cada necesidad. Haz click en cada servicio para conocer más detalles.
           </p>
         </div>
 
-        {/* Services Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {services.map((service, i) => (
-            <div
-              key={service.title}
-              className={`group relative p-6 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm hover:border-[#00E676]/30 hover:bg-white/[0.05] transition-all duration-500 cursor-pointer ${
-                visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-              }`}
-              style={{ transitionDelay: visible ? `${i * 50}ms` : '0ms' }}
-            >
-              {/* Glow on hover */}
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#00E676]/0 to-[#0077BD]/0 group-hover:from-[#00E676]/5 group-hover:to-[#0077BD]/5 transition-all duration-500" />
+        {/* Services Grid - compact icons + title, expand on click */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+          {services.map((service, i) => {
+            const isExpanded = expandedService === service.title
+            return (
+              <div
+                key={service.title}
+                onClick={() => setExpandedService(isExpanded ? null : service.title)}
+                className={`group relative p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm cursor-pointer transition-all duration-500 ${
+                  isExpanded
+                    ? 'border-[#00E676]/30 bg-white/[0.06] sm:col-span-2 lg:col-span-2 xl:col-span-2'
+                    : 'hover:border-white/10 hover:bg-white/[0.05]'
+                } ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+                style={{ transitionDelay: visible ? `${i * 40}ms` : '0ms' }}
+              >
+                {/* Glow on hover/active */}
+                <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br from-[#00E676]/0 to-[#0077BD]/0 transition-all duration-500 ${
+                  isExpanded ? 'from-[#00E676]/5 to-[#0077BD]/5' : 'group-hover:from-[#00E676]/3'
+                }`} />
 
-              <div className="relative z-10">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#0077BD]/20 to-[#00E676]/20 flex items-center justify-center mb-4 group-hover:from-[#0077BD]/30 group-hover:to-[#00E676]/30 transition-all duration-300">
-                  <service.icon className="w-6 h-6 text-[#00E676]" />
+                <div className="relative z-10">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300 ${
+                      isExpanded ? 'bg-[#00E676]/20' : 'bg-gradient-to-br from-[#0077BD]/20 to-[#00E676]/20'
+                    }`}>
+                      <service.icon className={`w-5 h-5 transition-colors duration-300 ${
+                        isExpanded ? 'text-[#00E676]' : 'text-[#00E676]/80'
+                      }`} />
+                    </div>
+                    <h3 className={`text-sm font-semibold transition-colors duration-300 ${
+                      isExpanded ? 'text-[#00E676]' : 'text-white/80 group-hover:text-white'
+                    }`}>
+                      {service.title}
+                    </h3>
+                    <ChevronDown className={`w-4 h-4 text-white/20 ml-auto shrink-0 transition-transform duration-300 ${
+                      isExpanded ? 'rotate-180 text-[#00E676]' : ''
+                    }`} />
+                  </div>
+
+                  {/* Expanded description */}
+                  <div className={`overflow-hidden transition-all duration-500 ${
+                    isExpanded ? 'max-h-40 opacity-100 mt-4' : 'max-h-0 opacity-0'
+                  }`}>
+                    <p className="text-sm text-white/50 leading-relaxed">
+                      {service.desc}
+                    </p>
+                    <a
+                      href="#reservas"
+                      className="inline-flex items-center gap-1 mt-3 text-xs font-semibold text-[#00E676] hover:text-[#00ff88] transition-colors"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      Reservar este servicio →
+                    </a>
+                  </div>
                 </div>
-                <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-[#00E676] transition-colors duration-300">
-                  {service.title}
-                </h3>
-                <p className="text-sm text-white/40 leading-relaxed">
-                  {service.desc}
-                </p>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </div>
     </section>

@@ -62,7 +62,7 @@ export function Arbolimetro() {
 
       {/* Animated tree particles */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(20)].map((_, i) => (
+        {[...Array(12)].map((_, i) => (
           <div
             key={i}
             className="absolute text-[#00E676]/10 animate-float"
@@ -101,43 +101,66 @@ export function Arbolimetro() {
           </p>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-          {stats.map((stat, i) => (
-            <div
-              key={stat.label}
-              className={`group relative p-8 rounded-3xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm text-center hover:border-white/10 transition-all duration-700 ${
-                visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
-              }`}
-              style={{ transitionDelay: visible ? `${i * 150}ms` : '0ms' }}
-            >
-              {/* Glow ring */}
-              <div
-                className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"
-                style={{
-                  boxShadow: `inset 0 0 60px ${stat.glowColor}, 0 0 30px ${stat.glowColor}`,
-                }}
+        {/* Main content: Tree image + Stats */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-16 items-center">
+          {/* Tree Image - left side */}
+          <div className={`lg:col-span-2 flex justify-center transition-all duration-1000 ${
+            visible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'
+          }`}>
+            <div className="relative">
+              {/* Glow behind tree */}
+              <div className="absolute inset-0 rounded-full bg-[#00E676]/20 blur-[60px] scale-75" />
+              <img
+                src="/eco-tree.png"
+                alt="Árbol ecológico - Símbolo de pureza y descontaminación"
+                className="relative w-full max-w-sm rounded-3xl object-contain"
+                style={{ filter: 'drop-shadow(0 0 40px rgba(0,230,118,0.3))' }}
               />
-
-              <div className="relative z-10">
-                {/* Icon */}
-                <div
-                  className="w-16 h-16 rounded-2xl mx-auto mb-6 flex items-center justify-center"
-                  style={{ background: `${stat.color}15` }}
-                >
-                  <stat.icon className="w-8 h-8" style={{ color: stat.color }} />
-                </div>
-
-                {/* Counter */}
-                <div style={{ color: stat.color }}>
-                  <AnimatedCounter end={stat.value} suffix={stat.suffix} />
-                </div>
-
-                {/* Label */}
-                <p className="text-white/50 mt-3 text-sm font-medium">{stat.label}</p>
+              {/* Purity label */}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-[#00E676]/10 border border-[#00E676]/20 backdrop-blur-sm">
+                <span className="text-xs text-[#00E676] font-medium">Pureza y Descontaminación</span>
               </div>
             </div>
-          ))}
+          </div>
+
+          {/* Stats Grid - right side */}
+          <div className="lg:col-span-3 grid grid-cols-2 gap-4">
+            {stats.map((stat, i) => (
+              <div
+                key={stat.label}
+                className={`group relative p-6 md:p-8 rounded-3xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm text-center hover:border-white/10 transition-all duration-700 ${
+                  visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
+                }`}
+                style={{ transitionDelay: visible ? `${i * 150}ms` : '0ms' }}
+              >
+                {/* Glow ring */}
+                <div
+                  className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"
+                  style={{
+                    boxShadow: `inset 0 0 60px ${stat.glowColor}, 0 0 30px ${stat.glowColor}`,
+                  }}
+                />
+
+                <div className="relative z-10">
+                  {/* Icon */}
+                  <div
+                    className="w-14 h-14 rounded-2xl mx-auto mb-4 flex items-center justify-center"
+                    style={{ background: `${stat.color}15` }}
+                  >
+                    <stat.icon className="w-7 h-7" style={{ color: stat.color }} />
+                  </div>
+
+                  {/* Counter */}
+                  <div style={{ color: stat.color }}>
+                    <AnimatedCounter end={stat.value} suffix={stat.suffix} />
+                  </div>
+
+                  {/* Label */}
+                  <p className="text-white/50 mt-3 text-xs md:text-sm font-medium">{stat.label}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* CO2 Progress Bar */}
