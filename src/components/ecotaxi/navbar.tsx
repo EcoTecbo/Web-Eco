@@ -1,26 +1,42 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Menu, X, Phone } from 'lucide-react'
+import { Menu, X, Phone, ChevronDown } from 'lucide-react'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 const navLinks = [
-  { label: 'Inicio', href: '#inicio' },
-  { label: 'Servicios', href: '#servicios' },
-  { label: 'Flota', href: '#flota' },
-  { label: 'Arbolímetro', href: '#arbolimetro' },
-  { label: 'Canales', href: '#multicanal' },
-  { label: 'Reservas', href: '#reservas' },
+  { label: 'Inicio', href: '/' },
+  { label: 'Nosotros', href: '/nosotros' },
+  { label: 'Servicios', href: '/#servicios', isHash: true },
+  { label: 'Flota', href: '/#flota', isHash: true },
+  { label: 'Arbolímetro', href: '/#arbolimetro', isHash: true },
+  { label: 'Canales', href: '/#multicanal', isHash: true },
+  { label: 'Reservas', href: '/#reservas', isHash: true },
+]
+
+const servicePages = [
+  { label: 'Traslado Aeropuerto', href: '/aeropuerto' },
+  { label: 'Servicios Corporativos', href: '/corporativo' },
 ]
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [servicesOpen, setServicesOpen] = useState(false)
+  const pathname = usePathname()
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50)
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  const isActive = (href: string) => {
+    if (href === '/') return pathname === '/'
+    if (href.startsWith('/#')) return pathname === '/'
+    return pathname === href
+  }
 
   return (
     <nav
@@ -33,26 +49,61 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
-          <a href="#inicio" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2">
             <img
               src="https://static.wixstatic.com/media/93e1f3_ab4f7e0b7c2e4f4ba3e0be8f1c2a8f44~mv2.png/v1/fill/w_247,h_104,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/Logo%20Vector%20Ecotaxi.png"
               alt="Ecotaxi Logo"
               className="h-10 md:h-12 w-auto"
             />
-          </a>
+          </Link>
 
           {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-6">
             {navLinks.map((link) => (
-              <a
+              <Link
                 key={link.href}
                 href={link.href}
-                className="text-sm text-white/70 hover:text-white transition-colors duration-200 relative group"
+                className={`text-sm transition-colors duration-200 relative group ${
+                  isActive(link.href) ? 'text-[#00E676]' : 'text-white/70 hover:text-white'
+                }`}
               >
                 {link.label}
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#00E676] transition-all duration-300 group-hover:w-full" />
-              </a>
+                <span className={`absolute -bottom-1 left-0 h-0.5 bg-[#00E676] transition-all duration-300 ${
+                  isActive(link.href) ? 'w-full' : 'w-0 group-hover:w-full'
+                }`} />
+              </Link>
             ))}
+
+            {/* Services Dropdown */}
+            <div className="relative"
+              onMouseEnter={() => setServicesOpen(true)}
+              onMouseLeave={() => setServicesOpen(false)}
+            >
+              <button className={`flex items-center gap-1 text-sm transition-colors duration-200 ${
+                pathname === '/aeropuerto' || pathname === '/corporativo' ? 'text-[#00E676]' : 'text-white/70 hover:text-white'
+              }`}>
+                Servicios
+                <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${servicesOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {servicesOpen && (
+                <div className="absolute top-full left-0 mt-2 w-56 rounded-xl bg-[#0d1320]/95 backdrop-blur-xl border border-white/[0.08] shadow-xl shadow-black/30 overflow-hidden z-50">
+                  {servicePages.map((service) => (
+                    <Link
+                      key={service.href}
+                      href={service.href}
+                      className={`block px-4 py-3 text-sm transition-colors duration-200 ${
+                        pathname === service.href
+                          ? 'text-[#00E676] bg-[#00E676]/5'
+                          : 'text-white/70 hover:text-white hover:bg-white/5'
+                      }`}
+                      onClick={() => setServicesOpen(false)}
+                    >
+                      {service.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* CTA */}
@@ -64,12 +115,12 @@ export function Navbar() {
               <Phone className="w-4 h-4" />
               (+591) 3 3296885
             </a>
-            <a
-              href="#reservas"
+            <Link
+              href="/#reservas"
               className="relative px-6 py-2.5 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)] hover:shadow-[0_0_30px_rgba(0,230,118,0.5)]"
             >
               Pedir Taxi
-            </a>
+            </Link>
           </div>
 
           {/* Mobile Toggle */}
@@ -86,27 +137,45 @@ export function Navbar() {
       {/* Mobile Menu */}
       <div
         className={`md:hidden transition-all duration-300 overflow-hidden ${
-          mobileOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+          mobileOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
         <div className="bg-[#0a0e17]/95 backdrop-blur-xl border-t border-white/5 px-4 py-4 space-y-3">
           {navLinks.map((link) => (
-            <a
+            <Link
               key={link.href}
               href={link.href}
               onClick={() => setMobileOpen(false)}
-              className="block text-white/70 hover:text-white py-2 text-lg transition-colors"
+              className={`block py-2 text-lg transition-colors ${
+                isActive(link.href) ? 'text-[#00E676]' : 'text-white/70'
+              }`}
             >
               {link.label}
-            </a>
+            </Link>
           ))}
-          <a
-            href="#reservas"
+          {/* Mobile service pages */}
+          <div className="border-t border-white/5 pt-3">
+            <p className="text-xs text-white/30 uppercase tracking-wider mb-2 px-2">Servicios</p>
+            {servicePages.map((service) => (
+              <Link
+                key={service.href}
+                href={service.href}
+                onClick={() => setMobileOpen(false)}
+                className={`block py-2 px-2 text-lg transition-colors ${
+                  pathname === service.href ? 'text-[#00E676]' : 'text-white/70'
+                }`}
+              >
+                {service.label}
+              </Link>
+            ))}
+          </div>
+          <Link
+            href="/#reservas"
             onClick={() => setMobileOpen(false)}
             className="block w-full text-center px-6 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all mt-2"
           >
             Pedir Taxi
-          </a>
+          </Link>
         </div>
       </div>
     </nav>

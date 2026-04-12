@@ -1,19 +1,33 @@
 'use client'
 
+import Link from 'next/link'
 import { Leaf, Facebook, Instagram, Linkedin, Youtube, Phone, Mail, MapPin } from 'lucide-react'
 
 const serviceLinks = [
-  'Aeropuerto', 'Ejecutivo', 'Corporativo', 'Eventos',
-  'Turismo', 'Envíos', 'Mudanza', 'Logística',
+  { label: 'Aeropuerto', href: '/aeropuerto' },
+  { label: 'Corporativo', href: '/corporativo' },
+  { label: 'Ejecutivo', href: '/#servicios' },
+  { label: 'Eventos', href: '/#servicios' },
+  { label: 'Turismo', href: '/#servicios' },
+  { label: 'Envíos', href: '/#servicios' },
+  { label: 'Mudanza', href: '/#servicios' },
+  { label: 'Logística', href: '/#servicios' },
 ]
 
 const workLinks = [
-  'Agencias de viaje', 'Organizadores de eventos', 'Socios de transporte',
-  'Afiliados', 'Conductores', 'Aerolíneas',
+  { label: 'Agencias de viaje', href: '/corporativo' },
+  { label: 'Organizadores de eventos', href: '/#multicanal' },
+  { label: 'Socios de transporte', href: '/#multicanal' },
+  { label: 'Afiliados', href: '/#multicanal' },
+  { label: 'Conductores', href: '/#multicanal' },
+  { label: 'Aerolíneas', href: '/aeropuerto' },
 ]
 
 const benefitLinks = [
-  'Plan de millas', 'Descuentos especiales', 'Servicios especiales', 'Promociones',
+  { label: 'Plan de millas', href: '/#inicio' },
+  { label: 'Descuentos especiales', href: '/corporativo' },
+  { label: 'Servicios especiales', href: '/#servicios' },
+  { label: 'Promociones', href: '/#inicio' },
 ]
 
 export function Footer() {
@@ -23,11 +37,13 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
           {/* Brand Column */}
           <div className="lg:col-span-2">
-            <img
-              src="https://static.wixstatic.com/media/93e1f3_ab4f7e0b7c2e4f4ba3e0be8f1c2a8f44~mv2.png/v1/fill/w_247,h_104,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/Logo%20Vector%20Ecotaxi.png"
-              alt="Ecotaxi Logo"
-              className="h-10 w-auto mb-4"
-            />
+            <Link href="/">
+              <img
+                src="https://static.wixstatic.com/media/93e1f3_ab4f7e0b7c2e4f4ba3e0be8f1c2a8f44~mv2.png/v1/fill/w_247,h_104,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/Logo%20Vector%20Ecotaxi.png"
+                alt="Ecotaxi Logo"
+                className="h-10 w-auto mb-4"
+              />
+            </Link>
             <p className="text-white/40 text-sm leading-relaxed mb-6 max-w-xs">
               Eco Taxi es un servicio de O&C Ingeniería y Representaciones SRL. Primera empresa de transporte
               en Bolivia con plan de neutralización de CO2.
@@ -75,10 +91,10 @@ export function Footer() {
             <h3 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">Servicios</h3>
             <ul className="space-y-2">
               {serviceLinks.map((link) => (
-                <li key={link}>
-                  <a href="#servicios" className="text-white/40 hover:text-[#00E676] text-sm transition-colors duration-200">
-                    {link}
-                  </a>
+                <li key={link.label}>
+                  <Link href={link.href} className="text-white/40 hover:text-[#00E676] text-sm transition-colors duration-200">
+                    {link.label}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -89,10 +105,10 @@ export function Footer() {
             <h3 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">Trabaja con Nosotros</h3>
             <ul className="space-y-2">
               {workLinks.map((link) => (
-                <li key={link}>
-                  <a href="#inicio" className="text-white/40 hover:text-[#00E676] text-sm transition-colors duration-200">
-                    {link}
-                  </a>
+                <li key={link.label}>
+                  <Link href={link.href} className="text-white/40 hover:text-[#00E676] text-sm transition-colors duration-200">
+                    {link.label}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -103,10 +119,10 @@ export function Footer() {
             <h3 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">Beneficios</h3>
             <ul className="space-y-2">
               {benefitLinks.map((link) => (
-                <li key={link}>
-                  <a href="#inicio" className="text-white/40 hover:text-[#00E676] text-sm transition-colors duration-200">
-                    {link}
-                  </a>
+                <li key={link.label}>
+                  <Link href={link.href} className="text-white/40 hover:text-[#00E676] text-sm transition-colors duration-200">
+                    {link.label}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -130,6 +146,9 @@ export function Footer() {
             &copy; {new Date().getFullYear()} ecotaxi-bo.com — Todos los derechos reservados
           </p>
           <div className="flex items-center gap-4">
+            <Link href="/nosotros" className="text-white/20 hover:text-white/40 text-xs transition-colors">
+              Nosotros
+            </Link>
             <a href="#" className="text-white/20 hover:text-white/40 text-xs transition-colors">
               Política de Privacidad
             </a>
