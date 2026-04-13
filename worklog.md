@@ -117,3 +117,26 @@ Stage Summary:
 - Savings comparison section with visual taxi-by-trip vs hourly comparison
 - Booking section with 3 channels (App/Web, Call Center, WhatsApp) and 5-step timeline
 - All navigation updated (Navbar dropdown + Footer services)
+
+---
+Task ID: 2
+Agent: Main Agent
+Task: Create Servicio Ejecutivo (Executive VIP Transport) independent page
+
+Work Log:
+- Read existing Navbar, Footer, and page patterns for consistency
+- Created /src/app/ejecutivo/page.tsx with 8 sections and premium gold/black theme
+- Updated Navbar to add "Ejecutivo VIP" to services dropdown with active state detection
+- Updated Footer to add "Ejecutivo VIP" to services links (replacing generic "Ejecutivo" hash link)
+- Ran ESLint - no errors
+- Verified all 7 pages return HTTP 200
+
+Stage Summary:
+- New page at /ejecutivo with luxury dark/gold theme (#D4AF37 gold accent)
+- Key section: Confort vs VIP comparison - clearly differentiates categories (Confort = max 10yr, A/C; VIP = high-end Mercedes, Audi, Land Cruiser, etc.)
+- VIP Fleet: 6 vehicles (Sedán Ejecutivo, Sedán Premium, SUV Premium, SUV Adventure, Limusina, Van Ejecutiva)
+- Service Modalities: 5 options (Recorrido, Ruta Específica, Por Hora, Por Día, Por Mes)
+- Premium Services: Chofer bilingüe, vestimenta, entregas especiales, aeropuerto VIP, bodas, seguridad
+- Target Clients: Ejecutivos, artistas, deportistas, diplomáticos, novios, VIPs
+- Chauffeur Qualities: Visual card with skill bars and certifications
+- Reservation section with 5 channels + prominent CTA

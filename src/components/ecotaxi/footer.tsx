@@ -6,9 +6,9 @@ import { Leaf, Facebook, Instagram, Linkedin, Youtube, Phone, Mail, MapPin } fro
 const serviceLinks = [
   { label: 'Puerta a Puerta', href: '/puerta-a-puerta' },
   { label: 'Servicio por Hora', href: '/por-hora' },
+  { label: 'Ejecutivo VIP', href: '/ejecutivo' },
   { label: 'Aeropuerto', href: '/aeropuerto' },
   { label: 'Corporativo', href: '/corporativo' },
-  { label: 'Ejecutivo', href: '/#servicios' },
   { label: 'Eventos', href: '/#servicios' },
   { label: 'Turismo', href: '/#servicios' },
   { label: 'Envíos', href: '/#servicios' },
