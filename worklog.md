@@ -74,3 +74,25 @@ Work Log:
 
 Stage Summary:
 - Footer updated at /home/z/my-project/src/components/ecotaxi/footer.tsx
+
+---
+Task ID: 6
+Agent: main
+Task: Create /puerta-a-puerta page for urban taxi service
+
+Work Log:
+- Created /src/app/puerta-a-puerta/page.tsx with full urban taxi service content
+- Sections: Hero, Vehicle Types (6 categories), Subastas (auction system with 4 steps), Viajes Compartidos (shared rides with visual + 4 steps), Transparent Pricing, Cities Coverage (9 cities), Support & Dispatch Center, How It Works (5 steps), CTA
+- Shared ride visual with route diagram showing passenger sharing and cost comparison
+- Subasta system with 4-step process (indicate route, launch offer, drivers compete, travel)
+- 9 Bolivia cities with main city badges
+- 5 support channels including human dispatch center
+- Updated Navbar: added Puerta a Puerta to services dropdown
+- Updated Footer: added Puerta a Puerta to service links
+- Lint passes clean, all pages return HTTP 200
+
+Stage Summary:
+- Puerta a Puerta page created at /home/z/my-project/src/app/puerta-a-puerta/page.tsx
+- Navbar updated with Puerta a Puerta in services dropdown
+- Footer updated with Puerta a Puerta link
+- All 5 pages verified: /, /nosotros, /aeropuerto, /corporativo, /puerta-a-puerta

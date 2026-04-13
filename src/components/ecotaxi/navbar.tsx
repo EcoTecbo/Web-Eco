@@ -16,6 +16,7 @@ const navLinks = [
 ]
 
 const servicePages = [
+  { label: 'Puerta a Puerta', href: '/puerta-a-puerta' },
   { label: 'Traslado Aeropuerto', href: '/aeropuerto' },
   { label: 'Servicios Corporativos', href: '/corporativo' },
 ]
@@ -80,7 +81,7 @@ export function Navbar() {
               onMouseLeave={() => setServicesOpen(false)}
             >
               <button className={`flex items-center gap-1 text-sm transition-colors duration-200 ${
-                pathname === '/aeropuerto' || pathname === '/corporativo' ? 'text-[#00E676]' : 'text-white/70 hover:text-white'
+                pathname === '/aeropuerto' || pathname === '/corporativo' || pathname === '/puerta-a-puerta' ? 'text-[#00E676]' : 'text-white/70 hover:text-white'
               }`}>
                 Servicios
                 <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${servicesOpen ? 'rotate-180' : ''}`} />

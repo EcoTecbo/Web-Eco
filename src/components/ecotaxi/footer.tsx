@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Leaf, Facebook, Instagram, Linkedin, Youtube, Phone, Mail, MapPin } from 'lucide-react'
 
 const serviceLinks = [
+  { label: 'Puerta a Puerta', href: '/puerta-a-puerta' },
   { label: 'Aeropuerto', href: '/aeropuerto' },
   { label: 'Corporativo', href: '/corporativo' },
   { label: 'Ejecutivo', href: '/#servicios' },
@@ -11,7 +12,6 @@ const serviceLinks = [
   { label: 'Turismo', href: '/#servicios' },
   { label: 'Envíos', href: '/#servicios' },
   { label: 'Mudanza', href: '/#servicios' },
-  { label: 'Logística', href: '/#servicios' },
 ]
 
 const workLinks = [
