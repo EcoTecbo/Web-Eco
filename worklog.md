@@ -96,3 +96,24 @@ Stage Summary:
 - Navbar updated with Puerta a Puerta in services dropdown
 - Footer updated with Puerta a Puerta link
 - All 5 pages verified: /, /nosotros, /aeropuerto, /corporativo, /puerta-a-puerta
+
+---
+Task ID: 1
+Agent: Main Agent
+Task: Create Servicio por Hora (Hourly Service) independent page
+
+Work Log:
+- Read existing project structure (Navbar, Footer, Corporativo page, Puerta-a-Puerta page) for patterns
+- Created /src/app/por-hora/page.tsx with 9 sections: Hero, What Is It, Benefits, Pricing Models (2 tabs), Vehicle Types, Savings Comparison, How to Book, Dispatch Center, CTA
+- Updated Navbar to add "Servicio por Hora" to services dropdown with active state detection
+- Updated Footer to add "Servicio por Hora" to services links
+- Ran ESLint - no errors
+- Verified all 6 pages return HTTP 200
+
+Stage Summary:
+- New page at /por-hora with complete hourly service content
+- Two pricing models: Horas por Zonas (auto zone detection per-minute) and Horas Libres (fixed rate with included km)
+- Benefits section highlighting: no credit card, no contracts, 80% savings, all-inclusive, unique in Bolivia
+- Savings comparison section with visual taxi-by-trip vs hourly comparison
+- Booking section with 3 channels (App/Web, Call Center, WhatsApp) and 5-step timeline
+- All navigation updated (Navbar dropdown + Footer services)
