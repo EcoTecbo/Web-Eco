@@ -9,6 +9,7 @@ const serviceLinks = [
   { label: 'Ejecutivo VIP', href: '/ejecutivo' },
   { label: 'Aeropuerto', href: '/aeropuerto' },
   { label: 'Corporativo', href: '/corporativo' },
+  { label: 'Transporte de Salud', href: '/transporte-salud' },
   { label: 'Eventos', href: '/#servicios' },
   { label: 'Turismo', href: '/#servicios' },
   { label: 'Envíos', href: '/#servicios' },
