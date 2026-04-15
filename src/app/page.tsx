@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from 'react'
 import {
   Heart, Stethoscope, Car, Shield, Clock, Users, Phone,
   ArrowRight, CheckCircle2, Star, UserCheck, MapPin,
-  BadgeCheck, HandHeart, Wheelchair, Building2, Cross,
-  Accessibility, Ambulance, BedDouble, User, Eye,
+  BadgeCheck, HandHeart, Accessibility, Building2, Cross,
+  Ambulance, BedDouble, User, Eye,
   Compass, Smile, ShieldCheck, PhoneCall, MessageCircle,
   CalendarDays, Route, Navigation, Baby, Armchair,
   AlertCircle, Sparkles, ChevronRight
@@ -309,7 +309,7 @@ function ServiceAreasSection() {
                   {[
                     { icon: Heart, text: 'Choferes capacitados en trato a pacientes' },
                     { icon: Accessibility, text: 'Asistencia a personas con movilidad reducida' },
-                    { icon: Wheelchair, text: 'Apoyo a adultos mayores y personas con discapacidad' },
+                    { icon: Accessibility, text: 'Apoyo a adultos mayores y personas con discapacidad' },
                     { icon: Smile, text: 'Trato empático, paciente y respetuoso' },
                     { icon: ShieldCheck, text: 'Seguridad y acompañamiento en todo momento' },
                     { icon: Baby, text: 'Atención especial para pacientes de todas las edades' },
@@ -468,7 +468,7 @@ const vehicleTypes = [
     color: '#0077BD',
   },
   {
-    icon: Wheelchair,
+    icon: Accessibility,
     name: 'Vehículo Adaptado',
     desc: 'Próximamente: vehículos equipados con rampa de acceso, espacio para silla de ruedas, asientos rebatibles y puntos de sujeción homologados. Diseñados específicamente para pacientes con discapacidad severa o movilidad muy reducida.',
     passengers: '1-3 + silla',
@@ -599,7 +599,7 @@ const healthCenters = [
     color: '#E91E63',
   },
   {
-    icon: Wheelchair,
+    icon: Accessibility,
     title: 'Centros de Rehabilitación',
     desc: 'Traslado especializado de pacientes que acuden a terapias físicas, sesiones de rehabilitación o tratamientos ambulatorios. Nuestros choferes comprenden las necesidades de estos pacientes y ofrecen el apoyo necesario durante todo el trayecto.',
     color: '#8B5CF6',

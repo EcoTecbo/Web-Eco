@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import {
   DoorOpen, Bus, Plane, Clock, Route, Map, Building2,
   Calendar, GraduationCap, Heart, Briefcase, PawPrint,
@@ -12,8 +13,7 @@ const services = [
   { icon: Bus, title: 'Bus', desc: 'Servicio de transporte en bus para grupos grandes, eventos corporativos y excursiones con la máxima comodidad.' },
   { icon: Plane, title: 'Aeropuerto', desc: 'Traslados al aeropuerto con puntualidad garantizada. Monitoreo de vuelos en tiempo real para que nunca esperes.' },
   { icon: Clock, title: 'Por Hora', desc: 'Alquila un vehículo con conductor por horas. Ideal para reuniones, diligencias o recorridos a tu ritmo.' },
-  { icon: Route, title: 'Interurbano', desc: 'Viajes entre ciudades con la seguridad y confort que caracteriza a Ecotaxi. Rutas nacionales cubiertas.' },
-  { icon: Map, title: 'Turismo', desc: 'Descubre los destinos más impresionantes de Bolivia con nuestros tours guiados y transporte turístico exclusivo.' },
+  { icon: Map, title: 'Interurbano y Turismo', desc: 'Viajes entre ciudades y destinos turísticos de Bolivia con seguridad, confort y la mejor atención. Rutas nacionales y tours guiados.', href: '/interurbano' },
   { icon: Building2, title: 'Corporativo', desc: 'Soluciones de transporte empresarial a medida. Gestión de flota, facturación corporativa y reportes detallados.' },
   { icon: Calendar, title: 'Eventos', desc: 'Transporte coordinado para todo tipo de eventos: bodas, conferencias, conciertos y celebraciones especiales.' },
   { icon: GraduationCap, title: 'Transporte Escolar', desc: 'Servicio seguro y confiable para el transporte de estudiantes. Conductores certificados y vehículos monitoreados.' },
@@ -117,13 +117,23 @@ export function Services() {
                     <p className="text-sm text-white/50 leading-relaxed">
                       {service.desc}
                     </p>
-                    <a
-                      href="#reservas"
-                      className="inline-flex items-center gap-1 mt-3 text-xs font-semibold text-[#00E676] hover:text-[#00ff88] transition-colors"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      Reservar este servicio →
-                    </a>
+                    {'href' in service && service.href ? (
+                      <Link
+                        href={service.href}
+                        className="inline-flex items-center gap-1 mt-3 text-xs font-semibold text-[#00E676] hover:text-[#00ff88] transition-colors"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Conocer más →
+                      </Link>
+                    ) : (
+                      <a
+                        href="#reservas"
+                        className="inline-flex items-center gap-1 mt-3 text-xs font-semibold text-[#00E676] hover:text-[#00ff88] transition-colors"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Reservar este servicio →
+                      </a>
+                    )}
                   </div>
                 </div>
               </div>

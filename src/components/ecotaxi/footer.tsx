@@ -10,8 +10,8 @@ const serviceLinks = [
   { label: 'Aeropuerto', href: '/aeropuerto' },
   { label: 'Corporativo', href: '/corporativo' },
   { label: 'Transporte de Salud', href: '/transporte-salud' },
+  { label: 'Interurbano y Turismo', href: '/interurbano' },
   { label: 'Eventos', href: '/#servicios' },
-  { label: 'Turismo', href: '/#servicios' },
   { label: 'Envíos', href: '/#servicios' },
   { label: 'Mudanza', href: '/#servicios' },
 ]
