@@ -42,8 +42,10 @@ const stats = [
 export function Arbolimetro() {
   const sectionRef = useRef<HTMLDivElement>(null)
   const [visible, setVisible] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     const observer = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) setVisible(true) },
       { threshold: 0.1 }
@@ -51,6 +53,22 @@ export function Arbolimetro() {
     if (sectionRef.current) observer.observe(sectionRef.current)
     return () => observer.disconnect()
   }, [])
+
+  // Deterministic leaf positions to avoid hydration mismatch
+  const leafPositions = [
+    { left: 12, top: 8, delay: 0.3, duration: 10, size: 16 },
+    { left: 85, top: 15, delay: 1.8, duration: 12, size: 22 },
+    { left: 28, top: 72, delay: 2.5, duration: 9, size: 14 },
+    { left: 65, top: 45, delay: 0.8, duration: 11, size: 20 },
+    { left: 45, top: 20, delay: 3.2, duration: 13, size: 18 },
+    { left: 92, top: 60, delay: 1.5, duration: 10, size: 15 },
+    { left: 5, top: 50, delay: 4.0, duration: 14, size: 24 },
+    { left: 75, top: 85, delay: 2.0, duration: 9, size: 13 },
+    { left: 38, top: 35, delay: 0.5, duration: 11, size: 17 },
+    { left: 55, top: 90, delay: 3.5, duration: 12, size: 19 },
+    { left: 18, top: 65, delay: 1.2, duration: 10, size: 21 },
+    { left: 82, top: 30, delay: 2.8, duration: 13, size: 15 },
+  ]
 
   // CO2 depurated vs emitted ratio
   const co2Ratio = (623000 / 485000) * 100 // ~128.5%
@@ -62,16 +80,16 @@ export function Arbolimetro() {
 
       {/* Animated tree particles */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(12)].map((_, i) => (
+        {mounted && leafPositions.map((pos, i) => (
           <div
             key={i}
             className="absolute text-[#00E676]/10 animate-float"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 5}s`,
-              animationDuration: `${8 + Math.random() * 7}s`,
-              fontSize: `${12 + Math.random() * 16}px`,
+              left: `${pos.left}%`,
+              top: `${pos.top}%`,
+              animationDelay: `${pos.delay}s`,
+              animationDuration: `${pos.duration}s`,
+              fontSize: `${pos.size}px`,
             }}
           >
             🌿
