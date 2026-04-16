@@ -11,8 +11,8 @@ const serviceLinks = [
   { label: 'Corporativo', href: '/corporativo' },
   { label: 'Transporte de Salud', href: '/transporte-salud' },
   { label: 'Interurbano y Turismo', href: '/interurbano' },
+  { label: 'Envíos y Mensajería', href: '/envios' },
   { label: 'Eventos', href: '/#servicios' },
-  { label: 'Envíos', href: '/#servicios' },
   { label: 'Mudanza', href: '/#servicios' },
 ]
 
