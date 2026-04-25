@@ -62,3 +62,24 @@ Stage Summary:
 - Navbar dropdown now includes "Auxilio Mecánico" link
 - Footer service links now include "Auxilio Mecánico"
 - Build succeeds with all routes listed
+---
+Task ID: 2
+Agent: Main Agent
+Task: Adjust auxilio-mecanico page: pricing model change, banner images, service card backgrounds
+
+Work Log:
+- Generated 4 AI images for roadside assistance scenarios (battery, tire, key, mechanic)
+- Saved to /public/auxilio-bateria.png, auxilio-neumatico.png, auxilio-llave.png, auxilio-mecanico.png
+- Changed pricing section from "3 plans" to "under-demand platform model"
+- New pricing clearly states: APP cost = displacement only, additional costs coordinated with agent
+- Added insurance coverage notification feature in pricing section
+- Added 4-image banner in hero section with hover effects and colored accent lines
+- Added background images to each service card (opacity 20-30% with gradient overlay)
+- Verified build compiles with 0 errors
+- Started production server, all pages return HTTP 200
+
+Stage Summary:
+- Pricing section now reflects Ecotaxi as a technology platform (not service provider)
+- Banner with 4 scenario images added to hero
+- Service cards have background images matching each service type
+- All 11 pages verified working on production server

@@ -67,20 +67,11 @@ function HeroSection() {
       {/* Glow orbs */}
       <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full bg-[#F97316]/12 blur-[120px] animate-pulse" />
       <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full bg-[#F59E0B]/10 blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full bg-[#EF4444]/6 blur-[100px] animate-pulse" style={{ animationDelay: '2s' }} />
-
-      {/* Decorative icons */}
-      <div className="absolute top-32 right-[8%] md:right-[18%] opacity-[0.07]">
-        <Wrench className="w-28 h-28 md:w-40 md:h-40 text-[#F97316]" />
-      </div>
-      <div className="absolute bottom-28 left-[5%] md:left-[12%] opacity-[0.05]">
-        <Battery className="w-20 h-20 md:w-28 md:h-28 text-[#F59E0B]" />
-      </div>
 
       {/* Animated hazard stripe */}
       <div className="absolute bottom-0 left-0 right-0 h-2 bg-gradient-to-r from-[#F97316] via-[#F59E0B] to-[#F97316] opacity-30" />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-28 pb-16">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-28 pb-8">
         <AnimatedSection>
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#F97316]/10 border border-[#F97316]/25 mb-8 backdrop-blur-sm">
             <AlertTriangle className="w-4 h-4 text-[#F97316]" />
@@ -108,7 +99,7 @@ function HeroSection() {
         </AnimatedSection>
 
         <AnimatedSection delay={300}>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-14">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
             <a
               href="#servicios"
               className="px-8 py-4 rounded-full text-lg font-semibold text-black bg-[#F97316] hover:bg-[#FB923C] transition-all duration-300 shadow-[0_0_30px_rgba(249,115,22,0.3)] hover:shadow-[0_0_50px_rgba(249,115,22,0.5)] hover:scale-105"
@@ -124,7 +115,35 @@ function HeroSection() {
           </div>
         </AnimatedSection>
 
+        {/* 4-Image Banner */}
         <AnimatedSection delay={400}>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10 max-w-5xl mx-auto">
+            {[
+              { src: '/auxilio-bateria.png', label: 'Auxilio de Bateria', color: '#F97316' },
+              { src: '/auxilio-neumatico.png', label: 'Cambio de Neumatico', color: '#F59E0B' },
+              { src: '/auxilio-llave.png', label: 'Cerrajeria Movil', color: '#0077BD' },
+              { src: '/auxilio-mecanico.png', label: 'Asistencia Mecanica', color: '#EF4444' },
+            ].map((img) => (
+              <div key={img.label} className="group relative h-40 md:h-52 rounded-2xl overflow-hidden border border-white/[0.06] hover:border-white/15 transition-all duration-500">
+                <img
+                  src={img.src}
+                  alt={img.label}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0e17] via-[#0a0e17]/40 to-transparent" />
+                <div className="absolute bottom-3 left-3 right-3">
+                  <span className="text-xs font-semibold text-white/80 backdrop-blur-sm px-2 py-1 rounded-lg bg-black/30">
+                    {img.label}
+                  </span>
+                </div>
+                {/* Colored accent line at bottom */}
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 opacity-60" style={{ backgroundColor: img.color }} />
+              </div>
+            ))}
+          </div>
+        </AnimatedSection>
+
+        <AnimatedSection delay={500}>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
             {[
               { value: '4', label: 'Servicios de Auxilio', icon: Wrench },
@@ -167,6 +186,7 @@ const mainServices = [
     ],
     color: '#F97316',
     tag: 'MAS SOLICITADO',
+    image: '/auxilio-bateria.png',
   },
   {
     icon: CarFront,
@@ -183,6 +203,7 @@ const mainServices = [
     ],
     color: '#F59E0B',
     tag: 'RAPIDO',
+    image: '/auxilio-neumatico.png',
   },
   {
     icon: Key,
@@ -199,6 +220,7 @@ const mainServices = [
     ],
     color: '#0077BD',
     tag: 'SIN DANOS',
+    image: '/auxilio-llave.png',
   },
   {
     icon: Cog,
@@ -215,6 +237,7 @@ const mainServices = [
     ],
     color: '#EF4444',
     tag: 'EMERGENCIA',
+    image: '/auxilio-mecanico.png',
   },
 ]
 
@@ -253,18 +276,28 @@ function ServicesSection() {
               <AnimatedSection key={service.title} delay={i * 100}>
                 <div
                   onClick={() => setActiveService(isActive ? null : service.title)}
-                  className={`group relative p-6 md:p-8 rounded-2xl bg-white/[0.03] border backdrop-blur-sm cursor-pointer transition-all duration-500 overflow-hidden ${
+                  className={`group relative rounded-2xl border backdrop-blur-sm cursor-pointer transition-all duration-500 overflow-hidden ${
                     isActive ? 'bg-white/[0.06]' : 'hover:border-white/10'
                   }`}
                   style={{
                     borderColor: isActive ? `${service.color}40` : undefined,
                   }}
                 >
+                  {/* Background image */}
+                  <div className="absolute inset-0">
+                    <img
+                      src={service.image}
+                      alt={service.title}
+                      className="w-full h-full object-cover opacity-20 group-hover:opacity-30 transition-opacity duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0a0e17] via-[#0a0e17]/80 to-[#0a0e17]/60" />
+                  </div>
+
                   <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
                     style={{ boxShadow: `0 0 40px ${service.color}08` }}
                   />
 
-                  <div className="absolute top-4 right-4">
+                  <div className="absolute top-4 right-4 z-20">
                     <span className="px-3 py-1 rounded-full text-[10px] font-bold border"
                       style={{
                         backgroundColor: `${service.color}10`,
@@ -276,7 +309,7 @@ function ServicesSection() {
                     </span>
                   </div>
 
-                  <div className="relative z-10">
+                  <div className="relative z-10 p-6 md:p-8">
                     <div className="flex items-start gap-4 mb-5">
                       <div className="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300"
                         style={{ backgroundColor: `${service.color}12` }}
@@ -848,143 +881,159 @@ function TechSection() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   8. PRICING & PLANS
+   8. COMO FUNCIONA LA TARIFA — Plataforma bajo demanda
    ═══════════════════════════════════════════════════════════════════════════════ */
-const planCards = [
-  {
-    name: 'Auxilio por Evento',
-    subtitle: 'Pago por uso',
-    price: 'Bs/Evento',
-    desc: 'Ideal para conductores que necesitan asistencia vial de manera puntual. Pagas solo por el servicio que utilizas, sin compromisos ni suscripciones. Cada auxilio tiene un precio transparente y justo, sin sorpresas ni cobros ocultos. La tarifa se calcula segun el tipo de auxilio y la distancia del auxiliador.',
-    features: [
-      'Sin suscripcion ni compromiso',
-      'Pago solo por el servicio utilizado',
-      'Tarifa transparente y justa',
-      'Cobertura en Santa Cruz y alrededores',
-      'Disponible 24/7 los 365 dias',
-      'Seguimiento en tiempo real',
-    ],
-    color: '#F97316',
-    popular: false,
-  },
-  {
-    name: 'Plan Mensual Proteccion',
-    subtitle: 'Suscripcion mensual',
-    price: 'Bs/Mes',
-    desc: 'Para conductores que quieren la tranquilidad de saber que siempre tienen respaldo. Con una cuota mensual, accedes a auxilios ilimitados o con franquicia reducida. Pensado para quien usa su vehiculo a diario y prefiere estar cubierto sin preocuparse por el costo de cada emergencia.',
-    features: [
-      'Auxilios ilimitados o con franquicia reducida',
-      'Prioridad en despacho de auxiliadores',
-      'Precio mensual fijo sin sorpresas',
-      'Cobertura ampliada a carreteras',
-      'Beneficios exclusivos para suscriptores',
-      'Central de emergencias preferente',
-    ],
-    color: '#00E676',
-    popular: true,
-  },
-  {
-    name: 'Plan Corporativo Flota',
-    subtitle: 'Empresas y flotas',
-    price: 'Personalizado',
-    desc: 'Para empresas con flota de vehiculos que necesitan cobertura total de asistencia vial para todos sus unidades. Plan personalizado segun la cantidad de vehiculos, tipo de cobertura y frecuencia de uso. Incluye dashboard de control, reportes mensuales y gerente de cuenta dedicado.',
-    features: [
-      'Cobertura para toda la flota',
-      'Dashboard de control y reportes',
-      'Plan personalizado a tu medida',
-      'Gerente de cuenta dedicado',
-      'Facturacion mensual corporativa',
-      'Cobertura nacional completa',
-    ],
-    color: '#0077BD',
-    popular: false,
-  },
-]
-
 function PricingSection() {
   return (
-    <section id="planes" className="relative py-24 md:py-32">
+    <section id="tarifas" className="relative py-24 md:py-32">
       <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1320] to-[#0a0e17]" />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] rounded-full bg-[#F97316]/5 blur-[150px]" />
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <AnimatedSection>
           <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00E676]/10 border border-[#00E676]/20 mb-4">
-              <Handshake className="w-4 h-4 text-[#00E676]" />
-              <span className="text-sm text-[#00E676]">Planes y Tarifas</span>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#F97316]/10 border border-[#F97316]/20 mb-4">
+              <Zap className="w-4 h-4 text-[#F97316]" />
+              <span className="text-sm text-[#F97316]">Bajo Demanda</span>
             </div>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
-              Elige tu{' '}
-              <span className="bg-gradient-to-r from-[#F97316] via-[#00E676] to-[#0077BD] bg-clip-text text-transparent">
-                Nivel de Proteccion
+              Solo Pagas por lo que{' '}
+              <span className="bg-gradient-to-r from-[#F97316] to-[#F59E0B] bg-clip-text text-transparent">
+                Necesitas
               </span>
             </h2>
             <p className="text-white/50 max-w-3xl mx-auto text-lg">
-              Desde un auxilio puntual hasta cobertura total para tu flota empresarial. Tenemos el plan
-              perfecto para cada necesidad y presupuesto. Todos los planes incluyen nuestra red de profesionales
-              verificados y seguimiento en tiempo real.
+              Ecotaxi es una plataforma tecnologica que te conecta con el auxiliador mas cercano. Sin planes, 
+              sin suscripciones, sin compromisos. Solicitas cuando lo necesitas y solo pagas el desplazamiento 
+              del agente hasta tu ubicacion. Los costos adicionales se coordinan directamente con el profesional.
             </p>
           </div>
         </AnimatedSection>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {planCards.map((plan, i) => (
-            <AnimatedSection key={plan.name} delay={i * 100}>
-              <div className={`group relative p-6 md:p-8 rounded-2xl bg-white/[0.03] border backdrop-blur-sm transition-all duration-500 h-full flex flex-col ${
-                plan.popular ? 'border-[#00E676]/30 shadow-[0_0_40px_rgba(0,230,118,0.08)]' : 'border-white/[0.06] hover:border-white/10'
-              }`}>
-                {plan.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="px-4 py-1 rounded-full text-xs font-bold text-black bg-[#00E676] shadow-[0_0_20px_rgba(0,230,118,0.3)]">
-                      MAS POPULAR
-                    </span>
-                  </div>
-                )}
-
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                      style={{ backgroundColor: `${plan.color}12` }}
-                    >
-                      <Shield className="w-5 h-5" style={{ color: plan.color }} />
+        {/* Main pricing card */}
+        <AnimatedSection delay={100}>
+          <div className="max-w-4xl mx-auto mb-10">
+            <div className="relative p-6 md:p-10 rounded-2xl bg-white/[0.04] border border-[#F97316]/20 backdrop-blur-sm shadow-[0_0_40px_rgba(249,115,22,0.08)]">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                {/* Left: How the cost works */}
+                <div>
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-12 h-12 rounded-xl bg-[#F97316]/12 flex items-center justify-center">
+                      <Gauge className="w-6 h-6 text-[#F97316]" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-white">{plan.name}</h3>
-                      <p className="text-xs" style={{ color: plan.color }}>{plan.subtitle}</p>
+                      <h3 className="text-xl font-bold text-white">Costo de Desplazamiento</h3>
+                      <p className="text-sm text-[#F97316]">Lo que aparece en la APP</p>
                     </div>
                   </div>
 
-                  <div className="mb-5">
-                    <span className="text-3xl font-bold" style={{ color: plan.color }}>{plan.price}</span>
-                  </div>
+                  <p className="text-white/55 leading-relaxed mb-6">
+                    El monto que ves en la APP al solicitar el servicio corresponde unicamente al costo 
+                    de desplazamiento del auxiliador desde su ubicacion hasta donde tu te encuentras. 
+                    Este costo puede ser un monto fijo o minimo, o calcularse por tiempo o distancia, 
+                    dependiendo de cada agente. Puedes conocer la tarifa en linea antes de confirmar tu solicitud.
+                  </p>
 
-                  <p className="text-sm text-white/45 leading-relaxed mb-6">{plan.desc}</p>
-
-                  <div className="space-y-3 mb-8">
-                    {plan.features.map((feat) => (
-                      <div key={feat} className="flex items-start gap-2">
-                        <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0" style={{ color: plan.color }} />
-                        <span className="text-sm text-white/55">{feat}</span>
+                  <div className="space-y-3">
+                    {[
+                      { icon: CheckCircle2, text: 'Conoces la tarifa antes de solicitar', color: '#00E676' },
+                      { icon: CheckCircle2, text: 'Costo fijo, minimo, por tiempo o distancia', color: '#F59E0B' },
+                      { icon: CheckCircle2, text: 'Sin planes ni suscripciones', color: '#F97316' },
+                      { icon: CheckCircle2, text: 'Solo pagas cuando necesitas el servicio', color: '#0077BD' },
+                    ].map((item) => (
+                      <div key={item.text} className="flex items-center gap-3">
+                        <item.icon className="w-4 h-4 shrink-0" style={{ color: item.color }} />
+                        <span className="text-sm text-white/60">{item.text}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <a
-                  href="#contacto"
-                  className={`block w-full text-center px-6 py-3.5 rounded-xl font-semibold transition-all duration-300 hover:scale-[1.02] ${
-                    plan.popular
-                      ? 'text-black bg-[#00E676] hover:bg-[#00ff88] shadow-[0_0_30px_rgba(0,230,118,0.3)]'
-                      : 'text-white border border-white/10 hover:border-white/20 hover:bg-white/5'
-                  }`}
-                >
-                  {plan.popular ? 'Contratar Plan' : 'Solicitar Info'}
-                </a>
+                {/* Right: Cost breakdown visual */}
+                <div className="space-y-4">
+                  <div className="p-5 rounded-xl bg-[#F97316]/8 border border-[#F97316]/15">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Shield className="w-4 h-4 text-[#F97316]" />
+                      <span className="text-xs font-bold text-[#F97316] uppercase tracking-wider">Tarifa en la APP</span>
+                    </div>
+                    <p className="text-2xl font-bold text-white mb-2">Solo Desplazamiento</p>
+                    <p className="text-xs text-white/40 leading-relaxed">
+                      El monto que aparece en la APP cubre exclusivamente el traslado del agente desde su 
+                      posicion actual hasta tu ubicacion. Es transparente y lo ves antes de confirmar.
+                    </p>
+                  </div>
+
+                  <div className="p-5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Wrench className="w-4 h-4 text-[#F59E0B]" />
+                      <span className="text-xs font-bold text-[#F59E0B] uppercase tracking-wider">Costos Adicionales</span>
+                    </div>
+                    <p className="text-sm font-semibold text-white mb-2">Se coordinan con el agente</p>
+                    <p className="text-xs text-white/40 leading-relaxed">
+                      Los costos por repuestos, reparaciones, baterías nuevas, llantas de reemplazo u otros 
+                      trabajos se coordinan directamente con el agente auxiliador una vez que evalúa la situación 
+                      en el lugar. Tu decides si aceptas o no.
+                    </p>
+                  </div>
+
+                  <div className="p-5 rounded-xl bg-[#00E676]/5 border border-[#00E676]/10">
+                    <div className="flex items-center gap-2 mb-3">
+                      <BadgeCheck className="w-4 h-4 text-[#00E676]" />
+                      <span className="text-xs font-bold text-[#00E676] uppercase tracking-wider">Cobertura con Seguro</span>
+                    </div>
+                    <p className="text-sm font-semibold text-white mb-2">Sin costo para ti</p>
+                    <p className="text-xs text-white/40 leading-relaxed">
+                      Si tienes contratado un seguro que incluye este servicio dentro de Ecotaxi, la app te 
+                      avisara automaticamente que el servicio no tiene costo para ti. Tu seguro cubre todo.
+                    </p>
+                  </div>
+                </div>
               </div>
-            </AnimatedSection>
-          ))}
-        </div>
+            </div>
+          </div>
+        </AnimatedSection>
+
+        {/* Key points grid */}
+        <AnimatedSection delay={200}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
+            {[
+              {
+                icon: Zap,
+                title: 'Bajo Demanda',
+                desc: 'Solicitas el servicio cuando lo necesitas, sin compromiso. No hay planes mensuales ni suscripciones. Pagas solo por la asistencia que utilizas en el momento.',
+                color: '#F97316',
+              },
+              {
+                icon: Gauge,
+                title: 'Tarifa Transparente',
+                desc: 'Conoces el costo de desplazamiento antes de confirmar. Cada agente define su tarifa que puede ser fija, minima, por tiempo o por distancia. Sin sorpresas.',
+                color: '#F59E0B',
+              },
+              {
+                icon: Handshake,
+                title: 'Coordina con el Agente',
+                desc: 'Los costos del servicio en si (repuestos, reparaciones) se coordinan directamente con el auxiliador. El evalua la situacion y te informa antes de proceder.',
+                color: '#0077BD',
+              },
+              {
+                icon: Shield,
+                title: 'Cubierto por Seguro',
+                desc: 'Si tu seguro incluye asistencia vial a traves de Ecotaxi, se te notificara que el servicio no tiene costo. Tu aseguradora cubre el auxilio completo.',
+                color: '#00E676',
+              },
+            ].map((point) => (
+              <div key={point.title} className="group p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm hover:border-white/10 transition-all duration-500">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300"
+                  style={{ backgroundColor: `${point.color}12` }}
+                >
+                  <point.icon className="w-5 h-5" style={{ color: point.color }} />
+                </div>
+                <h3 className="text-sm font-semibold text-white mb-2">{point.title}</h3>
+                <p className="text-xs text-white/40 leading-relaxed">{point.desc}</p>
+              </div>
+            ))}
+          </div>
+        </AnimatedSection>
       </div>
     </section>
   )
