@@ -12,6 +12,7 @@ const serviceLinks = [
   { label: 'Transporte de Salud', href: '/transporte-salud' },
   { label: 'Interurbano y Turismo', href: '/interurbano' },
   { label: 'Envíos y Mensajería', href: '/envios' },
+  { label: 'Auxilio Mecánico', href: '/auxilio-mecanico' },
   { label: 'Eventos', href: '/#servicios' },
   { label: 'Mudanza', href: '/#servicios' },
 ]
