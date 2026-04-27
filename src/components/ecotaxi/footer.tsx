@@ -13,6 +13,9 @@ const serviceLinks = [
   { label: 'Interurbano y Turismo', href: '/interurbano' },
   { label: 'Envíos y Mensajería', href: '/envios' },
   { label: 'Auxilio Mecánico', href: '/auxilio-mecanico' },
+  { label: 'Transporte Escolar', href: '/transporte-escolar' },
+  { label: 'Transporte de Mascotas', href: '/transporte-mascotas' },
+  { label: 'Aventura', href: '/aventura' },
   { label: 'Eventos', href: '/#servicios' },
   { label: 'Mudanza', href: '/#servicios' },
 ]

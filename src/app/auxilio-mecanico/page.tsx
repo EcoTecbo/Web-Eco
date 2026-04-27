@@ -1065,7 +1065,7 @@ const faqs = [
   },
   {
     q: 'Como puedo pagar el servicio de auxilio?',
-    a: 'Aceptamos multiples formas de pago: efectivo al auxiliador, tarjeta de credito o debito a traves de la app, transferencia bancaria y QR de pago. Si tienes un plan mensual o corporativo, el cargo se aplica directamente a tu suscripcion sin necesidad de pago adicional al momento del auxilio.',
+    a: 'Aceptamos multiples formas de pago: efectivo al auxiliador, tarjeta de credito o debito a traves de la app, transferencia bancaria y QR de pago. Si tienes un seguro que cubre este servicio dentro de Ecotaxi, se te notificara automaticamente que no tiene costo para ti. El costo que aparece en la APP es solo el desplazamiento; los costos adicionales del servicio se coordinan directamente con el agente auxiliador.',
   },
 ]
 
