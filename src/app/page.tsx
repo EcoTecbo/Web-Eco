@@ -4,6 +4,7 @@ import { Navbar } from '@/components/ecotaxi/navbar'
 import { Hero } from '@/components/ecotaxi/hero'
 import { Services } from '@/components/ecotaxi/services'
 import { Fleet } from '@/components/ecotaxi/fleet'
+import { ConductorSection } from '@/components/ecotaxi/conductor-section'
 import { Arbolimetro } from '@/components/ecotaxi/arbolimetro'
 import { Multicanal } from '@/components/ecotaxi/multicanal'
 import { Reservas } from '@/components/ecotaxi/reservas'
@@ -17,6 +18,7 @@ export default function HomePage() {
         <Hero />
         <Services />
         <Fleet />
+        <ConductorSection />
         <Arbolimetro />
         <Multicanal />
         <Reservas />

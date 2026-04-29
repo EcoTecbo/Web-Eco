@@ -52,3 +52,35 @@ Stage Summary:
 - New Grúas section added with 4 transparent PNG crane images
 - Arbolímetro image changed from tree icon to real photo of drivers planting trees
 - All pages compile and serve HTTP 200
+
+---
+Task ID: 3
+Agent: Main Agent
+Task: Restore lost fleet vehicle categories (Grúa, Camioneta, Furgón, Agro, Construcción) with images, restore Conductor section
+
+Work Log:
+- Copied all vehicle images from /upload/vehicle_icons/ to /public/ with clean fleet-* filenames
+  - Clásico: fleet-clasico-auto.png, fleet-clasico-vagoneta.png
+  - Confort: fleet-confort-compacto.png, fleet-confort-sedan.png, fleet-confort-suv.png, fleet-confort-minivan.png
+  - VIP: fleet-vip-sedan.png, fleet-vip-suv.png, fleet-vip-van.png, fleet-vip-limosina.png
+  - Bus: fleet-bus-minibus.png, fleet-bus-micro.png, fleet-bus-flota.png
+  - Moto: fleet-moto-taxi.png, fleet-moto-envios.png, fleet-moto-torito.png, fleet-moto-chata.png
+  - Camioneta: fleet-camioneta-pickup.png, fleet-camioneta-pequena.png, fleet-camioneta-mediana.png, fleet-camioneta-larga.png, fleet-camioneta-grande.jpg
+  - Furgón: fleet-furgon-pequeno.png, fleet-furgon-mediano.png, fleet-furgon-grande.png, fleet-furgon-largo.png
+  - Grúa: fleet-grua-moto.jpg, fleet-grua-arrastre.jpg, fleet-grua-remolque.jpg, fleet-grua-rampla.png, fleet-grua-pluma.png, fleet-grua-telescopica.jpg
+  - Construcción: fleet-construccion-volqueta.png, fleet-construccion-bobcat.png, fleet-construccion-gallinita.png, fleet-construccion-motoniveladora.png, fleet-construccion-retroexcavadora.png, fleet-construccion-excavadora.png, fleet-construccion-aplanadora.png
+  - Agro: fleet-agro-tractor.png, fleet-agro-cosechadora.png
+  - Auxilio: fleet-auxilio-gomero.jpg, fleet-auxilio-bateria.jpg, fleet-auxilio-llave.jpg
+- Rewrote fleet.tsx with 11 vehicle categories (was 6), each vehicle now shows its image from the uploaded vehicle icons
+- Created ConductorSection component (conductor-section.tsx) with: animated steering wheel, benefits, CTA card with requirements, testimonials, stats bar
+- Updated homepage page.tsx to include ConductorSection between Fleet and Arbolimetro
+- Added "Conductores" nav link to navbar.tsx pointing to /#conductores
+- Fixed lucide-react import: replaced non-existent Van icon with Caravan icon
+- Build: 0 errors, 17 pages generated
+
+Stage Summary:
+- Fleet component now shows 11 categories with real vehicle images from user's uploaded ZIP
+- New categories: Camioneta (5), Furgón (4), Grúa (6), Construcción (7), Agro (2)
+- ConductorSection component created and added to homepage
+- Navbar updated with Conductores link
+- All images from user's vehicle icons ZIP are now in /public/

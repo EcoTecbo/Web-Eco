@@ -11,6 +11,7 @@ const navLinks = [
   { label: 'Servicios', href: '/#servicios', isHash: true },
   { label: 'Flota', href: '/#flota', isHash: true },
   { label: 'Arbolímetro', href: '/#arbolimetro', isHash: true },
+  { label: 'Conductores', href: '/#conductores', isHash: true },
   { label: 'Canales', href: '/#multicanal', isHash: true },
   { label: 'Reservas', href: '/#reservas', isHash: true },
 ]

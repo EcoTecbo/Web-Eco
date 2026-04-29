@@ -1,9 +1,10 @@
 'use client'
 
-import { Car, Bus, Bike, Crown, Wind, Users, Package, Leaf, Zap, ChevronRight, ArrowRight } from 'lucide-react'
+import { Car, Bus, Bike, Crown, Wind, Users, Package, Leaf, Zap, ChevronRight, ArrowRight, Truck, Wrench, Tractor, HardHat, Caravan } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import Image from 'next/image'
 
-type VehicleCategoryKey = 'clasico' | 'confort' | 'vip' | 'bus' | 'sostenible' | 'moto'
+type VehicleCategoryKey = 'clasico' | 'confort' | 'vip' | 'bus' | 'sostenible' | 'moto' | 'camioneta' | 'furgon' | 'grua' | 'construccion' | 'agro'
 
 interface Vehicle {
   name: string
@@ -12,6 +13,7 @@ interface Vehicle {
   icon: React.ComponentType<{ className?: string }>
   luggage: string
   description: string
+  image: string
 }
 
 interface CategoryDef {
@@ -33,8 +35,8 @@ const categories: CategoryDef[] = [
     bgColor: 'bg-yellow-400/10',
     borderColor: 'border-yellow-400/30 hover:border-yellow-400/60',
     vehicles: [
-      { name: 'Auto', passengers: 4, ac: false, icon: Car, luggage: '3 grandes, 2 pequeños', description: 'Vehículo clásico ideal para traslados urbanos cómodos y económicos.' },
-      { name: 'Vagoneta', passengers: 4, ac: false, icon: Car, luggage: '4 grandes, 3 pequeños', description: 'Mayor espacio de equipaje, perfecta para viajes con carga adicional.' },
+      { name: 'Auto', passengers: 4, ac: false, icon: Car, luggage: '3 grandes, 2 pequeños', description: 'Vehículo clásico ideal para traslados urbanos cómodos y económicos.', image: '/fleet-clasico-auto.png' },
+      { name: 'Vagoneta', passengers: 4, ac: false, icon: Car, luggage: '4 grandes, 3 pequeños', description: 'Mayor espacio de equipaje, perfecta para viajes con carga adicional.', image: '/fleet-clasico-vagoneta.png' },
     ],
   },
   {
@@ -45,10 +47,10 @@ const categories: CategoryDef[] = [
     bgColor: 'bg-[#0077BD]/10',
     borderColor: 'border-[#0077BD]/30 hover:border-[#0077BD]/60',
     vehicles: [
-      { name: 'Compacto', passengers: 4, ac: true, icon: Car, luggage: '1 grande, 1 pequeño', description: 'Compacto con aire acondicionado para viajes cómodos en la ciudad.' },
-      { name: 'Sedan', passengers: 4, ac: true, icon: Car, luggage: '1 grande, 1 pequeño', description: 'Sedán confortable con A/C para un viaje placentero y seguro.' },
-      { name: 'SUV', passengers: 4, ac: true, icon: Car, luggage: '1 grande, 1 pequeño', description: 'SUV con A/C, ideal para quienes buscan mayor altura y confort.' },
-      { name: 'MiniVan', passengers: 4, ac: true, icon: Bus, luggage: '1 grande, 1 pequeño', description: 'MiniVan con A/C, perfecta para grupos pequeños con equipaje.' },
+      { name: 'Compacto', passengers: 4, ac: true, icon: Car, luggage: '1 grande, 1 pequeño', description: 'Compacto con aire acondicionado para viajes cómodos en la ciudad.', image: '/fleet-confort-compacto.png' },
+      { name: 'Sedan', passengers: 4, ac: true, icon: Car, luggage: '1 grande, 1 pequeño', description: 'Sedán confortable con A/C para un viaje placentero y seguro.', image: '/fleet-confort-sedan.png' },
+      { name: 'SUV', passengers: 4, ac: true, icon: Car, luggage: '1 grande, 1 pequeño', description: 'SUV con A/C, ideal para quienes buscan mayor altura y confort.', image: '/fleet-confort-suv.png' },
+      { name: 'MiniVan', passengers: 4, ac: true, icon: Bus, luggage: '1 grande, 1 pequeño', description: 'MiniVan con A/C, perfecta para grupos pequeños con equipaje.', image: '/fleet-confort-minivan.png' },
     ],
   },
   {
@@ -59,10 +61,10 @@ const categories: CategoryDef[] = [
     bgColor: 'bg-amber-400/10',
     borderColor: 'border-amber-400/30 hover:border-amber-400/60',
     vehicles: [
-      { name: 'Sedan VIP', passengers: 4, ac: true, icon: Car, luggage: '1 grande, 1 pequeño', description: 'Sedán premium con conductor profesional, total discreción y comodidad.' },
-      { name: 'SUV VIP', passengers: 4, ac: true, icon: Car, luggage: '1 grande, 1 pequeño', description: 'SUV de alta gama para ejecutivos que exigen lo mejor.' },
-      { name: 'Van VIP', passengers: 4, ac: true, icon: Bus, luggage: '1 grande, 1 pequeño', description: 'Van VIP para transporte ejecutivo grupal con máximo confort.' },
-      { name: 'Limosina', passengers: 4, ac: true, icon: Car, luggage: '1 grande, 1 pequeño', description: 'Experiencia de lujo con limosina para ocasiones especiales.' },
+      { name: 'Sedan VIP', passengers: 4, ac: true, icon: Car, luggage: '1 grande, 1 pequeño', description: 'Sedán premium con conductor profesional, total discreción y comodidad.', image: '/fleet-vip-sedan.png' },
+      { name: 'SUV VIP', passengers: 4, ac: true, icon: Car, luggage: '1 grande, 1 pequeño', description: 'SUV de alta gama para ejecutivos que exigen lo mejor.', image: '/fleet-vip-suv.png' },
+      { name: 'Van VIP', passengers: 4, ac: true, icon: Bus, luggage: '1 grande, 1 pequeño', description: 'Van VIP para transporte ejecutivo grupal con máximo confort.', image: '/fleet-vip-van.png' },
+      { name: 'Limosina', passengers: 4, ac: true, icon: Car, luggage: '1 grande, 1 pequeño', description: 'Experiencia de lujo con limosina para ocasiones especiales.', image: '/fleet-vip-limosina.png' },
     ],
   },
   {
@@ -73,9 +75,9 @@ const categories: CategoryDef[] = [
     bgColor: 'bg-sky-400/10',
     borderColor: 'border-sky-400/30 hover:border-sky-400/60',
     vehicles: [
-      { name: 'Flota', passengers: 4, ac: true, icon: Bus, luggage: '1 grande, 1 pequeño', description: 'Vehículo de flota con A/C para traslados regulares confiables.' },
-      { name: 'Micro', passengers: 4, ac: true, icon: Bus, luggage: '1 grande, 1 pequeño', description: 'Microbús con A/C para grupos medianos y recorridos urbanos.' },
-      { name: 'MiniBus', passengers: 12, ac: true, icon: Bus, luggage: 'Espacio amplio', description: 'MiniBus de 12 pasajeros con A/C, ideal para eventos y excursiones.' },
+      { name: 'MiniBus', passengers: 12, ac: true, icon: Bus, luggage: 'Espacio amplio', description: 'MiniBus de 12 pasajeros con A/C, ideal para eventos y excursiones.', image: '/fleet-bus-minibus.png' },
+      { name: 'Micro', passengers: 20, ac: true, icon: Bus, luggage: '1 grande, 1 pequeño', description: 'Microbús con A/C para grupos medianos y recorridos urbanos.', image: '/fleet-bus-micro.png' },
+      { name: 'Flota', passengers: 30, ac: true, icon: Bus, luggage: '1 grande, 1 pequeño', description: 'Vehículo de flota con A/C para traslados regulares confiables.', image: '/fleet-bus-flota.png' },
     ],
   },
   {
@@ -86,7 +88,7 @@ const categories: CategoryDef[] = [
     bgColor: 'bg-[#00E676]/10',
     borderColor: 'border-[#00E676]/30 hover:border-[#00E676]/60',
     vehicles: [
-      { name: 'Quantum', passengers: 2, ac: true, icon: Zap, luggage: 'Sin equipaje', description: 'Vehículo eléctrico eco-friendly para traslados urbanos sin emisiones.' },
+      { name: 'Quantum', passengers: 2, ac: true, icon: Zap, luggage: 'Sin equipaje', description: 'Vehículo eléctrico eco-friendly para traslados urbanos sin emisiones.', image: '/fleet-confort-compacto.png' },
     ],
   },
   {
@@ -97,10 +99,84 @@ const categories: CategoryDef[] = [
     bgColor: 'bg-gray-400/10',
     borderColor: 'border-gray-400/30 hover:border-gray-400/60',
     vehicles: [
-      { name: 'Moto Chata', passengers: 1, ac: false, icon: Bike, luggage: '1 pequeño', description: 'Motocicleta para envíos rápidos y traslados ágiles en la ciudad.' },
-      { name: 'Torito', passengers: 2, ac: false, icon: Bike, luggage: '1 grande, 1 pequeño', description: 'Triciclo motorizado para traslados cortos con equipaje ligero.' },
-      { name: 'Envío', passengers: 0, ac: false, icon: Package, luggage: 'Paquetes', description: 'Servicio de entrega de paquetes y documentos a cualquier punto.' },
-      { name: 'Moto', passengers: 1, ac: false, icon: Bike, luggage: '1 pequeño', description: 'Motocicleta estándar para traslados rápidos y eficientes.' },
+      { name: 'Moto Taxi', passengers: 1, ac: false, icon: Bike, luggage: '1 pequeño', description: 'Motocicleta taxi para traslados rápidos y ágiles en la ciudad.', image: '/fleet-moto-taxi.png' },
+      { name: 'Envío', passengers: 0, ac: false, icon: Package, luggage: 'Paquetes', description: 'Servicio de entrega de paquetes y documentos a cualquier punto.', image: '/fleet-moto-envios.png' },
+      { name: 'Torito', passengers: 2, ac: false, icon: Bike, luggage: '1 grande, 1 pequeño', description: 'Triciclo motorizado para traslados cortos con equipaje ligero.', image: '/fleet-moto-torito.png' },
+      { name: 'Chata', passengers: 1, ac: false, icon: Bike, luggage: '1 pequeño', description: 'Motocicleta para envíos rápidos y traslados ágiles en la ciudad.', image: '/fleet-moto-chata.png' },
+    ],
+  },
+  {
+    key: 'camioneta',
+    label: 'Camioneta',
+    icon: Caravan,
+    color: 'text-orange-400',
+    bgColor: 'bg-orange-400/10',
+    borderColor: 'border-orange-400/30 hover:border-orange-400/60',
+    vehicles: [
+      { name: 'Pickup', passengers: 4, ac: true, icon: Truck, luggage: 'Caja abierta grande', description: 'Pickup versátil para transporte de carga y pasajeros con caja abierta.', image: '/fleet-camioneta-pickup.png' },
+      { name: 'Camioneta Pequeña', passengers: 4, ac: true, icon: Caravan, luggage: '2 grandes, 2 pequeños', description: 'Camioneta compacta ideal para terrenos urbanos y suburbanos.', image: '/fleet-camioneta-pequena.png' },
+      { name: 'Camioneta Mediana', passengers: 5, ac: true, icon: Caravan, luggage: '3 grandes, 2 pequeños', description: 'Camioneta mediana con mayor capacidad para pasajeros y equipaje.', image: '/fleet-camioneta-mediana.png' },
+      { name: 'Camioneta Larga', passengers: 6, ac: true, icon: Caravan, luggage: '4 grandes, 3 pequeños', description: 'Camioneta larga ideal para grupos grandes y viajes largos.', image: '/fleet-camioneta-larga.png' },
+      { name: 'Camioneta Grande', passengers: 8, ac: true, icon: Caravan, luggage: 'Espacio amplio', description: 'Camioneta de gran tamaño para traslado de grupos numerosos.', image: '/fleet-camioneta-grande.jpg' },
+    ],
+  },
+  {
+    key: 'furgon',
+    label: 'Furgón',
+    icon: Truck,
+    color: 'text-indigo-400',
+    bgColor: 'bg-indigo-400/10',
+    borderColor: 'border-indigo-400/30 hover:border-indigo-400/60',
+    vehicles: [
+      { name: 'Furgón Pequeño', passengers: 2, ac: true, icon: Truck, luggage: 'Carga pequeña', description: 'Furgón compacto para entregas y traslados de carga ligera en la ciudad.', image: '/fleet-furgon-pequeno.png' },
+      { name: 'Furgón Mediano', passengers: 2, ac: true, icon: Truck, luggage: 'Carga mediana', description: 'Furgón mediano ideal para transporte de mercancías de tamaño moderado.', image: '/fleet-furgon-mediano.png' },
+      { name: 'Furgón Grande', passengers: 3, ac: true, icon: Truck, luggage: 'Carga grande', description: 'Furgón grande para traslado de mercancías voluminosas con A/C.', image: '/fleet-furgon-grande.png' },
+      { name: 'Furgón Largo', passengers: 3, ac: true, icon: Truck, luggage: 'Carga extra grande', description: 'Furgón largo de máxima capacidad para grandes volúmenes de carga.', image: '/fleet-furgon-largo.png' },
+    ],
+  },
+  {
+    key: 'grua',
+    label: 'Grúa',
+    icon: Truck,
+    color: 'text-red-400',
+    bgColor: 'bg-red-400/10',
+    borderColor: 'border-red-400/30 hover:border-red-400/60',
+    vehicles: [
+      { name: 'Moto Grúa', passengers: 1, ac: false, icon: Bike, luggage: 'Moto', description: 'Grúa especializada para el traslado seguro de motocicletas.', image: '/fleet-grua-moto.jpg' },
+      { name: 'Grúa Arrastre', passengers: 2, ac: false, icon: Truck, luggage: 'Vehículo liviano', description: 'Grúa de arrastre para vehículos livianos y medianos en situaciones de emergencia.', image: '/fleet-grua-arrastre.jpg' },
+      { name: 'Grúa Remolque', passengers: 2, ac: false, icon: Truck, luggage: 'Vehículo pesado', description: 'Grúa de remolque para vehículos pesados y traslados de larga distancia.', image: '/fleet-grua-remolque.jpg' },
+      { name: 'Grúa Rampla', passengers: 2, ac: false, icon: Truck, luggage: 'Vehículos varios', description: 'Grúa con rampla para carga y descarga de vehículos de todo tipo.', image: '/fleet-grua-rampla.png' },
+      { name: 'Grúa Pluma', passengers: 2, ac: false, icon: Truck, luggage: 'Carga pesada', description: 'Grúa pluma para izaje y maniobras de carga pesada en obra.', image: '/fleet-grua-pluma.png' },
+      { name: 'Grúa Telescópica', passengers: 2, ac: false, icon: Truck, luggage: 'Carga industrial', description: 'Grúa telescópica de gran alcance para operaciones industriales y de construcción.', image: '/fleet-grua-telescopica.jpg' },
+    ],
+  },
+  {
+    key: 'construccion',
+    label: 'Construcción',
+    icon: HardHat,
+    color: 'text-amber-500',
+    bgColor: 'bg-amber-500/10',
+    borderColor: 'border-amber-500/30 hover:border-amber-500/60',
+    vehicles: [
+      { name: 'Volqueta', passengers: 2, ac: false, icon: Truck, luggage: 'Material de construcción', description: 'Volqueta para transporte de áridos, escombros y materiales de construcción.', image: '/fleet-construccion-volqueta.png' },
+      { name: 'Bobcat', passengers: 1, ac: false, icon: HardHat, luggage: 'Carga compacta', description: 'Minicargador Bobcat para movimientos de tierra y cargas compactas.', image: '/fleet-construccion-bobcat.png' },
+      { name: 'Gallinita', passengers: 1, ac: false, icon: HardHat, luggage: 'Concreto', description: 'Mezcladora de concreto (gallinita) para obras de construcción.', image: '/fleet-construccion-gallinita.png' },
+      { name: 'Motoniveladora', passengers: 1, ac: false, icon: HardHat, luggage: 'Nivelación', description: 'Motoniveladora para trabajos de nivelación y mantenimiento de caminos.', image: '/fleet-construccion-motoniveladora.png' },
+      { name: 'Retroexcavadora', passengers: 1, ac: false, icon: HardHat, luggage: 'Excavación', description: 'Retroexcavadora para excavación, zanjas y movimientos de tierra.', image: '/fleet-construccion-retroexcavadora.png' },
+      { name: 'Excavadora', passengers: 1, ac: true, icon: HardHat, luggage: 'Gran excavación', description: 'Excavadora de gran tamaño para movimientos masivos de tierra.', image: '/fleet-construccion-excavadora.png' },
+      { name: 'Aplanadora', passengers: 1, ac: false, icon: HardHat, luggage: 'Compactación', description: 'Aplanadora para compactación de superficies en obras viales.', image: '/fleet-construccion-aplanadora.png' },
+    ],
+  },
+  {
+    key: 'agro',
+    label: 'Agro',
+    icon: Tractor,
+    color: 'text-green-500',
+    bgColor: 'bg-green-500/10',
+    borderColor: 'border-green-500/30 hover:border-green-500/60',
+    vehicles: [
+      { name: 'Tractor', passengers: 1, ac: false, icon: Tractor, luggage: 'Implementos agrícolas', description: 'Tractor para laboreo, siembra y tareas agrícolas en el campo.', image: '/fleet-agro-tractor.png' },
+      { name: 'Cosechadora', passengers: 1, ac: true, icon: Tractor, luggage: 'Cosecha', description: 'Cosechadora para recolección eficiente de cultivos a gran escala.', image: '/fleet-agro-cosechadora.png' },
     ],
   },
 ]
@@ -132,7 +208,7 @@ export function Fleet() {
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00E676]/10 border border-[#00E676]/20 mb-4">
             <Car className="w-4 h-4 text-[#00E676]" />
-            <span className="text-sm text-[#00E676]">Flota Moderna</span>
+            <span className="text-sm text-[#00E676]">Flota Completa</span>
           </div>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
             Nuestra{' '}
@@ -141,11 +217,11 @@ export function Fleet() {
             </span>
           </h2>
           <p className="text-white/50 max-w-2xl mx-auto text-lg">
-            Elige el servicio de tu preferencia. Vehículos modernos, equipados y mantenidos para tu seguridad y confort.
+            Elige el servicio de tu preferencia. Vehículos modernos, equipados y mantenidos para tu seguridad y confort. Desde autos clásicos hasta maquinaria especializada.
           </p>
         </div>
 
-        {/* Category Tabs - fey.com/fxify.com style */}
+        {/* Category Tabs - Scrollable on mobile */}
         <div className={`flex flex-wrap justify-center gap-2 md:gap-3 mb-10 transition-all duration-700 ${
           visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}>
@@ -153,7 +229,7 @@ export function Fleet() {
             <button
               key={cat.key}
               onClick={() => { setActiveCategory(cat.key); setActiveVehicle(null) }}
-              className={`group flex items-center gap-2 px-4 md:px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 border ${
+              className={`group flex items-center gap-2 px-3 md:px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 border ${
                 activeCategory === cat.key
                   ? `${cat.bgColor} ${cat.color} ${cat.borderColor} shadow-lg`
                   : 'bg-white/[0.03] text-white/50 border-white/[0.06] hover:bg-white/[0.06] hover:text-white/80'
@@ -201,15 +277,16 @@ export function Fleet() {
                     isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
                   }`} />
 
-                  <div className="relative z-10 p-6">
-                    {/* Top Row */}
-                    <div className="flex items-start justify-between mb-3">
-                      <div className={`w-12 h-12 rounded-xl ${currentCategory.bgColor} flex items-center justify-center`}>
-                        <vehicle.icon className={`w-6 h-6 ${currentCategory.color}`} />
-                      </div>
-                      <ChevronRight className={`w-5 h-5 text-white/20 transition-transform duration-300 ${
-                        isSelected ? 'rotate-90 text-white/50' : ''
-                      }`} />
+                  <div className="relative z-10 p-5">
+                    {/* Vehicle Image */}
+                    <div className="w-full h-28 flex items-center justify-center mb-4 rounded-xl bg-white/[0.02] overflow-hidden">
+                      <Image
+                        src={vehicle.image}
+                        alt={vehicle.name}
+                        width={160}
+                        height={100}
+                        className="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-110"
+                      />
                     </div>
 
                     {/* Vehicle Name */}
@@ -220,7 +297,7 @@ export function Fleet() {
                     </h3>
 
                     {/* Quick specs - always visible */}
-                    <div className="flex items-center gap-3 text-xs text-white/30 mb-3">
+                    <div className="flex items-center gap-3 text-xs text-white/30 mb-2">
                       {vehicle.passengers > 0 && (
                         <div className="flex items-center gap-1">
                           <Users className="w-3 h-3" />
