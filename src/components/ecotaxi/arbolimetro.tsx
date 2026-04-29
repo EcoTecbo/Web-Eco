@@ -126,17 +126,16 @@ export function Arbolimetro() {
             visible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'
           }`}>
             <div className="relative">
-              {/* Glow behind tree */}
-              <div className="absolute inset-0 rounded-full bg-[#00E676]/20 blur-[60px] scale-75" />
+              {/* Glow behind image */}
+              <div className="absolute inset-0 rounded-3xl bg-[#00E676]/15 blur-[60px] scale-90" />
               <img
-                src="/eco-tree.png"
-                alt="Árbol ecológico - Símbolo de pureza y descontaminación"
-                className="relative w-full max-w-sm rounded-3xl object-contain"
-                style={{ filter: 'drop-shadow(0 0 40px rgba(0,230,118,0.3))' }}
+                src="/eco-tree.jpg"
+                alt="Choferes de Ecotaxi plantando árboles - Compromiso ecológico"
+                className="relative w-full max-w-sm rounded-3xl object-cover shadow-[0_0_40px_rgba(0,230,118,0.2)]"
               />
               {/* Purity label */}
               <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-[#00E676]/10 border border-[#00E676]/20 backdrop-blur-sm">
-                <span className="text-xs text-[#00E676] font-medium">Pureza y Descontaminación</span>
+                <span className="text-xs text-[#00E676] font-medium">Compromiso Ecológico Real</span>
               </div>
             </div>
           </div>

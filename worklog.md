@@ -24,3 +24,31 @@ Stage Summary:
 - Navigation fully updated with 12 service links
 - Build passes with 0 errors
 - Preview URL: https://preview-chat-97b1d118-ee9d-46c5-a3f5-20dcc6e7bd02.space.z.ai/
+
+---
+Task ID: 2
+Agent: Main Agent
+Task: Replace auxilio mecánico images, add grúas section, update arbolímetro image
+
+Work Log:
+- Copied 8 uploaded images from /upload/ to /public/ with clean filenames
+- auxilio-bateria.png → Batería Móvil (transparent PNG)
+- auxilio-neumatico.png → Gomero Móvil (transparent PNG)
+- auxilio-llave.png → Llave Móvil (transparent PNG)
+- grua-moto.png → Moto Grúa (transparent PNG)
+- grua-arrastre.png → Grúa de Arrastre (transparent PNG)
+- grua-remolque.png → Grúa de Remolque (transparent PNG)
+- grua-telescopica.png → Grúa Telescópica (transparent PNG)
+- eco-tree.jpg → Choferes plantando árbol (JPG photo)
+- Updated Hero banner: changed from object-cover to object-contain layout with colored glow backgrounds for transparent PNGs, added grúa remolque as 4th banner image
+- Updated service cards: replaced background image overlay with decorative transparent PNG positioned on right side
+- Changed Asistencia Mecánica card image from /auxilio-mecanico.png to /grua-remolque.png
+- Added new GruasSection with 4 crane types (Moto Grúa, Arrastre, Remolque, Telescópica) each with transparent PNG icon and decorative background, plus cost disclaimer
+- Updated arbolimetro.tsx: replaced /eco-tree.png (icon) with /eco-tree.jpg (photo of drivers planting trees), changed object-contain to object-cover, updated label to "Compromiso Ecológico Real"
+- Build: 0 errors, all 17 pages generated
+
+Stage Summary:
+- All 3 auxilio service images replaced with transparent PNGs (Gomero Móvil, Batería Móvil, Llave Móvil)
+- New Grúas section added with 4 transparent PNG crane images
+- Arbolímetro image changed from tree icon to real photo of drivers planting trees
+- All pages compile and serve HTTP 200

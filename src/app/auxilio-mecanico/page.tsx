@@ -115,24 +115,30 @@ function HeroSection() {
           </div>
         </AnimatedSection>
 
-        {/* 4-Image Banner */}
+        {/* 4-Image Banner — Transparent PNGs */}
         <AnimatedSection delay={400}>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10 max-w-5xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10 max-w-5xl mx-auto">
             {[
-              { src: '/auxilio-bateria.png', label: 'Auxilio de Bateria', color: '#F97316' },
-              { src: '/auxilio-neumatico.png', label: 'Cambio de Neumatico', color: '#F59E0B' },
-              { src: '/auxilio-llave.png', label: 'Cerrajeria Movil', color: '#0077BD' },
-              { src: '/auxilio-mecanico.png', label: 'Asistencia Mecanica', color: '#EF4444' },
+              { src: '/auxilio-bateria.png', label: 'Batería Móvil', color: '#F97316' },
+              { src: '/auxilio-neumatico.png', label: 'Gomero Móvil', color: '#F59E0B' },
+              { src: '/auxilio-llave.png', label: 'Llave Móvil', color: '#0077BD' },
+              { src: '/grua-remolque.png', label: 'Grúa Remolque', color: '#EF4444' },
             ].map((img) => (
-              <div key={img.label} className="group relative h-40 md:h-52 rounded-2xl overflow-hidden border border-white/[0.06] hover:border-white/15 transition-all duration-500">
-                <img
-                  src={img.src}
-                  alt={img.label}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0e17] via-[#0a0e17]/40 to-transparent" />
+              <div key={img.label} className="group relative h-44 md:h-56 rounded-2xl overflow-hidden border border-white/[0.06] hover:border-white/15 transition-all duration-500 bg-white/[0.02]">
+                {/* Colored glow behind icon */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-32 h-32 rounded-full opacity-20 group-hover:opacity-30 transition-opacity duration-500" style={{ backgroundColor: img.color, filter: 'blur(50px)' }} />
+                </div>
+                <div className="relative z-10 w-full h-full flex items-center justify-center p-4">
+                  <img
+                    src={img.src}
+                    alt={img.label}
+                    className="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-700 drop-shadow-[0_0_30px_rgba(255,255,255,0.1)]"
+                  />
+                </div>
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#0a0e17] via-[#0a0e17]/60 to-transparent h-20" />
                 <div className="absolute bottom-3 left-3 right-3">
-                  <span className="text-xs font-semibold text-white/80 backdrop-blur-sm px-2 py-1 rounded-lg bg-black/30">
+                  <span className="text-xs font-semibold text-white/90 backdrop-blur-sm px-3 py-1.5 rounded-lg bg-black/30">
                     {img.label}
                   </span>
                 </div>
@@ -237,7 +243,7 @@ const mainServices = [
     ],
     color: '#EF4444',
     tag: 'EMERGENCIA',
-    image: '/auxilio-mecanico.png',
+    image: '/grua-remolque.png',
   },
 ]
 
@@ -283,14 +289,14 @@ function ServicesSection() {
                     borderColor: isActive ? `${service.color}40` : undefined,
                   }}
                 >
-                  {/* Background image */}
-                  <div className="absolute inset-0">
+                  {/* Transparent PNG as decorative element */}
+                  <div className="absolute inset-0 flex items-center justify-end opacity-10 group-hover:opacity-20 transition-opacity duration-500 pointer-events-none">
                     <img
                       src={service.image}
-                      alt={service.title}
-                      className="w-full h-full object-cover opacity-20 group-hover:opacity-30 transition-opacity duration-500"
+                      alt=""
+                      className="h-[80%] object-contain translate-x-4"
+                      aria-hidden="true"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#0a0e17] via-[#0a0e17]/80 to-[#0a0e17]/60" />
                   </div>
 
                   <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
@@ -789,7 +795,187 @@ function LocksmithDetailSection() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   7. TECHNOLOGY & COVERAGE
+   7. GRÚAS — Servicio de remolque y traslado
+   ═══════════════════════════════════════════════════════════════════════════════ */
+const gruaTypes = [
+  {
+    title: 'Moto Grúa',
+    subtitle: 'Rescate ágil para motocicletas',
+    desc: 'Tu motocicleta se quedó varada en la calle o en la carretera? La moto grúa de Ecotaxi está diseñada específicamente para el traslado seguro de motos de todo tipo: scooter, deportivas, trail, custom y más. El sistema de sujeción especializado garantiza que tu moto llegue al taller sin un solo rasguño, con anchas correas de sujeción y plataformas antideslizantes que evitan cualquier movimiento durante el traslado.',
+    features: [
+      'Plataforma exclusiva para motocicletas',
+      'Sujeción con correas de alta resistencia',
+      'Cobertura urbana y en carretera',
+      'Traslado al taller de tu elección',
+    ],
+    color: '#F97316',
+    image: '/grua-moto.png',
+  },
+  {
+    title: 'Grúa de Arrastre',
+    subtitle: 'Vehículos livianos y medianos',
+    desc: 'Cuando tu vehículo no puede moverse por desperfecto mecánico, accidente o cualquier otra emergencia, la grúa de arrastre es la solución más rápida. Ideal para sedanes, hatchbacks y vehículos livianos que necesitan ser trasladados de inmediato. El sistema de arrastre se realiza con equipamiento profesional que protege la carrocería y el tren delantero de tu vehículo durante todo el recorrido hasta el taller o destino que indiques.',
+    features: [
+      'Arrastre profesional con protección de carrocería',
+      'Ideal para vehículos livianos y medianos',
+      'Disponible 24/7 en Santa Cruz',
+      'Conduce directo al taller de tu preferencia',
+    ],
+    color: '#F59E0B',
+    image: '/grua-arrastre.png',
+  },
+  {
+    title: 'Grúa de Remolque',
+    subtitle: 'Traslado seguro con plataforma',
+    desc: 'La grúa de remolque con plataforma es la opción más segura para trasladar vehículos que no pueden rodar por sí mismos. El vehículo completo es cargado sobre la plataforma, evitando cualquier desgaste o daño adicional a llantas, transmisión o suspensión. Es la grúa ideal para vehículos con daños severos por accidente, fallas de transmisión o cuando simplemente no quieres arriesgar más kilómetros al vehículo antes de llegar al taller.',
+    features: [
+      'Plataforma completa para carga total',
+      'Sin desgaste ni rodaje del vehículo',
+      'Perfecta para vehículos accidentados',
+      'Traslado largo distancia disponible',
+    ],
+    color: '#0077BD',
+    image: '/grua-remolque.png',
+  },
+  {
+    title: 'Grúa Telescópica',
+    subtitle: 'Vehículos pesados y especiales',
+    desc: 'Para el traslado de vehículos de gran tamaño como camiones, buses, maquinaria agrícola, equipos de construcción y vehículos especiales, la grúa telescópica es la herramienta indicada. Con capacidad de elevación superior y brazo extensible, puede maniobrar en espacios reducidos y levantar cargas que otras grúas simplemente no pueden mover. Si tu emergencia involucra un vehículo pesado, esta es tu grúa.',
+    features: [
+      'Capacidad para vehículos pesados y maquinaria',
+      'Brazo telescópico extensible',
+      'Maniobra en espacios reducidos',
+      'Equipamiento para cargas especiales',
+    ],
+    color: '#D4AF37',
+    image: '/grua-telescopica.png',
+  },
+]
+
+function GruasSection() {
+  const [activeGrua, setActiveGrua] = useState<string | null>(null)
+
+  return (
+    <section id="gruas" className="relative py-24 md:py-32 overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#1a1005] to-[#0a0e17]" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[500px] rounded-full bg-[#F97316]/5 blur-[180px]" />
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <AnimatedSection>
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#EF4444]/10 border border-[#EF4444]/20 mb-4">
+              <Truck className="w-4 h-4 text-[#EF4444]" />
+              <span className="text-sm text-[#EF4444]">Servicio de Grúas</span>
+            </div>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+              Grúas para{' '}
+              <span className="bg-gradient-to-r from-[#F97316] via-[#F59E0B] to-[#D4AF37] bg-clip-text text-transparent">
+                Cada Situación
+              </span>
+            </h2>
+            <p className="text-white/50 max-w-3xl mx-auto text-lg">
+              Desde una motocicleta varada hasta un camión pesado que necesita traslado, nuestra flota de grúas
+              cubre cada tipo de emergencia vial. Elige la grúa adecuada a tu necesidad y solicítala directamente
+              desde la APP de Ecotaxi.
+            </p>
+          </div>
+        </AnimatedSection>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {gruaTypes.map((grua, i) => {
+            const isActive = activeGrua === grua.title
+            return (
+              <AnimatedSection key={grua.title} delay={i * 100}>
+                <div
+                  onClick={() => setActiveGrua(isActive ? null : grua.title)}
+                  className={`group relative rounded-2xl border backdrop-blur-sm cursor-pointer transition-all duration-500 overflow-hidden ${
+                    isActive ? 'bg-white/[0.06]' : 'hover:border-white/10'
+                  }`}
+                  style={{
+                    borderColor: isActive ? `${grua.color}40` : undefined,
+                  }}
+                >
+                  {/* Transparent PNG decorative */}
+                  <div className="absolute inset-0 flex items-center justify-end opacity-[0.08] group-hover:opacity-[0.15] transition-opacity duration-500 pointer-events-none">
+                    <img
+                      src={grua.image}
+                      alt=""
+                      className="h-[85%] object-contain translate-x-6"
+                      aria-hidden="true"
+                    />
+                  </div>
+
+                  {/* Hover glow */}
+                  <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    style={{ boxShadow: `0 0 40px ${grua.color}08` }}
+                  />
+
+                  <div className="relative z-10 p-6 md:p-8">
+                    {/* Image + Title row */}
+                    <div className="flex items-start gap-4 mb-5">
+                      <div className="w-20 h-20 rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-300 bg-white/[0.03] border border-white/[0.06]"
+                        style={{ boxShadow: `0 0 20px ${grua.color}10` }}
+                      >
+                        <img
+                          src={grua.image}
+                          alt={grua.title}
+                          className="w-14 h-14 object-contain"
+                          style={{ filter: `drop-shadow(0 0 10px ${grua.color}40)` }}
+                        />
+                      </div>
+                      <div className="pt-1">
+                        <h3 className="text-xl font-bold text-white">{grua.title}</h3>
+                        <p className="text-sm mt-0.5" style={{ color: grua.color }}>{grua.subtitle}</p>
+                      </div>
+                    </div>
+
+                    <p className="text-sm text-white/50 leading-relaxed mb-5">{grua.desc}</p>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {grua.features.map((feat) => (
+                        <div key={feat} className="flex items-start gap-2">
+                          <CheckCircle2 className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: grua.color }} />
+                          <span className="text-xs text-white/45">{feat}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {!isActive && (
+                      <p className="text-xs text-white/20 mt-4 flex items-center gap-1">
+                        <ChevronRight className="w-3 h-3" />
+                        Click para expandir
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </AnimatedSection>
+            )
+          })}
+        </div>
+
+        {/* Nota sobre costo de grúa */}
+        <AnimatedSection delay={400}>
+          <div className="mt-10 max-w-3xl mx-auto p-5 rounded-2xl bg-[#F97316]/5 border border-[#F97316]/10">
+            <div className="flex items-center gap-2 mb-3">
+              <Gauge className="w-4 h-4 text-[#F97316]" />
+              <span className="text-xs font-bold text-[#F97316] uppercase tracking-wider">Costo del Servicio de Grúa</span>
+            </div>
+            <p className="text-sm text-white/50 leading-relaxed">
+              El costo que refleja la APP es solo el del desplazamiento de la grúa hasta tu ubicación. El costo del
+              remolque o traslado se coordina directamente con el operador de la grúa según la distancia al destino,
+              el tipo de vehículo y la complejidad del traslado. Puedes conocer la tarifa de desplazamiento en línea
+              antes de confirmar. Si tu seguro cubre este servicio dentro de Ecotaxi, se te notificará que no tiene
+              costo para ti.
+            </p>
+          </div>
+        </AnimatedSection>
+      </div>
+    </section>
+  )
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   8. TECHNOLOGY & COVERAGE
    ═══════════════════════════════════════════════════════════════════════════════ */
 const techFeatures = [
   {
@@ -1214,6 +1400,7 @@ export default function AuxilioMecanicoPage() {
       <EmergencyScenariosSection />
       <BatteryDetailSection />
       <LocksmithDetailSection />
+      <GruasSection />
       <TechSection />
       <PricingSection />
       <FAQSection />
