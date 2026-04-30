@@ -1,10 +1,10 @@
 'use client'
 
-import { Car, Bus, Bike, Crown, Wind, Users, Package, Leaf, Zap, ChevronRight, ArrowRight, Truck, Wrench, Tractor, HardHat, Caravan } from 'lucide-react'
+import { Car, Bus, Bike, Crown, Wind, Users, Package, ChevronRight, ArrowRight, Truck, Wrench, Tractor, HardHat, Caravan } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 
-type VehicleCategoryKey = 'clasico' | 'confort' | 'vip' | 'bus' | 'sostenible' | 'moto' | 'camioneta' | 'furgon' | 'grua' | 'construccion' | 'agro'
+type VehicleCategoryKey = 'clasico' | 'confort' | 'vip' | 'bus' | 'moto' | 'camioneta' | 'furgon' | 'grua' | 'auxilio' | 'construccion' | 'agro'
 
 interface Vehicle {
   name: string
@@ -81,17 +81,6 @@ const categories: CategoryDef[] = [
     ],
   },
   {
-    key: 'sostenible',
-    label: 'Sostenible',
-    icon: Leaf,
-    color: 'text-[#00E676]',
-    bgColor: 'bg-[#00E676]/10',
-    borderColor: 'border-[#00E676]/30 hover:border-[#00E676]/60',
-    vehicles: [
-      { name: 'Quantum', passengers: 2, ac: true, icon: Zap, luggage: 'Sin equipaje', description: 'Vehículo eléctrico eco-friendly para traslados urbanos sin emisiones.', image: '/fleet-confort-compacto.png' },
-    ],
-  },
-  {
     key: 'moto',
     label: 'Moto',
     icon: Bike,
@@ -148,6 +137,19 @@ const categories: CategoryDef[] = [
       { name: 'Grúa Rampla', passengers: 2, ac: false, icon: Truck, luggage: 'Vehículos varios', description: 'Grúa con rampla para carga y descarga de vehículos de todo tipo.', image: '/fleet-grua-rampla.png' },
       { name: 'Grúa Pluma', passengers: 2, ac: false, icon: Truck, luggage: 'Carga pesada', description: 'Grúa pluma para izaje y maniobras de carga pesada en obra.', image: '/fleet-grua-pluma.png' },
       { name: 'Grúa Telescópica', passengers: 2, ac: false, icon: Truck, luggage: 'Carga industrial', description: 'Grúa telescópica de gran alcance para operaciones industriales y de construcción.', image: '/fleet-grua-telescopica.jpg' },
+    ],
+  },
+  {
+    key: 'auxilio',
+    label: 'Auxilio Mecánico',
+    icon: Wrench,
+    color: 'text-cyan-400',
+    bgColor: 'bg-cyan-400/10',
+    borderColor: 'border-cyan-400/30 hover:border-cyan-400/60',
+    vehicles: [
+      { name: 'Gomería Móvil', passengers: 2, ac: false, icon: Wrench, luggage: 'Repuestos de neumáticos', description: 'Servicio de gomería móvil que acude a tu ubicación para reparar o cambiar neumáticos en el lugar.', image: '/fleet-auxilio-gomero.png' },
+      { name: 'Batería Móvil', passengers: 2, ac: false, icon: Wrench, luggage: 'Baterías y cables', description: 'Servicio de batería móvil para arranque asistido o reemplazo de batería en el sitio.', image: '/fleet-auxilio-bateria.png' },
+      { name: 'Llave Móvil', passengers: 2, ac: false, icon: Wrench, luggage: 'Herramientas de cerrajería', description: 'Servicio de cerrajería móvil para apertura de vehículos y duplicado de llaves en el acto.', image: '/fleet-auxilio-llave.png' },
     ],
   },
   {
