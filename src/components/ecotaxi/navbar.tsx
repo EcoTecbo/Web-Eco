@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Menu, X, Phone, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -10,7 +10,7 @@ const navLinks = [
   { label: 'Nosotros', href: '/nosotros' },
   { label: 'Servicios', href: '/#servicios', isHash: true },
   { label: 'Flota', href: '/#flota', isHash: true },
-  { label: 'Arbolímetro', href: '/#arbolimetro', isHash: true },
+  { label: 'Sostenibilidad', href: '/#arbolimetro', isHash: true },
   { label: 'Conductores', href: '/#conductores', isHash: true },
   { label: 'Canales', href: '/#multicanal', isHash: true },
   { label: 'Reservas', href: '/#reservas', isHash: true },
@@ -35,6 +35,8 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [servicesOpen, setServicesOpen] = useState(false)
+  const [mobileServicesOpen, setMobileServicesOpen] = useState(false)
+  const closeTimerRef = useRef<NodeJS.Timeout | null>(null)
   const pathname = usePathname()
 
   useEffect(() => {
@@ -87,17 +89,32 @@ export function Navbar() {
 
             {/* Services Dropdown */}
             <div className="relative"
-              onMouseEnter={() => setServicesOpen(true)}
-              onMouseLeave={() => setServicesOpen(false)}
+              onMouseEnter={() => {
+                if (closeTimerRef.current) clearTimeout(closeTimerRef.current)
+                setServicesOpen(true)
+              }}
+              onMouseLeave={() => {
+                closeTimerRef.current = setTimeout(() => setServicesOpen(false), 600)
+              }}
             >
-              <button className={`flex items-center gap-1 text-sm transition-colors duration-200 ${
-                pathname === '/aeropuerto' || pathname === '/corporativo' || pathname === '/puerta-a-puerta' || pathname === '/por-hora' || pathname === '/ejecutivo' || pathname === '/transporte-salud' || pathname === '/interurbano' || pathname === '/envios' || pathname === '/auxilio-mecanico' || pathname === '/transporte-mascotas' || pathname === '/transporte-escolar' || pathname === '/aventura' ? 'text-[#00E676]' : 'text-white/70 hover:text-white'
-              }`}>
+              <button
+                onClick={() => setServicesOpen(!servicesOpen)}
+                className={`flex items-center gap-1 text-sm transition-colors duration-200 ${
+                  pathname === '/aeropuerto' || pathname === '/corporativo' || pathname === '/puerta-a-puerta' || pathname === '/por-hora' || pathname === '/ejecutivo' || pathname === '/transporte-salud' || pathname === '/interurbano' || pathname === '/envios' || pathname === '/auxilio-mecanico' || pathname === '/transporte-mascotas' || pathname === '/transporte-escolar' || pathname === '/aventura' ? 'text-[#00E676]' : 'text-white/70 hover:text-white'
+                }`}>
                 Servicios
                 <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${servicesOpen ? 'rotate-180' : ''}`} />
               </button>
               {servicesOpen && (
-                <div className="absolute top-full left-0 mt-2 w-56 rounded-xl bg-[#0d1320]/95 backdrop-blur-xl border border-white/[0.08] shadow-xl shadow-black/30 overflow-hidden z-50">
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-60 rounded-xl bg-[#0d1320]/95 backdrop-blur-xl border border-white/[0.08] shadow-xl shadow-black/30 overflow-hidden z-50"
+                  onMouseEnter={() => {
+                    if (closeTimerRef.current) clearTimeout(closeTimerRef.current)
+                    setServicesOpen(true)
+                  }}
+                  onMouseLeave={() => {
+                    closeTimerRef.current = setTimeout(() => setServicesOpen(false), 600)
+                  }}
+                >
                   {servicePages.map((service) => (
                     <Link
                       key={service.href}
@@ -148,10 +165,10 @@ export function Navbar() {
       {/* Mobile Menu */}
       <div
         className={`md:hidden transition-all duration-300 overflow-hidden ${
-          mobileOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+          mobileOpen ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
-        <div className="bg-[#0a0e17]/95 backdrop-blur-xl border-t border-white/5 px-4 py-4 space-y-3">
+        <div className="bg-[#0a0e17]/95 backdrop-blur-xl border-t border-white/5 px-4 py-4 space-y-1">
           {navLinks.map((link) => (
             <Link
               key={link.href}
@@ -164,21 +181,33 @@ export function Navbar() {
               {link.label}
             </Link>
           ))}
-          {/* Mobile service pages */}
-          <div className="border-t border-white/5 pt-3">
-            <p className="text-xs text-white/30 uppercase tracking-wider mb-2 px-2">Servicios</p>
-            {servicePages.map((service) => (
-              <Link
-                key={service.href}
-                href={service.href}
-                onClick={() => setMobileOpen(false)}
-                className={`block py-2 px-2 text-lg transition-colors ${
-                  pathname === service.href ? 'text-[#00E676]' : 'text-white/70'
-                }`}
-              >
-                {service.label}
-              </Link>
-            ))}
+          {/* Mobile service pages - expandable */}
+          <div className="border-t border-white/5 pt-2">
+            <button
+              onClick={() => setMobileServicesOpen(!mobileServicesOpen)}
+              className="w-full flex items-center justify-between py-2 text-lg text-white/70"
+            >
+              <span>Servicios</span>
+              <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${mobileServicesOpen ? 'rotate-180' : ''}`} />
+            </button>
+            <div className={`transition-all duration-300 overflow-hidden ${
+              mobileServicesOpen ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'
+            }`}>
+              <div className="pl-3 space-y-0.5 pb-2">
+                {servicePages.map((service) => (
+                  <Link
+                    key={service.href}
+                    href={service.href}
+                    onClick={() => { setMobileOpen(false); setMobileServicesOpen(false) }}
+                    className={`block py-2 px-3 text-base rounded-lg transition-colors ${
+                      pathname === service.href ? 'text-[#00E676] bg-[#00E676]/5' : 'text-white/60 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    {service.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
           </div>
           <Link
             href="/#reservas"

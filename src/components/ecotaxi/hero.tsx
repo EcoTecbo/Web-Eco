@@ -12,8 +12,8 @@ const slides = [
   },
   {
     image: '/hero-taxi-2.png',
-    title: 'Tu Viaje,',
-    highlight: 'Nuestra Misión Verde',
+    title: 'Toca. Viaja. Llega:',
+    highlight: '¡así de sencillo!',
     subtitle: 'Cada trayecto con Ecotaxi es un paso hacia un planeta más limpio. Viaja con nosotros y reduce tu huella de carbono automáticamente.',
   },
 ]

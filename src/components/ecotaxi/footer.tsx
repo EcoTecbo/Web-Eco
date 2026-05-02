@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { Leaf, Facebook, Instagram, Linkedin, Youtube, Phone, Mail, MapPin } from 'lucide-react'
+import Script from 'next/script'
 
 const serviceLinks = [
   { label: 'Puerta a Puerta', href: '/puerta-a-puerta' },
@@ -63,7 +64,7 @@ export function Footer() {
               </div>
               <div className="flex items-center gap-2 text-white/40 text-sm">
                 <Mail className="w-4 h-4 text-[#0077BD]" />
-                <span>info@ecotaxi-bo.com</span>
+                <span>ecotaxi@oyc-srl.com</span>
               </div>
               <div className="flex items-center gap-2 text-white/40 text-sm">
                 <MapPin className="w-4 h-4 text-[#0077BD]" />
@@ -145,6 +146,12 @@ export function Footer() {
             </div>
           </div>
         </div>
+
+        {/* Tree-Nation Widget */}
+        <div className="mt-10 flex justify-center">
+          <div data-widget-type="tree-counter" data-tree-nation-code="f35060a6da2c0369" data-lang="es" data-theme="dark" />
+        </div>
+        <Script src="https://widgets.tree-nation.com/js/widgets/v3/widgets.min.js" strategy="afterInteractive" />
 
         {/* Bottom Bar */}
         <div className="mt-12 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">

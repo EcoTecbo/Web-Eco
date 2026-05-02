@@ -84,3 +84,28 @@ Stage Summary:
 - ConductorSection component created and added to homepage
 - Navbar updated with Conductores link
 - All images from user's vehicle icons ZIP are now in /public/
+
+---
+Task ID: 1-9
+Agent: Main Agent
+Task: Implement 9 changes to the Ecotaxi homepage
+
+Work Log:
+- Changed hero slide 2 text from "Tu Viaje, Nuestra Misión Verde" to "Toca. Viaja. Llega: ¡así de sencillo!"
+- Updated navbar label from "Arbolímetro" to "Sostenibilidad"
+- Fixed services dropdown menu: added 600ms delay on close + click toggle + dropdown also keeps menu open on hover
+- Updated mobile menu: added expandable services submenu with direct links to service pages
+- Added href links to all services in the Services grid component (previously some lacked links)
+- Updated fleet vehicle images: removed bg-white/[0.02] background, standardized to max-h-[90px] max-w-[140px] with drop-shadow for transparent background appearance
+- Changed "Arbolímetro" heading to "Sostenibilidad" in arbolimetro.tsx
+- Reordered homepage: moved ConductorSection after Reservas section
+- Rewrote ConductorSection with integrated iframe registration form, language selector (8 languages via Google Translate), fullscreen toggle, and proper APP download button linking to Google Play
+- Updated Multicanal: replaced "Línea Gratuita 800-240-002" with "Celular o Línea Móvil 73662803", updated APP link to AppMetrica download URL, WhatsApp to +59172100946 bot, added Telegram bot link, added Facebook Messenger link
+- Added Tree-Nation widget to footer with script loading
+- Changed email from info@ecotaxi-bo.com to ecotaxi@oyc-srl.com
+- Build successful: ✓ Compiled successfully
+
+Stage Summary:
+- All 9 changes implemented successfully
+- Build passes with 0 errors
+- Key files modified: hero.tsx, navbar.tsx, services.tsx, fleet.tsx, arbolimetro.tsx, page.tsx, conductor-section.tsx, multicanal.tsx, footer.tsx

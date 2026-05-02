@@ -2,7 +2,7 @@
 
 import {
   Phone, MessageCircle, Globe, Smartphone, Building2,
-  HandshakeIcon, Hotel, Users, Headphones, ChevronRight, ArrowRight
+  HandshakeIcon, Hotel, Users, Headphones, ArrowRight, Send
 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
@@ -12,15 +12,17 @@ interface Channel {
   value: string
   color: string
   href?: string
+  description?: string
 }
 
 const requestChannels: Channel[] = [
   { icon: Phone, label: 'Call Center', value: '(+591) 3 3296885', color: '#0077BD', href: 'tel:+59133296885' },
-  { icon: Phone, label: 'Línea Gratuita', value: '800-240-002', color: '#1D6988', href: 'tel:800240002' },
-  { icon: Smartphone, label: 'App Móvil', value: 'Descarga la APP', color: '#00E676' },
-  { icon: MessageCircle, label: 'WhatsApp', value: '+591 73662803', color: '#25D366', href: 'https://wa.me/59173662803' },
+  { icon: Smartphone, label: 'Celular o Línea Móvil', value: '73662803', color: '#1D6988', href: 'tel:+59173662803' },
+  { icon: Smartphone, label: 'Descarga la APP', value: 'Android, iOS, Huawei', color: '#00E676', href: 'https://redirect.appmetrica.yandex.com/serve/1182345336769790636', description: 'Disponible para Android, iOS y Huawei' },
+  { icon: MessageCircle, label: 'WhatsApp', value: '+591 72100946', color: '#25D366', href: 'https://wa.me/59172100946', description: 'Bot automático para pedir taxi' },
+  { icon: Send, label: 'Telegram', value: '@EcotaxiBoBot', color: '#26A5E4', href: 'https://t.me/EcotaxiBoBot', description: 'Bot de pedidos por Telegram' },
   { icon: Globe, label: 'Sitio Web', value: 'Reserva Online', color: '#0077BD', href: '#reservas' },
-  { icon: Headphones, label: 'Redes Sociales', value: '@ecotaxibo', color: '#8B5CF6' },
+  { icon: Headphones, label: 'Redes Sociales', value: 'Facebook Messenger', color: '#8B5CF6', href: 'https://m.me/395162460915352', description: 'Chatea por Messenger' },
 ]
 
 const portalAccess = [
@@ -99,7 +101,7 @@ export function Multicanal() {
         </div>
 
         {/* Request Channels Grid */}
-        <div className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-20 transition-all duration-700 ${
+        <div className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-20 transition-all duration-700 ${
           visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}>
           {requestChannels.map((channel) => (
@@ -118,6 +120,9 @@ export function Multicanal() {
               </div>
               <p className="text-sm font-medium text-white/80 group-hover:text-white transition-colors">{channel.label}</p>
               <p className="text-xs text-white/40 mt-1">{channel.value}</p>
+              {channel.description && (
+                <p className="text-[10px] text-white/25 mt-1 leading-relaxed">{channel.description}</p>
+              )}
             </a>
           ))}
         </div>
@@ -157,8 +162,7 @@ export function Multicanal() {
               >
                 {/* Glow */}
                 <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                  style={{ boxShadow: `0 0 30px ${portal.color}15` }}
-                />
+                  style={{ boxShadow: `0 0 30px ${portal.color}15` }} />
 
                 <div className="relative z-10">
                   <div className={`w-14 h-14 rounded-2xl ${portal.bgColor} flex items-center justify-center mb-4`}>

@@ -110,7 +110,7 @@ export function Arbolimetro() {
           </div>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
             <span className="bg-gradient-to-r from-[#00E676] to-[#71B124] bg-clip-text text-transparent">
-              Arbolímetro
+              Sostenibilidad
             </span>
           </h2>
           <p className="text-white/50 max-w-3xl mx-auto text-lg leading-relaxed">

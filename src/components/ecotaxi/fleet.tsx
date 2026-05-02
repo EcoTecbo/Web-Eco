@@ -281,13 +281,13 @@ export function Fleet() {
 
                   <div className="relative z-10 p-5">
                     {/* Vehicle Image */}
-                    <div className="w-full h-28 flex items-center justify-center mb-4 rounded-xl bg-white/[0.02] overflow-hidden">
+                    <div className="w-full h-32 flex items-center justify-center mb-4 rounded-xl overflow-hidden">
                       <Image
                         src={vehicle.image}
                         alt={vehicle.name}
-                        width={160}
-                        height={100}
-                        className="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-110"
+                        width={140}
+                        height={90}
+                        className="max-h-[90px] max-w-[140px] w-auto h-auto object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)] transition-transform duration-500 group-hover:scale-110"
                       />
                     </div>
 
