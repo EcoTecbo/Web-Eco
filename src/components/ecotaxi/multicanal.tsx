@@ -33,7 +33,7 @@ const portalAccess = [
     color: '#0077BD',
     bgColor: 'bg-[#0077BD]/10',
     borderColor: 'border-[#0077BD]/20 hover:border-[#0077BD]/50',
-    href: 'https://id3251.tm.taxi:58443/?cid=1',
+    href: 'https://ecotaxi-kc.tm.taxi/',
   },
   {
     icon: HandshakeIcon,
@@ -42,7 +42,7 @@ const portalAccess = [
     color: '#00E676',
     bgColor: 'bg-[#00E676]/10',
     borderColor: 'border-[#00E676]/20 hover:border-[#00E676]/50',
-    href: 'https://id3251.tm.taxi:58443/?cid=1',
+    href: 'https://crm.oyc-srl.com/',
   },
   {
     icon: Hotel,
@@ -51,16 +51,16 @@ const portalAccess = [
     color: '#FF9800',
     bgColor: 'bg-orange-500/10',
     borderColor: 'border-orange-500/20 hover:border-orange-500/50',
-    href: 'https://id3251.tm.taxi:58443/?cid=1',
+    href: 'https://crm.oyc-srl.com/',
   },
   {
     icon: Users,
     title: 'Conductores',
-    description: 'Portal de registro y gestión para conductores. Únete a la flota más grande de Bolivia.',
+    description: 'Descarga la APP de conductor y únete a la flota más grande de Bolivia.',
     color: '#8B5CF6',
     bgColor: 'bg-purple-500/10',
     borderColor: 'border-purple-500/20 hover:border-purple-500/50',
-    href: 'https://id3251.tm.taxi:58443/?cid=1',
+    href: 'https://play.google.com/store/apps/details?id=taxi.id3251&pcampaignid=web_share',
   },
 ]
 
@@ -175,7 +175,7 @@ export function Multicanal() {
                     {portal.description}
                   </p>
                   <div className="flex items-center gap-2 text-sm font-medium transition-colors" style={{ color: portal.color }}>
-                    <span>Acceder al portal</span>
+                    <span>{portal.title === 'Conductores' ? 'Descargar APP' : 'Acceder al portal'}</span>
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
                   </div>
                 </div>

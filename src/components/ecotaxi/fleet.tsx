@@ -106,7 +106,7 @@ const categories: CategoryDef[] = [
       { name: 'Camioneta Pequeña', passengers: 4, ac: true, icon: Caravan, luggage: '2 grandes, 2 pequeños', description: 'Camioneta compacta ideal para terrenos urbanos y suburbanos.', image: '/fleet-camioneta-pequena.png' },
       { name: 'Camioneta Mediana', passengers: 5, ac: true, icon: Caravan, luggage: '3 grandes, 2 pequeños', description: 'Camioneta mediana con mayor capacidad para pasajeros y equipaje.', image: '/fleet-camioneta-mediana.png' },
       { name: 'Camioneta Larga', passengers: 6, ac: true, icon: Caravan, luggage: '4 grandes, 3 pequeños', description: 'Camioneta larga ideal para grupos grandes y viajes largos.', image: '/fleet-camioneta-larga.png' },
-      { name: 'Camioneta Grande', passengers: 8, ac: true, icon: Caravan, luggage: 'Espacio amplio', description: 'Camioneta de gran tamaño para traslado de grupos numerosos.', image: '/fleet-camioneta-grande.jpg' },
+      { name: 'Camioneta Grande', passengers: 8, ac: true, icon: Caravan, luggage: 'Espacio amplio', description: 'Camioneta de gran tamaño para traslado de grupos numerosos.', image: '/fleet-camioneta-grande.png' },
     ],
   },
   {
@@ -131,12 +131,12 @@ const categories: CategoryDef[] = [
     bgColor: 'bg-red-400/10',
     borderColor: 'border-red-400/30 hover:border-red-400/60',
     vehicles: [
-      { name: 'Moto Grúa', passengers: 1, ac: false, icon: Bike, luggage: 'Moto', description: 'Grúa especializada para el traslado seguro de motocicletas.', image: '/fleet-grua-moto.jpg' },
-      { name: 'Grúa Arrastre', passengers: 2, ac: false, icon: Truck, luggage: 'Vehículo liviano', description: 'Grúa de arrastre para vehículos livianos y medianos en situaciones de emergencia.', image: '/fleet-grua-arrastre.jpg' },
-      { name: 'Grúa Remolque', passengers: 2, ac: false, icon: Truck, luggage: 'Vehículo pesado', description: 'Grúa de remolque para vehículos pesados y traslados de larga distancia.', image: '/fleet-grua-remolque.jpg' },
+      { name: 'Moto Grúa', passengers: 1, ac: false, icon: Bike, luggage: 'Moto', description: 'Grúa especializada para el traslado seguro de motocicletas.', image: '/fleet-grua-moto.png' },
+      { name: 'Grúa Arrastre', passengers: 2, ac: false, icon: Truck, luggage: 'Vehículo liviano', description: 'Grúa de arrastre para vehículos livianos y medianos en situaciones de emergencia.', image: '/fleet-grua-arrastre.png' },
+      { name: 'Grúa Remolque', passengers: 2, ac: false, icon: Truck, luggage: 'Vehículo pesado', description: 'Grúa de remolque para vehículos pesados y traslados de larga distancia.', image: '/fleet-grua-remolque.png' },
       { name: 'Grúa Rampla', passengers: 2, ac: false, icon: Truck, luggage: 'Vehículos varios', description: 'Grúa con rampla para carga y descarga de vehículos de todo tipo.', image: '/fleet-grua-rampla.png' },
       { name: 'Grúa Pluma', passengers: 2, ac: false, icon: Truck, luggage: 'Carga pesada', description: 'Grúa pluma para izaje y maniobras de carga pesada en obra.', image: '/fleet-grua-pluma.png' },
-      { name: 'Grúa Telescópica', passengers: 2, ac: false, icon: Truck, luggage: 'Carga industrial', description: 'Grúa telescópica de gran alcance para operaciones industriales y de construcción.', image: '/fleet-grua-telescopica.jpg' },
+      { name: 'Grúa Telescópica', passengers: 2, ac: false, icon: Truck, luggage: 'Carga industrial', description: 'Grúa telescópica de gran alcance para operaciones industriales y de construcción.', image: '/fleet-grua-telescopica.png' },
     ],
   },
   {

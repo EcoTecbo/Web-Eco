@@ -109,3 +109,32 @@ Stage Summary:
 - All 9 changes implemented successfully
 - Build passes with 0 errors
 - Key files modified: hero.tsx, navbar.tsx, services.tsx, fleet.tsx, arbolimetro.tsx, page.tsx, conductor-section.tsx, multicanal.tsx, footer.tsx
+
+---
+Task ID: fleet-links-animations-fullscreen
+Agent: Main Agent
+Task: Update fleet images (transparent bg, flip furgon), portal links, animations, reservation fullscreen
+
+Work Log:
+- Installed rembg with CPU support for AI background removal
+- Processed 11 fleet images that had non-transparent backgrounds (auxilio-bateria, auxilio-gomero, auxilio-llave, camioneta-grande, construccion-aplanadora, construccion-excavadora, construccion-motoniveladora, grua-moto, grua-arrastre, grua-remolque, grua-telescopica)
+- Flipped furgon-mediano and furgon-largo images horizontally so all furgon images face the same direction
+- Updated fleet.tsx: changed all .jpg references to .png for camioneta-grande and grua images
+- Updated multicanal.tsx portal links:
+  - Empresas → https://ecotaxi-kc.tm.taxi/
+  - Partners → https://crm.oyc-srl.com/
+  - Hoteles → https://crm.oyc-srl.com/
+  - Conductores → https://play.google.com/store/apps/details?id=taxi.id3251 (APP de chofer)
+- Updated Conductores portal card button text to "Descargar APP"
+- Added CSS animations: animate-gradient-x, stagger-1 through stagger-6
+- Restored Reservas component with fullscreen capability (Fullscreen API + ESC key handler + toolbar UI)
+- Restored ConductorSection with: benefits grid, registration iframe, language selector (8 langs), fullscreen, ESC, Google Play download, stats
+- Build successful: ✓ 17 pages compiled
+
+Stage Summary:
+- All fleet vehicle images now have transparent backgrounds (AI-processed with rembg)
+- Furgon mediano and largo flipped to face same direction
+- Portal links updated per user request
+- Animations restored and enhanced in CSS
+- Reservation form has fullscreen + ESC capability restored
+- Conductor section fully restored with all features
