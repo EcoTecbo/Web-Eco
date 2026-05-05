@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { Leaf, Facebook, Instagram, Linkedin, Youtube, Phone, Mail, MapPin } from 'lucide-react'
-import Script from 'next/script'
 
 const serviceLinks = [
   { label: 'Puerta a Puerta', href: '/puerta-a-puerta' },
@@ -147,11 +146,10 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Tree-Nation Widget */}
+        {/* Tree-Nation Widget - Also rendered via floating widget on all pages */}
         <div className="mt-10 flex justify-center">
           <div data-widget-type="tree-counter" data-tree-nation-code="f35060a6da2c0369" data-lang="es" data-theme="dark" />
         </div>
-        <Script src="https://widgets.tree-nation.com/js/widgets/v3/widgets.min.js" strategy="afterInteractive" />
 
         {/* Bottom Bar */}
         <div className="mt-12 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
