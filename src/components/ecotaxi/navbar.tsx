@@ -33,19 +33,19 @@ function TaxiIcon() {
   return (
     <svg width="34" height="20" viewBox="0 0 34 20" fill="none" xmlns="http://www.w3.org/2000/svg">
       {/* Exhaust trail particles */}
-      <circle cx="0" cy="16" r="1.5" fill="#00E676" opacity="0.3">
+      <circle cx="0" cy="16" r="1.5" fill="#ffffff" opacity="0.4">
         <animate attributeName="cx" from="2" to="-4" dur="0.6s" repeatCount="indefinite" />
         <animate attributeName="opacity" from="0.3" to="0" dur="0.6s" repeatCount="indefinite" />
       </circle>
-      <circle cx="1" cy="17" r="1" fill="#00E676" opacity="0.2">
+      <circle cx="1" cy="17" r="1" fill="#ffffff" opacity="0.3">
         <animate attributeName="cx" from="3" to="-6" dur="0.8s" repeatCount="indefinite" />
         <animate attributeName="opacity" from="0.2" to="0" dur="0.8s" repeatCount="indefinite" />
       </circle>
 
       {/* Car body */}
-      <rect x="5" y="5" width="22" height="9" rx="2.5" fill="#00E676" />
+      <rect x="5" y="5" width="22" height="9" rx="2.5" fill="#ffffff" />
       {/* Car roof / cabin */}
-      <path d="M9 5 L11 1.5 L21 1.5 L23 5" fill="#009E4F" stroke="#008040" strokeWidth="0.3" />
+      <path d="M9 5 L11 1.5 L21 1.5 L23 5" fill="#cccccc" stroke="#aaaaaa" strokeWidth="0.3" />
       {/* Taxi sign on roof */}
       <rect x="13" y="0.5" width="6" height="2" rx="0.7" fill="#FFEB3B" opacity="0.9" />
       <rect x="14" y="1" width="4" height="1" rx="0.3" fill="#FFC107" />
@@ -89,14 +89,14 @@ function TaxiIcon() {
       <circle cx="22" cy="15" r="0.8" fill="#888" />
 
       {/* Door line */}
-      <line x1="16" y1="5.5" x2="16" y2="13" stroke="#008040" strokeWidth="0.4" opacity="0.6" />
+      <line x1="16" y1="5.5" x2="16" y2="13" stroke="#999999" strokeWidth="0.4" opacity="0.6" />
       {/* Door handle */}
-      <rect x="17" y="9" width="1.5" height="0.6" rx="0.3" fill="#008040" opacity="0.5" />
+      <rect x="17" y="9" width="1.5" height="0.6" rx="0.3" fill="#999999" opacity="0.5" />
 
       {/* Front bumper */}
-      <rect x="26" y="12" width="2" height="2.5" rx="0.5" fill="#0077BD" opacity="0.7" />
+      <rect x="26" y="12" width="2" height="2.5" rx="0.5" fill="#ffffff" opacity="0.7" />
       {/* Undercarriage shadow */}
-      <ellipse cx="16" cy="18.5" rx="10" ry="1" fill="#00E676" opacity="0.08" />
+      <ellipse cx="16" cy="18.5" rx="10" ry="1" fill="#ffffff" opacity="0.1" />
     </svg>
   )
 }
