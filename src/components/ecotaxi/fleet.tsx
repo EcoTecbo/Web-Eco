@@ -237,7 +237,7 @@ export function Fleet() {
                   : 'bg-white/[0.03] text-white/50 border-white/[0.06] hover:bg-white/[0.06] hover:text-white/80'
               }`}
             >
-              <cat.icon className={`w-4 h-4 ${activeCategory === cat.key ? cat.color : 'text-white/40'}`} />
+              <cat.icon className={`w-4 h-4 ${activeCategory === cat.key ? cat.color : 'text-white/70'}`} />
               <span>{cat.label}</span>
               <span className="text-xs opacity-50">({cat.vehicles.length})</span>
             </button>

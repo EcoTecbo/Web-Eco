@@ -171,7 +171,7 @@ export function Navbar() {
                 key={link.href}
                 href={link.href}
                 className={`text-sm transition-colors duration-200 relative group ${
-                  isActive(link.href) ? 'text-[#00E676]' : 'text-white/70 hover:text-white'
+                  isActive(link.href) ? 'text-[#00E676]' : 'text-white/85 hover:text-white'
                 }`}
               >
                 {link.label}
@@ -189,7 +189,7 @@ export function Navbar() {
               <button
                 onClick={() => setServicesOpen(prev => !prev)}
                 className={`flex items-center gap-1 text-sm transition-colors duration-200 ${
-                  isServiceActive ? 'text-[#00E676]' : 'text-white/70 hover:text-white'
+                  isServiceActive ? 'text-[#00E676]' : 'text-white/85 hover:text-white'
                 }`}>
                 Servicios
                 <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${servicesOpen ? 'rotate-180' : ''}`} />
@@ -206,7 +206,7 @@ export function Navbar() {
                       className={`block px-4 py-3 text-sm transition-colors duration-200 ${
                         pathname === service.href
                           ? 'text-[#00E676] bg-[#00E676]/5'
-                          : 'text-white/70 hover:text-white hover:bg-white/5'
+                          : 'text-white/85 hover:text-white hover:bg-white/5'
                       }`}
                       onClick={() => setServicesOpen(false)}
                     >
@@ -222,10 +222,10 @@ export function Navbar() {
           <div className="hidden md:flex items-center gap-4">
             <a
               href="tel:73662803"
-              className="flex items-center gap-2 text-white/60 hover:text-white text-sm transition-colors"
+              className="flex items-center gap-2 text-white hover:text-[#00E676] text-base font-bold transition-colors"
             >
-              <Phone className="w-4 h-4" />
-              73662803
+              <Phone className="w-5 h-5 text-[#00E676]" />
+              <span className="drop-shadow-[0_0_8px_rgba(0,230,118,0.3)]">73662803</span>
             </a>
             <Link
               href="/#reservas"

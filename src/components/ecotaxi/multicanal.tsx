@@ -116,7 +116,7 @@ export function Multicanal() {
                 className="w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center"
                 style={{ background: `${channel.color}15` }}
               >
-                <channel.icon className="w-6 h-6" style={{ color: channel.color }} />
+                <channel.icon className="w-6 h-6 text-white" style={{ color: channel.color, filter: 'brightness(1.3)' }} />
               </div>
               <p className="text-sm font-medium text-white/80 group-hover:text-white transition-colors">{channel.label}</p>
               <p className="text-xs text-white/40 mt-1">{channel.value}</p>
@@ -166,7 +166,7 @@ export function Multicanal() {
 
                 <div className="relative z-10">
                   <div className={`w-14 h-14 rounded-2xl ${portal.bgColor} flex items-center justify-center mb-4`}>
-                    <portal.icon className="w-7 h-7" style={{ color: portal.color }} />
+                    <portal.icon className="w-7 h-7 text-white" style={{ color: portal.color, filter: 'brightness(1.3)' }} />
                   </div>
                   <h4 className="text-lg font-semibold text-white mb-2 group-hover:text-white/90 transition-colors">
                     {portal.title}

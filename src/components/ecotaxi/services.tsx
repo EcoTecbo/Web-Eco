@@ -97,7 +97,7 @@ export function Services() {
                       isExpanded ? 'bg-[#00E676]/20' : 'bg-gradient-to-br from-[#0077BD]/20 to-[#00E676]/20'
                     }`}>
                       <service.icon className={`w-5 h-5 transition-colors duration-300 ${
-                        isExpanded ? 'text-[#00E676]' : 'text-[#00E676]/80'
+                        isExpanded ? 'text-[#00E676]' : 'text-white/90'
                       }`} />
                     </div>
                     <h3 className={`text-sm font-semibold transition-colors duration-300 ${

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { ArrowRight, Shield, Clock, DollarSign, Users, Smartphone, Star, ChevronRight, CheckCircle2, Languages, Maximize2, Minimize2 } from 'lucide-react'
+import { ArrowRight, Shield, Clock, DollarSign, Smartphone, Star, ChevronRight, CheckCircle2, Languages, Maximize2, Minimize2 } from 'lucide-react'
 
 const languages = [
   { code: 'es', label: 'Español', flag: '🇪🇸' },
@@ -54,6 +54,18 @@ export function ConductorSection() {
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange)
   }, [])
 
+  useEffect(() => {
+    const handleEscKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && document.fullscreenElement) {
+        document.exitFullscreen().then(() => {
+          setIsFullscreen(false)
+        })
+      }
+    }
+    document.addEventListener('keydown', handleEscKey)
+    return () => document.removeEventListener('keydown', handleEscKey)
+  }, [])
+
   const getTranslatedUrl = () => {
     const baseUrl = 'https://id3251.tm.taxi:48443/?cid=1'
     if (selectedLang === 'es') return baseUrl
@@ -94,50 +106,82 @@ export function ConductorSection() {
     { value: 'Bolivia', label: 'Cobertura Nacional' },
   ]
 
-  const testimonials = [
-    {
-      name: 'Carlos M.',
-      role: 'Conductor desde 2022',
-      text: 'Ecotaxi me permitió tener un ingreso estable y flexible. La app es muy fácil de usar.',
-      rating: 5,
-    },
-    {
-      name: 'Rosa L.',
-      role: 'Conductora desde 2023',
-      text: 'Me encanta la seguridad que brinda la plataforma. Me siento protegida en cada viaje.',
-      rating: 5,
-    },
-    {
-      name: 'Miguel T.',
-      role: 'Conductor desde 2021',
-      text: 'El mejor sistema de pagos. Siempre recibo mis ganancias a tiempo y sin complicaciones.',
-      rating: 5,
-    },
-  ]
-
   return (
     <section id="conductores" ref={sectionRef} className="relative py-24 md:py-32 overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1525] to-[#0a0e17]" />
 
+      {/* ─── Large Steering Wheel Background ─── */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] md:w-[700px] md:h-[700px] pointer-events-none select-none">
+        <svg viewBox="0 0 300 300" className="w-full h-full opacity-[0.06]" fill="none">
+          {/* Outer ring */}
+          <circle cx="150" cy="150" r="140" stroke="#00E676" strokeWidth="10" />
+          {/* Inner ring */}
+          <circle cx="150" cy="150" r="55" stroke="#0077BD" strokeWidth="8" />
+          {/* Center hub */}
+          <circle cx="150" cy="150" r="28" fill="#00E676" opacity="0.3" />
+          <circle cx="150" cy="150" r="14" fill="#00E676" opacity="0.5" />
+          {/* Spokes */}
+          <line x1="150" y1="10" x2="150" y2="95" stroke="#00E676" strokeWidth="8" strokeLinecap="round" />
+          <line x1="28" y1="230" x2="96" y2="190" stroke="#0077BD" strokeWidth="8" strokeLinecap="round" />
+          <line x1="272" y1="230" x2="204" y2="190" stroke="#71B124" strokeWidth="8" strokeLinecap="round" />
+          {/* Grip marks on outer ring */}
+          <circle cx="150" cy="10" r="6" fill="#00E676" opacity="0.4" />
+          <circle cx="28" cy="230" r="6" fill="#0077BD" opacity="0.4" />
+          <circle cx="272" cy="230" r="6" fill="#71B124" opacity="0.4" />
+        </svg>
+      </div>
+
       {/* Animated steering wheel glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-[0.03]"
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full opacity-[0.04] animate-pulse"
         style={{ background: 'radial-gradient(circle, #00E676 0%, transparent 70%)' }} />
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
+        {/* Header with Steering Wheel */}
         <div className={`text-center mb-16 transition-all duration-700 ${
           visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}>
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00E676]/10 border border-[#00E676]/20 mb-4">
-            <svg className="w-5 h-5 text-[#00E676] animate-spin" style={{ animationDuration: '8s' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <circle cx="12" cy="12" r="10" />
-              <circle cx="12" cy="12" r="3" />
-              <line x1="12" y1="2" x2="12" y2="9" />
-              <line x1="12" y1="15" x2="12" y2="22" />
-              <line x1="2" y1="12" x2="9" y2="12" />
-              <line x1="15" y1="12" x2="22" y2="12" />
-            </svg>
+          {/* Large Steering Wheel Icon */}
+          <div className="mb-8 flex justify-center">
+            <div className="relative">
+              {/* Glow behind */}
+              <div className="absolute inset-0 w-40 h-40 md:w-48 md:h-48 rounded-full bg-[#00E676]/8 blur-[40px] animate-pulse" />
+              {/* Animated ring */}
+              <div className="absolute inset-[-8px] rounded-full border-2 border-[#00E676]/10 animate-spin" style={{ animationDuration: '20s' }} />
+              <div className="absolute inset-[-16px] rounded-full border border-[#0077BD]/5 animate-spin" style={{ animationDuration: '30s', animationDirection: 'reverse' }} />
+              <svg viewBox="0 0 120 120" className="w-36 h-36 md:w-44 md:h-44 relative z-10" fill="none">
+                {/* Outer ring with gradient */}
+                <circle cx="60" cy="60" r="52" stroke="url(#steeringGrad)" strokeWidth="5" />
+                {/* Inner ring */}
+                <circle cx="60" cy="60" r="22" stroke="#0077BD" strokeWidth="3.5" opacity="0.7" />
+                {/* Center hub */}
+                <circle cx="60" cy="60" r="10" fill="#00E676" opacity="0.2" />
+                <circle cx="60" cy="60" r="5" fill="#00E676" opacity="0.5" />
+                {/* Spokes */}
+                <line x1="60" y1="8" x2="60" y2="38" stroke="#00E676" strokeWidth="4.5" strokeLinecap="round" opacity="0.8" />
+                <line x1="13" y1="85" x2="39" y2="68" stroke="#0077BD" strokeWidth="4.5" strokeLinecap="round" opacity="0.8" />
+                <line x1="107" y1="85" x2="81" y2="68" stroke="#71B124" strokeWidth="4.5" strokeLinecap="round" opacity="0.8" />
+                {/* Grip details */}
+                <circle cx="60" cy="8" r="4" fill="#00E676" opacity="0.5" />
+                <circle cx="13" cy="85" r="4" fill="#0077BD" opacity="0.5" />
+                <circle cx="107" cy="85" r="4" fill="#71B124" opacity="0.5" />
+                {/* Decorative dashes on outer ring */}
+                <path d="M 60 8 A 52 52 0 0 1 107 85" stroke="#00E676" strokeWidth="2" strokeDasharray="4 8" opacity="0.3" fill="none" />
+                <path d="M 107 85 A 52 52 0 0 1 13 85" stroke="#0077BD" strokeWidth="2" strokeDasharray="4 8" opacity="0.3" fill="none" />
+                <path d="M 13 85 A 52 52 0 0 1 60 8" stroke="#71B124" strokeWidth="2" strokeDasharray="4 8" opacity="0.3" fill="none" />
+                <defs>
+                  <linearGradient id="steeringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#00E676" />
+                    <stop offset="50%" stopColor="#71B124" />
+                    <stop offset="100%" stopColor="#0077BD" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+          </div>
+
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00E676]/10 border border-[#00E676]/20 mb-6">
+            <Shield className="w-4 h-4 text-[#00E676]" />
             <span className="text-sm text-[#00E676]">Únete Como Conductor</span>
           </div>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
@@ -160,7 +204,7 @@ export function ConductorSection() {
               <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-[#00E676] to-[#0077BD] bg-clip-text text-transparent">
                 {stat.value}
               </div>
-              <div className="text-sm text-white/40 mt-1">{stat.label}</div>
+              <div className="text-sm text-white/50 mt-1">{stat.label}</div>
             </div>
           ))}
         </div>
@@ -182,17 +226,28 @@ export function ConductorSection() {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-white mb-1">{benefit.title}</h3>
-                  <p className="text-sm text-white/40 leading-relaxed">{benefit.description}</p>
+                  <p className="text-sm text-white/50 leading-relaxed">{benefit.description}</p>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Right - CTA Card */}
+          {/* Right - CTA Card with Steering Wheel */}
           <div className={`transition-all duration-700 ${
             visible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'
           }`} style={{ transitionDelay: '300ms' }}>
             <div className="relative p-8 md:p-10 rounded-3xl bg-gradient-to-br from-[#0077BD]/20 to-[#00E676]/10 border border-[#00E676]/20 overflow-hidden">
+              {/* Background steering wheel silhouette */}
+              <div className="absolute -right-16 -bottom-16 w-64 h-64 opacity-[0.05] pointer-events-none">
+                <svg viewBox="0 0 120 120" fill="none">
+                  <circle cx="60" cy="60" r="52" stroke="#00E676" strokeWidth="4" />
+                  <circle cx="60" cy="60" r="22" stroke="#0077BD" strokeWidth="3" />
+                  <line x1="60" y1="8" x2="60" y2="38" stroke="#00E676" strokeWidth="3" strokeLinecap="round" />
+                  <line x1="13" y1="85" x2="39" y2="68" stroke="#0077BD" strokeWidth="3" strokeLinecap="round" />
+                  <line x1="107" y1="85" x2="81" y2="68" stroke="#71B124" strokeWidth="3" strokeLinecap="round" />
+                </svg>
+              </div>
+
               {/* Decorative circles */}
               <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-[#00E676]/5" />
               <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full bg-[#0077BD]/5" />
@@ -200,13 +255,13 @@ export function ConductorSection() {
               <div className="relative z-10">
                 {/* Steering wheel icon large */}
                 <div className="w-20 h-20 rounded-2xl bg-[#00E676]/10 border border-[#00E676]/20 flex items-center justify-center mb-6 mx-auto lg:mx-0">
-                  <svg className="w-10 h-10 text-[#00E676] animate-spin" style={{ animationDuration: '8s' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <circle cx="12" cy="12" r="10" />
-                    <circle cx="12" cy="12" r="3" />
-                    <line x1="12" y1="2" x2="12" y2="9" />
-                    <line x1="12" y1="15" x2="12" y2="22" />
-                    <line x1="2" y1="12" x2="9" y2="12" />
-                    <line x1="15" y1="12" x2="22" y2="12" />
+                  <svg viewBox="0 0 120 120" className="w-12 h-12 animate-spin" style={{ animationDuration: '12s' }} fill="none">
+                    <circle cx="60" cy="60" r="50" stroke="#00E676" strokeWidth="5" />
+                    <circle cx="60" cy="60" r="20" stroke="#0077BD" strokeWidth="3.5" opacity="0.7" />
+                    <circle cx="60" cy="60" r="8" fill="#00E676" opacity="0.3" />
+                    <line x1="60" y1="10" x2="60" y2="40" stroke="#00E676" strokeWidth="4" strokeLinecap="round" />
+                    <line x1="16" y1="85" x2="40" y2="68" stroke="#0077BD" strokeWidth="4" strokeLinecap="round" />
+                    <line x1="104" y1="85" x2="80" y2="68" stroke="#71B124" strokeWidth="4" strokeLinecap="round" />
                   </svg>
                 </div>
 
@@ -294,7 +349,7 @@ export function ConductorSection() {
                   <div className="relative">
                     <button
                       onClick={() => setShowLangMenu(!showLangMenu)}
-                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.05] border border-white/[0.08] text-white/50 hover:text-white hover:bg-white/[0.1] hover:border-white/20 transition-all duration-300 text-xs"
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.05] border border-white/[0.08] text-white/70 hover:text-white hover:bg-white/[0.1] hover:border-white/20 transition-all duration-300 text-xs"
                     >
                       <Languages className="w-3.5 h-3.5" />
                       <span className="hidden sm:inline">
@@ -309,7 +364,7 @@ export function ConductorSection() {
                     {showLangMenu && (
                       <div className="absolute right-0 top-full mt-2 w-48 rounded-xl bg-[#0d1320]/95 backdrop-blur-xl border border-white/[0.08] shadow-xl shadow-black/30 overflow-hidden z-50">
                         <div className="px-3 py-2 border-b border-white/[0.06]">
-                          <p className="text-[10px] text-white/30 uppercase tracking-wider">Traducir formulario</p>
+                          <p className="text-[10px] text-white/40 uppercase tracking-wider">Traducir formulario</p>
                         </div>
                         {languages.map((lang) => (
                           <button
@@ -332,7 +387,7 @@ export function ConductorSection() {
                           </button>
                         ))}
                         <div className="px-3 py-2 border-t border-white/[0.06]">
-                          <p className="text-[9px] text-white/20 leading-relaxed">Traducción automática vía Google Translate</p>
+                          <p className="text-[9px] text-white/30 leading-relaxed">Traducción automática vía Google Translate</p>
                         </div>
                       </div>
                     )}
@@ -341,8 +396,8 @@ export function ConductorSection() {
                   {/* Fullscreen Button */}
                   <button
                     onClick={toggleFullscreen}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.05] border border-white/[0.08] text-white/50 hover:text-white hover:bg-white/[0.1] hover:border-white/20 transition-all duration-300 text-xs"
-                    title={isFullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.05] border border-white/[0.08] text-white/70 hover:text-white hover:bg-white/[0.1] hover:border-white/20 transition-all duration-300 text-xs"
+                    title={isFullscreen ? 'Salir de pantalla completa (ESC)' : 'Pantalla completa'}
                   >
                     {isFullscreen ? (
                       <>
@@ -358,6 +413,11 @@ export function ConductorSection() {
                   </button>
                 </div>
               </div>
+              {isFullscreen && (
+                <div className="text-center py-1">
+                  <span className="text-xs text-white/30">Presiona ESC para salir de pantalla completa</span>
+                </div>
+              )}
 
               {/* Iframe */}
               <div className="p-4 sm:p-6 pt-3">
@@ -372,39 +432,6 @@ export function ConductorSection() {
                 />
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Testimonials */}
-        <div className={`mt-16 transition-all duration-700 ${
-          visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-        }`} style={{ transitionDelay: '400ms' }}>
-          <div className="text-center mb-8">
-            <h3 className="text-xl md:text-2xl font-bold text-white mb-2">
-              Lo que dicen nuestros{' '}
-              <span className="text-[#00E676]">conductores</span>
-            </h3>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {testimonials.map((testimonial) => (
-              <div key={testimonial.name} className="p-6 rounded-2xl bg-white/[0.03] border border-white/[0.06] hover:border-white/[0.12] transition-all duration-300">
-                <div className="flex gap-1 mb-3">
-                  {Array.from({ length: testimonial.rating }).map((_, j) => (
-                    <Star key={j} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                  ))}
-                </div>
-                <p className="text-sm text-white/50 leading-relaxed mb-4">&ldquo;{testimonial.text}&rdquo;</p>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-[#0077BD]/20 flex items-center justify-center">
-                    <Users className="w-5 h-5 text-[#0077BD]" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-white">{testimonial.name}</p>
-                    <p className="text-xs text-white/30">{testimonial.role}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       </div>

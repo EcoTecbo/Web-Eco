@@ -164,7 +164,7 @@ export function Arbolimetro() {
                     className="w-14 h-14 rounded-2xl mx-auto mb-4 flex items-center justify-center"
                     style={{ background: `${stat.color}15` }}
                   >
-                    <stat.icon className="w-7 h-7" style={{ color: stat.color }} />
+                    <stat.icon className="w-7 h-7 text-white" style={{ color: stat.color, filter: 'brightness(1.3)' }} />
                   </div>
 
                   {/* Counter */}
