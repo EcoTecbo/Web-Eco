@@ -138,3 +138,25 @@ Stage Summary:
 - Animations restored and enhanced in CSS
 - Reservation form has fullscreen + ESC capability restored
 - Conductor section fully restored with all features
+---
+Task ID: 2
+Agent: main
+Task: Add animated taxi icon in navbar with gradient track
+
+Work Log:
+- Read BusControl.app pricing page for reference (navbar has gradient bar with animated taxi driving along it)
+- Viewed uploaded image showing navbar with gradient progress bar and taxi icon
+- Created detailed SVG taxi icon with: green body, spinning wheels, headlights, taxi sign, exhaust particles
+- Added CSS animations: taxi-drive (moves left to right), taxi-bounce (simulates road bumps), taxi-trail (light trail), gradient-road (animated gradient), wheel-spin, headlight-glow
+- Created gradient track bar at bottom of navbar using Ecotaxi colors (#0077BD → #00E676 → #71B124)
+- Taxi icon drives across the navbar continuously (12s loop) with bouncing and spinning wheels
+- Gradient bar has animated flowing gradient effect
+- Headlights pulse with glow effect
+- Exhaust particles animate behind the taxi
+- Build succeeds, all pages return 200
+
+Stage Summary:
+- Animated taxi icon added to navbar bottom edge
+- Gradient track flows with Ecotaxi brand colors
+- Taxi drives from left to right with bouncing, spinning wheels, glowing headlights, and exhaust particles
+- Inspired by BusControl.app but adapted to Ecotaxi green/blue color scheme
