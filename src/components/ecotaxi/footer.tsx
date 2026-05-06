@@ -146,11 +146,6 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Tree-Nation Widget - Also rendered via floating widget on all pages */}
-        <div className="mt-10 flex justify-center">
-          <div data-widget-type="tree-counter" data-tree-nation-code="f35060a6da2c0369" data-lang="es" data-theme="dark" />
-        </div>
-
         {/* Bottom Bar */}
         <div className="mt-12 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-white/20 text-xs">
