@@ -18,7 +18,7 @@ interface Channel {
 const requestChannels: Channel[] = [
   { icon: Phone, label: 'Call Center', value: '(+591) 3 3296885', color: '#0077BD', href: 'tel:+59133296885' },
   { icon: Smartphone, label: 'Celular o Línea Móvil', value: '73662803', color: '#1D6988', href: 'tel:+59173662803' },
-  { icon: Smartphone, label: 'Descarga la APP', value: 'Android, iOS, Huawei', color: '#00E676', href: 'https://redirect.appmetrica.yandex.com/serve/1182345336769790636', description: 'Disponible para Android, iOS y Huawei' },
+  { icon: Smartphone, label: 'Descarga la APP', value: 'Android, iOS, Huawei', color: '#00E676', href: 'https://onelink.to/2bygmz', description: 'Disponible para Android, iOS y Huawei' },
   { icon: MessageCircle, label: 'WhatsApp', value: '+591 72100946', color: '#25D366', href: 'https://wa.me/59172100946', description: 'Bot automático para pedir taxi' },
   { icon: Send, label: 'Telegram', value: '@EcotaxiBoBot', color: '#26A5E4', href: 'https://t.me/EcotaxiBoBot', description: 'Bot de pedidos por Telegram' },
   { icon: Globe, label: 'Sitio Web', value: 'Reserva Online', color: '#0077BD', href: '#reservas' },

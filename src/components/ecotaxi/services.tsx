@@ -10,21 +10,21 @@ import { useEffect, useRef, useState } from 'react'
 
 const services = [
   { icon: DoorOpen, title: 'Puerta a Puerta', desc: 'Te recogemos y llevamos exactamente donde necesitas, con la comodidad de un servicio personalizado puerta a puerta.', href: '/puerta-a-puerta' },
-  { icon: Bus, title: 'Bus', desc: 'Servicio de transporte en bus para grupos grandes, eventos corporativos y excursiones con la máxima comodidad.', href: '/puerta-a-puerta' },
+  { icon: Bus, title: 'Bus', desc: 'Servicio de transporte en bus para grupos grandes, eventos corporativos y excursiones con la máxima comodidad.', href: '/eventos' },
   { icon: Plane, title: 'Aeropuerto', desc: 'Traslados al aeropuerto con puntualidad garantizada. Monitoreo de vuelos en tiempo real para que nunca esperes.', href: '/aeropuerto' },
   { icon: Clock, title: 'Por Hora', desc: 'Alquila un vehículo con conductor por horas. Ideal para reuniones, diligencias o recorridos a tu ritmo.', href: '/por-hora' },
   { icon: Map, title: 'Interurbano y Turismo', desc: 'Viajes entre ciudades y destinos turísticos de Bolivia con seguridad, confort y la mejor atención. Rutas nacionales y tours guiados.', href: '/interurbano' },
   { icon: Building2, title: 'Corporativo', desc: 'Soluciones de transporte empresarial a medida. Gestión de flota, facturación corporativa y reportes detallados.', href: '/corporativo' },
-  { icon: Calendar, title: 'Eventos', desc: 'Transporte coordinado para todo tipo de eventos: bodas, conferencias, conciertos y celebraciones especiales.', href: '/corporativo' },
+  { icon: Calendar, title: 'Eventos', desc: 'Transporte coordinado para todo tipo de eventos: bodas, conferencias, conciertos y celebraciones especiales.', href: '/eventos' },
   { icon: GraduationCap, title: 'Transporte Escolar', desc: 'Servicio seguro y confiable para el transporte de estudiantes. Conductores certificados y vehículos monitoreados.', href: '/transporte-escolar' },
   { icon: Heart, title: 'Transporte de Salud', desc: 'Traslado de personal de salud y pacientes con la máxima precaución, puntualidad y cuidado humano.', href: '/transporte-salud' },
   { icon: Briefcase, title: 'Ejecutivo', desc: 'Servicio premium para ejecutivos con vehículos de alta gama, conductores profesionales y total discreción.', href: '/ejecutivo' },
   { icon: PawPrint, title: 'Transporte de Mascotas', desc: 'Tu mascota viaja segura y cómoda. Vehículos adaptados para el transporte de tus compañeros peludos.', href: '/transporte-mascotas' },
   { icon: Package, title: 'Envíos', desc: 'Servicio de entrega de paquetes y documentos con seguimiento en tiempo real y confirmación de entrega.', href: '/envios' },
-  { icon: Truck, title: 'Mudanza', desc: 'Mudanzas residenciales y comerciales con personal especializado y vehículos de carga apropiados.', href: '/envios' },
+  { icon: Truck, title: 'Mudanza', desc: 'Mudanzas residenciales y comerciales con personal especializado y vehículos de carga apropiados.', href: '/mudanza' },
   { icon: Warehouse, title: 'Logística', desc: 'Soluciones logísticas integrales para empresas. Cadena de suministro eficiente y rastreo completo.', href: '/corporativo' },
   { icon: Wrench, title: 'Auxilio Mecánico', desc: 'Asistencia vial 24/7. Remolque, cambio de neumáticos y soluciones mecánicas en el momento que lo necesitas.', href: '/auxilio-mecanico' },
-  { icon: HardHat, title: 'Maquinaria', desc: 'Transporte especializado de maquinaria pesada y equipos con los permisos y seguros correspondientes.', href: '/auxilio-mecanico' },
+  { icon: HardHat, title: 'Maquinaria', desc: 'Transporte especializado de maquinaria pesada y equipos con los permisos y seguros correspondientes.', href: '/alquiler-maquinaria' },
   { icon: Mountain, title: 'Aventura', desc: 'Expediciones y aventuras al aire libre con transporte adaptado para los caminos más desafiantes de Bolivia.', href: '/aventura' },
 ]
 

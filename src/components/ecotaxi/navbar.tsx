@@ -221,18 +221,20 @@ export function Navbar() {
           {/* CTA */}
           <div className="hidden md:flex items-center gap-4">
             <a
-              href="tel:73662803"
-              className="flex items-center gap-2 text-white hover:text-[#00E676] text-base font-bold transition-colors"
+              href="https://wa.me/59173662803"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-white hover:text-[#25D366] text-base font-bold transition-colors"
             >
               <Phone className="w-5 h-5 text-[#00E676]" />
               <span className="drop-shadow-[0_0_8px_rgba(0,230,118,0.3)]">73662803</span>
             </a>
-            <Link
+            <a
               href="/#reservas"
               className="relative px-6 py-2.5 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)] hover:shadow-[0_0_30px_rgba(0,230,118,0.5)]"
             >
               Pedir Taxi
-            </Link>
+            </a>
           </div>
 
           {/* Mobile Toggle */}
@@ -298,13 +300,13 @@ export function Navbar() {
               ))}
             </div>
           </div>
-          <Link
+          <a
             href="/#reservas"
             onClick={() => setMobileOpen(false)}
             className="block w-full text-center px-6 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all mt-2"
           >
             Pedir Taxi
-          </Link>
+          </a>
         </div>
       </div>
     </nav>
