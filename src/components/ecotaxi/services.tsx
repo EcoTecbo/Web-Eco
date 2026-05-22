@@ -10,7 +10,7 @@ import { useEffect, useRef, useState } from 'react'
 
 const services = [
   { icon: DoorOpen, title: 'Puerta a Puerta', desc: 'Te recogemos y llevamos exactamente donde necesitas, con la comodidad de un servicio personalizado puerta a puerta.', href: '/puerta-a-puerta' },
-  { icon: Bus, title: 'Bus', desc: 'Servicio de transporte en bus para grupos grandes, eventos corporativos y excursiones con la máxima comodidad.', href: '/eventos' },
+  { icon: Bus, title: 'Bus', desc: 'Servicio de transporte en bus para grupos grandes, eventos corporativos y excursiones con la máxima comodidad.', href: '/interurbano' },
   { icon: Plane, title: 'Aeropuerto', desc: 'Traslados al aeropuerto con puntualidad garantizada. Monitoreo de vuelos en tiempo real para que nunca esperes.', href: '/aeropuerto' },
   { icon: Clock, title: 'Por Hora', desc: 'Alquila un vehículo con conductor por horas. Ideal para reuniones, diligencias o recorridos a tu ritmo.', href: '/por-hora' },
   { icon: Map, title: 'Interurbano y Turismo', desc: 'Viajes entre ciudades y destinos turísticos de Bolivia con seguridad, confort y la mejor atención. Rutas nacionales y tours guiados.', href: '/interurbano' },

@@ -37,57 +37,66 @@ export function EcotaxiChatWidget() {
         transform: none !important;
         contain: none !important;
       }
-      #ecotaxi-widget-container > * {
-        pointer-events: auto !important;
-      }
+      /* Only the FAB button gets pointer-events — everything else is click-through unless explicitly opened */
       #et-fab {
         position: fixed !important;
         z-index: 99990 !important;
         bottom: 28px !important;
         right: 28px !important;
+        pointer-events: auto !important;
       }
       #et-panel {
         position: fixed !important;
         z-index: 99991 !important;
         bottom: 108px !important;
         right: 28px !important;
+        pointer-events: none !important;
+      }
+      #et-panel.open {
+        pointer-events: auto !important;
       }
       #et-proactive {
         position: fixed !important;
         z-index: 99989 !important;
         bottom: 110px !important;
         right: 28px !important;
+        pointer-events: none !important;
+      }
+      #et-proactive.show {
+        pointer-events: auto !important;
       }
       #et-toast {
         position: fixed !important;
         z-index: 99992 !important;
         bottom: 110px !important;
         right: 28px !important;
+        pointer-events: none !important;
       }
+      #et-toast.show {
+        pointer-events: auto !important;
+      }
+      /* Hide the FAB label text completely */
       #et-fab-label {
-        position: fixed !important;
-        z-index: 99988 !important;
-        bottom: 34px !important;
-        right: 100px !important;
+        display: none !important;
       }
-      @media (max-width: 430px) {
+      @media (max-width: 640px) {
         #et-fab {
-          bottom: 20px !important;
+          bottom: 80px !important;
           right: 16px !important;
+          width: 56px !important;
+          height: 56px !important;
         }
         #et-panel {
-          bottom: 90px !important;
+          bottom: 150px !important;
           right: 10px !important;
           width: calc(100vw - 20px) !important;
+          max-height: 70vh !important;
         }
         #et-proactive, #et-toast {
           right: 10px !important;
           width: calc(100vw - 20px) !important;
           max-width: none !important;
-        }
-        #et-fab-label {
-          bottom: 26px !important;
-          right: 88px !important;
+          bottom: 150px !important;
         }
       }
     `
