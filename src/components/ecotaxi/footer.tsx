@@ -16,8 +16,8 @@ const serviceLinks = [
   { label: 'Transporte Escolar', href: '/transporte-escolar' },
   { label: 'Transporte de Mascotas', href: '/transporte-mascotas' },
   { label: 'Aventura', href: '/aventura' },
-  { label: 'Eventos', href: '/#servicios' },
-  { label: 'Mudanza', href: '/#servicios' },
+  { label: 'Eventos', href: '/eventos' },
+  { label: 'Mudanza', href: '/mudanza' },
 ]
 
 const workLinks = [
