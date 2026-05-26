@@ -1,16 +1,100 @@
 'use client'
 
-import { useEffect, useRef, useState, useMemo } from 'react'
+import { useEffect, useRef, useState, useMemo, useCallback } from 'react'
+import dynamic from 'next/dynamic'
 import anime from 'animejs'
 import {
   MapPin, Route, Globe, Home, Building2, Shield, Truck, Package,
   CheckCircle, Calculator, ClipboardList, ChevronRight, Minus, Plus,
   ArrowRight, Phone, Sparkles, Box, Sofa, Bed, Tv, Refrigerator,
   ChefHat, Bath, Printer, Piano, Dumbbell, Bike as BikeIcon, CircleDollarSign,
-  MessageCircle, Clock, Users, Star, AlertCircle
+  MessageCircle, Clock, Users, Star, AlertCircle, Mail, CreditCard,
+  Search, Navigation, Flag, X, Send, Loader2, ChevronDown
 } from 'lucide-react'
 import { Navbar } from '@/components/ecotaxi/navbar'
 import { Footer } from '@/components/ecotaxi/footer'
+
+// Dynamic import for map component (avoids SSR issues with leaflet)
+const MudanzaMap = dynamic(() => import('@/components/mudanza-map'), { ssr: false })
+
+/* Nominatim search */
+async function searchAddress(query: string): Promise<NominatimResult[]> {
+  if (!query || query.length < 3) return []
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=bo&limit=5`,
+      { headers: { 'Accept-Language': 'es' } }
+    )
+    if (!res.ok) return []
+    return await res.json()
+  } catch {
+    return []
+  }
+}
+
+/* OSRM route calculation */
+async function calculateRoute(
+  origin: LatLng,
+  destination: LatLng,
+  stops: LatLng[]
+): Promise<{ distance: number; duration: number; geometry: [number, number][] } | null> {
+  const coords = [origin, ...stops, destination]
+    .map(c => `${c.lng},${c.lat}`)
+    .join(';')
+  try {
+    const res = await fetch(
+      `https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&steps=true`
+    )
+    if (!res.ok) return null
+    const data = await res.json()
+    if (!data.routes || data.routes.length === 0) return null
+    const route = data.routes[0]
+    const geometry: [number, number][] = []
+    if (route.geometry) {
+      if (typeof route.geometry === 'string') {
+        // Decode polyline
+        let index = 0
+        let lat = 0
+        let lng = 0
+        while (index < (route.geometry as string).length) {
+          let byte: number
+          let shift = 0
+          let result = 0
+          do {
+            byte = (route.geometry as string).charCodeAt(index++) - 63
+            result |= (byte & 0x1f) << shift
+            shift += 5
+          } while (byte >= 0x20)
+          const dlat = ((result & 1) !== 0 ? ~(result >> 1) : (result >> 1))
+          lat += dlat
+          shift = 0
+          result = 0
+          do {
+            byte = (route.geometry as string).charCodeAt(index++) - 63
+            result |= (byte & 0x1f) << shift
+            shift += 5
+          } while (byte >= 0x20)
+          const dlng = ((result & 1) !== 0 ? ~(result >> 1) : (result >> 1))
+          lng += dlng
+          geometry.push([lat / 1e5, lng / 1e5])
+        }
+      } else if (Array.isArray(route.geometry)) {
+        for (const coord of route.geometry) {
+          if (Array.isArray(coord) && coord.length >= 2) {
+            geometry.push([coord[1], coord[0]])
+          }
+        }
+      }
+    }
+    return {
+      distance: route.distance / 1000,
+      duration: route.duration / 60,
+      geometry,
+    }
+  } catch {
+    return null
+  }
+}
 
 /* ─────────── scroll-triggered animation ─────────── */
 function useInView(threshold = 0.1) {
@@ -108,6 +192,24 @@ const EXTRAS: Extra[] = [
   { name: 'Traslado electrodomésticos especiales', price: 250 },
 ]
 
+/* Origin extras */
+const ORIGIN_EXTRAS: Extra[] = [
+  { name: 'Embalaje completo', price: 500 },
+  { name: 'Desmontaje de muebles', price: 300 },
+  { name: 'Empaque frágil/cristalería', price: 150 },
+  { name: 'Protección pisos y paredes', price: 100 },
+  { name: 'Carga planta alta sin elevador', price: 100, unit: 'piso' },
+  { name: 'Carga planta alta con elevador', price: 150 },
+]
+
+/* Destination extras */
+const DEST_EXTRAS: Extra[] = [
+  { name: 'Desembalaje completo', price: 500 },
+  { name: 'Montaje de muebles', price: 300 },
+  { name: 'Traslado electrodomésticos especiales', price: 250 },
+  { name: 'Guardamuebles/almacenamiento', price: 200, unit: 'semana' },
+]
+
 /* vehicles */
 const VEHICLES = [
   { cat: 'Camioneta', color: '#FB923C', items: [
@@ -124,6 +226,32 @@ const VEHICLES = [
     { name: 'Furgón Largo', cap: 30, desc: 'Carga extra grande, casas grandes (30m³)', pax: 3 },
   ]},
 ]
+
+/* Payment methods */
+const PAYMENT_METHODS = [
+  { id: 'efectivo', label: 'Efectivo', icon: CircleDollarSign },
+  { id: 'qr', label: 'QR', icon: CreditCard },
+  { id: 'transferencia', label: 'Transferencia bancaria', icon: Building2 },
+  { id: 'tarjeta', label: 'Tarjeta crédito/débito', icon: CreditCard },
+  { id: 'corporativa', label: 'Cuenta corporativa', icon: Building2 },
+]
+
+/* Insurance options */
+const INSURANCE_OPTIONS = [
+  { amount: 5000, label: 'Bs 5,000' },
+  { amount: 10000, label: 'Bs 10,000' },
+  { amount: 20000, label: 'Bs 20,000' },
+  { amount: 50000, label: 'Bs 50,000' },
+]
+
+/* Shared types */
+type MoveType = 'local' | 'provincial' | 'nacional'
+type CatType = 'casa' | 'oficina' | 'especial'
+type PaymentMethod = 'efectivo' | 'qr' | 'transferencia' | 'tarjeta' | 'corporativa'
+
+interface LatLng { lat: number; lng: number }
+interface IntermediateStop { id: string; latlng: LatLng; address: string }
+interface NominatimResult { display_name: string; lat: string; lon: string }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
    1. HERO
@@ -429,24 +557,64 @@ function FleetSection() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   5. MOVING CALCULATOR (THE MOST IMPORTANT SECTION)
+   5. MOVING CALCULATOR (COMPLETELY REWRITTEN — 7 STEPS)
    ═══════════════════════════════════════════════════════════════════════════════ */
-type MoveType = 'local' | 'provincial' | 'nacional'
-type CatType = 'casa' | 'oficina' | 'especial'
 
+/* ═══ CALCULATOR SECTION ═══ */
 function CalculatorSection() {
   const [step, setStep] = useState(1)
   const [moveType, setMoveType] = useState<MoveType>('local')
   const [catType, setCatType] = useState<CatType>('casa')
   const [inventory, setInventory] = useState<Record<string, number>>({})
-  const [selectedExtras, setSelectedExtras] = useState<Record<string, number>>({})
-  const [originFloor, setOriginFloor] = useState('baja')
-  const [destFloor, setDestFloor] = useState('baja')
-  const [elevatorOrigin, setElevatorOrigin] = useState(false)
-  const [elevatorDest, setElevatorDest] = useState(false)
-  const [distance, setDistance] = useState('10')
   const [activeRoom, setActiveRoom] = useState('recamara')
 
+  // Step 3: Route & Direction
+  const [origin, setOrigin] = useState<LatLng | null>(null)
+  const [destination, setDestination] = useState<LatLng | null>(null)
+  const [intermediateStops, setIntermediateStops] = useState<IntermediateStop[]>([])
+  const [originAddress, setOriginAddress] = useState('')
+  const [destAddress, setDestAddress] = useState('')
+  const [routeDistance, setRouteDistance] = useState<number>(0)
+  const [routeDuration, setRouteDuration] = useState<number>(0)
+  const [routeGeometry, setRouteGeometry] = useState<[number, number][]>([])
+  const [mapSelectionMode, setMapSelectionMode] = useState<'origin' | 'destination' | 'stop'>('origin')
+  const [searchingOrigin, setSearchingOrigin] = useState(false)
+  const [searchingDest, setSearchingDest] = useState(false)
+  const [originResults, setOriginResults] = useState<NominatimResult[]>([])
+  const [destResults, setDestResults] = useState<NominatimResult[]>([])
+  const [isCalculatingRoute, setIsCalculatingRoute] = useState(false)
+
+  // Step 4: Origin extras
+  const [originExtras, setOriginExtras] = useState<Record<string, number>>({})
+  const [originFloor, setOriginFloor] = useState('baja')
+  const [elevatorOrigin, setElevatorOrigin] = useState(false)
+  const [originHelpers, setOriginHelpers] = useState(0)
+
+  // Step 5: Destination extras
+  const [destExtras, setDestExtras] = useState<Record<string, number>>({})
+  const [destFloor, setDestFloor] = useState('baja')
+  const [elevatorDest, setElevatorDest] = useState(false)
+  const [destHelpers, setDestHelpers] = useState(0)
+  const [guardamueblesWeeks, setGuardamueblesWeeks] = useState(1)
+
+  // Step 6: Insurance, IVA, Payment
+  const [wantsInsurance, setWantsInsurance] = useState(false)
+  const [insuranceAmount, setInsuranceAmount] = useState<number>(5000)
+  const [customInsurance, setCustomInsurance] = useState('')
+  const [includeIva, setIncludeIva] = useState(false)
+  const [razonSocial, setRazonSocial] = useState('')
+  const [nit, setNit] = useState('')
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('efectivo')
+
+  // Step 7: Personal data
+  const [fullName, setFullName] = useState('')
+  const [phone, setPhone] = useState('')
+  const [hasWhatsApp, setHasWhatsApp] = useState(true)
+  const [email, setEmail] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitResult, setSubmitResult] = useState<'success' | 'error' | null>(null)
+
+  // ──── Inventory helpers ────
   const setQty = (name: string, delta: number) => {
     setInventory(prev => {
       const cur = prev[name] || 0
@@ -456,14 +624,7 @@ function CalculatorSection() {
     })
   }
 
-  const toggleExtra = (name: string) => {
-    setSelectedExtras(prev => {
-      if (prev[name]) { const { [name]: _, ...rest } = prev; return rest }
-      return { ...prev, [name]: 1 }
-    })
-  }
-
-  // Calculations
+  // ──── Calculations ────
   const totalVolume = useMemo(() => {
     let v = 0
     Object.entries(inventory).forEach(([name, qty]) => {
@@ -484,24 +645,43 @@ function CalculatorSection() {
     return { vehicle: 'Camioneta Grande + Furgón Largo', detail: '2 vehículos o 2 viajes recomendados' }
   }
 
-  const extrasTotal = useMemo(() => {
+  // Origin extras total
+  const originExtrasTotal = useMemo(() => {
     let t = 0
-    Object.keys(selectedExtras).forEach(name => {
-      const extra = EXTRAS.find(e => e.name === name)
+    Object.entries(originExtras).forEach(([name, qty]) => {
+      const extra = ORIGIN_EXTRAS.find(e => e.name === name)
       if (!extra) return
-      if (name === 'Carga planta alta sin elevador (p/piso)') {
-        const origF = originFloor === 'baja' ? 0 : parseInt(originFloor)
-        const destF = destFloor === 'baja' ? 0 : parseInt(destFloor)
-        t += extra.price * (origF + destF)
+      if (name === 'Carga planta alta sin elevador') {
+        const floors = originFloor === 'baja' ? 0 : parseInt(originFloor)
+        t += extra.price * floors * qty
       } else {
-        t += extra.price
+        t += extra.price * qty
       }
     })
+    t += originHelpers * 150
     return t
-  }, [selectedExtras, originFloor, destFloor])
+  }, [originExtras, originFloor, originHelpers])
+
+  // Dest extras total
+  const destExtrasTotal = useMemo(() => {
+    let t = 0
+    Object.entries(destExtras).forEach(([name, qty]) => {
+      const extra = DEST_EXTRAS.find(e => e.name === name)
+      if (!extra) return
+      if (name === 'Guardamuebles/almacenamiento') {
+        t += extra.price * guardamueblesWeeks * qty
+      } else {
+        t += extra.price * qty
+      }
+    })
+    t += destHelpers * 150
+    return t
+  }, [destExtras, destHelpers, guardamueblesWeeks])
+
+  const extrasTotal = originExtrasTotal + destExtrasTotal
 
   const basePrice = useMemo(() => {
-    const d = parseFloat(distance) || 0
+    const d = routeDistance > 0 ? routeDistance : 10
     const rates: Record<MoveType, { perKm: number; base: number }> = {
       local: { perKm: 15, base: 200 },
       provincial: { perKm: 12, base: 500 },
@@ -509,9 +689,17 @@ function CalculatorSection() {
     }
     const r = rates[moveType]
     return r.base + r.perKm * d
-  }, [moveType, distance])
+  }, [moveType, routeDistance])
 
-  const grandTotal = useMemo(() => basePrice + extrasTotal, [basePrice, extrasTotal])
+  const insuranceCost = useMemo(() => {
+    if (!wantsInsurance) return 0
+    const amount = customInsurance ? parseFloat(customInsurance) || 0 : insuranceAmount
+    return Math.round(amount * 0.03)
+  }, [wantsInsurance, insuranceAmount, customInsurance])
+
+  const subtotal = basePrice + extrasTotal + insuranceCost
+  const ivaAmount = includeIva ? Math.round(subtotal * 0.16) : 0
+  const grandTotal = subtotal + ivaAmount
 
   const getSelectedItems = () => {
     const items: { name: string; qty: number; vol: number; emoji: string }[] = []
@@ -524,25 +712,187 @@ function CalculatorSection() {
     return items
   }
 
-  const buildWhatsAppMsg = () => {
-    const rec = getRecommendation(totalVolume)
-    const items = getSelectedItems().map(i => `${i.qty}x ${i.name}`).join(', ')
-    const extras = Object.keys(selectedExtras).join(', ') || 'Ninguno'
-    return encodeURIComponent(
-      `Hola, necesito una cotización de mudanza.\nTipo: ${moveType}\nCategoría: ${catType}\nVolumen: ${totalVolume} m³\nVehículo recomendado: ${rec.vehicle}\nDistancia: ${distance} km\nExtras: ${extras}\nTotal estimado: Bs ${grandTotal.toLocaleString()}\nArtículos: ${items || 'Ninguno seleccionado'}`
-    )
+  // ──── Nominatim search ────
+  const handleOriginSearch = useCallback(async (query: string) => {
+    setOriginAddress(query)
+    if (query.length < 3) { setOriginResults([]); return }
+    const results = await searchAddress(query)
+    setOriginResults(results)
+  }, [])
+
+  const handleDestSearch = useCallback(async (query: string) => {
+    setDestAddress(query)
+    if (query.length < 3) { setDestResults([]); return }
+    const results = await searchAddress(query)
+    setDestResults(results)
+  }, [])
+
+  const selectOrigin = (result: NominatimResult) => {
+    const latlng = { lat: parseFloat(result.lat), lng: parseFloat(result.lon) }
+    setOrigin(latlng)
+    setOriginAddress(result.display_name.split(',').slice(0, 3).join(','))
+    setOriginResults([])
+    setSearchingOrigin(false)
   }
 
+  const selectDest = (result: NominatimResult) => {
+    const latlng = { lat: parseFloat(result.lat), lng: parseFloat(result.lon) }
+    setDestination(latlng)
+    setDestAddress(result.display_name.split(',').slice(0, 3).join(','))
+    setDestResults([])
+    setSearchingDest(false)
+  }
+
+  // ──── Route calculation ────
+  const handleCalculateRoute = useCallback(async () => {
+    if (!origin || !destination) return
+    setIsCalculatingRoute(true)
+    const stops = intermediateStops.map(s => s.latlng)
+    const result = await calculateRoute(origin, destination, stops)
+    if (result) {
+      setRouteDistance(Math.round(result.distance * 10) / 10)
+      setRouteDuration(Math.round(result.duration))
+      setRouteGeometry(result.geometry)
+    }
+    setIsCalculatingRoute(false)
+  }, [origin, destination, intermediateStops])
+
+  // Auto-calculate route when origin, destination, or stops change
+  useEffect(() => {
+    if (origin && destination) {
+      handleCalculateRoute()
+    }
+  }, [origin, destination, intermediateStops, handleCalculateRoute])
+
+  // ──── Map click handler ────
+  const handleMapClick = useCallback((latlng: LatLng) => {
+    if (mapSelectionMode === 'origin') {
+      setOrigin(latlng)
+      setOriginAddress(`${latlng.lat.toFixed(5)}, ${latlng.lng.toFixed(5)}`)
+    } else if (mapSelectionMode === 'destination') {
+      setDestination(latlng)
+      setDestAddress(`${latlng.lat.toFixed(5)}, ${latlng.lng.toFixed(5)}`)
+    } else if (mapSelectionMode === 'stop') {
+      const newStop: IntermediateStop = {
+        id: `stop-${Date.now()}`,
+        latlng,
+        address: `${latlng.lat.toFixed(5)}, ${latlng.lng.toFixed(5)}`,
+      }
+      setIntermediateStops(prev => [...prev, newStop])
+    }
+  }, [mapSelectionMode])
+
+  const removeStop = (id: string) => {
+    setIntermediateStops(prev => prev.filter(s => s.id !== id))
+  }
+
+  // ──── Toggle extras ────
+  const toggleOriginExtra = (name: string) => {
+    setOriginExtras(prev => {
+      if (prev[name]) { const { [name]: _, ...rest } = prev; return rest }
+      return { ...prev, [name]: 1 }
+    })
+  }
+
+  const toggleDestExtra = (name: string) => {
+    setDestExtras(prev => {
+      if (prev[name]) { const { [name]: _, ...rest } = prev; return rest }
+      return { ...prev, [name]: 1 }
+    })
+  }
+
+  // ──── Form submission ────
+  const buildSummaryText = () => {
+    const items = getSelectedItems().map(i => `${i.qty}x ${i.name}`).join(', ')
+    const rec = getRecommendation(totalVolume)
+    const originExtraNames = Object.keys(originExtras).join(', ') || 'Ninguno'
+    const destExtraNames = Object.keys(destExtras).join(', ') || 'Ninguno'
+
+    let text = `COTIZACIÓN DE MUDANZA\n`
+    text += `═══════════════════════\n`
+    text += `Tipo: ${moveType.toUpperCase()}\n`
+    text += `Categoría: ${catType.toUpperCase()}\n`
+    text += `Volumen: ${totalVolume} m³\n`
+    text += `Vehículo recomendado: ${rec.vehicle}\n`
+    text += `Distancia: ${routeDistance > 0 ? routeDistance : '~10'} km\n`
+    if (routeDuration > 0) text += `Duración estimada: ${routeDuration} min\n`
+    text += `\nORIGEN: ${originAddress || 'No especificado'}\n`
+    text += `DESTINO: ${destAddress || 'No especificado'}\n`
+    if (intermediateStops.length > 0) {
+      text += `PARADAS: ${intermediateStops.map(s => s.address).join(' → ')}\n`
+    }
+    text += `\nEXTRAS ORIGEN: ${originExtraNames}\n`
+    if (originHelpers > 0) text += `Ayudantes en origen: ${originHelpers}\n`
+    text += `EXTRAS DESTINO: ${destExtraNames}\n`
+    if (destHelpers > 0) text += `Ayudantes en destino: ${destHelpers}\n`
+    if (wantsInsurance) text += `\nSeguro: Bs ${customInsurance || insuranceAmount} (costo: Bs ${insuranceCost})\n`
+    text += `\nMETODO PAGO: ${paymentMethod}\n`
+    if (includeIva) text += `IVA 16%: Bs ${ivaAmount}\n`
+    if (includeIva && razonSocial) text += `Razón Social: ${razonSocial}\n`
+    if (includeIva && nit) text += `NIT: ${nit}\n`
+    text += `\nTOTAL: Bs ${grandTotal.toLocaleString()}\n`
+    text += `\nCLIENTE:\n`
+    text += `Nombre: ${fullName}\n`
+    text += `Teléfono: ${phone}${hasWhatsApp ? ' (WhatsApp)' : ''}\n`
+    text += `Email: ${email}\n`
+    text += `\nArtículos: ${items || 'Ninguno seleccionado'}`
+
+    return text
+  }
+
+  const buildWhatsAppMsg = () => {
+    return encodeURIComponent(buildSummaryText())
+  }
+
+  const handleSubmit = async () => {
+    if (!fullName || !phone || !email) return
+    setIsSubmitting(true)
+    try {
+      const res = await fetch('/api/mudanza/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          moveType, catType, totalVolume, routeDistance, routeDuration,
+          originAddress, destAddress, intermediateStops,
+          originExtras, destExtras, originHelpers, destHelpers,
+          wantsInsurance, insuranceAmount: customInsurance || insuranceAmount, insuranceCost,
+          includeIva, ivaAmount, razonSocial, nit, paymentMethod,
+          basePrice, extrasTotal, subtotal, grandTotal,
+          fullName, phone, hasWhatsApp, email,
+          items: getSelectedItems(),
+          vehicleRecommendation: getRecommendation(totalVolume).vehicle,
+        }),
+      })
+      if (res.ok) {
+        setSubmitResult('success')
+      } else {
+        setSubmitResult('error')
+      }
+    } catch {
+      setSubmitResult('error')
+    }
+    setIsSubmitting(false)
+  }
+
+  // ──── Steps config ────
   const steps = [
-    { num: 1, label: 'Tipo de Mudanza' },
+    { num: 1, label: 'Tipo' },
     { num: 2, label: 'Inventario' },
-    { num: 3, label: 'Extras' },
-    { num: 4, label: 'Cotización' },
+    { num: 3, label: 'Ruta' },
+    { num: 4, label: 'Origen +' },
+    { num: 5, label: 'Destino +' },
+    { num: 6, label: 'Seguro' },
+    { num: 7, label: 'Envío' },
   ]
+
+  const inputClass = 'w-full bg-white/[0.04] border border-white/[0.08] text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#00E676]/40 transition-all'
 
   return (
     <section id="calculadora" className="relative py-24 md:py-32">
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1320] to-[#0a0e17]" />
+      {/* Background image */}
+      <div className="absolute inset-0 bg-[url('/mudanza-calculator.jpg')] bg-cover bg-center opacity-[0.15]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17]/95 via-[#0d1320]/90 to-[#0a0e17]/95" />
+
       <div className="absolute top-1/2 left-1/3 w-[600px] h-[600px] rounded-full bg-[#00E676]/5 blur-[150px]" />
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <A><div className="text-center mb-12">
@@ -550,33 +900,40 @@ function CalculatorSection() {
             <Calculator className="w-4 h-4 text-[#00E676]" /><span className="text-sm text-[#00E676] font-medium">Calculadora de Mudanza</span>
           </div>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">Calcula tu <span className="bg-gradient-to-r from-[#00E676] via-[#0077BD] to-[#FF9800] bg-clip-text text-transparent">Mudanza</span></h2>
-          <p className="text-white/50 max-w-2xl mx-auto text-lg">Selecciona tus artículos, elige extras y obtén una cotización estimada al instante.</p>
+          <p className="text-white/50 max-w-2xl mx-auto text-lg">Selecciona tus artículos, define tu ruta, elige extras y obtén una cotización estimada al instante.</p>
         </div></A>
 
         {/* Step indicator */}
-        <div className="flex items-center justify-center gap-2 mb-10">
+        <div className="flex items-center justify-center gap-1 sm:gap-2 mb-10 overflow-x-auto pb-2">
           {steps.map((s, i) => (
-            <div key={s.num} className="flex items-center">
-              <button onClick={() => s.num <= step && setStep(s.num)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 ${step === s.num ? 'bg-[#00E676] text-black shadow-[0_0_20px_rgba(0,230,118,0.3)]' : step > s.num ? 'bg-[#00E676]/20 text-[#00E676]' : 'bg-white/[0.05] text-white/40'}`}>
-                <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold" style={{ backgroundColor: step >= s.num ? 'rgba(0,230,118,0.2)' : 'rgba(255,255,255,0.05)' }}>{step > s.num ? '✓' : s.num}</span>
-                <span className="hidden sm:inline">{s.label}</span>
+            <div key={s.num} className="flex items-center shrink-0">
+              <button onClick={() => s.num < step && setStep(s.num)}
+                className={`flex items-center gap-1.5 px-2.5 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all duration-300 ${step === s.num ? 'bg-[#00E676] text-black shadow-[0_0_20px_rgba(0,230,118,0.3)]' : step > s.num ? 'bg-[#00E676]/20 text-[#00E676] cursor-pointer' : 'bg-white/[0.05] text-white/40'}`}>
+                <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-bold" style={{ backgroundColor: step >= s.num ? 'rgba(0,230,118,0.2)' : 'rgba(255,255,255,0.05)' }}>{step > s.num ? '✓' : s.num}</span>
+                <span className="hidden md:inline">{s.label}</span>
               </button>
-              {i < steps.length - 1 && <ChevronRight className="w-4 h-4 text-white/20 mx-1" />}
+              {i < steps.length - 1 && <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 text-white/20 mx-0.5 sm:mx-1" />}
             </div>
           ))}
         </div>
 
-        {/* Volume badge */}
-        <div className="flex justify-center mb-8">
+        {/* Volume & Distance badges */}
+        <div className="flex flex-wrap justify-center gap-3 mb-8">
           <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-white/[0.04] border border-[#00E676]/20">
             <Box className="w-4 h-4 text-[#00E676]" />
-            <span className="text-sm text-white/60">Volumen total:</span>
+            <span className="text-sm text-white/60">Volumen:</span>
             <span className="text-lg font-bold text-[#00E676]">{totalVolume} m³</span>
           </div>
+          {routeDistance > 0 && (
+            <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-white/[0.04] border border-[#0077BD]/20">
+              <Navigation className="w-4 h-4 text-[#0077BD]" />
+              <span className="text-sm text-white/60">Distancia:</span>
+              <span className="text-lg font-bold text-[#0077BD]">{routeDistance} km</span>
+            </div>
+          )}
         </div>
 
-        {/* Step 1: Type */}
+        {/* ═══════════════ Step 1: Tipo de Mudanza ═══════════════ */}
         {step === 1 && (
           <div className="max-w-4xl mx-auto">
             <h3 className="text-xl font-bold text-white mb-2 text-center">¿Qué tipo de mudanza necesitas?</h3>
@@ -617,12 +974,11 @@ function CalculatorSection() {
           </div>
         )}
 
-        {/* Step 2: Inventory */}
+        {/* ═══════════════ Step 2: Inventario ═══════════════ */}
         {step === 2 && (
           <div className="max-w-5xl mx-auto">
             <h3 className="text-xl font-bold text-white mb-2 text-center">Inventario de Artículos</h3>
             <p className="text-sm text-white/40 text-center mb-6">Selecciona la cantidad de cada artículo por ambiente</p>
-            {/* Room tabs */}
             <div className="flex flex-wrap justify-center gap-2 mb-6">
               {ROOM_KEYS.map((key) => (
                 <button key={key} onClick={() => setActiveRoom(key)}
@@ -631,7 +987,6 @@ function CalculatorSection() {
                 </button>
               ))}
             </div>
-            {/* Items grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-8 max-h-[480px] overflow-y-auto pr-2 custom-scroll">
               {ROOMS[activeRoom].items.map((item) => {
                 const qty = inventory[item.name] || 0
@@ -660,22 +1015,182 @@ function CalculatorSection() {
             <div className="flex justify-between">
               <button onClick={() => setStep(1)} className="px-6 py-3 rounded-full text-sm font-semibold text-white/60 border border-white/[0.1] hover:border-white/20 transition-all">← Atrás</button>
               <button onClick={() => setStep(3)} className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)]">
-                Siguiente: Extras →
+                Siguiente: Ruta →
               </button>
             </div>
           </div>
         )}
 
-        {/* Step 3: Extras */}
+        {/* ═══════════════ Step 3: Ruta y Dirección (MAP) ═══════════════ */}
         {step === 3 && (
+          <div className="max-w-7xl mx-auto">
+            <h3 className="text-xl font-bold text-white mb-2 text-center">Ruta y Dirección</h3>
+            <p className="text-sm text-white/40 text-center mb-6">Define origen, destino y paradas intermedias en el mapa</p>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              {/* Left: Form fields */}
+              <div className="space-y-4">
+                {/* Map selection mode indicator */}
+                <div className="p-4 rounded-2xl bg-white/[0.03] border border-[#00E676]/15">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Navigation className="w-4 h-4 text-[#00E676]" />
+                    <span className="text-sm font-semibold text-[#00E676]">Modo de selección en mapa</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={() => setMapSelectionMode('origin')}
+                      className={`flex-1 px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${mapSelectionMode === 'origin' ? 'bg-[#00E676] text-black' : 'bg-white/[0.04] text-white/50 border border-white/[0.08]'}`}>
+                      <Flag className="w-3 h-3" /> Origen
+                    </button>
+                    <button onClick={() => setMapSelectionMode('destination')}
+                      className={`flex-1 px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${mapSelectionMode === 'destination' ? 'bg-red-500 text-white' : 'bg-white/[0.04] text-white/50 border border-white/[0.08]'}`}>
+                      <Flag className="w-3 h-3" /> Destino
+                    </button>
+                    <button onClick={() => setMapSelectionMode('stop')}
+                      className={`flex-1 px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${mapSelectionMode === 'stop' ? 'bg-[#4FC3F7] text-black' : 'bg-white/[0.04] text-white/50 border border-white/[0.08]'}`}>
+                      <Plus className="w-3 h-3" /> Parada
+                    </button>
+                  </div>
+                </div>
+
+                {/* Origin search */}
+                <div className="relative">
+                  <label className="text-xs text-white/40 block mb-1.5">
+                    <Flag className="w-3 h-3 inline mr-1 text-[#00E676]" /> Dirección de Origen
+                  </label>
+                  <div className="relative">
+                    <input type="text" value={originAddress}
+                      onChange={(e) => handleOriginSearch(e.target.value)}
+                      onFocus={() => { setSearchingOrigin(true); setMapSelectionMode('origin') }}
+                      onBlur={() => setTimeout(() => setSearchingOrigin(false), 200)}
+                      className={inputClass + ' pr-10'}
+                      placeholder="Buscar dirección de origen..." />
+                    <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                  </div>
+                  {searchingOrigin && originResults.length > 0 && (
+                    <div className="absolute z-30 w-full mt-1 rounded-xl bg-[#0a0e17] border border-white/[0.1] max-h-48 overflow-y-auto custom-scroll shadow-2xl">
+                      {originResults.map((r, i) => (
+                        <button key={i} onClick={() => selectOrigin(r)}
+                          className="w-full text-left px-4 py-3 text-sm text-white/70 hover:bg-white/[0.06] border-b border-white/[0.04] last:border-b-0 transition-all">
+                          {r.display_name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Destination search */}
+                <div className="relative">
+                  <label className="text-xs text-white/40 block mb-1.5">
+                    <Flag className="w-3 h-3 inline mr-1 text-red-400" /> Dirección de Destino
+                  </label>
+                  <div className="relative">
+                    <input type="text" value={destAddress}
+                      onChange={(e) => handleDestSearch(e.target.value)}
+                      onFocus={() => { setSearchingDest(true); setMapSelectionMode('destination') }}
+                      onBlur={() => setTimeout(() => setSearchingDest(false), 200)}
+                      className={inputClass + ' pr-10'}
+                      placeholder="Buscar dirección de destino..." />
+                    <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                  </div>
+                  {searchingDest && destResults.length > 0 && (
+                    <div className="absolute z-30 w-full mt-1 rounded-xl bg-[#0a0e17] border border-white/[0.1] max-h-48 overflow-y-auto custom-scroll shadow-2xl">
+                      {destResults.map((r, i) => (
+                        <button key={i} onClick={() => selectDest(r)}
+                          className="w-full text-left px-4 py-3 text-sm text-white/70 hover:bg-white/[0.06] border-b border-white/[0.04] last:border-b-0 transition-all">
+                          {r.display_name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Intermediate stops */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs text-white/40">
+                      <Flag className="w-3 h-3 inline mr-1 text-[#4FC3F7]" /> Paradas Intermedias
+                    </label>
+                    <button onClick={() => setMapSelectionMode('stop')}
+                      className="text-xs text-[#4FC3F7] hover:text-[#4FC3F7]/80 transition-colors flex items-center gap-1">
+                      <Plus className="w-3 h-3" /> Agregar
+                    </button>
+                  </div>
+                  {intermediateStops.map((stop) => (
+                    <div key={stop.id} className="flex items-center gap-2 p-2.5 rounded-xl bg-[#4FC3F7]/5 border border-[#4FC3F7]/20">
+                      <Flag className="w-3.5 h-3.5 text-[#4FC3F7] shrink-0" />
+                      <span className="text-sm text-white/60 flex-1 truncate">{stop.address}</span>
+                      <button onClick={() => removeStop(stop.id)} className="shrink-0 text-white/30 hover:text-red-400 transition-colors">
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                  {intermediateStops.length === 0 && (
+                    <p className="text-xs text-white/20 text-center py-2">No hay paradas intermedias</p>
+                  )}
+                </div>
+
+                {/* Route info */}
+                {routeDistance > 0 && (
+                  <div className="p-4 rounded-2xl bg-[#0077BD]/10 border border-[#0077BD]/20">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Route className="w-4 h-4 text-[#0077BD]" />
+                      <span className="text-sm font-semibold text-[#0077BD]">Ruta Calculada</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div>
+                        <span className="text-white/40">Distancia</span>
+                        <div className="text-white font-bold">{routeDistance} km</div>
+                      </div>
+                      <div>
+                        <span className="text-white/40">Duración est.</span>
+                        <div className="text-white font-bold">{routeDuration} min</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {isCalculatingRoute && (
+                  <div className="flex items-center gap-2 text-sm text-[#0077BD]">
+                    <Loader2 className="w-4 h-4 animate-spin" /> Calculando ruta...
+                  </div>
+                )}
+              </div>
+
+              {/* Right: Map */}
+              <div className="relative rounded-2xl overflow-hidden border border-white/[0.08]" style={{ height: '400px' }}>
+                <MudanzaMap
+                  origin={origin}
+                  destination={destination}
+                  intermediateStops={intermediateStops}
+                  originAddress={originAddress}
+                  destAddress={destAddress}
+                  routeGeometry={routeGeometry}
+                  mapSelectionMode={mapSelectionMode}
+                  onMapClick={handleMapClick}
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-between">
+              <button onClick={() => setStep(2)} className="px-6 py-3 rounded-full text-sm font-semibold text-white/60 border border-white/[0.1] hover:border-white/20 transition-all">← Atrás</button>
+              <button onClick={() => setStep(4)} className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)]">
+                Siguiente: Complementos Origen →
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ═══════════════ Step 4: Complementos de Origen ═══════════════ */}
+        {step === 4 && (
           <div className="max-w-4xl mx-auto">
-            <h3 className="text-xl font-bold text-white mb-2 text-center">Servicios Adicionales</h3>
-            <p className="text-sm text-white/40 text-center mb-8">Personaliza tu mudanza con servicios extra</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
-              {EXTRAS.map((extra) => {
-                const checked = !!selectedExtras[extra.name]
+            <h3 className="text-xl font-bold text-white mb-2 text-center">Complementos de Origen</h3>
+            <p className="text-sm text-white/40 text-center mb-8">Servicios adicionales en el punto de partida</p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+              {ORIGIN_EXTRAS.map((extra) => {
+                const checked = !!originExtras[extra.name]
                 return (
-                  <button key={extra.name} onClick={() => toggleExtra(extra.name)}
+                  <button key={extra.name} onClick={() => toggleOriginExtra(extra.name)}
                     className={`flex items-center gap-3 p-4 rounded-xl text-left transition-all duration-200 ${checked ? 'bg-[#00E676]/5 border-[#00E676]/20 border' : 'bg-white/[0.02] border border-white/[0.06] hover:border-white/10'}`}>
                     <div className={`w-5 h-5 rounded flex items-center justify-center shrink-0 transition-all ${checked ? 'bg-[#00E676]' : 'bg-white/[0.08] border border-white/[0.15]'}`}>
                       {checked && <CheckCircle className="w-3.5 h-3.5 text-black" />}
@@ -688,188 +1203,433 @@ function CalculatorSection() {
                 )
               })}
             </div>
-            {/* Floor and elevator selectors */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06]">
-                <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-[#00E676]" /> Origen
-                </h4>
-                <div className="space-y-3">
-                  <div>
-                    <label className="text-xs text-white/40 block mb-1">Piso</label>
-                    <select value={originFloor} onChange={e => setOriginFloor(e.target.value)}
-                      className="w-full bg-white/[0.05] border border-white/[0.1] rounded-lg px-3 py-2 text-sm text-white appearance-none focus:outline-none focus:border-[#00E676]/40">
-                      {['baja', '1', '2', '3', '4', '5'].map(f => <option key={f} value={f} className="bg-[#0a0e17]">Planta {f === 'baja' ? 'baja' : f + '°'}</option>)}
-                    </select>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm text-white/60">¿Elevador?</span>
-                    <button onClick={() => setElevatorOrigin(!elevatorOrigin)}
-                      className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${elevatorOrigin ? 'bg-[#00E676] text-black' : 'bg-white/[0.06] text-white/40'}`}>
-                      {elevatorOrigin ? 'Sí' : 'No'}
-                    </button>
-                  </div>
+
+            {/* Ayudantes en origen */}
+            <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] mb-6">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <h4 className="text-white font-semibold text-sm">Ayudantes en Origen</h4>
+                  <p className="text-xs text-white/30">Bs 150 c/u</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button onClick={() => setOriginHelpers(Math.max(0, originHelpers - 1))}
+                    className="w-9 h-9 rounded-xl bg-white/[0.06] flex items-center justify-center text-white/60 hover:bg-white/10 transition-all">
+                    <Minus className="w-4 h-4" />
+                  </button>
+                  <span className="text-xl font-bold text-white w-8 text-center">{originHelpers}</span>
+                  <button onClick={() => setOriginHelpers(originHelpers + 1)}
+                    className="w-9 h-9 rounded-xl bg-[#00E676]/20 flex items-center justify-center text-[#00E676] hover:bg-[#00E676]/30 transition-all">
+                    <Plus className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
-              <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06]">
-                <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-[#0077BD]" /> Destino
-                </h4>
-                <div className="space-y-3">
-                  <div>
-                    <label className="text-xs text-white/40 block mb-1">Piso</label>
-                    <select value={destFloor} onChange={e => setDestFloor(e.target.value)}
-                      className="w-full bg-white/[0.05] border border-white/[0.1] rounded-lg px-3 py-2 text-sm text-white appearance-none focus:outline-none focus:border-[#0077BD]/40">
-                      {['baja', '1', '2', '3', '4', '5'].map(f => <option key={f} value={f} className="bg-[#0a0e17]">Planta {f === 'baja' ? 'baja' : f + '°'}</option>)}
-                    </select>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm text-white/60">¿Elevador?</span>
-                    <button onClick={() => setElevatorDest(!elevatorDest)}
-                      className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${elevatorDest ? 'bg-[#0077BD] text-white' : 'bg-white/[0.06] text-white/40'}`}>
-                      {elevatorDest ? 'Sí' : 'No'}
-                    </button>
-                  </div>
+              {originHelpers > 0 && (
+                <div className="text-sm text-[#00E676]">Bs {originHelpers * 150}</div>
+              )}
+            </div>
+
+            {/* Piso y elevador origen */}
+            <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] mb-6">
+              <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-[#00E676]" /> Piso de Origen
+              </h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs text-white/40 block mb-1">Piso</label>
+                  <select value={originFloor} onChange={e => setOriginFloor(e.target.value)}
+                    className={inputClass + ' appearance-none'}>
+                    {['baja', '1', '2', '3', '4', '5'].map(f => <option key={f} value={f} className="bg-[#0a0e17]">Planta {f === 'baja' ? 'baja' : f + '°'}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs text-white/40 block mb-1">Elevador</label>
+                  <button onClick={() => setElevatorOrigin(!elevatorOrigin)}
+                    className={`w-full px-4 py-3 rounded-xl text-sm font-semibold transition-all ${elevatorOrigin ? 'bg-[#00E676] text-black' : 'bg-white/[0.04] text-white/40 border border-white/[0.08]'}`}>
+                    {elevatorOrigin ? 'Sí' : 'No'}
+                  </button>
                 </div>
               </div>
             </div>
-            <div className="mb-8">
-              <label className="text-sm text-white/60 block mb-2">Distancia entre origen y destino (km)</label>
-              <input type="number" value={distance} onChange={e => setDistance(e.target.value)} min="1"
-                className="w-full max-w-xs bg-white/[0.05] border border-white/[0.1] rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#00E676]/40" placeholder="Ej: 10" />
-            </div>
+
             <div className="flex justify-between">
-              <button onClick={() => setStep(2)} className="px-6 py-3 rounded-full text-sm font-semibold text-white/60 border border-white/[0.1] hover:border-white/20 transition-all">← Atrás</button>
-              <button onClick={() => setStep(4)} className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)]">
-                Ver Cotización →
+              <button onClick={() => setStep(3)} className="px-6 py-3 rounded-full text-sm font-semibold text-white/60 border border-white/[0.1] hover:border-white/20 transition-all">← Atrás</button>
+              <button onClick={() => setStep(5)} className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)]">
+                Siguiente: Complementos Destino →
               </button>
             </div>
           </div>
         )}
 
-        {/* Step 4: Quote */}
-        {step === 4 && (
-          <div className="max-w-5xl mx-auto">
-            <h3 className="text-xl font-bold text-white mb-6 text-center">Resumen de Cotización</h3>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-              {/* Main summary */}
-              <div className="lg:col-span-2 space-y-4">
-                {/* Vehicle recommendation */}
-                <div className="p-5 rounded-2xl bg-[#00E676]/5 border border-[#00E676]/15">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Truck className="w-5 h-5 text-[#00E676]" />
-                    <span className="text-sm font-semibold text-[#00E676]">Vehículo Recomendado</span>
+        {/* ═══════════════ Step 5: Complementos de Destino ═══════════════ */}
+        {step === 5 && (
+          <div className="max-w-4xl mx-auto">
+            <h3 className="text-xl font-bold text-white mb-2 text-center">Complementos de Destino</h3>
+            <p className="text-sm text-white/40 text-center mb-8">Servicios adicionales en el punto de llegada</p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+              {DEST_EXTRAS.map((extra) => {
+                const checked = !!destExtras[extra.name]
+                return (
+                  <div key={extra.name}>
+                    <button onClick={() => toggleDestExtra(extra.name)}
+                      className={`w-full flex items-center gap-3 p-4 rounded-xl text-left transition-all duration-200 ${checked ? 'bg-[#0077BD]/5 border-[#0077BD]/20 border' : 'bg-white/[0.02] border border-white/[0.06] hover:border-white/10'}`}>
+                      <div className={`w-5 h-5 rounded flex items-center justify-center shrink-0 transition-all ${checked ? 'bg-[#0077BD]' : 'bg-white/[0.08] border border-white/[0.15]'}`}>
+                        {checked && <CheckCircle className="w-3.5 h-3.5 text-white" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm text-white font-medium truncate">{extra.name}</div>
+                        <div className="text-xs text-white/30">Bs {extra.price}{extra.unit ? `/${extra.unit}` : ''}</div>
+                      </div>
+                    </button>
+                    {/* Guardamuebles weeks selector */}
+                    {checked && extra.name === 'Guardamuebles/almacenamiento' && (
+                      <div className="mt-2 ml-8 flex items-center gap-3">
+                        <span className="text-xs text-white/40">Semanas:</span>
+                        <button onClick={() => setGuardamueblesWeeks(Math.max(1, guardamueblesWeeks - 1))}
+                          className="w-7 h-7 rounded-lg bg-white/[0.06] flex items-center justify-center text-white/60 hover:bg-white/10 transition-all">
+                          <Minus className="w-3 h-3" />
+                        </button>
+                        <span className="text-sm font-bold text-white">{guardamueblesWeeks}</span>
+                        <button onClick={() => setGuardamueblesWeeks(guardamueblesWeeks + 1)}
+                          className="w-7 h-7 rounded-lg bg-[#0077BD]/20 flex items-center justify-center text-[#0077BD] hover:bg-[#0077BD]/30 transition-all">
+                          <Plus className="w-3 h-3" />
+                          </button>
+                        <span className="text-xs text-white/30">Bs {200 * guardamueblesWeeks}</span>
+                      </div>
+                    )}
                   </div>
-                  <div className="text-xl font-bold text-white">{getRecommendation(totalVolume).vehicle}</div>
-                  <div className="text-sm text-white/40">{getRecommendation(totalVolume).detail}</div>
+                )
+              })}
+            </div>
+
+            {/* Ayudantes en destino */}
+            <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] mb-6">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <h4 className="text-white font-semibold text-sm">Ayudantes en Destino</h4>
+                  <p className="text-xs text-white/30">Bs 150 c/u</p>
                 </div>
-                {/* Items list */}
-                <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06]">
-                  <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
-                    <ClipboardList className="w-4 h-4 text-[#0077BD]" /> Artículos Seleccionados
-                  </h4>
-                  {getSelectedItems().length === 0 ? (
-                    <p className="text-sm text-white/30">No se seleccionaron artículos</p>
-                  ) : (
-                    <div className="max-h-48 overflow-y-auto space-y-1.5 custom-scroll">
-                      {getSelectedItems().map((item) => (
-                        <div key={item.name} className="flex items-center justify-between text-sm py-1">
-                          <span className="text-white/60"><span className="mr-1">{item.emoji}</span>{item.qty}x {item.name}</span>
-                          <span className="text-white/30">{item.vol.toFixed(2)} m³</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                {/* Extras list */}
-                {Object.keys(selectedExtras).length > 0 && (
-                  <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06]">
-                    <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-[#FF9800]" /> Servicios Extras
-                    </h4>
-                    <div className="space-y-1.5">
-                      {Object.keys(selectedExtras).map((name) => {
-                        const extra = EXTRAS.find(e => e.name === name)!
-                        return (
-                          <div key={name} className="flex items-center justify-between text-sm py-1">
-                            <span className="text-white/60">{name}</span>
-                            <span className="text-white/30">Bs {extra.price}{extra.unit ? `/${extra.unit}` : ''}</span>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </div>
-                )}
-                {/* Floor info */}
-                <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06]">
-                  <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-[#8B5CF6]" /> Ubicación
-                  </h4>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div><span className="text-white/40">Origen:</span> <span className="text-white/70">Planta {originFloor === 'baja' ? 'baja' : originFloor + '°'} {elevatorOrigin ? '(con elevador)' : '(sin elevador)'}</span></div>
-                    <div><span className="text-white/40">Destino:</span> <span className="text-white/70">Planta {destFloor === 'baja' ? 'baja' : destFloor + '°'} {elevatorDest ? '(con elevador)' : '(sin elevador)'}</span></div>
-                    <div className="col-span-2"><span className="text-white/40">Distancia:</span> <span className="text-white/70">{distance} km</span></div>
-                  </div>
+                <div className="flex items-center gap-3">
+                  <button onClick={() => setDestHelpers(Math.max(0, destHelpers - 1))}
+                    className="w-9 h-9 rounded-xl bg-white/[0.06] flex items-center justify-center text-white/60 hover:bg-white/10 transition-all">
+                    <Minus className="w-4 h-4" />
+                  </button>
+                  <span className="text-xl font-bold text-white w-8 text-center">{destHelpers}</span>
+                  <button onClick={() => setDestHelpers(destHelpers + 1)}
+                    className="w-9 h-9 rounded-xl bg-[#0077BD]/20 flex items-center justify-center text-[#0077BD] hover:bg-[#0077BD]/30 transition-all">
+                    <Plus className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
+              {destHelpers > 0 && (
+                <div className="text-sm text-[#0077BD]">Bs {destHelpers * 150}</div>
+              )}
+            </div>
 
-              {/* Price panel */}
-              <div className="space-y-4">
-                <div className="p-6 rounded-2xl bg-white/[0.04] border border-[#00E676]/15 sticky top-24">
-                  <h4 className="text-white font-bold text-lg mb-5">Cotización Estimada</h4>
-                  <div className="space-y-3 mb-5">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-white/50">Volumen total</span>
-                      <span className="text-white font-semibold">{totalVolume} m³</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-white/50">Tipo</span>
-                      <span className="text-white font-semibold capitalize">{moveType}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-white/50">Distancia</span>
-                      <span className="text-white font-semibold">{distance} km</span>
-                    </div>
-                    <div className="h-px bg-white/[0.06]" />
-                    <div className="flex justify-between text-sm">
-                      <span className="text-white/50">Precio base</span>
-                      <span className="text-white font-semibold">Bs {basePrice.toLocaleString()}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-white/50">Extras</span>
-                      <span className="text-white font-semibold">Bs {extrasTotal.toLocaleString()}</span>
-                    </div>
-                    <div className="h-px bg-white/[0.06]" />
-                    <div className="flex justify-between">
-                      <span className="text-white font-bold">Total estimado</span>
-                      <span className="text-2xl font-bold text-[#00E676]">Bs {grandTotal.toLocaleString()}</span>
-                    </div>
-                  </div>
-                  <p className="text-xs text-white/30 mb-5">*Precio estimado. La cotización final puede variar según evaluación presencial.</p>
-                  <div className="space-y-3">
-                    <a href={`https://wa.me/59173662803?text=${buildWhatsAppMsg()}`} target="_blank" rel="noopener noreferrer"
-                      className="w-full py-3 rounded-xl bg-[#25D366] text-white font-semibold text-sm flex items-center justify-center gap-2 hover:bg-[#128C7E] transition-all">
-                      <MessageCircle className="w-4 h-4" /> Solicitar Cotización Oficial
-                    </a>
-                    <a href={`https://wa.me/?text=${buildWhatsAppMsg()}`} target="_blank" rel="noopener noreferrer"
-                      className="w-full py-3 rounded-xl bg-white/[0.06] text-white/70 font-semibold text-sm flex items-center justify-center gap-2 hover:bg-white/[0.1] transition-all border border-white/[0.08]">
-                      <MessageCircle className="w-4 h-4" /> Compartir por WhatsApp
-                    </a>
-                  </div>
+            {/* Piso y elevador destino */}
+            <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] mb-6">
+              <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-[#0077BD]" /> Piso de Destino
+              </h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs text-white/40 block mb-1">Piso</label>
+                  <select value={destFloor} onChange={e => setDestFloor(e.target.value)}
+                    className={inputClass + ' appearance-none'}>
+                    {['baja', '1', '2', '3', '4', '5'].map(f => <option key={f} value={f} className="bg-[#0a0e17]">Planta {f === 'baja' ? 'baja' : f + '°'}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs text-white/40 block mb-1">Elevador</label>
+                  <button onClick={() => setElevatorDest(!elevatorDest)}
+                    className={`w-full px-4 py-3 rounded-xl text-sm font-semibold transition-all ${elevatorDest ? 'bg-[#0077BD] text-white' : 'bg-white/[0.04] text-white/40 border border-white/[0.08]'}`}>
+                    {elevatorDest ? 'Sí' : 'No'}
+                  </button>
                 </div>
               </div>
             </div>
-            <div className="flex justify-start">
-              <button onClick={() => setStep(3)} className="px-6 py-3 rounded-full text-sm font-semibold text-white/60 border border-white/[0.1] hover:border-white/20 transition-all">← Modificar</button>
+
+            <div className="flex justify-between">
+              <button onClick={() => setStep(4)} className="px-6 py-3 rounded-full text-sm font-semibold text-white/60 border border-white/[0.1] hover:border-white/20 transition-all">← Atrás</button>
+              <button onClick={() => setStep(6)} className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)]">
+                Siguiente: Seguro y Pago →
+              </button>
             </div>
           </div>
         )}
+
+        {/* ═══════════════ Step 6: Seguro, IVA y Pago ═══════════════ */}
+        {step === 6 && (
+          <div className="max-w-4xl mx-auto">
+            <h3 className="text-xl font-bold text-white mb-2 text-center">Seguro, IVA y Método de Pago</h3>
+            <p className="text-sm text-white/40 text-center mb-8">Configura el seguro de carga, facturación y forma de pago</p>
+
+            {/* Insurance */}
+            <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Shield className="w-5 h-5 text-[#FF9800]" />
+                  <h4 className="text-white font-semibold">Seguro de Carga</h4>
+                </div>
+                <button onClick={() => setWantsInsurance(!wantsInsurance)}
+                  className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${wantsInsurance ? 'bg-[#FF9800] text-white' : 'bg-white/[0.04] text-white/40 border border-white/[0.08]'}`}>
+                  {wantsInsurance ? 'Sí, incluir seguro' : 'No incluir seguro'}
+                </button>
+              </div>
+              {wantsInsurance && (
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-xs text-white/40 block mb-2">Valor declarado de la carga</label>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      {INSURANCE_OPTIONS.map((opt) => (
+                        <button key={opt.amount} onClick={() => { setInsuranceAmount(opt.amount); setCustomInsurance('') }}
+                          className={`p-3 rounded-xl text-sm font-semibold transition-all ${insuranceAmount === opt.amount && !customInsurance ? 'bg-[#FF9800]/20 border-[#FF9800]/40 border text-[#FF9800]' : 'bg-white/[0.03] border border-white/[0.06] text-white/50 hover:border-white/10'}`}>
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="mt-3">
+                      <label className="text-xs text-white/40 block mb-1">O monto personalizado</label>
+                      <input type="number" value={customInsurance} onChange={e => setCustomInsurance(e.target.value)}
+                        className={inputClass + ' max-w-xs'} placeholder="Bs (monto personalizado)" min="0" />
+                    </div>
+                  </div>
+                  <div className="p-3 rounded-xl bg-[#FF9800]/5 border border-[#FF9800]/15">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-white/50">Valor declarado</span>
+                      <span className="text-white font-semibold">Bs {(customInsurance ? parseFloat(customInsurance) || 0 : insuranceAmount).toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between text-sm mt-1">
+                      <span className="text-white/50">Costo del seguro (3%)</span>
+                      <span className="text-[#FF9800] font-bold">Bs {insuranceCost.toLocaleString()}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* IVA */}
+            <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <CircleDollarSign className="w-5 h-5 text-[#818CF8]" />
+                  <h4 className="text-white font-semibold">Facturación con IVA (16%)</h4>
+                </div>
+                <button onClick={() => setIncludeIva(!includeIva)}
+                  className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${includeIva ? 'bg-[#818CF8] text-white' : 'bg-white/[0.04] text-white/40 border border-white/[0.08]'}`}>
+                  {includeIva ? 'Sí, con IVA' : 'Sin IVA'}
+                </button>
+              </div>
+              {includeIva && (
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-xs text-white/40 block mb-1">Razón Social</label>
+                    <input type="text" value={razonSocial} onChange={e => setRazonSocial(e.target.value)}
+                      className={inputClass} placeholder="Nombre o razón social" />
+                  </div>
+                  <div>
+                    <label className="text-xs text-white/40 block mb-1">NIT</label>
+                    <input type="text" value={nit} onChange={e => setNit(e.target.value)}
+                      className={inputClass} placeholder="Número de NIT" />
+                  </div>
+                  <div className="p-3 rounded-xl bg-[#818CF8]/5 border border-[#818CF8]/15">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-white/50">Subtotal</span>
+                      <span className="text-white font-semibold">Bs {subtotal.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between text-sm mt-1">
+                      <span className="text-white/50">IVA 16%</span>
+                      <span className="text-[#818CF8] font-bold">Bs {ivaAmount.toLocaleString()}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Payment method */}
+            <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] mb-6">
+              <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
+                <CreditCard className="w-5 h-5 text-[#00E676]" /> Método de Pago
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {PAYMENT_METHODS.map((pm) => {
+                  const Icon = pm.icon
+                  return (
+                    <button key={pm.id} onClick={() => setPaymentMethod(pm.id)}
+                      className={`flex items-center gap-3 p-3 rounded-xl text-left transition-all duration-200 ${paymentMethod === pm.id ? 'bg-[#00E676]/5 border-[#00E676]/20 border' : 'bg-white/[0.02] border border-white/[0.06] hover:border-white/10'}`}>
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${paymentMethod === pm.id ? 'bg-[#00E676]/20' : 'bg-white/[0.04]'}`}>
+                        <Icon className={`w-4 h-4 ${paymentMethod === pm.id ? 'text-[#00E676]' : 'text-white/30'}`} />
+                      </div>
+                      <span className={`text-sm font-medium ${paymentMethod === pm.id ? 'text-white' : 'text-white/50'}`}>{pm.label}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Running total */}
+            <div className="p-5 rounded-2xl bg-white/[0.04] border border-[#00E676]/15 mb-6">
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-white/50">Precio base</span>
+                  <span className="text-white font-semibold">Bs {basePrice.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-white/50">Extras</span>
+                  <span className="text-white font-semibold">Bs {extrasTotal.toLocaleString()}</span>
+                </div>
+                {wantsInsurance && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-white/50">Seguro</span>
+                    <span className="text-white font-semibold">Bs {insuranceCost.toLocaleString()}</span>
+                  </div>
+                )}
+                {includeIva && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-white/50">IVA 16%</span>
+                    <span className="text-white font-semibold">Bs {ivaAmount.toLocaleString()}</span>
+                  </div>
+                )}
+                <div className="h-px bg-white/[0.06]" />
+                <div className="flex justify-between">
+                  <span className="text-white font-bold">Total estimado</span>
+                  <span className="text-2xl font-bold text-[#00E676]">Bs {grandTotal.toLocaleString()}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-between">
+              <button onClick={() => setStep(5)} className="px-6 py-3 rounded-full text-sm font-semibold text-white/60 border border-white/[0.1] hover:border-white/20 transition-all">← Atrás</button>
+              <button onClick={() => setStep(7)} className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)]">
+                Siguiente: Datos Personales →
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ═══════════════ Step 7: Datos Personales y Envío ═══════════════ */}
+        {step === 7 && (
+          <div className="max-w-4xl mx-auto">
+            <h3 className="text-xl font-bold text-white mb-2 text-center">Datos Personales y Envío</h3>
+            <p className="text-sm text-white/40 text-center mb-8">Completa tus datos para enviar la cotización</p>
+
+            {submitResult === 'success' ? (
+              /* Success state */
+              <div className="max-w-lg mx-auto text-center">
+                <div className="w-20 h-20 rounded-full bg-[#00E676]/20 flex items-center justify-center mx-auto mb-6">
+                  <CheckCircle className="w-10 h-10 text-[#00E676]" />
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-3">¡Cotización Enviada!</h3>
+                <p className="text-white/50 mb-6">
+                  Hemos enviado tu cotización a <span className="text-[#00E676]">ecotaxi@oyc-srl.com</span>.
+                  Nuestro equipo se pondrá en contacto contigo pronto.
+                </p>
+                <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] mb-6 text-left">
+                  <h4 className="text-white font-semibold mb-3">Resumen</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between"><span className="text-white/40">Total estimado</span><span className="text-[#00E676] font-bold text-lg">Bs {grandTotal.toLocaleString()}</span></div>
+                    <div className="flex justify-between"><span className="text-white/40">Tipo</span><span className="text-white">{moveType}</span></div>
+                    <div className="flex justify-between"><span className="text-white/40">Vehículo</span><span className="text-white">{getRecommendation(totalVolume).vehicle}</span></div>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <a href={`https://wa.me/59173662803?text=${buildWhatsAppMsg()}`} target="_blank" rel="noopener noreferrer"
+                    className="w-full py-3 rounded-xl bg-[#25D366] text-white font-semibold text-sm flex items-center justify-center gap-2 hover:bg-[#128C7E] transition-all">
+                    <MessageCircle className="w-4 h-4" /> Enviar por WhatsApp
+                  </a>
+                  <button onClick={() => { setSubmitResult(null); setStep(1) }}
+                    className="w-full py-3 rounded-xl bg-white/[0.06] text-white/70 font-semibold text-sm hover:bg-white/[0.1] transition-all border border-white/[0.08]">
+                    Nueva Cotización
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                  <div>
+                    <label className="text-xs text-white/40 block mb-1.5">Nombre completo *</label>
+                    <input type="text" value={fullName} onChange={e => setFullName(e.target.value)}
+                      className={inputClass} placeholder="Tu nombre completo" required />
+                  </div>
+                  <div>
+                    <label className="text-xs text-white/40 block mb-1.5">Teléfono *</label>
+                    <div className="flex gap-2">
+                      <input type="tel" value={phone} onChange={e => setPhone(e.target.value)}
+                        className={inputClass + ' flex-1'} placeholder="+591 xxx xxxxx" required />
+                    </div>
+                    <div className="mt-2">
+                      <button onClick={() => setHasWhatsApp(!hasWhatsApp)}
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${hasWhatsApp ? 'bg-[#25D366]/20 text-[#25D366] border border-[#25D366]/30' : 'bg-white/[0.04] text-white/30 border border-white/[0.08]'}`}>
+                        <MessageCircle className="w-3 h-3" /> Tiene WhatsApp
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div className="mb-6">
+                  <label className="text-xs text-white/40 block mb-1.5">Correo electrónico *</label>
+                  <input type="email" value={email} onChange={e => setEmail(e.target.value)}
+                    className={inputClass + ' max-w-lg'} placeholder="tu@email.com" required />
+                </div>
+
+                {/* Summary */}
+                <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] mb-6">
+                  <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
+                    <ClipboardList className="w-4 h-4 text-[#0077BD]" /> Resumen de Cotización
+                  </h4>
+                  <div className="space-y-2 text-sm max-h-48 overflow-y-auto custom-scroll">
+                    <div className="flex justify-between"><span className="text-white/40">Tipo de mudanza</span><span className="text-white capitalize">{moveType} / {catType}</span></div>
+                    <div className="flex justify-between"><span className="text-white/40">Volumen</span><span className="text-white">{totalVolume} m³</span></div>
+                    <div className="flex justify-between"><span className="text-white/40">Vehículo</span><span className="text-white">{getRecommendation(totalVolume).vehicle}</span></div>
+                    <div className="flex justify-between"><span className="text-white/40">Distancia</span><span className="text-white">{routeDistance > 0 ? `${routeDistance} km` : '~10 km'}</span></div>
+                    <div className="h-px bg-white/[0.06]" />
+                    <div className="flex justify-between"><span className="text-white/40">Precio base</span><span className="text-white">Bs {basePrice.toLocaleString()}</span></div>
+                    <div className="flex justify-between"><span className="text-white/40">Extras origen</span><span className="text-white">Bs {originExtrasTotal.toLocaleString()}</span></div>
+                    <div className="flex justify-between"><span className="text-white/40">Extras destino</span><span className="text-white">Bs {destExtrasTotal.toLocaleString()}</span></div>
+                    {wantsInsurance && <div className="flex justify-between"><span className="text-white/40">Seguro</span><span className="text-white">Bs {insuranceCost.toLocaleString()}</span></div>}
+                    {includeIva && <div className="flex justify-between"><span className="text-white/40">IVA 16%</span><span className="text-white">Bs {ivaAmount.toLocaleString()}</span></div>}
+                    <div className="h-px bg-white/[0.06]" />
+                    <div className="flex justify-between"><span className="text-white font-bold">Total estimado</span><span className="text-xl font-bold text-[#00E676]">Bs {grandTotal.toLocaleString()}</span></div>
+                  </div>
+                </div>
+
+                {submitResult === 'error' && (
+                  <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 mb-4 text-sm text-red-400 flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0" /> Error al enviar. Intenta de nuevo o contáctanos por WhatsApp.
+                  </div>
+                )}
+
+                <div className="flex justify-between items-center">
+                  <button onClick={() => setStep(6)} className="px-6 py-3 rounded-full text-sm font-semibold text-white/60 border border-white/[0.1] hover:border-white/20 transition-all">← Atrás</button>
+                  <div className="flex gap-3">
+                    <a href={`https://wa.me/59173662803?text=${buildWhatsAppMsg()}`} target="_blank" rel="noopener noreferrer"
+                      className="px-6 py-3 rounded-full text-sm font-semibold bg-[#25D366] text-white flex items-center gap-2 hover:bg-[#128C7E] transition-all">
+                      <MessageCircle className="w-4 h-4" /> WhatsApp
+                    </a>
+                    <button onClick={handleSubmit} disabled={isSubmitting || !fullName || !phone || !email}
+                      className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+                      {isSubmitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Enviando...</> : <><Send className="w-4 h-4" /> Enviar Cotización</>}
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        )}
       </div>
-      <style jsx>{`
+
+      {/* Custom styles */}
+      <style jsx global>{`
+        .origin-marker { filter: hue-rotate(100deg) saturate(1.5); }
+        .dest-marker { filter: hue-rotate(-30deg) saturate(2) brightness(0.8); }
+        .stop-marker { filter: hue-rotate(180deg) saturate(1.5) brightness(1.2); }
         .custom-scroll::-webkit-scrollbar { width: 4px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
         .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
         .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+        .leaflet-container { background: #0a0e17; }
+        .leaflet-control-zoom a { background: #0a0e17 !important; color: white !important; border-color: rgba(255,255,255,0.1) !important; }
+        .leaflet-control-attribution { background: rgba(10,14,23,0.8) !important; color: rgba(255,255,255,0.3) !important; font-size: 8px !important; }
+        .leaflet-control-attribution a { color: rgba(255,255,255,0.4) !important; }
       `}</style>
     </section>
   )
