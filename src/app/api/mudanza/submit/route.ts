@@ -8,7 +8,14 @@ export async function POST(request: NextRequest) {
     const {
       moveType, catType, totalVolume, routeDistance, routeDuration,
       originAddress, destAddress, intermediateStops,
-      originExtras, destExtras, originHelpers, destHelpers,
+      vehicleType, selectedVehicle,
+      embalajeType, embalajeCost, boxes, boxesCost, materials, materialsCost,
+      handlingExtras, handlingCost,
+      originFloor, elevatorOrigin, originFloorCost, originCaminata, originFachada,
+      destFloor, elevatorDest, destFloorCost, destCaminata, destFachada,
+      accessibilityCost,
+      helpers, helpersCost,
+      logisticsExtras, logisticsCost,
       wantsInsurance, insuranceAmount, insuranceCost,
       includeIva, ivaAmount, razonSocial, nit, paymentMethod,
       basePrice, extrasTotal, subtotal, grandTotal,
@@ -21,12 +28,39 @@ export async function POST(request: NextRequest) {
       ? items.map((i: { qty: number; name: string; vol: number; emoji: string }) => `  ${i.emoji} ${i.qty}x ${i.name} (${i.vol} m³)`).join('\n')
       : '  Ninguno seleccionado'
 
-    const originExtraNames = originExtras ? Object.keys(originExtras).join(', ') || 'Ninguno' : 'Ninguno'
-    const destExtraNames = destExtras ? Object.keys(destExtras).join(', ') || 'Ninguno' : 'Ninguno'
-
     const stopsList = intermediateStops && intermediateStops.length > 0
       ? intermediateStops.map((s: { address: string }, i: number) => `  Parada ${i + 1}: ${s.address}`).join('\n')
       : '  Ninguna'
+
+    const embalajeLabel = embalajeType === 'completo' ? 'Completo (Bs 45/m³)' : embalajeType === 'solo_embalaje' ? 'Solo Embalaje (Bs 30/m³)' : embalajeType === 'solo_desembalaje' ? 'Solo Desembalaje (Bs 15/m³)' : 'Ninguno'
+
+    const boxesList = boxes && Object.keys(boxes).length > 0
+      ? Object.entries(boxes).map(([id, qty]) => {
+          const boxMap: Record<string, string> = { caja_peq: 'Caja Pequeña', caja_med: 'Caja Mediana', caja_gra: 'Caja Grande' }
+          return `  ${qty}x ${boxMap[id] || id}`
+        }).join('\n')
+      : '  Ninguna'
+
+    const materialsList = materials && Object.keys(materials).length > 0
+      ? Object.entries(materials).map(([id, qty]) => {
+          const matMap: Record<string, string> = { papel_film: 'Papel Film', papel_burbuja: 'Papel Burbuja', papel_kraft: 'Papel Kraft', manta_proteccion: 'Manta de Protección', cinta_embalar: 'Cinta de Embalar', etiquetas: 'Etiquetas y Marcadores' }
+          return `  ${qty}x ${matMap[id] || id}`
+        }).join('\n')
+      : '  Ninguno'
+
+    const handlingList = handlingExtras && Object.keys(handlingExtras).length > 0
+      ? Object.entries(handlingExtras).map(([id, qty]) => {
+          const hMap: Record<string, string> = { armado_muebles: 'Armado/Desarmado Muebles', embalaje_fragil: 'Embalaje Frágil', objetos_pesados: 'Objetos Pesados' }
+          return `  ${qty}x ${hMap[id] || id}`
+        }).join('\n')
+      : '  Ninguno'
+
+    const logisticsList = logisticsExtras && Object.keys(logisticsExtras).length > 0
+      ? Object.entries(logisticsExtras).map(([id, qty]) => {
+          const lMap: Record<string, string> = { punto_carga_extra: 'Punto de Carga Adicional', retiro_cajas: 'Desescombro/Retiro de Cajas' }
+          return `  ${qty}x ${lMap[id] || id}`
+        }).join('\n')
+      : '  Ninguno'
 
     const emailBody = `
 ═══════════════════════════════════════
@@ -38,31 +72,54 @@ TIPO DE MUDANZA: ${moveType?.toUpperCase() || 'N/A'}
 CATEGORÍA: ${catType?.toUpperCase() || 'N/A'}
 
 VOLUMEN TOTAL: ${totalVolume || 0} m³
-VEHÍCULO RECOMENDADO: ${vehicleRecommendation || 'N/A'}
+VEHÍCULO SELECCIONADO: ${selectedVehicle?.name || vehicleRecommendation || 'N/A'}
+TIPO VEHÍCULO: ${vehicleType === 'cerrado' ? 'Furgón (Cerrado)' : vehicleType === 'abierto' ? 'Camioneta (Abierto)' : 'N/A'}
 
 DISTANCIA: ${routeDistance || '~10'} km
 DURACIÓN ESTIMADA: ${routeDuration ? routeDuration + ' min' : 'N/A'}
 
 ── ORIGEN ─────────────────────────────
 Dirección: ${originAddress || 'No especificada'}
-Piso: (ver extras)
-${originHelpers > 0 ? `Ayudantes: ${originHelpers}` : ''}
+Piso: ${originFloor === 'baja' ? 'Planta baja' : `Piso ${originFloor}`}${elevatorOrigin ? ' (con elevador)' : ' (sin elevador)'}
+${originFloorCost > 0 ? `Costo piso: Bs ${originFloorCost}` : ''}
+${originCaminata > 0 ? `Distancia caminata: ${originCaminata} x 10m` : ''}
+${originFachada > 0 ? `Elevador fachada: ${originFachada} hr` : ''}
 
 ── DESTINO ────────────────────────────
 Dirección: ${destAddress || 'No especificada'}
-Piso: (ver extras)
-${destHelpers > 0 ? `Ayudantes: ${destHelpers}` : ''}
+Piso: ${destFloor === 'baja' ? 'Planta baja' : `Piso ${destFloor}`}${elevatorDest ? ' (con elevador)' : ' (sin elevador)'}
+${destFloorCost > 0 ? `Costo piso: Bs ${destFloorCost}` : ''}
+${destCaminata > 0 ? `Distancia caminata: ${destCaminata} x 10m` : ''}
+${destFachada > 0 ? `Elevador fachada: ${destFachada} hr` : ''}
 
 ── PARADAS INTERMEDIAS ────────────────
 ${stopsList}
 
-── EXTRAS DE ORIGEN ───────────────────
-${originExtraNames}
-${originHelpers > 0 ? `Ayudantes en origen: ${originHelpers} x Bs 150 = Bs ${originHelpers * 150}` : ''}
+── EMBALAJE ───────────────────────────
+Tipo: ${embalajeLabel}
+${embalajeCost > 0 ? `Costo: Bs ${embalajeCost}` : ''}
 
-── EXTRAS DE DESTINO ──────────────────
-${destExtraNames}
-${destHelpers > 0 ? `Ayudantes en destino: ${destHelpers} x Bs 150 = Bs ${destHelpers * 150}` : ''}
+── CAJAS ──────────────────────────────
+${boxesList}
+Costo cajas: Bs ${boxesCost || 0}
+
+── MATERIALES ─────────────────────────
+${materialsList}
+Costo materiales: Bs ${materialsCost || 0}
+
+── MANIPULACIÓN ───────────────────────
+${handlingList}
+Costo manipulación: Bs ${handlingCost || 0}
+
+── ACCESIBILIDAD ──────────────────────
+Costo total accesibilidad: Bs ${accessibilityCost || 0}
+
+── AYUDANTES ──────────────────────────
+${helpers > 0 ? `${helpers} ayudantes × Bs ${selectedVehicle?.helperPrice || 80} = Bs ${helpersCost}` : 'Ninguno'}
+
+── LOGÍSTICA ──────────────────────────
+${logisticsList}
+Costo logística: Bs ${logisticsCost || 0}
 
 ── SEGURO ─────────────────────────────
 ${wantsInsurance ? `Sí - Valor declarado: Bs ${insuranceAmount?.toLocaleString()} - Costo: Bs ${insuranceCost?.toLocaleString()}` : 'No incluye seguro'}
@@ -122,7 +179,6 @@ Cotización generada desde ecotaxibolivia.com
     } catch (emailError) {
       console.error('Email sending failed:', emailError)
       // Still return success so the user can use WhatsApp
-      // The email might fail if SMTP is not configured
     }
 
     // Build WhatsApp link

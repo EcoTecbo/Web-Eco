@@ -180,50 +180,59 @@ const ROOMS: Record<string, { label: string; items: FurnitureItem[] }> = {
 
 const ROOM_KEYS = Object.keys(ROOMS)
 
-/* extras */
+/* extras (legacy - kept for type reference) */
 interface Extra { name: string; price: number; unit?: string }
-const EXTRAS: Extra[] = [
-  { name: 'Embalaje completo', price: 500 }, { name: 'Desembalaje completo', price: 500 },
-  { name: 'Ayudante de carga (c/u)', price: 150 }, { name: 'Póliza seguro básica', price: 200 },
-  { name: 'Póliza seguro premium', price: 500 }, { name: 'Carga planta alta sin elevador (p/piso)', price: 100, unit: 'piso' },
-  { name: 'Carga planta alta con elevador', price: 150 }, { name: 'Desmontaje de muebles', price: 300 },
-  { name: 'Montaje de muebles', price: 300 }, { name: 'Empaque frágil (cristalería)', price: 150 },
-  { name: 'Protección pisos y paredes', price: 100 }, { name: 'Guardamuebles (almacenamiento)', price: 200, unit: 'semana' },
-  { name: 'Traslado electrodomésticos especiales', price: 250 },
+
+/* Box purchase options */
+const BOX_OPTIONS = [
+  { id: 'caja_peq', name: 'Caja Pequeña (30×30×30 cm)', price: 15, emoji: '📦' },
+  { id: 'caja_med', name: 'Caja Mediana (40×40×40 cm)', price: 25, emoji: '📦' },
+  { id: 'caja_gra', name: 'Caja Grande (50×50×50 cm)', price: 35, emoji: '📦' },
 ]
 
-/* Origin extras */
-const ORIGIN_EXTRAS: Extra[] = [
-  { name: 'Embalaje completo', price: 500 },
-  { name: 'Desmontaje de muebles', price: 300 },
-  { name: 'Empaque frágil/cristalería', price: 150 },
-  { name: 'Protección pisos y paredes', price: 100 },
-  { name: 'Carga planta alta sin elevador', price: 100, unit: 'piso' },
-  { name: 'Carga planta alta con elevador', price: 150 },
+/* Packing materials */
+const PACKING_MATERIALS = [
+  { id: 'papel_film', name: 'Papel Film (rollo)', price: 30, emoji: '🔀' },
+  { id: 'papel_burbuja', name: 'Papel Burbuja (rollo)', price: 45, emoji: '🫧' },
+  { id: 'papel_kraft', name: 'Papel Kraft (rollo)', price: 25, emoji: '🟫' },
+  { id: 'manta_proteccion', name: 'Manta de Protección', price: 50, emoji: '🛡️' },
+  { id: 'cinta_embalar', name: 'Cinta de Embalar (rollo)', price: 15, emoji: '📎' },
+  { id: 'etiquetas', name: 'Etiquetas y Marcadores', price: 10, emoji: '🏷️' },
 ]
 
-/* Destination extras */
-const DEST_EXTRAS: Extra[] = [
-  { name: 'Desembalaje completo', price: 500 },
-  { name: 'Montaje de muebles', price: 300 },
-  { name: 'Traslado electrodomésticos especiales', price: 250 },
-  { name: 'Guardamuebles/almacenamiento', price: 200, unit: 'semana' },
+/* Handling extras (per item, applies to both origin/dest) */
+const HANDLING_EXTRAS = [
+  { id: 'armado_muebles', name: 'Armado y Desarmado de Muebles Grandes', price: 80, unit: 'mueble', emoji: '🔧', desc: 'Roperos, camas, cunas, escritorios grandes' },
+  { id: 'embalaje_fragil', name: 'Embalaje Especial Objetos Frágiles', price: 60, unit: 'juego', emoji: '🍷', desc: 'Vajilla, espejos, obras de arte, pantallas TV' },
+  { id: 'objetos_pesados', name: 'Objetos de Gran Peso / Línea Blanca', price: 120, unit: 'objeto', emoji: '🏋️', desc: 'Pianos, cajas fuertes, refrigeradores 2 puertas' },
+]
+
+/* Accessibility extras (per location - origin and destination separately) */
+const ACCESSIBILITY_EXTRAS = [
+  { id: 'distancia_caminata', name: 'Distancia de Caminata / Acarreo', price: 20, unit: '10m', emoji: '🚶', desc: 'Si el camión no puede estacionar frente a la puerta' },
+  { id: 'elevador_fachada', name: 'Elevador por Fachada (Grúa)', price: 200, unit: 'hr', emoji: '🏗️', desc: 'Grúa externa para subir muebles por ventana' },
+]
+
+/* Logistics extras */
+const LOGISTICS_EXTRAS = [
+  { id: 'punto_carga_extra', name: 'Punto de Carga Adicional (parada extra)', price: 100, unit: 'parada', emoji: '📍' },
+  { id: 'retiro_cajas', name: 'Desescombro / Retiro de Cajas y Material', price: 150, emoji: '♻️', desc: 'Retornamos días después para llevar cartón y plástico' },
 ]
 
 /* vehicles */
 const VEHICLES = [
   { cat: 'Camioneta', color: '#FB923C', items: [
-    { name: 'Pickup', cap: 8, desc: 'Caja abierta grande, ideal para cargas sin protección del clima', pax: 2 },
-    { name: 'Camioneta Pequeña', cap: 5, desc: 'Mudanzas pequeñas, departamento studio o 1 dormitorio', pax: 2 },
-    { name: 'Camioneta Mediana', cap: 12, desc: 'Mudanzas medianas, departamento 2 dormitorios', pax: 3 },
-    { name: 'Camioneta Larga', cap: 22, desc: 'Mudanzas grandes, casa 3+ dormitorios', pax: 3 },
-    { name: 'Camioneta Grande', cap: 35, desc: 'Mudanzas extra grandes o múltiples destinos', pax: 3 },
+    { name: 'Pickup', cap: 8, desc: 'Caja abierta grande, ideal para cargas sin protección del clima', pax: 2, floorElev: 5, floorNoElev: 10, helperPrice: 60, perKm: 8 },
+    { name: 'Camioneta Pequeña', cap: 5, desc: 'Mudanzas pequeñas, departamento studio o 1 dormitorio', pax: 2, floorElev: 10, floorNoElev: 15, helperPrice: 80, perKm: 10 },
+    { name: 'Camioneta Mediana', cap: 12, desc: 'Mudanzas medianas, departamento 2 dormitorios', pax: 3, floorElev: 15, floorNoElev: 20, helperPrice: 100, perKm: 12 },
+    { name: 'Camioneta Grande', cap: 35, desc: 'Mudanzas extra grandes o múltiples destinos', pax: 3, floorElev: 20, floorNoElev: 25, helperPrice: 120, perKm: 15 },
+    { name: 'Camioneta Larga', cap: 22, desc: 'Mudanzas grandes, casa 3+ dormitorios', pax: 3, floorElev: 25, floorNoElev: 30, helperPrice: 150, perKm: 18 },
   ]},
   { cat: 'Furgón', color: '#818CF8', items: [
-    { name: 'Furgón Pequeño', cap: 6, desc: 'Carga pequeña, mudanzas studio (6m³)', pax: 2 },
-    { name: 'Furgón Mediano', cap: 12, desc: 'Carga mediana, mudanzas 1-2 dormitorios (12m³)', pax: 2 },
-    { name: 'Furgón Grande', cap: 20, desc: 'Carga grande, mudanzas 2-3 dormitorios (20m³)', pax: 3 },
-    { name: 'Furgón Largo', cap: 30, desc: 'Carga extra grande, casas grandes (30m³)', pax: 3 },
+    { name: 'Furgón Pequeño', cap: 6, desc: 'Carga pequeña, mudanzas studio (6m³)', pax: 2, floorElev: 10, floorNoElev: 15, helperPrice: 80, perKm: 10 },
+    { name: 'Furgón Mediano', cap: 12, desc: 'Carga mediana, mudanzas 1-2 dormitorios (12m³)', pax: 2, floorElev: 15, floorNoElev: 20, helperPrice: 100, perKm: 12 },
+    { name: 'Furgón Grande', cap: 20, desc: 'Carga grande, mudanzas 2-3 dormitorios (20m³)', pax: 3, floorElev: 20, floorNoElev: 25, helperPrice: 120, perKm: 15 },
+    { name: 'Furgón Largo', cap: 30, desc: 'Carga extra grande, casas grandes (30m³)', pax: 3, floorElev: 25, floorNoElev: 30, helperPrice: 150, perKm: 18 },
   ]},
 ]
 
@@ -557,7 +566,7 @@ function FleetSection() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   5. MOVING CALCULATOR (COMPLETELY REWRITTEN — 7 STEPS)
+   5. MOVING CALCULATOR (6 STEPS)
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 /* ═══ CALCULATOR SECTION ═══ */
@@ -567,6 +576,10 @@ function CalculatorSection() {
   const [catType, setCatType] = useState<CatType>('casa')
   const [inventory, setInventory] = useState<Record<string, number>>({})
   const [activeRoom, setActiveRoom] = useState('recamara')
+
+  // Vehicle selection
+  const [vehicleType, setVehicleType] = useState<'cerrado' | 'abierto'>('cerrado')
+  const [selectedVehicle, setSelectedVehicle] = useState<typeof VEHICLES[0]['items'][0] | null>(null)
 
   // Step 3: Route & Direction
   const [origin, setOrigin] = useState<LatLng | null>(null)
@@ -584,20 +597,35 @@ function CalculatorSection() {
   const [destResults, setDestResults] = useState<NominatimResult[]>([])
   const [isCalculatingRoute, setIsCalculatingRoute] = useState(false)
 
-  // Step 4: Origin extras
-  const [originExtras, setOriginExtras] = useState<Record<string, number>>({})
+  // Embalaje
+  const [embalajeType, setEmbalajeType] = useState<'ninguno' | 'completo' | 'solo_embalaje' | 'solo_desembalaje'>('ninguno')
+
+  // Boxes and materials
+  const [boxes, setBoxes] = useState<Record<string, number>>({})
+  const [materials, setMaterials] = useState<Record<string, number>>({})
+
+  // Handling extras
+  const [handlingExtras, setHandlingExtras] = useState<Record<string, number>>({})
+
+  // Accessibility - Origin
   const [originFloor, setOriginFloor] = useState('baja')
   const [elevatorOrigin, setElevatorOrigin] = useState(false)
-  const [originHelpers, setOriginHelpers] = useState(0)
+  const [originCaminata, setOriginCaminata] = useState(0)
+  const [originFachada, setOriginFachada] = useState(0)
 
-  // Step 5: Destination extras
-  const [destExtras, setDestExtras] = useState<Record<string, number>>({})
+  // Accessibility - Destination
   const [destFloor, setDestFloor] = useState('baja')
   const [elevatorDest, setElevatorDest] = useState(false)
-  const [destHelpers, setDestHelpers] = useState(0)
-  const [guardamueblesWeeks, setGuardamueblesWeeks] = useState(1)
+  const [destCaminata, setDestCaminata] = useState(0)
+  const [destFachada, setDestFachada] = useState(0)
 
-  // Step 6: Insurance, IVA, Payment
+  // Helpers (shared for carga y descarga)
+  const [helpers, setHelpers] = useState(0)
+
+  // Logistics
+  const [logisticsExtras, setLogisticsExtras] = useState<Record<string, number>>({})
+
+  // Step 5: Insurance, IVA, Payment
   const [wantsInsurance, setWantsInsurance] = useState(false)
   const [insuranceAmount, setInsuranceAmount] = useState<number>(5000)
   const [customInsurance, setCustomInsurance] = useState('')
@@ -606,7 +634,7 @@ function CalculatorSection() {
   const [nit, setNit] = useState('')
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('efectivo')
 
-  // Step 7: Personal data
+  // Step 6: Personal data
   const [fullName, setFullName] = useState('')
   const [phone, setPhone] = useState('')
   const [hasWhatsApp, setHasWhatsApp] = useState(true)
@@ -645,56 +673,102 @@ function CalculatorSection() {
     return { vehicle: 'Camioneta Grande + Furgón Largo', detail: '2 vehículos o 2 viajes recomendados' }
   }
 
-  // Origin extras total
-  const originExtrasTotal = useMemo(() => {
-    let t = 0
-    Object.entries(originExtras).forEach(([name, qty]) => {
-      const extra = ORIGIN_EXTRAS.find(e => e.name === name)
-      if (!extra) return
-      if (name === 'Carga planta alta sin elevador') {
-        const floors = originFloor === 'baja' ? 0 : parseInt(originFloor)
-        t += extra.price * floors * qty
-      } else {
-        t += extra.price * qty
-      }
-    })
-    t += originHelpers * 150
-    return t
-  }, [originExtras, originFloor, originHelpers])
+  // ──── Calculations ────
+  // Floor cost helpers
+  const getFloorCount = (floor: string) => floor === 'baja' ? 0 : parseInt(floor) || 0
 
-  // Dest extras total
-  const destExtrasTotal = useMemo(() => {
-    let t = 0
-    Object.entries(destExtras).forEach(([name, qty]) => {
-      const extra = DEST_EXTRAS.find(e => e.name === name)
-      if (!extra) return
-      if (name === 'Guardamuebles/almacenamiento') {
-        t += extra.price * guardamueblesWeeks * qty
-      } else {
-        t += extra.price * qty
-      }
-    })
-    t += destHelpers * 150
-    return t
-  }, [destExtras, destHelpers, guardamueblesWeeks])
+  const originFloorCost = useMemo(() => {
+    if (!selectedVehicle) return 0
+    const floors = getFloorCount(originFloor)
+    if (floors === 0) return 0
+    const pricePerFloor = elevatorOrigin ? selectedVehicle.floorElev : selectedVehicle.floorNoElev
+    return floors * pricePerFloor
+  }, [selectedVehicle, originFloor, elevatorOrigin])
 
-  const extrasTotal = originExtrasTotal + destExtrasTotal
+  const destFloorCost = useMemo(() => {
+    if (!selectedVehicle) return 0
+    const floors = getFloorCount(destFloor)
+    if (floors === 0) return 0
+    const pricePerFloor = elevatorDest ? selectedVehicle.floorElev : selectedVehicle.floorNoElev
+    return floors * pricePerFloor
+  }, [selectedVehicle, destFloor, elevatorDest])
+
+  // Embalaje cost
+  const embalajeCost = useMemo(() => {
+    if (embalajeType === 'ninguno') return 0
+    if (embalajeType === 'completo') return Math.round(totalVolume * 45)
+    if (embalajeType === 'solo_embalaje') return Math.round(totalVolume * 30)
+    if (embalajeType === 'solo_desembalaje') return Math.round(totalVolume * 15)
+    return 0
+  }, [embalajeType, totalVolume])
+
+  // Boxes cost
+  const boxesCost = useMemo(() => {
+    let t = 0
+    Object.entries(boxes).forEach(([id, qty]) => {
+      const box = BOX_OPTIONS.find(b => b.id === id)
+      if (box) t += box.price * qty
+    })
+    return t
+  }, [boxes])
+
+  // Materials cost
+  const materialsCost = useMemo(() => {
+    let t = 0
+    Object.entries(materials).forEach(([id, qty]) => {
+      const mat = PACKING_MATERIALS.find(m => m.id === id)
+      if (mat) t += mat.price * qty
+    })
+    return t
+  }, [materials])
+
+  // Handling extras cost
+  const handlingCost = useMemo(() => {
+    let t = 0
+    Object.entries(handlingExtras).forEach(([id, qty]) => {
+      const extra = HANDLING_EXTRAS.find(e => e.id === id)
+      if (extra) t += extra.price * qty
+    })
+    return t
+  }, [handlingExtras])
+
+  // Accessibility extras cost
+  const accessibilityCost = useMemo(() => {
+    const caminataPrice = ACCESSIBILITY_EXTRAS.find(a => a.id === 'distancia_caminata')!.price
+    const fachadaPrice = ACCESSIBILITY_EXTRAS.find(a => a.id === 'elevador_fachada')!.price
+    return (originCaminata * caminataPrice) + (originFachada * fachadaPrice)
+      + (destCaminata * caminataPrice) + (destFachada * fachadaPrice)
+  }, [originCaminata, originFachada, destCaminata, destFachada])
+
+  // Helpers cost
+  const helpersCost = useMemo(() => {
+    if (!selectedVehicle) return helpers * 80
+    return helpers * selectedVehicle.helperPrice
+  }, [helpers, selectedVehicle])
+
+  // Logistics cost
+  const logisticsCost = useMemo(() => {
+    let t = 0
+    Object.entries(logisticsExtras).forEach(([id, qty]) => {
+      const extra = LOGISTICS_EXTRAS.find(e => e.id === id)
+      if (extra) t += extra.price * qty
+    })
+    return t
+  }, [logisticsExtras])
+
+  const extrasTotal = embalajeCost + boxesCost + materialsCost + handlingCost + originFloorCost + destFloorCost + accessibilityCost + helpersCost + logisticsCost
 
   const basePrice = useMemo(() => {
     const d = routeDistance > 0 ? routeDistance : 10
-    const rates: Record<MoveType, { perKm: number; base: number }> = {
-      local: { perKm: 15, base: 200 },
-      provincial: { perKm: 12, base: 500 },
-      nacional: { perKm: 10, base: 1000 },
-    }
-    const r = rates[moveType]
-    return r.base + r.perKm * d
-  }, [moveType, routeDistance])
+    const bases: Record<MoveType, number> = { local: 200, provincial: 500, nacional: 1000 }
+    const perKm = selectedVehicle ? selectedVehicle.perKm : 10
+    return bases[moveType] + perKm * d
+  }, [moveType, routeDistance, selectedVehicle])
 
   const insuranceCost = useMemo(() => {
     if (!wantsInsurance) return 0
     const amount = customInsurance ? parseFloat(customInsurance) || 0 : insuranceAmount
-    return Math.round(amount * 0.03)
+    return Math.round(amount * 0.02)
   }, [wantsInsurance, insuranceAmount, customInsurance])
 
   const subtotal = basePrice + extrasTotal + insuranceCost
@@ -786,45 +860,48 @@ function CalculatorSection() {
     setIntermediateStops(prev => prev.filter(s => s.id !== id))
   }
 
-  // ──── Toggle extras ────
-  const toggleOriginExtra = (name: string) => {
-    setOriginExtras(prev => {
-      if (prev[name]) { const { [name]: _, ...rest } = prev; return rest }
-      return { ...prev, [name]: 1 }
-    })
-  }
-
-  const toggleDestExtra = (name: string) => {
-    setDestExtras(prev => {
-      if (prev[name]) { const { [name]: _, ...rest } = prev; return rest }
-      return { ...prev, [name]: 1 }
-    })
-  }
-
   // ──── Form submission ────
   const buildSummaryText = () => {
     const items = getSelectedItems().map(i => `${i.qty}x ${i.name}`).join(', ')
-    const rec = getRecommendation(totalVolume)
-    const originExtraNames = Object.keys(originExtras).join(', ') || 'Ninguno'
-    const destExtraNames = Object.keys(destExtras).join(', ') || 'Ninguno'
+    const vehicleName = selectedVehicle ? selectedVehicle.name : getRecommendation(totalVolume).vehicle
+    const embalajeLabel = embalajeType === 'completo' ? 'Completo (Bs 45/m³)' : embalajeType === 'solo_embalaje' ? 'Solo Embalaje (Bs 30/m³)' : embalajeType === 'solo_desembalaje' ? 'Solo Desembalaje (Bs 15/m³)' : 'Ninguno'
 
     let text = `COTIZACIÓN DE MUDANZA\n`
     text += `═══════════════════════\n`
     text += `Tipo: ${moveType.toUpperCase()}\n`
     text += `Categoría: ${catType.toUpperCase()}\n`
+    text += `Vehículo: ${vehicleName}\n`
     text += `Volumen: ${totalVolume} m³\n`
-    text += `Vehículo recomendado: ${rec.vehicle}\n`
     text += `Distancia: ${routeDistance > 0 ? routeDistance : '~10'} km\n`
     if (routeDuration > 0) text += `Duración estimada: ${routeDuration} min\n`
     text += `\nORIGEN: ${originAddress || 'No especificado'}\n`
-    text += `DESTINO: ${destAddress || 'No especificado'}\n`
+    text += `  Piso: ${originFloor === 'baja' ? 'Planta baja' : `Piso ${originFloor}`}${elevatorOrigin ? ' (con elevador)' : ' (sin elevador)'}\n`
+    if (originFloorCost > 0) text += `  Costo piso: Bs ${originFloorCost}\n`
+    if (originCaminata > 0) text += `  Distancia caminata: ${originCaminata} x 10m\n`
+    if (originFachada > 0) text += `  Elevador fachada: ${originFachada} hr\n`
+    text += `\nDESTINO: ${destAddress || 'No especificado'}\n`
+    text += `  Piso: ${destFloor === 'baja' ? 'Planta baja' : `Piso ${destFloor}`}${elevatorDest ? ' (con elevador)' : ' (sin elevador)'}\n`
+    if (destFloorCost > 0) text += `  Costo piso: Bs ${destFloorCost}\n`
+    if (destCaminata > 0) text += `  Distancia caminata: ${destCaminata} x 10m\n`
+    if (destFachada > 0) text += `  Elevador fachada: ${destFachada} hr\n`
     if (intermediateStops.length > 0) {
-      text += `PARADAS: ${intermediateStops.map(s => s.address).join(' → ')}\n`
+      text += `\nPARADAS: ${intermediateStops.map(s => s.address).join(' → ')}\n`
     }
-    text += `\nEXTRAS ORIGEN: ${originExtraNames}\n`
-    if (originHelpers > 0) text += `Ayudantes en origen: ${originHelpers}\n`
-    text += `EXTRAS DESTINO: ${destExtraNames}\n`
-    if (destHelpers > 0) text += `Ayudantes en destino: ${destHelpers}\n`
+    text += `\nEMBALAJE: ${embalajeLabel}\n`
+    if (embalajeCost > 0) text += `  Costo embalaje: Bs ${embalajeCost}\n`
+    if (Object.keys(boxes).length > 0) {
+      text += `CAJAS: ${Object.entries(boxes).map(([id, q]) => { const b = BOX_OPTIONS.find(x => x.id === id); return b ? `${q}x ${b.name}` : '' }).join(', ')}\n`
+    }
+    if (Object.keys(materials).length > 0) {
+      text += `MATERIALES: ${Object.entries(materials).map(([id, q]) => { const m = PACKING_MATERIALS.find(x => x.id === id); return m ? `${q}x ${m.name}` : '' }).join(', ')}\n`
+    }
+    if (Object.keys(handlingExtras).length > 0) {
+      text += `MANIPULACIÓN: ${Object.entries(handlingExtras).map(([id, q]) => { const h = HANDLING_EXTRAS.find(x => x.id === id); return h ? `${q}x ${h.name}` : '' }).join(', ')}\n`
+    }
+    if (helpers > 0) text += `AYUDANTES: ${helpers} (Bs ${selectedVehicle?.helperPrice || 80} c/u = Bs ${helpersCost})\n`
+    if (Object.keys(logisticsExtras).length > 0) {
+      text += `LOGÍSTICA: ${Object.entries(logisticsExtras).map(([id, q]) => { const l = LOGISTICS_EXTRAS.find(x => x.id === id); return l ? `${q}x ${l.name}` : '' }).join(', ')}\n`
+    }
     if (wantsInsurance) text += `\nSeguro: Bs ${customInsurance || insuranceAmount} (costo: Bs ${insuranceCost})\n`
     text += `\nMETODO PAGO: ${paymentMethod}\n`
     if (includeIva) text += `IVA 16%: Bs ${ivaAmount}\n`
@@ -854,13 +931,20 @@ function CalculatorSection() {
         body: JSON.stringify({
           moveType, catType, totalVolume, routeDistance, routeDuration,
           originAddress, destAddress, intermediateStops,
-          originExtras, destExtras, originHelpers, destHelpers,
+          vehicleType, selectedVehicle: selectedVehicle ? { name: selectedVehicle.name, cap: selectedVehicle.cap, perKm: selectedVehicle.perKm, helperPrice: selectedVehicle.helperPrice, floorElev: selectedVehicle.floorElev, floorNoElev: selectedVehicle.floorNoElev } : null,
+          embalajeType, embalajeCost, boxes, boxesCost, materials, materialsCost,
+          handlingExtras, handlingCost,
+          originFloor, elevatorOrigin, originFloorCost, originCaminata, originFachada,
+          destFloor, elevatorDest, destFloorCost, destCaminata, destFachada,
+          accessibilityCost,
+          helpers, helpersCost,
+          logisticsExtras, logisticsCost,
           wantsInsurance, insuranceAmount: customInsurance || insuranceAmount, insuranceCost,
           includeIva, ivaAmount, razonSocial, nit, paymentMethod,
           basePrice, extrasTotal, subtotal, grandTotal,
           fullName, phone, hasWhatsApp, email,
           items: getSelectedItems(),
-          vehicleRecommendation: getRecommendation(totalVolume).vehicle,
+          vehicleRecommendation: selectedVehicle ? selectedVehicle.name : getRecommendation(totalVolume).vehicle,
         }),
       })
       if (res.ok) {
@@ -879,10 +963,9 @@ function CalculatorSection() {
     { num: 1, label: 'Tipo' },
     { num: 2, label: 'Inventario' },
     { num: 3, label: 'Ruta' },
-    { num: 4, label: 'Origen +' },
-    { num: 5, label: 'Destino +' },
-    { num: 6, label: 'Seguro' },
-    { num: 7, label: 'Envío' },
+    { num: 4, label: 'Extras' },
+    { num: 5, label: 'Seguro' },
+    { num: 6, label: 'Envío' },
   ]
 
   const inputClass = 'w-full bg-white/[0.04] border border-white/[0.08] text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#00E676]/40 transition-all'
@@ -933,7 +1016,7 @@ function CalculatorSection() {
           )}
         </div>
 
-        {/* ═══════════════ Step 1: Tipo de Mudanza ═══════════════ */}
+        {/* ═══════════════ Step 1: Tipo + Vehículo ═══════════════ */}
         {step === 1 && (
           <div className="max-w-4xl mx-auto">
             <h3 className="text-xl font-bold text-white mb-2 text-center">¿Qué tipo de mudanza necesitas?</h3>
@@ -966,8 +1049,51 @@ function CalculatorSection() {
                 </button>
               ))}
             </div>
+
+            {/* Vehicle type selection */}
+            <h3 className="text-xl font-bold text-white mb-2 text-center">¿Vehículo cerrado o abierto?</h3>
+            <p className="text-sm text-white/40 text-center mb-6">Los furgones protegen del clima, las camionetas tienen caja abierta</p>
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <button onClick={() => { setVehicleType('cerrado'); setSelectedVehicle(null) }}
+                className={`p-5 rounded-2xl text-center transition-all duration-300 ${vehicleType === 'cerrado' ? 'bg-[#818CF8]/10 border-2 border-[#818CF8]/50' : 'bg-white/[0.03] border border-white/[0.06] hover:border-white/10'}`}>
+                <div className="text-3xl mb-2">🚛</div>
+                <div className="text-white font-semibold mb-1">Furgón (Cerrado)</div>
+                <div className="text-xs text-white/40">Protección completa del clima</div>
+              </button>
+              <button onClick={() => { setVehicleType('abierto'); setSelectedVehicle(null) }}
+                className={`p-5 rounded-2xl text-center transition-all duration-300 ${vehicleType === 'abierto' ? 'bg-[#FB923C]/10 border-2 border-[#FB923C]/50' : 'bg-white/[0.03] border border-white/[0.06] hover:border-white/10'}`}>
+                <div className="text-3xl mb-2">🛻</div>
+                <div className="text-white font-semibold mb-1">Camioneta (Abierto)</div>
+                <div className="text-xs text-white/40">Caja abierta, ideal para cargas resistentes</div>
+              </button>
+            </div>
+
+            {/* Vehicle options */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
+              {(vehicleType === 'cerrado' ? VEHICLES.find(v => v.cat === 'Furgón')! : VEHICLES.find(v => v.cat === 'Camioneta')!).items.map((v) => {
+                const isSelected = selectedVehicle?.name === v.name
+                const catColor = vehicleType === 'cerrado' ? '#818CF8' : '#FB923C'
+                return (
+                  <button key={v.name} onClick={() => setSelectedVehicle(v)}
+                    className={`p-4 rounded-xl text-left transition-all duration-200 ${isSelected ? `border-2` : 'bg-white/[0.02] border border-white/[0.06] hover:border-white/10'}`}
+                    style={isSelected ? { backgroundColor: `${catColor}08`, borderColor: `${catColor}50` } : {}}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-white font-semibold text-sm">{v.name}</span>
+                      <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ backgroundColor: `${catColor}15`, color: catColor }}>{v.cap} m³</span>
+                    </div>
+                    <p className="text-xs text-white/40 mb-2">{v.desc}</p>
+                    <div className="flex items-center gap-3 text-xs text-white/30">
+                      <span>{v.pax} pasajeros</span>
+                      <span>Bs {v.perKm}/km</span>
+                      <span>Ayudante Bs {v.helperPrice}</span>
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
             <div className="flex justify-end">
-              <button onClick={() => setStep(2)} className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)]">
+              <button onClick={() => setStep(2)} disabled={!selectedVehicle}
+                className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)] disabled:opacity-40 disabled:cursor-not-allowed">
                 Siguiente: Inventario →
               </button>
             </div>
@@ -1174,71 +1300,168 @@ function CalculatorSection() {
             <div className="flex justify-between">
               <button onClick={() => setStep(2)} className="px-6 py-3 rounded-full text-sm font-semibold text-white/60 border border-white/[0.1] hover:border-white/20 transition-all">← Atrás</button>
               <button onClick={() => setStep(4)} className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)]">
-                Siguiente: Complementos Origen →
+                Siguiente: Extras y Servicios →
               </button>
             </div>
           </div>
         )}
 
-        {/* ═══════════════ Step 4: Complementos de Origen ═══════════════ */}
+        {/* ═══════════════ Step 4: Extras y Servicios ═══════════════ */}
         {step === 4 && (
-          <div className="max-w-4xl mx-auto">
-            <h3 className="text-xl font-bold text-white mb-2 text-center">Complementos de Origen</h3>
-            <p className="text-sm text-white/40 text-center mb-8">Servicios adicionales en el punto de partida</p>
+          <div className="max-w-4xl mx-auto max-h-[80vh] overflow-y-auto custom-scroll pr-1">
+            <h3 className="text-xl font-bold text-white mb-2 text-center">Extras y Servicios</h3>
+            <p className="text-sm text-white/40 text-center mb-8">Personaliza tu mudanza con servicios adicionales</p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
-              {ORIGIN_EXTRAS.map((extra) => {
-                const checked = !!originExtras[extra.name]
-                return (
-                  <button key={extra.name} onClick={() => toggleOriginExtra(extra.name)}
-                    className={`flex items-center gap-3 p-4 rounded-xl text-left transition-all duration-200 ${checked ? 'bg-[#00E676]/5 border-[#00E676]/20 border' : 'bg-white/[0.02] border border-white/[0.06] hover:border-white/10'}`}>
-                    <div className={`w-5 h-5 rounded flex items-center justify-center shrink-0 transition-all ${checked ? 'bg-[#00E676]' : 'bg-white/[0.08] border border-white/[0.15]'}`}>
-                      {checked && <CheckCircle className="w-3.5 h-3.5 text-black" />}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm text-white font-medium truncate">{extra.name}</div>
-                      <div className="text-xs text-white/30">Bs {extra.price}{extra.unit ? `/${extra.unit}` : ''}</div>
-                    </div>
-                  </button>
-                )
-              })}
-            </div>
+            {/* Section A: Embalaje y Cajas */}
+            <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] mb-4">
+              <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
+                <span className="text-lg">📦</span> Embalaje y Cajas
+              </h4>
 
-            {/* Ayudantes en origen */}
-            <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] mb-6">
-              <div className="flex items-center justify-between mb-3">
-                <div>
-                  <h4 className="text-white font-semibold text-sm">Ayudantes en Origen</h4>
-                  <p className="text-xs text-white/30">Bs 150 c/u</p>
+              {/* Embalaje type */}
+              <div className="mb-5">
+                <label className="text-xs text-white/40 block mb-2">Servicio de Embalaje</label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {([['ninguno', 'Ninguno', '#666'], ['completo', 'Completo (Bs 45/m³)', '#00E676'], ['solo_embalaje', 'Solo Embalaje (Bs 30/m³)', '#0077BD'], ['solo_desembalaje', 'Solo Desembalaje (Bs 15/m³)', '#FF9800']] as const).map(([id, label, color]) => (
+                    <button key={id} onClick={() => setEmbalajeType(id as typeof embalajeType)}
+                      className={`p-3 rounded-xl text-xs font-semibold transition-all text-center ${embalajeType === id ? `border-2` : 'bg-white/[0.03] border border-white/[0.06] hover:border-white/10 text-white/50'}`}
+                      style={embalajeType === id ? { backgroundColor: `${color}10`, borderColor: `${color}50`, color } : {}}>
+                      {label}
+                    </button>
+                  ))}
                 </div>
-                <div className="flex items-center gap-3">
-                  <button onClick={() => setOriginHelpers(Math.max(0, originHelpers - 1))}
-                    className="w-9 h-9 rounded-xl bg-white/[0.06] flex items-center justify-center text-white/60 hover:bg-white/10 transition-all">
-                    <Minus className="w-4 h-4" />
-                  </button>
-                  <span className="text-xl font-bold text-white w-8 text-center">{originHelpers}</span>
-                  <button onClick={() => setOriginHelpers(originHelpers + 1)}
-                    className="w-9 h-9 rounded-xl bg-[#00E676]/20 flex items-center justify-center text-[#00E676] hover:bg-[#00E676]/30 transition-all">
-                    <Plus className="w-4 h-4" />
-                  </button>
+                {embalajeType !== 'ninguno' && totalVolume > 0 && (
+                  <div className="mt-2 p-3 rounded-xl bg-white/[0.02] border border-white/[0.06] text-xs text-white/50">
+                    {embalajeType === 'completo' && (
+                      <span>Embalaje (Bs 30/m³) + Desembalaje (Bs 15/m³) = Bs 45/m³ × {totalVolume}m³ = <span className="text-[#00E676] font-bold">Bs {embalajeCost}</span></span>
+                    )}
+                    {embalajeType === 'solo_embalaje' && (
+                      <span>Bs 30/m³ × {totalVolume}m³ = <span className="text-[#0077BD] font-bold">Bs {embalajeCost}</span></span>
+                    )}
+                    {embalajeType === 'solo_desembalaje' && (
+                      <span>Bs 15/m³ × {totalVolume}m³ = <span className="text-[#FF9800] font-bold">Bs {embalajeCost}</span></span>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Box purchase */}
+              <div className="mb-4">
+                <label className="text-xs text-white/40 block mb-2">Compra de Cajas</label>
+                <div className="space-y-2">
+                  {BOX_OPTIONS.map((box) => {
+                    const qty = boxes[box.id] || 0
+                    return (
+                      <div key={box.id} className={`flex items-center justify-between p-3 rounded-xl transition-all ${qty > 0 ? 'bg-[#00E676]/5 border border-[#00E676]/15' : 'bg-white/[0.02] border border-white/[0.04]'}`}>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm">{box.emoji}</span>
+                          <div>
+                            <div className="text-xs text-white/70">{box.name}</div>
+                            <div className="text-xs text-white/30">Bs {box.price} c/u</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button onClick={() => setBoxes(prev => { const n = Math.max(0, (prev[box.id] || 0) - 1); if (n === 0) { const { [box.id]: _, ...rest } = prev; return rest }; return { ...prev, [box.id]: n } })}
+                            className="w-7 h-7 rounded-lg bg-white/[0.06] flex items-center justify-center text-white/60 hover:bg-white/10 transition-all">
+                            <Minus className="w-3 h-3" />
+                          </button>
+                          <span className="w-6 text-center text-sm font-semibold text-white">{qty}</span>
+                          <button onClick={() => setBoxes(prev => ({ ...prev, [box.id]: (prev[box.id] || 0) + 1 }))}
+                            className="w-7 h-7 rounded-lg bg-[#00E676]/20 flex items-center justify-center text-[#00E676] hover:bg-[#00E676]/30 transition-all">
+                            <Plus className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
-              {originHelpers > 0 && (
-                <div className="text-sm text-[#00E676]">Bs {originHelpers * 150}</div>
-              )}
+
+              {/* Packing materials */}
+              <div>
+                <label className="text-xs text-white/40 block mb-2">Materiales de Embalaje</label>
+                <div className="space-y-2">
+                  {PACKING_MATERIALS.map((mat) => {
+                    const qty = materials[mat.id] || 0
+                    return (
+                      <div key={mat.id} className={`flex items-center justify-between p-3 rounded-xl transition-all ${qty > 0 ? 'bg-[#0077BD]/5 border border-[#0077BD]/15' : 'bg-white/[0.02] border border-white/[0.04]'}`}>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm">{mat.emoji}</span>
+                          <div>
+                            <div className="text-xs text-white/70">{mat.name}</div>
+                            <div className="text-xs text-white/30">Bs {mat.price} c/u</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button onClick={() => setMaterials(prev => { const n = Math.max(0, (prev[mat.id] || 0) - 1); if (n === 0) { const { [mat.id]: _, ...rest } = prev; return rest }; return { ...prev, [mat.id]: n } })}
+                            className="w-7 h-7 rounded-lg bg-white/[0.06] flex items-center justify-center text-white/60 hover:bg-white/10 transition-all">
+                            <Minus className="w-3 h-3" />
+                          </button>
+                          <span className="w-6 text-center text-sm font-semibold text-white">{qty}</span>
+                          <button onClick={() => setMaterials(prev => ({ ...prev, [mat.id]: (prev[mat.id] || 0) + 1 }))}
+                            className="w-7 h-7 rounded-lg bg-[#0077BD]/20 flex items-center justify-center text-[#0077BD] hover:bg-[#0077BD]/30 transition-all">
+                            <Plus className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
             </div>
 
-            {/* Piso y elevador origen */}
-            <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] mb-6">
+            {/* Section B: Manipulación de Objetos */}
+            <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] mb-4">
               <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-[#00E676]" /> Piso de Origen
+                <span className="text-lg">🔧</span> Manipulación de Objetos
               </h4>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-3">
+                {HANDLING_EXTRAS.map((extra) => {
+                  const qty = handlingExtras[extra.id] || 0
+                  return (
+                    <div key={extra.id} className={`p-4 rounded-xl transition-all ${qty > 0 ? 'bg-[#FF9800]/5 border border-[#FF9800]/15' : 'bg-white/[0.02] border border-white/[0.06]'}`}>
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm">{extra.emoji}</span>
+                          <div>
+                            <div className="text-sm text-white font-medium">{extra.name}</div>
+                            <div className="text-xs text-white/30">{extra.desc}</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0 ml-3">
+                          <button onClick={() => setHandlingExtras(prev => { const n = Math.max(0, (prev[extra.id] || 0) - 1); if (n === 0) { const { [extra.id]: _, ...rest } = prev; return rest }; return { ...prev, [extra.id]: n } })}
+                            className="w-7 h-7 rounded-lg bg-white/[0.06] flex items-center justify-center text-white/60 hover:bg-white/10 transition-all">
+                            <Minus className="w-3 h-3" />
+                          </button>
+                          <span className="w-6 text-center text-sm font-semibold text-white">{qty}</span>
+                          <button onClick={() => setHandlingExtras(prev => ({ ...prev, [extra.id]: (prev[extra.id] || 0) + 1 }))}
+                            className="w-7 h-7 rounded-lg bg-[#FF9800]/20 flex items-center justify-center text-[#FF9800] hover:bg-[#FF9800]/30 transition-all">
+                            <Plus className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between mt-1">
+                        <span className="text-xs text-white/30">Bs {extra.price}/{extra.unit}</span>
+                        {qty > 0 && <span className="text-xs text-[#FF9800] font-semibold">Bs {extra.price * qty}</span>}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Section C: Accesibilidad - Origen */}
+            <div className="p-5 rounded-2xl bg-white/[0.03] border border-[#00E676]/10 mb-4">
+              <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
+                <span className="text-lg">🏢</span> Accesibilidad — Origen
+                <span className="text-xs px-2 py-0.5 rounded-full bg-[#00E676]/10 text-[#00E676] font-semibold">Origen</span>
+              </h4>
+              <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
-                  <label className="text-xs text-white/40 block mb-1">Piso</label>
+                  <label className="text-xs text-white/40 block mb-1">Piso de origen</label>
                   <select value={originFloor} onChange={e => setOriginFloor(e.target.value)}
                     className={inputClass + ' appearance-none'}>
-                    {['baja', '1', '2', '3', '4', '5'].map(f => <option key={f} value={f} className="bg-[#0a0e17]">Planta {f === 'baja' ? 'baja' : f + '°'}</option>)}
+                    {['baja', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'].map(f => <option key={f} value={f} className="bg-[#0a0e17]">Planta {f === 'baja' ? 'baja' : f + '°'}</option>)}
                   </select>
                 </div>
                 <div>
@@ -1249,94 +1472,67 @@ function CalculatorSection() {
                   </button>
                 </div>
               </div>
-            </div>
-
-            <div className="flex justify-between">
-              <button onClick={() => setStep(3)} className="px-6 py-3 rounded-full text-sm font-semibold text-white/60 border border-white/[0.1] hover:border-white/20 transition-all">← Atrás</button>
-              <button onClick={() => setStep(5)} className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)]">
-                Siguiente: Complementos Destino →
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* ═══════════════ Step 5: Complementos de Destino ═══════════════ */}
-        {step === 5 && (
-          <div className="max-w-4xl mx-auto">
-            <h3 className="text-xl font-bold text-white mb-2 text-center">Complementos de Destino</h3>
-            <p className="text-sm text-white/40 text-center mb-8">Servicios adicionales en el punto de llegada</p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
-              {DEST_EXTRAS.map((extra) => {
-                const checked = !!destExtras[extra.name]
-                return (
-                  <div key={extra.name}>
-                    <button onClick={() => toggleDestExtra(extra.name)}
-                      className={`w-full flex items-center gap-3 p-4 rounded-xl text-left transition-all duration-200 ${checked ? 'bg-[#0077BD]/5 border-[#0077BD]/20 border' : 'bg-white/[0.02] border border-white/[0.06] hover:border-white/10'}`}>
-                      <div className={`w-5 h-5 rounded flex items-center justify-center shrink-0 transition-all ${checked ? 'bg-[#0077BD]' : 'bg-white/[0.08] border border-white/[0.15]'}`}>
-                        {checked && <CheckCircle className="w-3.5 h-3.5 text-white" />}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm text-white font-medium truncate">{extra.name}</div>
-                        <div className="text-xs text-white/30">Bs {extra.price}{extra.unit ? `/${extra.unit}` : ''}</div>
-                      </div>
-                    </button>
-                    {/* Guardamuebles weeks selector */}
-                    {checked && extra.name === 'Guardamuebles/almacenamiento' && (
-                      <div className="mt-2 ml-8 flex items-center gap-3">
-                        <span className="text-xs text-white/40">Semanas:</span>
-                        <button onClick={() => setGuardamueblesWeeks(Math.max(1, guardamueblesWeeks - 1))}
-                          className="w-7 h-7 rounded-lg bg-white/[0.06] flex items-center justify-center text-white/60 hover:bg-white/10 transition-all">
-                          <Minus className="w-3 h-3" />
-                        </button>
-                        <span className="text-sm font-bold text-white">{guardamueblesWeeks}</span>
-                        <button onClick={() => setGuardamueblesWeeks(guardamueblesWeeks + 1)}
-                          className="w-7 h-7 rounded-lg bg-[#0077BD]/20 flex items-center justify-center text-[#0077BD] hover:bg-[#0077BD]/30 transition-all">
-                          <Plus className="w-3 h-3" />
-                          </button>
-                        <span className="text-xs text-white/30">Bs {200 * guardamueblesWeeks}</span>
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-
-            {/* Ayudantes en destino */}
-            <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] mb-6">
-              <div className="flex items-center justify-between mb-3">
-                <div>
-                  <h4 className="text-white font-semibold text-sm">Ayudantes en Destino</h4>
-                  <p className="text-xs text-white/30">Bs 150 c/u</p>
+              {originFloorCost > 0 && (
+                <div className="p-2 rounded-lg bg-[#00E676]/5 border border-[#00E676]/10 text-xs text-white/50 mb-4">
+                  Costo piso: {getFloorCount(originFloor)} pisos × Bs {elevatorOrigin ? selectedVehicle?.floorElev : selectedVehicle?.floorNoElev}/piso = <span className="text-[#00E676] font-bold">Bs {originFloorCost}</span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <button onClick={() => setDestHelpers(Math.max(0, destHelpers - 1))}
-                    className="w-9 h-9 rounded-xl bg-white/[0.06] flex items-center justify-center text-white/60 hover:bg-white/10 transition-all">
-                    <Minus className="w-4 h-4" />
+              )}
+              {/* Distancia caminata origen */}
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm">🚶</span>
+                  <div>
+                    <div className="text-xs text-white/70">Distancia de caminata</div>
+                    <div className="text-xs text-white/30">Bs 20 / 10m</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => setOriginCaminata(Math.max(0, originCaminata - 1))}
+                    className="w-7 h-7 rounded-lg bg-white/[0.06] flex items-center justify-center text-white/60 hover:bg-white/10 transition-all">
+                    <Minus className="w-3 h-3" />
                   </button>
-                  <span className="text-xl font-bold text-white w-8 text-center">{destHelpers}</span>
-                  <button onClick={() => setDestHelpers(destHelpers + 1)}
-                    className="w-9 h-9 rounded-xl bg-[#0077BD]/20 flex items-center justify-center text-[#0077BD] hover:bg-[#0077BD]/30 transition-all">
-                    <Plus className="w-4 h-4" />
+                  <span className="w-8 text-center text-sm font-semibold text-white">{originCaminata}</span>
+                  <button onClick={() => setOriginCaminata(originCaminata + 1)}
+                    className="w-7 h-7 rounded-lg bg-[#00E676]/20 flex items-center justify-center text-[#00E676] hover:bg-[#00E676]/30 transition-all">
+                    <Plus className="w-3 h-3" />
                   </button>
                 </div>
               </div>
-              {destHelpers > 0 && (
-                <div className="text-sm text-[#0077BD]">Bs {destHelpers * 150}</div>
-              )}
+              {/* Elevador fachada origen */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm">🏗️</span>
+                  <div>
+                    <div className="text-xs text-white/70">Elevador por fachada (grúa)</div>
+                    <div className="text-xs text-white/30">Bs 200 / hr</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => setOriginFachada(Math.max(0, originFachada - 1))}
+                    className="w-7 h-7 rounded-lg bg-white/[0.06] flex items-center justify-center text-white/60 hover:bg-white/10 transition-all">
+                    <Minus className="w-3 h-3" />
+                  </button>
+                  <span className="w-8 text-center text-sm font-semibold text-white">{originFachada}</span>
+                  <button onClick={() => setOriginFachada(originFachada + 1)}
+                    className="w-7 h-7 rounded-lg bg-[#00E676]/20 flex items-center justify-center text-[#00E676] hover:bg-[#00E676]/30 transition-all">
+                    <Plus className="w-3 h-3" />
+                  </button>
+                </div>
+              </div>
             </div>
 
-            {/* Piso y elevador destino */}
-            <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] mb-6">
+            {/* Section D: Accesibilidad - Destino */}
+            <div className="p-5 rounded-2xl bg-white/[0.03] border border-[#0077BD]/10 mb-4">
               <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-[#0077BD]" /> Piso de Destino
+                <span className="text-lg">🏢</span> Accesibilidad — Destino
+                <span className="text-xs px-2 py-0.5 rounded-full bg-[#0077BD]/10 text-[#0077BD] font-semibold">Destino</span>
               </h4>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
-                  <label className="text-xs text-white/40 block mb-1">Piso</label>
+                  <label className="text-xs text-white/40 block mb-1">Piso de destino</label>
                   <select value={destFloor} onChange={e => setDestFloor(e.target.value)}
                     className={inputClass + ' appearance-none'}>
-                    {['baja', '1', '2', '3', '4', '5'].map(f => <option key={f} value={f} className="bg-[#0a0e17]">Planta {f === 'baja' ? 'baja' : f + '°'}</option>)}
+                    {['baja', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'].map(f => <option key={f} value={f} className="bg-[#0a0e17]">Planta {f === 'baja' ? 'baja' : f + '°'}</option>)}
                   </select>
                 </div>
                 <div>
@@ -1347,19 +1543,152 @@ function CalculatorSection() {
                   </button>
                 </div>
               </div>
+              {destFloorCost > 0 && (
+                <div className="p-2 rounded-lg bg-[#0077BD]/5 border border-[#0077BD]/10 text-xs text-white/50 mb-4">
+                  Costo piso: {getFloorCount(destFloor)} pisos × Bs {elevatorDest ? selectedVehicle?.floorElev : selectedVehicle?.floorNoElev}/piso = <span className="text-[#0077BD] font-bold">Bs {destFloorCost}</span>
+                </div>
+              )}
+              {/* Distancia caminata destino */}
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm">🚶</span>
+                  <div>
+                    <div className="text-xs text-white/70">Distancia de caminata</div>
+                    <div className="text-xs text-white/30">Bs 20 / 10m</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => setDestCaminata(Math.max(0, destCaminata - 1))}
+                    className="w-7 h-7 rounded-lg bg-white/[0.06] flex items-center justify-center text-white/60 hover:bg-white/10 transition-all">
+                    <Minus className="w-3 h-3" />
+                  </button>
+                  <span className="w-8 text-center text-sm font-semibold text-white">{destCaminata}</span>
+                  <button onClick={() => setDestCaminata(destCaminata + 1)}
+                    className="w-7 h-7 rounded-lg bg-[#0077BD]/20 flex items-center justify-center text-[#0077BD] hover:bg-[#0077BD]/30 transition-all">
+                    <Plus className="w-3 h-3" />
+                  </button>
+                </div>
+              </div>
+              {/* Elevador fachada destino */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm">🏗️</span>
+                  <div>
+                    <div className="text-xs text-white/70">Elevador por fachada (grúa)</div>
+                    <div className="text-xs text-white/30">Bs 200 / hr</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => setDestFachada(Math.max(0, destFachada - 1))}
+                    className="w-7 h-7 rounded-lg bg-white/[0.06] flex items-center justify-center text-white/60 hover:bg-white/10 transition-all">
+                    <Minus className="w-3 h-3" />
+                  </button>
+                  <span className="w-8 text-center text-sm font-semibold text-white">{destFachada}</span>
+                  <button onClick={() => setDestFachada(destFachada + 1)}
+                    className="w-7 h-7 rounded-lg bg-[#0077BD]/20 flex items-center justify-center text-[#0077BD] hover:bg-[#0077BD]/30 transition-all">
+                    <Plus className="w-3 h-3" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Section E: Ayudantes */}
+            <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] mb-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-white font-semibold flex items-center gap-2">
+                    <span className="text-lg">👥</span> Ayudantes (carga y descarga)
+                  </h4>
+                  <p className="text-xs text-white/30 mt-1">Bs {selectedVehicle?.helperPrice || 80} c/u</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button onClick={() => setHelpers(Math.max(0, helpers - 1))}
+                    className="w-9 h-9 rounded-xl bg-white/[0.06] flex items-center justify-center text-white/60 hover:bg-white/10 transition-all">
+                    <Minus className="w-4 h-4" />
+                  </button>
+                  <span className="text-xl font-bold text-white w-8 text-center">{helpers}</span>
+                  <button onClick={() => setHelpers(helpers + 1)}
+                    className="w-9 h-9 rounded-xl bg-[#818CF8]/20 flex items-center justify-center text-[#818CF8] hover:bg-[#818CF8]/30 transition-all">
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+              {helpers > 0 && (
+                <div className="mt-2 text-sm text-[#818CF8]">{helpers} × Bs {selectedVehicle?.helperPrice || 80} = Bs {helpersCost}</div>
+              )}
+            </div>
+
+            {/* Section F: Logística y Seguridad */}
+            <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] mb-4">
+              <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
+                <span className="text-lg">🚚</span> Logística y Seguridad
+              </h4>
+              <div className="space-y-3">
+                {LOGISTICS_EXTRAS.map((extra) => {
+                  if (extra.id === 'retiro_cajas') {
+                    const qty = logisticsExtras[extra.id] || 0
+                    return (
+                      <div key={extra.id} className={`flex items-center justify-between p-3 rounded-xl transition-all ${qty > 0 ? 'bg-[#818CF8]/5 border border-[#818CF8]/15' : 'bg-white/[0.02] border border-white/[0.06]'}`}>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm">{extra.emoji}</span>
+                          <div>
+                            <div className="text-sm text-white font-medium">{extra.name}</div>
+                            <div className="text-xs text-white/30">{extra.desc} — Bs {extra.price}</div>
+                          </div>
+                        </div>
+                        <button onClick={() => setLogisticsExtras(prev => prev[extra.id] ? (prev[extra.id] ? (() => { const { [extra.id]: _, ...rest } = prev; return rest })() : prev) : { ...prev, [extra.id]: 1 })}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${qty > 0 ? 'bg-[#818CF8] text-white' : 'bg-white/[0.06] text-white/40 border border-white/[0.08]'}`}>
+                          {qty > 0 ? 'Incluido' : 'Agregar'}
+                        </button>
+                      </div>
+                    )
+                  }
+                  const qty = logisticsExtras[extra.id] || 0
+                  return (
+                    <div key={extra.id} className={`flex items-center justify-between p-3 rounded-xl transition-all ${qty > 0 ? 'bg-[#818CF8]/5 border border-[#818CF8]/15' : 'bg-white/[0.02] border border-white/[0.06]'}`}>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm">{extra.emoji}</span>
+                        <div>
+                          <div className="text-sm text-white font-medium">{extra.name}</div>
+                          <div className="text-xs text-white/30">Bs {extra.price}{extra.unit ? `/${extra.unit}` : ''}</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button onClick={() => setLogisticsExtras(prev => { const n = Math.max(0, (prev[extra.id] || 0) - 1); if (n === 0) { const { [extra.id]: _, ...rest } = prev; return rest }; return { ...prev, [extra.id]: n } })}
+                          className="w-7 h-7 rounded-lg bg-white/[0.06] flex items-center justify-center text-white/60 hover:bg-white/10 transition-all">
+                          <Minus className="w-3 h-3" />
+                        </button>
+                        <span className="w-6 text-center text-sm font-semibold text-white">{qty}</span>
+                        <button onClick={() => setLogisticsExtras(prev => ({ ...prev, [extra.id]: (prev[extra.id] || 0) + 1 }))}
+                          className="w-7 h-7 rounded-lg bg-[#818CF8]/20 flex items-center justify-center text-[#818CF8] hover:bg-[#818CF8]/30 transition-all">
+                          <Plus className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Running extras total */}
+            <div className="p-4 rounded-xl bg-white/[0.04] border border-[#00E676]/15 mb-4">
+              <div className="flex justify-between text-sm">
+                <span className="text-white/50">Total extras</span>
+                <span className="text-[#00E676] font-bold">Bs {extrasTotal.toLocaleString()}</span>
+              </div>
             </div>
 
             <div className="flex justify-between">
-              <button onClick={() => setStep(4)} className="px-6 py-3 rounded-full text-sm font-semibold text-white/60 border border-white/[0.1] hover:border-white/20 transition-all">← Atrás</button>
-              <button onClick={() => setStep(6)} className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)]">
+              <button onClick={() => setStep(3)} className="px-6 py-3 rounded-full text-sm font-semibold text-white/60 border border-white/[0.1] hover:border-white/20 transition-all">← Atrás</button>
+              <button onClick={() => setStep(5)} className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)]">
                 Siguiente: Seguro y Pago →
               </button>
             </div>
           </div>
         )}
 
-        {/* ═══════════════ Step 6: Seguro, IVA y Pago ═══════════════ */}
-        {step === 6 && (
+        {/* ═══════════════ Step 5: Seguro, IVA y Pago ═══════════════ */}
+        {step === 5 && (
           <div className="max-w-4xl mx-auto">
             <h3 className="text-xl font-bold text-white mb-2 text-center">Seguro, IVA y Método de Pago</h3>
             <p className="text-sm text-white/40 text-center mb-8">Configura el seguro de carga, facturación y forma de pago</p>
@@ -1400,7 +1729,7 @@ function CalculatorSection() {
                       <span className="text-white font-semibold">Bs {(customInsurance ? parseFloat(customInsurance) || 0 : insuranceAmount).toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between text-sm mt-1">
-                      <span className="text-white/50">Costo del seguro (3%)</span>
+                      <span className="text-white/50">Costo del seguro (2%)</span>
                       <span className="text-[#FF9800] font-bold">Bs {insuranceCost.toLocaleString()}</span>
                     </div>
                   </div>
@@ -1499,16 +1828,16 @@ function CalculatorSection() {
             </div>
 
             <div className="flex justify-between">
-              <button onClick={() => setStep(5)} className="px-6 py-3 rounded-full text-sm font-semibold text-white/60 border border-white/[0.1] hover:border-white/20 transition-all">← Atrás</button>
-              <button onClick={() => setStep(7)} className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)]">
+              <button onClick={() => setStep(4)} className="px-6 py-3 rounded-full text-sm font-semibold text-white/60 border border-white/[0.1] hover:border-white/20 transition-all">← Atrás</button>
+              <button onClick={() => setStep(6)} className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)]">
                 Siguiente: Datos Personales →
               </button>
             </div>
           </div>
         )}
 
-        {/* ═══════════════ Step 7: Datos Personales y Envío ═══════════════ */}
-        {step === 7 && (
+        {/* ═══════════════ Step 6: Datos Personales y Envío ═══════════════ */}
+        {step === 6 && (
           <div className="max-w-4xl mx-auto">
             <h3 className="text-xl font-bold text-white mb-2 text-center">Datos Personales y Envío</h3>
             <p className="text-sm text-white/40 text-center mb-8">Completa tus datos para enviar la cotización</p>
@@ -1529,7 +1858,7 @@ function CalculatorSection() {
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between"><span className="text-white/40">Total estimado</span><span className="text-[#00E676] font-bold text-lg">Bs {grandTotal.toLocaleString()}</span></div>
                     <div className="flex justify-between"><span className="text-white/40">Tipo</span><span className="text-white">{moveType}</span></div>
-                    <div className="flex justify-between"><span className="text-white/40">Vehículo</span><span className="text-white">{getRecommendation(totalVolume).vehicle}</span></div>
+                    <div className="flex justify-between"><span className="text-white/40">Vehículo</span><span className="text-white">{selectedVehicle?.name || getRecommendation(totalVolume).vehicle}</span></div>
                   </div>
                 </div>
                 <div className="space-y-3">
@@ -1576,15 +1905,23 @@ function CalculatorSection() {
                   <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
                     <ClipboardList className="w-4 h-4 text-[#0077BD]" /> Resumen de Cotización
                   </h4>
-                  <div className="space-y-2 text-sm max-h-48 overflow-y-auto custom-scroll">
+                  <div className="space-y-2 text-sm max-h-64 overflow-y-auto custom-scroll">
                     <div className="flex justify-between"><span className="text-white/40">Tipo de mudanza</span><span className="text-white capitalize">{moveType} / {catType}</span></div>
+                    <div className="flex justify-between"><span className="text-white/40">Vehículo</span><span className="text-white">{selectedVehicle?.name || '—'}</span></div>
                     <div className="flex justify-between"><span className="text-white/40">Volumen</span><span className="text-white">{totalVolume} m³</span></div>
-                    <div className="flex justify-between"><span className="text-white/40">Vehículo</span><span className="text-white">{getRecommendation(totalVolume).vehicle}</span></div>
                     <div className="flex justify-between"><span className="text-white/40">Distancia</span><span className="text-white">{routeDistance > 0 ? `${routeDistance} km` : '~10 km'}</span></div>
                     <div className="h-px bg-white/[0.06]" />
                     <div className="flex justify-between"><span className="text-white/40">Precio base</span><span className="text-white">Bs {basePrice.toLocaleString()}</span></div>
-                    <div className="flex justify-between"><span className="text-white/40">Extras origen</span><span className="text-white">Bs {originExtrasTotal.toLocaleString()}</span></div>
-                    <div className="flex justify-between"><span className="text-white/40">Extras destino</span><span className="text-white">Bs {destExtrasTotal.toLocaleString()}</span></div>
+                    {embalajeCost > 0 && <div className="flex justify-between"><span className="text-white/40">Embalaje ({embalajeType})</span><span className="text-white">Bs {embalajeCost.toLocaleString()}</span></div>}
+                    {boxesCost > 0 && <div className="flex justify-between"><span className="text-white/40">Cajas</span><span className="text-white">Bs {boxesCost.toLocaleString()}</span></div>}
+                    {materialsCost > 0 && <div className="flex justify-between"><span className="text-white/40">Materiales</span><span className="text-white">Bs {materialsCost.toLocaleString()}</span></div>}
+                    {handlingCost > 0 && <div className="flex justify-between"><span className="text-white/40">Manipulación</span><span className="text-white">Bs {handlingCost.toLocaleString()}</span></div>}
+                    {originFloorCost > 0 && <div className="flex justify-between"><span className="text-white/40">Piso origen</span><span className="text-white">Bs {originFloorCost.toLocaleString()}</span></div>}
+                    {destFloorCost > 0 && <div className="flex justify-between"><span className="text-white/40">Piso destino</span><span className="text-white">Bs {destFloorCost.toLocaleString()}</span></div>}
+                    {accessibilityCost > 0 && <div className="flex justify-between"><span className="text-white/40">Accesibilidad</span><span className="text-white">Bs {accessibilityCost.toLocaleString()}</span></div>}
+                    {helpersCost > 0 && <div className="flex justify-between"><span className="text-white/40">Ayudantes ({helpers})</span><span className="text-white">Bs {helpersCost.toLocaleString()}</span></div>}
+                    {logisticsCost > 0 && <div className="flex justify-between"><span className="text-white/40">Logística</span><span className="text-white">Bs {logisticsCost.toLocaleString()}</span></div>}
+                    <div className="flex justify-between"><span className="text-white/40">Total extras</span><span className="text-white">Bs {extrasTotal.toLocaleString()}</span></div>
                     {wantsInsurance && <div className="flex justify-between"><span className="text-white/40">Seguro</span><span className="text-white">Bs {insuranceCost.toLocaleString()}</span></div>}
                     {includeIva && <div className="flex justify-between"><span className="text-white/40">IVA 16%</span><span className="text-white">Bs {ivaAmount.toLocaleString()}</span></div>}
                     <div className="h-px bg-white/[0.06]" />
@@ -1599,7 +1936,7 @@ function CalculatorSection() {
                 )}
 
                 <div className="flex justify-between items-center">
-                  <button onClick={() => setStep(6)} className="px-6 py-3 rounded-full text-sm font-semibold text-white/60 border border-white/[0.1] hover:border-white/20 transition-all">← Atrás</button>
+                  <button onClick={() => setStep(5)} className="px-6 py-3 rounded-full text-sm font-semibold text-white/60 border border-white/[0.1] hover:border-white/20 transition-all">← Atrás</button>
                   <div className="flex gap-3">
                     <a href={`https://wa.me/59173662803?text=${buildWhatsAppMsg()}`} target="_blank" rel="noopener noreferrer"
                       className="px-6 py-3 rounded-full text-sm font-semibold bg-[#25D366] text-white flex items-center gap-2 hover:bg-[#128C7E] transition-all">
