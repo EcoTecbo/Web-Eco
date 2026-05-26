@@ -27,3 +27,27 @@ Stage Summary:
 - Multiple vehicle handling when volume exceeds single vehicle capacity
 - Hero with auto-sliding background images
 - All navigation links (navbar, footer, homepage) working correctly
+
+---
+Task ID: 1
+Agent: Main
+Task: Verify and improve mudanza page with fleet images and SchemaOrg
+
+Work Log:
+- Verified current /src/app/mudanza/page.tsx has complete two-path flow with all features
+- Build compiles successfully (Next.js 16.1.3 Turbopack)
+- Added SchemaOrg component to page (was missing from current implementation)
+- Added vehicle image paths to VEHICLES data (img property for each vehicle)
+- Replaced TruckSVG with actual fleet images in FleetSection (uses /vehicles/7-FURGON/ and /vehicles/6-CAMIONETA/)
+- Updated Path A vehicle type selection buttons with real images (furgón/camioneta)
+- Updated Path A vehicle option cards with images alongside details
+- Updated Path B vehicle type selection buttons with real images
+- Updated Path B mudanza category cards to show suggested vehicle image
+- Updated Path B vehicle suggestion card in inventory step with actual vehicle image
+- Updated Path B additional vehicles display to show vehicle images
+- Verified page returns HTTP 200
+
+Stage Summary:
+- All fleet images now used throughout calculator (selection, suggestion, inventory)
+- SchemaOrg added back for SEO structured data
+- Build verified and page loads correctly

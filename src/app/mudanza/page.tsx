@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import { Navbar } from '@/components/ecotaxi/navbar'
 import { Footer } from '@/components/ecotaxi/footer'
+import { SchemaOrg } from '@/components/ecotaxi/schema-org'
 
 // Dynamic import for map component (avoids SSR issues with leaflet)
 const MudanzaMap = dynamic(() => import('@/components/mudanza-map'), { ssr: false })
@@ -266,17 +267,17 @@ const MUDANZA_CATEGORIES = [
 /* vehicles */
 const VEHICLES = [
   { cat: 'Camioneta', color: '#FB923C', items: [
-    { name: 'Pickup', cap: 8, desc: 'Caja abierta grande, ideal para cargas sin protección del clima', pax: 2, floorElev: 5, floorNoElev: 10, helperPrice: 60, perKm: 8 },
-    { name: 'Camioneta Pequeña', cap: 5, desc: 'Mudanzas pequeñas, departamento studio o 1 dormitorio', pax: 2, floorElev: 10, floorNoElev: 15, helperPrice: 80, perKm: 10 },
-    { name: 'Camioneta Mediana', cap: 12, desc: 'Mudanzas medianas, departamento 2 dormitorios', pax: 3, floorElev: 15, floorNoElev: 20, helperPrice: 100, perKm: 12 },
-    { name: 'Camioneta Grande', cap: 35, desc: 'Mudanzas extra grandes o múltiples destinos', pax: 3, floorElev: 20, floorNoElev: 25, helperPrice: 120, perKm: 15 },
-    { name: 'Camioneta Larga', cap: 22, desc: 'Mudanzas grandes, casa 3+ dormitorios', pax: 3, floorElev: 25, floorNoElev: 30, helperPrice: 150, perKm: 18 },
+    { name: 'Pickup', cap: 8, desc: 'Caja abierta grande, ideal para cargas sin protección del clima', pax: 2, floorElev: 5, floorNoElev: 10, helperPrice: 60, perKm: 8, img: '/vehicles/6-CAMIONETA/pickup.png' },
+    { name: 'Camioneta Pequeña', cap: 5, desc: 'Mudanzas pequeñas, departamento studio o 1 dormitorio', pax: 2, floorElev: 10, floorNoElev: 15, helperPrice: 80, perKm: 10, img: '/vehicles/6-CAMIONETA/pequena.png' },
+    { name: 'Camioneta Mediana', cap: 12, desc: 'Mudanzas medianas, departamento 2 dormitorios', pax: 3, floorElev: 15, floorNoElev: 20, helperPrice: 100, perKm: 12, img: '/vehicles/6-CAMIONETA/mediana.png' },
+    { name: 'Camioneta Grande', cap: 35, desc: 'Mudanzas extra grandes o múltiples destinos', pax: 3, floorElev: 20, floorNoElev: 25, helperPrice: 120, perKm: 15, img: '/vehicles/6-CAMIONETA/grande.jpg' },
+    { name: 'Camioneta Larga', cap: 22, desc: 'Mudanzas grandes, casa 3+ dormitorios', pax: 3, floorElev: 25, floorNoElev: 30, helperPrice: 150, perKm: 18, img: '/vehicles/6-CAMIONETA/larga.png' },
   ]},
   { cat: 'Furgón', color: '#818CF8', items: [
-    { name: 'Furgón Pequeño', cap: 6, desc: 'Carga pequeña, mudanzas studio (6m³)', pax: 2, floorElev: 10, floorNoElev: 15, helperPrice: 80, perKm: 10 },
-    { name: 'Furgón Mediano', cap: 12, desc: 'Carga mediana, mudanzas 1-2 dormitorios (12m³)', pax: 2, floorElev: 15, floorNoElev: 20, helperPrice: 100, perKm: 12 },
-    { name: 'Furgón Grande', cap: 20, desc: 'Carga grande, mudanzas 2-3 dormitorios (20m³)', pax: 3, floorElev: 20, floorNoElev: 25, helperPrice: 120, perKm: 15 },
-    { name: 'Furgón Largo', cap: 30, desc: 'Carga extra grande, casas grandes (30m³)', pax: 3, floorElev: 25, floorNoElev: 30, helperPrice: 150, perKm: 18 },
+    { name: 'Furgón Pequeño', cap: 6, desc: 'Carga pequeña, mudanzas studio (6m³)', pax: 2, floorElev: 10, floorNoElev: 15, helperPrice: 80, perKm: 10, img: '/vehicles/7-FURGON/pequeno.png' },
+    { name: 'Furgón Mediano', cap: 12, desc: 'Carga mediana, mudanzas 1-2 dormitorios (12m³)', pax: 2, floorElev: 15, floorNoElev: 20, helperPrice: 100, perKm: 12, img: '/vehicles/7-FURGON/mediano.png' },
+    { name: 'Furgón Grande', cap: 20, desc: 'Carga grande, mudanzas 2-3 dormitorios (20m³)', pax: 3, floorElev: 20, floorNoElev: 25, helperPrice: 120, perKm: 15, img: '/vehicles/7-FURGON/grande.png' },
+    { name: 'Furgón Largo', cap: 30, desc: 'Carga extra grande, casas grandes (30m³)', pax: 3, floorElev: 25, floorNoElev: 30, helperPrice: 150, perKm: 18, img: '/vehicles/7-FURGON/largo.png' },
   ]},
 ]
 
@@ -566,30 +567,6 @@ function CategoriesSection() {
 /* ═══════════════════════════════════════════════════════════════════════════════
    4. MOVING FLEET
    ═══════════════════════════════════════════════════════════════════════════════ */
-function TruckSVG({ color, isVan }: { color: string; isVan?: boolean }) {
-  return (
-    <svg width="80" height="48" viewBox="0 0 80 48" fill="none">
-      {isVan ? (
-        <>
-          <rect x="8" y="6" width="50" height="30" rx="4" fill={color} opacity="0.15" stroke={color} strokeWidth="1" />
-          <rect x="58" y="14" width="16" height="22" rx="3" fill={color} opacity="0.1" stroke={color} strokeWidth="1" />
-          <rect x="63" y="18" width="8" height="10" rx="1.5" fill={color} opacity="0.06" />
-          <circle cx="22" cy="40" r="5" fill="#1a1a2e" stroke={color} strokeWidth="1" />
-          <circle cx="60" cy="40" r="5" fill="#1a1a2e" stroke={color} strokeWidth="1" />
-        </>
-      ) : (
-        <>
-          <rect x="20" y="8" width="40" height="24" rx="3" fill={color} opacity="0.15" stroke={color} strokeWidth="1" />
-          <rect x="60" y="16" width="16" height="16" rx="3" fill={color} opacity="0.1" stroke={color} strokeWidth="1" />
-          <rect x="64" y="19" width="8" height="8" rx="1.5" fill={color} opacity="0.06" />
-          <circle cx="28" cy="38" r="5" fill="#1a1a2e" stroke={color} strokeWidth="1" />
-          <circle cx="68" cy="38" r="5" fill="#1a1a2e" stroke={color} strokeWidth="1" />
-        </>
-      )}
-    </svg>
-  )
-}
-
 function FleetSection() {
   return (
     <section id="flota" className="relative py-24 md:py-32">
@@ -607,14 +584,14 @@ function FleetSection() {
           <div key={cat.cat} className="mb-10">
             <A><h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
               <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.color }} />
-              {cat.cat}
+              {cat.cat === 'Furgón' ? '🚛 Furgones (Cerrados)' : '🛻 Camionetas (Abiertas)'}
             </h3></A>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+            <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-${cat.cat === 'Camioneta' ? '5' : '4'} gap-4`}>
               {cat.items.map((v, i) => (
                 <A key={v.name} delay={i * 80}>
                   <div className="group p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm hover:border-white/10 transition-all duration-300">
-                    <div className="flex justify-center mb-3 opacity-70 group-hover:opacity-100 transition-opacity">
-                      <TruckSVG color={cat.color} isVan={cat.cat === 'Furgón'} />
+                    <div className="flex justify-center mb-3 h-20 items-center">
+                      <img src={v.img} alt={v.name} className="max-h-full max-w-full object-contain drop-shadow-[0_0_12px_rgba(255,255,255,0.08)] group-hover:drop-shadow-[0_0_20px_rgba(255,255,255,0.15)] transition-all duration-300 group-hover:scale-105" />
                     </div>
                     <h4 className="text-white font-semibold text-sm mb-1">{v.name}</h4>
                     <div className="flex items-center gap-3 mb-2">
@@ -1250,13 +1227,17 @@ function CalculatorSection() {
             <div className="grid grid-cols-2 gap-4 mb-6">
               <button onClick={() => { setVehicleType('cerrado'); setSelectedVehicle(null) }}
                 className={`p-5 rounded-2xl text-center transition-all duration-300 ${vehicleType === 'cerrado' ? 'bg-[#818CF8]/10 border-2 border-[#818CF8]/50' : 'bg-white/[0.03] border border-white/[0.06] hover:border-white/10'}`}>
-                <div className="text-3xl mb-2">🚛</div>
+                <div className="flex justify-center mb-2 h-16 items-center">
+                  <img src="/vehicles/7-FURGON/mediano.png" alt="Furgón" className="max-h-full max-w-[80px] object-contain" />
+                </div>
                 <div className="text-white font-semibold mb-1">Furgón (Cerrado)</div>
                 <div className="text-xs text-white/40">Protección completa del clima</div>
               </button>
               <button onClick={() => { setVehicleType('abierto'); setSelectedVehicle(null) }}
                 className={`p-5 rounded-2xl text-center transition-all duration-300 ${vehicleType === 'abierto' ? 'bg-[#FB923C]/10 border-2 border-[#FB923C]/50' : 'bg-white/[0.03] border border-white/[0.06] hover:border-white/10'}`}>
-                <div className="text-3xl mb-2">🛻</div>
+                <div className="flex justify-center mb-2 h-16 items-center">
+                  <img src="/vehicles/6-CAMIONETA/mediana.png" alt="Camioneta" className="max-h-full max-w-[80px] object-contain" />
+                </div>
                 <div className="text-white font-semibold mb-1">Camioneta (Abierto)</div>
                 <div className="text-xs text-white/40">Caja abierta, ideal para cargas resistentes</div>
               </button>
@@ -1271,15 +1252,22 @@ function CalculatorSection() {
                   <button key={v.name} onClick={() => { setSelectedVehicle(v); setAdditionalVehicles([]) }}
                     className={`p-4 rounded-xl text-left transition-all duration-200 ${isSelected ? `border-2` : 'bg-white/[0.02] border border-white/[0.06] hover:border-white/10'}`}
                     style={isSelected ? { backgroundColor: `${catColor}08`, borderColor: `${catColor}50` } : {}}>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-white font-semibold text-sm">{v.name}</span>
-                      <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ backgroundColor: `${catColor}15`, color: catColor }}>{v.cap} m³</span>
-                    </div>
-                    <p className="text-xs text-white/40 mb-2">{v.desc}</p>
-                    <div className="flex items-center gap-3 text-xs text-white/30">
-                      <span>{v.pax} pasajeros</span>
-                      <span>Bs {v.perKm}/km</span>
-                      <span>Ayudante Bs {v.helperPrice}</span>
+                    <div className="flex items-center gap-4">
+                      <div className="w-20 h-14 shrink-0 flex items-center justify-center">
+                        <img src={v.img} alt={v.name} className="max-h-full max-w-full object-contain" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-white font-semibold text-sm">{v.name}</span>
+                          <span className="text-xs px-2 py-0.5 rounded-full font-semibold shrink-0" style={{ backgroundColor: `${catColor}15`, color: catColor }}>{v.cap} m³</span>
+                        </div>
+                        <p className="text-xs text-white/40 mb-1">{v.desc}</p>
+                        <div className="flex items-center gap-3 text-xs text-white/30">
+                          <span>{v.pax} pax</span>
+                          <span>Bs {v.perKm}/km</span>
+                          <span>Ayud. Bs {v.helperPrice}</span>
+                        </div>
+                      </div>
                     </div>
                   </button>
                 )
@@ -1311,13 +1299,17 @@ function CalculatorSection() {
             <div className="grid grid-cols-2 gap-4 mb-8">
               <button onClick={() => { setVehicleType('cerrado'); setSelectedVehicle(null); setMudanzaCategory(null) }}
                 className={`p-5 rounded-2xl text-center transition-all duration-300 ${vehicleType === 'cerrado' ? 'bg-[#818CF8]/10 border-2 border-[#818CF8]/50' : 'bg-white/[0.03] border border-white/[0.06] hover:border-white/10'}`}>
-                <div className="text-3xl mb-2">🚛</div>
+                <div className="flex justify-center mb-2 h-16 items-center">
+                  <img src="/vehicles/7-FURGON/mediano.png" alt="Furgón" className="max-h-full max-w-[80px] object-contain" />
+                </div>
                 <div className="text-white font-semibold mb-1">Furgón (Cerrado)</div>
                 <div className="text-xs text-white/40">Protección completa del clima</div>
               </button>
               <button onClick={() => { setVehicleType('abierto'); setSelectedVehicle(null); setMudanzaCategory(null) }}
                 className={`p-5 rounded-2xl text-center transition-all duration-300 ${vehicleType === 'abierto' ? 'bg-[#FB923C]/10 border-2 border-[#FB923C]/50' : 'bg-white/[0.03] border border-white/[0.06] hover:border-white/10'}`}>
-                <div className="text-3xl mb-2">🛻</div>
+                <div className="flex justify-center mb-2 h-16 items-center">
+                  <img src="/vehicles/6-CAMIONETA/mediana.png" alt="Camioneta" className="max-h-full max-w-[80px] object-contain" />
+                </div>
                 <div className="text-white font-semibold mb-1">Camioneta (Abierto)</div>
                 <div className="text-xs text-white/40">Caja abierta, ideal para cargas resistentes</div>
               </button>
@@ -1330,18 +1322,24 @@ function CalculatorSection() {
               {MUDANZA_CATEGORIES.map((cat) => {
                 const isSelected = mudanzaCategory === cat.id
                 const suggestedName = cat.suggestedVehicle[vehicleType]
+                const vehicleList = vehicleType === 'cerrado' ? VEHICLES.find(v => v.cat === 'Furgón')! : VEHICLES.find(v => v.cat === 'Camioneta')!
+                const suggestedVehicle = vehicleList.items.find(v => v.name === suggestedName)
                 return (
                   <button key={cat.id} onClick={() => {
                     setMudanzaCategory(cat.id)
                     // Auto-suggest vehicle based on category
-                    const vehicleList = vehicleType === 'cerrado' ? VEHICLES.find(v => v.cat === 'Furgón')! : VEHICLES.find(v => v.cat === 'Camioneta')!
-                    const suggested = vehicleList.items.find(v => v.name === suggestedName)
-                    if (suggested) { setSelectedVehicle(suggested); setAdditionalVehicles([]) }
+                    if (suggestedVehicle) { setSelectedVehicle(suggestedVehicle); setAdditionalVehicles([]) }
                   }}
                     className={`p-5 rounded-2xl text-left transition-all duration-300 ${isSelected ? 'border-2' : 'bg-white/[0.03] border border-white/[0.06] hover:border-white/10'}`}
                     style={isSelected ? { backgroundColor: `${cat.color}08`, borderColor: `${cat.color}50` } : {}}>
                     <div className="flex items-center gap-3 mb-3">
-                      <span className="text-2xl">{cat.emoji}</span>
+                      <div className="w-16 h-12 shrink-0 flex items-center justify-center">
+                        {suggestedVehicle ? (
+                          <img src={suggestedVehicle.img} alt={suggestedName} className="max-h-full max-w-full object-contain" />
+                        ) : (
+                          <span className="text-2xl">{cat.emoji}</span>
+                        )}
+                      </div>
                       <div>
                         <h4 className="text-white font-bold text-sm">{cat.name}</h4>
                         <span className="text-xs text-white/40">{cat.subtitle}</span>
@@ -1359,21 +1357,32 @@ function CalculatorSection() {
 
             {mudanzaCategory && (
               <div className="p-4 rounded-xl bg-[#818CF8]/5 border border-[#818CF8]/15 mb-6">
-                <div className="flex items-center gap-2 mb-1">
-                  <Sparkles className="w-4 h-4 text-[#818CF8]" />
-                  <span className="text-sm font-semibold text-[#818CF8]">Vehículo sugerido</span>
+                <div className="flex items-center gap-3">
+                  <div className="w-20 h-14 shrink-0 flex items-center justify-center">
+                    {selectedVehicle ? (
+                      <img src={selectedVehicle.img} alt={selectedVehicle.name} className="max-h-full max-w-full object-contain" />
+                    ) : (
+                      <Truck className="w-8 h-8 text-[#818CF8]/40" />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Sparkles className="w-4 h-4 text-[#818CF8]" />
+                      <span className="text-sm font-semibold text-[#818CF8]">Vehículo sugerido</span>
+                    </div>
+                    <p className="text-sm text-white/60">
+                      {selectedVehicle ? (
+                        <>
+                          <span className="text-white font-semibold">{selectedVehicle.name}</span> ({selectedVehicle.cap} m³)
+                          {additionalVehicles.length > 0 && (
+                            <span className="text-[#FF9800]"> + {additionalVehicles.length} vehículo{additionalVehicles.length > 1 ? 's' : ''} adicional{additionalVehicles.length > 1 ? 'es' : ''}</span>
+                          )}
+                        </>
+                      ) : 'Selecciona una categoría para ver la sugerencia'}
+                    </p>
+                    <p className="text-xs text-white/30 mt-1">También puedes ajustar tu selección en el paso de inventario</p>
+                  </div>
                 </div>
-                <p className="text-sm text-white/60">
-                  {selectedVehicle ? (
-                    <>
-                      <span className="text-white font-semibold">{selectedVehicle.name}</span> ({selectedVehicle.cap} m³)
-                      {additionalVehicles.length > 0 && (
-                        <span className="text-[#FF9800]"> + {additionalVehicles.length} vehículo{additionalVehicles.length > 1 ? 's' : ''} adicional{additionalVehicles.length > 1 ? 'es' : ''}</span>
-                      )}
-                    </>
-                  ) : 'Selecciona una categoría para ver la sugerencia'}
-                </p>
-                <p className="text-xs text-white/30 mt-1">También puedes ajustar tu selección en el paso de inventario</p>
               </div>
             )}
 
@@ -1397,8 +1406,8 @@ function CalculatorSection() {
               <div className="mb-6 p-4 rounded-2xl bg-[#818CF8]/5 border border-[#818CF8]/15">
                 <div className="flex items-center justify-between flex-wrap gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[#818CF8]/15 flex items-center justify-center">
-                      <Truck className="w-5 h-5 text-[#818CF8]" />
+                    <div className="w-20 h-14 shrink-0 flex items-center justify-center">
+                      <img src={selectedVehicle.img} alt={selectedVehicle.name} className="max-h-full max-w-full object-contain" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
@@ -1427,9 +1436,16 @@ function CalculatorSection() {
                 </div>
                 {additionalVehicles.length > 0 && (
                   <div className="mt-3 pt-3 border-t border-[#818CF8]/10">
-                    <p className="text-xs text-white/50">
-                      <span className="text-[#FF9800] font-semibold">+ {additionalVehicles.length} vehículo{additionalVehicles.length > 1 ? 's' : ''} adicional{additionalVehicles.length > 1 ? 'es' : ''}:</span>{' '}
-                      {additionalVehicles.map((av, i) => <span key={i}>{av.name} ({av.cap} m³){i < additionalVehicles.length - 1 ? ', ' : ''}</span>)}
+                    <div className="flex items-center gap-3">
+                      {additionalVehicles.map((av, i) => (
+                        <div key={i} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.03]">
+                          <img src={av.img} alt={av.name} className="h-8 object-contain" />
+                          <span className="text-xs text-white/60">{av.name} ({av.cap} m³)</span>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-xs text-white/50 mt-2">
+                      <span className="text-[#FF9800] font-semibold">+ {additionalVehicles.length} vehículo{additionalVehicles.length > 1 ? 's' : ''} adicional{additionalVehicles.length > 1 ? 'es' : ''}</span>
                     </p>
                   </div>
                 )}
@@ -2413,6 +2429,7 @@ function FAQSection() {
 export default function MudanzaPage() {
   return (
     <main className="bg-[#0a0e17] min-h-screen">
+      <SchemaOrg />
       <Navbar />
       <HeroSection />
       <ServiceTypesSection />
