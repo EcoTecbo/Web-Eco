@@ -479,23 +479,24 @@ function ServiceTypesSection() {
    3. MOVING CATEGORIES (TABS)
    ═══════════════════════════════════════════════════════════════════════════════ */
 const categories = [
-  { id: 'casa', icon: Home, label: 'Mudanza de Casa', color: '#00E676',
+  { id: 'casa', icon: Home, label: 'Mudanza Domiciliaria', color: '#00E676',
+    bgImage: '/mudanza-servicio-casa.jpg',
     desc: 'Mudanza residencial completa. Transportamos tus muebles, electrodomésticos y pertenencias con el máximo cuidado desde tu hogar actual hasta tu nuevo hogar.',
     included: ['Desmontaje y montaje de muebles', 'Protección con mantas y plástico', 'Transporte de electrodomésticos', 'Carga y descarga profesional'],
     vehicles: 'Camioneta Mediana, Furgón Grande', notes: 'Recomendamos embalaje profesional para cristalería y objetos frágiles.' },
-  { id: 'oficina', icon: Building2, label: 'Mudanza de Oficina', color: '#0077BD',
-    desc: 'Relocalización de oficinas con mínima interrupción. Manejamos equipos informáticos, mobiliario corporativo y documentación con protocolos de seguridad especiales.',
-    included: ['Protocolo para equipos electrónicos', 'Embalaje de documentación', 'Desconexión/conexión de equipos', 'Montaje de estaciones de trabajo'],
-    vehicles: 'Furgón Mediano, Furgón Largo', notes: 'Disponemos de servicio nocturno y fin de semana para no afectar la operatividad.' },
   { id: 'especial', icon: Shield, label: 'Mudanza Especial', color: '#FF9800',
+    bgImage: '/mudanza-servicio-especial.jpg',
     desc: 'Para artículos de alto valor o delicados: pianos, obras de arte, cajas fuertes, equipo médico y antigüedades. Personal especializado y embalaje a medida.',
     included: ['Embalaje a medida personalizado', 'Personal especializado certificado', 'Seguro premium obligatorio', 'Equipamiento de sujeción profesional'],
     vehicles: 'Furgón Grande con suspensión reforzada', notes: 'Cotización personalizada obligatoria. Se requiere evaluación previa del artículo.' },
+  { id: 'oficina', icon: Building2, label: 'Mudanza de Oficina', color: '#0077BD',
+    bgImage: '/mudanza-servicio-oficina.jpg',
+    desc: 'Relocalización de oficinas con mínima interrupción. Manejamos equipos informáticos, mobiliario corporativo y documentación con protocolos de seguridad especiales.',
+    included: ['Protocolo para equipos electrónicos', 'Embalaje de documentación', 'Desconexión/conexión de equipos', 'Montaje de estaciones de trabajo'],
+    vehicles: 'Furgón Mediano, Furgón Largo', notes: 'Disponemos de servicio nocturno y fin de semana para no afectar la operatividad.' },
 ]
 
 function CategoriesSection() {
-  const [active, setActive] = useState('casa')
-  const cat = categories.find(c => c.id === active)!
   return (
     <section className="relative py-24 md:py-32">
       <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#080c15] to-[#0a0e17]" />
@@ -507,58 +508,44 @@ function CategoriesSection() {
           </div>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">Tipo de <span className="bg-gradient-to-r from-[#00E676] to-[#FF9800] bg-clip-text text-transparent">Mudanza</span></h2>
         </div></A>
-        <A delay={100}>
-          <div className="flex items-center justify-center mb-10">
-            <div className="p-1 rounded-2xl bg-white/[0.04] border border-white/[0.06] inline-flex">
-              {categories.map((c) => (
-                <button key={c.id} onClick={() => setActive(c.id)}
-                  className={`px-5 py-3 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center gap-2 ${active === c.id ? `text-white shadow-[0_0_20px_${c.color}30]` : 'text-white/50 hover:text-white/70'}`}
-                  style={active === c.id ? { backgroundColor: c.color } : {}}>
-                  <c.icon className="w-4 h-4" />{c.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </A>
-        <A delay={200}>
-          <div className="max-w-4xl mx-auto p-6 md:p-8 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm transition-all duration-500">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${cat.color}15` }}>
-                    <cat.icon className="w-6 h-6" style={{ color: cat.color }} />
-                  </div>
-                  <h3 className="text-xl font-bold text-white">{cat.label}</h3>
-                </div>
-                <p className="text-white/50 text-sm leading-relaxed mb-6">{cat.desc}</p>
-                <h4 className="text-sm font-semibold text-white/70 mb-3">Incluye:</h4>
-                <div className="space-y-2">
-                  {cat.included.map((item) => (
-                    <div key={item} className="flex items-start gap-2">
-                      <CheckCircle className="w-4 h-4 mt-0.5 shrink-0" style={{ color: cat.color }} />
-                      <span className="text-sm text-white/60">{item}</span>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {categories.map((c, i) => (
+            <A key={c.id} delay={i * 100}>
+              <div className="group relative rounded-2xl overflow-hidden border border-white/[0.08] hover:border-white/20 transition-all duration-500 h-full flex flex-col min-h-[420px]">
+                {/* Background image with lighter overlay for visibility */}
+                <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
+                  style={{ backgroundImage: `url('${c.bgImage}')` }} />
+                {/* Lighter gradient overlay so image is visible */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0e17] via-[#0a0e17]/60 to-[#0a0e17]/30" />
+                <div className="absolute inset-0 bg-[#0a0e17]/20" />
+                {/* Content */}
+                <div className="relative z-10 p-6 md:p-7 flex flex-col h-full justify-end">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-11 h-11 rounded-xl flex items-center justify-center backdrop-blur-sm" style={{ backgroundColor: `${c.color}25`, border: `1px solid ${c.color}40` }}>
+                      <c.icon className="w-5 h-5" style={{ color: c.color }} />
                     </div>
-                  ))}
-                </div>
-              </div>
-              <div className="space-y-4">
-                <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-                  <span className="text-xs text-white/40 uppercase tracking-wider">Vehículos Recomendados</span>
-                  <p className="text-white font-semibold mt-1">{cat.vehicles}</p>
-                </div>
-                <div className="p-4 rounded-xl" style={{ backgroundColor: `${cat.color}08`, border: `1px solid ${cat.color}20` }}>
-                  <div className="flex items-start gap-2">
-                    <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" style={{ color: cat.color }} />
-                    <div>
-                      <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: cat.color }}>Consideración Especial</span>
-                      <p className="text-sm text-white/50 mt-1">{cat.notes}</p>
+                    <h3 className="text-xl font-bold text-white">{c.label}</h3>
+                  </div>
+                  <p className="text-white/70 text-sm leading-relaxed mb-4">{c.desc}</p>
+                  <div className="space-y-2 mb-4">
+                    {c.included.map((item) => (
+                      <div key={item} className="flex items-start gap-2">
+                        <CheckCircle className="w-4 h-4 mt-0.5 shrink-0" style={{ color: c.color }} />
+                        <span className="text-sm text-white/75">{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-auto pt-3 border-t border-white/10">
+                    <div className="flex items-start gap-2">
+                      <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: c.color }} />
+                      <span className="text-xs text-white/50">{c.vehicles} — {c.notes}</span>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </A>
+            </A>
+          ))}
+        </div>
       </div>
     </section>
   )
