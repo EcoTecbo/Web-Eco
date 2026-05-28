@@ -18,6 +18,7 @@ const serviceLinks = [
   { label: 'Aventura', href: '/aventura' },
   { label: 'Eventos', href: '/eventos' },
   { label: 'Mudanza', href: '/mudanza' },
+  { label: 'Logística y Distribución', href: '/logistica' },
 ]
 
 const workLinks = [

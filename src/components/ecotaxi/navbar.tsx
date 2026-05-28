@@ -27,6 +27,7 @@ const servicePages = [
   { label: 'Envíos y Mensajería', href: '/envios' },
   { label: 'Auxilio Mecánico', href: '/auxilio-mecanico' },
   { label: 'Mudanza', href: '/mudanza' },
+  { label: 'Logística y Distribución', href: '/logistica' },
 ]
 
 /* ─── Animated Taxi SVG Icon ─── */
