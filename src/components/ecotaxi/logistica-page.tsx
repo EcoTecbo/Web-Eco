@@ -1,11 +1,11 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import {
   Truck, Sparkles, ShoppingCart, Bike, Snowflake, TrendingUp,
   Calendar, Route, Phone, CheckCircle2, ArrowRight, DollarSign,
   MapPin, Smartphone, Award, FileText, Layers, Clock, Send,
-  MessageCircle, Package, Warehouse, ChevronRight
+  MessageCircle, Package, Warehouse, ChevronRight, ChevronLeft, CircleDot
 } from 'lucide-react'
 
 /* ─── useInView hook ─── */
@@ -40,6 +40,214 @@ function AnimatedSection({ children, className = '', delay = 0 }: {
     >
       {children}
     </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   0. HERO SLIDESHOW BANNER
+   ═══════════════════════════════════════════════════════════════════════════════ */
+const heroSlides = [
+  {
+    image: '/logistica-ruta.jpg',
+    label: 'Rutas Optimizadas',
+    desc: 'Planificación inteligente de rutas para máxima eficiencia',
+    color: '#00E676',
+  },
+  {
+    image: '/logistica-coordinar.jpg',
+    label: 'Coordinación Total',
+    desc: 'Gestión centralizada de tu distribución desde nuestra plataforma',
+    color: '#0077BD',
+  },
+  {
+    image: '/logistica-mapa.jpg',
+    label: 'Cobertura Nacional',
+    desc: 'Llegamos a todo el territorio boliviano con trazabilidad GPS',
+    color: '#FF9800',
+  },
+  {
+    image: '/logistica-check.jpg',
+    label: 'Entrega Verificada',
+    desc: 'Confirmación de cada entrega con evidencia en tiempo real',
+    color: '#8B5CF6',
+  },
+]
+
+function HeroSlideshow() {
+  const [current, setCurrent] = useState(0)
+  const [isPaused, setIsPaused] = useState(false)
+  const total = heroSlides.length
+
+  const goTo = useCallback((index: number) => {
+    setCurrent((index + total) % total)
+  }, [total])
+
+  const next = useCallback(() => goTo(current + 1), [current, goTo])
+  const prev = useCallback(() => goTo(current - 1), [current, goTo])
+
+  // Auto-advance every 5s
+  useEffect(() => {
+    if (isPaused) return
+    const timer = setInterval(() => {
+      setCurrent((c) => (c + 1) % total)
+    }, 5000)
+    return () => clearInterval(timer)
+  }, [isPaused, total])
+
+  const slide = heroSlides[current]
+
+  return (
+    <section
+      className="relative h-[70vh] md:h-[80vh] overflow-hidden"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
+      {/* Background images — all loaded, crossfade with opacity */}
+      {heroSlides.map((s, i) => (
+        <div
+          key={s.image}
+          className="absolute inset-0 transition-opacity duration-1000 ease-in-out"
+          style={{ opacity: i === current ? 1 : 0 }}
+        >
+          <img
+            src={s.image}
+            alt={s.label}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      ))}
+
+      {/* Light gradient overlay — keeps images VISIBLE but adds readability */}
+      <div className="absolute inset-0 bg-gradient-to-r from-[#0a0e17]/75 via-[#0a0e17]/40 to-[#0a0e17]/20" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#0a0e17]/80 via-transparent to-[#0a0e17]/50" />
+
+      {/* Side accent glow matching current slide color */}
+      <div
+        className="absolute -left-20 top-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[150px] transition-colors duration-1000"
+        style={{ backgroundColor: `${slide.color}20` }}
+      />
+
+      {/* Content */}
+      <div className="relative z-10 h-full flex items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+          <div className="max-w-xl">
+            {/* Animated label */}
+            <div
+              key={`badge-${current}`}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full border backdrop-blur-sm mb-6 animate-fade-in"
+              style={{
+                backgroundColor: `${slide.color}15`,
+                borderColor: `${slide.color}30`,
+              }}
+            >
+              <Truck className="w-4 h-4" style={{ color: slide.color }} />
+              <span className="text-sm font-medium" style={{ color: slide.color }}>
+                {slide.label}
+              </span>
+            </div>
+
+            {/* Title */}
+            <h2
+              key={`title-${current}`}
+              className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 leading-tight animate-fade-in"
+            >
+              {slide.desc}
+            </h2>
+
+            {/* Subtitle */}
+            <p className="text-white/60 text-lg mb-8 max-w-md leading-relaxed">
+              Somos los brazos operativos de tu empresa, con la flota y tecnología que necesitas.
+            </p>
+
+            {/* CTA */}
+            <div className="flex flex-wrap gap-3">
+              <a
+                href="#contacto"
+                className="px-6 py-3 rounded-full font-semibold text-black transition-all duration-300 hover:scale-105"
+                style={{
+                  backgroundColor: slide.color,
+                  boxShadow: `0 0 25px ${slide.color}40`,
+                }}
+              >
+                Solicitar Propuesta
+              </a>
+              <a
+                href="#flota"
+                className="px-6 py-3 rounded-full font-semibold text-white border border-white/20 hover:border-white/40 hover:bg-white/5 transition-all duration-300"
+              >
+                Ver Flota
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Navigation arrows */}
+      <button
+        onClick={prev}
+        className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-black/30 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white hover:bg-black/50 hover:border-white/20 transition-all duration-300"
+        aria-label="Anterior"
+      >
+        <ChevronLeft className="w-6 h-6" />
+      </button>
+      <button
+        onClick={next}
+        className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-black/30 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white hover:bg-black/50 hover:border-white/20 transition-all duration-300"
+        aria-label="Siguiente"
+      >
+        <ChevronRight className="w-6 h-6" />
+      </button>
+
+      {/* Dot indicators */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3">
+        {heroSlides.map((s, i) => (
+          <button
+            key={s.image}
+            onClick={() => goTo(i)}
+            className="group relative flex items-center justify-center"
+            aria-label={`Ir a slide ${i + 1}`}
+          >
+            {i === current ? (
+              <div
+                className="w-10 h-3 rounded-full transition-all duration-500"
+                style={{ backgroundColor: slide.color }}
+              />
+            ) : (
+              <div className="w-3 h-3 rounded-full bg-white/30 group-hover:bg-white/60 transition-all duration-300" />
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* Progress bar */}
+      <div className="absolute bottom-0 left-0 right-0 z-20 h-1 bg-white/5">
+        <div
+          className="h-full transition-all duration-[5000ms] ease-linear"
+          style={{
+            width: isPaused ? '0%' : '100%',
+            backgroundColor: slide.color,
+            transition: isPaused ? 'none' : 'width 5s linear',
+          }}
+        />
+      </div>
+
+      {/* Slide counter */}
+      <div className="absolute top-6 right-6 z-20 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/30 backdrop-blur-sm border border-white/10">
+        <span className="text-sm font-bold text-white">{String(current + 1).padStart(2, '0')}</span>
+        <span className="text-xs text-white/30">/</span>
+        <span className="text-sm text-white/50">{String(total).padStart(2, '0')}</span>
+      </div>
+
+      <style jsx>{`
+        @keyframes fade-in {
+          from { opacity: 0; transform: translateY(12px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+          animation: fade-in 0.6s ease-out forwards;
+        }
+      `}</style>
+    </section>
   )
 }
 
@@ -890,6 +1098,7 @@ function ContactSection() {
 export function LogisticaPage() {
   return (
     <div className="min-h-screen bg-[#0a0e17]">
+      <HeroSlideshow />
       <HeroSection />
       <IndustrySolutionsSection />
       <FleetSection />
