@@ -307,105 +307,6 @@ function HeroSection() {
           </p>
         </AnimatedSection>
 
-        {/* Animated SVG Scene */}
-        <AnimatedSection delay={300}>
-          <div className="max-w-3xl mx-auto mb-8">
-            <svg viewBox="0 0 800 180" className="w-full">
-              {/* Road */}
-              <rect x="0" y="150" width="800" height="4" fill="#0077BD" opacity="0.2" rx="2" />
-              {[40, 140, 240, 340, 440, 540, 640, 740].map((x) => (
-                <rect key={x} x={x} y="151" width="30" height="2" fill="#0077BD" opacity="0.1" rx="1" />
-              ))}
-
-              {/* Delivery Motorcycle */}
-              <g>
-                <rect x="100" y="125" width="45" height="20" rx="4" fill="#1a1a2e" stroke="#00E676" strokeWidth="0.8" />
-                <rect x="108" y="128" width="12" height="8" rx="2" fill="#00E676" opacity="0.3" />
-                <circle cx="112" cy="148" r="4" fill="#222" stroke="#00E676" strokeWidth="0.5" />
-                <circle cx="133" cy="148" r="4" fill="#222" stroke="#00E676" strokeWidth="0.5" />
-                {/* Package on bike */}
-                <rect x="125" y="118" width="16" height="12" rx="2" fill="#00E676" opacity="0.2" stroke="#00E676" strokeWidth="0.4" />
-              </g>
-
-              {/* Delivery Van */}
-              <g>
-                <rect x="260" y="108" width="90" height="36" rx="6" fill="#1a1a2e" stroke="#0077BD" strokeWidth="0.8" />
-                <rect x="268" y="113" width="20" height="14" rx="2" fill="#0077BD" opacity="0.25" />
-                <rect x="292" y="112" width="50" height="16" rx="3" fill="#0077BD" opacity="0.12" />
-                <circle cx="282" cy="146" r="5" fill="#222" stroke="#0077BD" strokeWidth="0.5" />
-                <circle cx="328" cy="146" r="5" fill="#222" stroke="#0077BD" strokeWidth="0.5" />
-                {/* LOGO text */}
-                <text x="312" y="131" textAnchor="middle" fill="#0077BD" fontSize="7" opacity="0.4">ECO</text>
-                {/* Cargo glow */}
-                <rect x="260" y="105" width="90" height="3" rx="1.5" fill="#0077BD" opacity="0.3">
-                  <animate attributeName="opacity" values="0.2;0.5;0.2" dur="2s" repeatCount="indefinite" />
-                </rect>
-              </g>
-
-              {/* Large Truck */}
-              <g>
-                <rect x="440" y="100" width="100" height="44" rx="4" fill="#1a1a2e" stroke="#FF9800" strokeWidth="0.8" />
-                <rect x="540" y="112" width="30" height="32" rx="4" fill="#1a1a2e" stroke="#FF9800" strokeWidth="0.8" />
-                <rect x="545" y="117" width="18" height="14" rx="2" fill="#FF9800" opacity="0.25" />
-                <circle cx="460" cy="146" r="5.5" fill="#222" stroke="#FF9800" strokeWidth="0.5" />
-                <circle cx="480" cy="146" r="5.5" fill="#222" stroke="#FF9800" strokeWidth="0.5" />
-                <circle cx="556" cy="146" r="5.5" fill="#222" stroke="#FF9800" strokeWidth="0.5" />
-                {/* Cargo area pattern */}
-                <rect x="448" y="108" width="84" height="28" rx="2" fill="#FF9800" opacity="0.06" />
-                {[0, 1, 2, 3].map((i) => (
-                  <rect key={i} x={452 + i * 20} y="112" width="14" height="8" rx="1" fill="#FF9800" opacity="0.12" />
-                ))}
-              </g>
-
-              {/* Refrigerated Truck */}
-              <g>
-                <rect x="650" y="104" width="70" height="40" rx="4" fill="#1a1a2e" stroke="#8B5CF6" strokeWidth="0.8" />
-                <rect x="655" y="109" width="58" height="28" rx="2" fill="#8B5CF6" opacity="0.06" />
-                {/* Snowflake indicator */}
-                <circle cx="685" cy="124" r="8" fill="#8B5CF6" opacity="0.12" stroke="#8B5CF6" strokeWidth="0.4" />
-                <text x="685" y="127" textAnchor="middle" fill="#8B5CF6" fontSize="8" opacity="0.5">*</text>
-                <circle cx="665" cy="146" r="5" fill="#222" stroke="#8B5CF6" strokeWidth="0.5" />
-                <circle cx="705" cy="146" r="5" fill="#222" stroke="#8B5CF6" strokeWidth="0.5" />
-                {/* Cold glow */}
-                <rect x="650" y="101" width="70" height="3" rx="1.5" fill="#8B5CF6" opacity="0.25">
-                  <animate attributeName="opacity" values="0.15;0.4;0.15" dur="2.5s" repeatCount="indefinite" />
-                </rect>
-              </g>
-
-              {/* Warehouse / Distribution Center */}
-              <g opacity="0.15">
-                <rect x="20" y="80" width="30" height="70" rx="2" fill="#0077BD" />
-                <rect x="55" y="60" width="24" height="90" rx="2" fill="#0077BD" />
-                {[84, 88, 92].map((y) => (
-                  <rect key={`wh-${y}`} x="26" y={y} width="5" height="4" fill="#00E676" opacity="0.5" />
-                ))}
-                {[66, 72, 78, 84].map((y) => (
-                  <rect key={`wh2-${y}`} x="60" y={y} width="4" height="4" fill="#00E676" opacity="0.5" />
-                ))}
-              </g>
-
-              {/* Directional arrows */}
-              <path d="M 180 135 L 200 135 L 195 130 M 200 135 L 195 140" stroke="#00E676" strokeWidth="1.5" fill="none" opacity="0.3" />
-              <path d="M 370 135 L 390 135 L 385 130 M 390 135 L 385 140" stroke="#0077BD" strokeWidth="1.5" fill="none" opacity="0.3" />
-              <path d="M 560 135 L 580 135 L 575 130 M 580 135 L 575 140" stroke="#FF9800" strokeWidth="1.5" fill="none" opacity="0.3" />
-
-              {/* Sparkle decorations */}
-              <circle cx="90" cy="100" r="2" fill="#00E676" opacity="0.4">
-                <animate attributeName="opacity" values="0.2;0.6;0.2" dur="3s" repeatCount="indefinite" />
-              </circle>
-              <circle cx="240" cy="90" r="1.5" fill="#0077BD" opacity="0.4">
-                <animate attributeName="opacity" values="0.3;0.7;0.3" dur="2.5s" repeatCount="indefinite" />
-              </circle>
-              <circle cx="430" cy="85" r="2" fill="#FF9800" opacity="0.4">
-                <animate attributeName="opacity" values="0.2;0.5;0.2" dur="2s" repeatCount="indefinite" />
-              </circle>
-              <circle cx="640" cy="80" r="1.5" fill="#8B5CF6" opacity="0.4">
-                <animate attributeName="opacity" values="0.3;0.6;0.3" dur="2.8s" repeatCount="indefinite" />
-              </circle>
-            </svg>
-          </div>
-        </AnimatedSection>
-
         {/* CTA Buttons */}
         <AnimatedSection delay={350}>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
@@ -596,27 +497,29 @@ function FleetSection() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {fleetVehicles.map((vehicle, i) => (
             <AnimatedSection key={vehicle.title} delay={i * 120}>
-              <div className="group relative p-6 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm hover:border-white/10 transition-all duration-500 h-full overflow-hidden">
+              <div className="group relative rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm hover:border-white/10 transition-all duration-500 h-full overflow-hidden">
                 {/* Hover glow */}
                 <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"
                   style={{ boxShadow: `0 0 30px ${vehicle.color}10` }}
                 />
 
-                {/* Vehicle image background */}
-                <div className="absolute bottom-0 right-0 w-28 h-28 opacity-[0.08] group-hover:opacity-[0.15] transition-opacity duration-500">
+                {/* Vehicle image — full card, clearly visible */}
+                <div className="relative h-44 w-full bg-gradient-to-b from-transparent to-[#0a0e17]/60">
                   <img
                     src={vehicle.image}
                     alt={vehicle.title}
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-contain drop-shadow-[0_0_20px_rgba(255,255,255,0.15)] group-hover:scale-105 transition-transform duration-500"
                   />
+                  {/* Color accent line */}
+                  <div className="absolute bottom-0 left-0 right-0 h-1" style={{ backgroundColor: vehicle.color }} />
                 </div>
 
-                <div className="relative z-10">
+                <div className="relative z-10 p-6">
                   <div
-                    className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300"
+                    className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300"
                     style={{ backgroundColor: `${vehicle.color}15` }}
                   >
-                    <vehicle.icon className="w-7 h-7" style={{ color: vehicle.color }} />
+                    <vehicle.icon className="w-6 h-6" style={{ color: vehicle.color }} />
                   </div>
                   <h3 className="text-lg font-bold text-white mb-2">{vehicle.title}</h3>
                   <p className="text-sm text-white/40 leading-relaxed">{vehicle.desc}</p>
