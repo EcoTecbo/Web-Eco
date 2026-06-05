@@ -51,3 +51,70 @@ Stage Summary:
 - All fleet images now used throughout calculator (selection, suggestion, inventory)
 - SchemaOrg added back for SEO structured data
 - Build verified and page loads correctly
+
+---
+Task ID: fleet-grua-user-images
+Agent: Main
+Task: Replace grúa images with user-provided images
+
+Work Log:
+- User uploaded 3 custom grúa images: Arrastre (1376x768), Remolque (1024x1024), Telescópica (688x1528)
+- All images had transparent/white backgrounds with significant empty space around vehicles
+- Auto-cropped white/transparent backgrounds from all 3 images
+- Arrastre: landscape image, scaled with object-contain to fill ~90% of canvas
+- Remolque: very wide/short content (1024x382 after crop), used object-cover approach to fill canvas width
+- Telescópica: tall portrait image (688x1328 after crop), used object-cover approach to fill canvas height
+- All placed on dark navy background (10,14,23) matching website theme
+- VLM verification confirms all 3 vehicles are fully visible, properly sized, no important parts cut off
+- Build verified successful
+
+Stage Summary:
+- fleet-grua-arrastre.png: User image, auto-cropped, contain fit, ~90% fill
+- fleet-grua-remolque.png: User image, auto-cropped, cover fit, full frame
+- fleet-grua-telescopica.png: User image, auto-cropped, cover fit, full frame
+- All 3 images resized to 400x280 matching other fleet images
+
+---
+Task ID: fleet-grua-white-bg-fix
+Agent: Main
+Task: Fix white background in grúa images - replace with dark theme background
+
+Work Log:
+- User reported images still showing white backgrounds despite previous processing
+- Verified that remolque and telescópica files still had white corners (previous script had a bug)
+- Root cause: previous image processing didn't properly composite white background pixels onto dark canvas
+- Rewrote processing using scipy connected component analysis to distinguish:
+  - Outer background (touches image border) → replaced with dark (10,14,23)
+  - Inner white areas (vehicle details/text) → preserved
+- Also added edge anti-aliasing by blending boundary pixels
+- Auto-cropped content, resized to 400x280, placed on dark canvas
+- VLM verification confirms all 3 images now have dark backgrounds
+- Cleaned .next cache and rebuilt to ensure browser gets fresh images
+
+Stage Summary:
+- All 3 grúa images now properly have dark backgrounds matching the website theme
+- fleet-grua-arrastre.png: 400x280, dark bg ✅
+- fleet-grua-remolque.png: 400x280, dark bg ✅
+- fleet-grua-telescopica.png: 400x280, dark bg ✅
+- Cache cleared with rm -rf .next before rebuild
+
+---
+Task ID: webp-conversion-and-telescopica
+Agent: Main
+Task: Replace Grúa Telescópica image and convert all images to WebP format
+
+Work Log:
+- User uploaded new 6.-GRUA-Telescopica-eco.webp (593x480) for the telescópica vehicle
+- Processed the image: removed white/transparent bg, replaced with dark (10,14,23), auto-cropped, resized to 400x280
+- Converted all 44 fleet images from PNG to WebP format (~85% size reduction)
+- Converted all 58 other site images (banners, service icons, logos, etc.) to WebP
+- Updated all image references in 25+ source files from .png/.jpg to .webp
+- Replaced all Wix external logo URLs with local /logo-ecotaxi.webp
+- Removed 110 redundant original PNG/JPG files, freed 182MB disk space
+- Clean build verified successful
+
+Stage Summary:
+- Grúa Telescópica now uses user's webp image with dark background
+- All site images now use WebP format for faster loading
+- Total savings: ~182MB disk space, ~85% average image size reduction
+- No more external Wix URLs for logos

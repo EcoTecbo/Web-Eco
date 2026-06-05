@@ -57,7 +57,7 @@ function HeroSection() {
       {/* Background image with overlay */}
       <div className="absolute inset-0">
         <img
-          src="/health-hero.png"
+          src="/health-hero.webp"
           alt="Transporte de Salud Ecotaxi"
           className="w-full h-full object-cover"
         />
@@ -194,7 +194,7 @@ function ServiceAreasSection() {
               {/* Image */}
               <div className="relative h-56 overflow-hidden">
                 <img
-                  src="/health-staff.png"
+                  src="/health-staff.webp"
                   alt="Transporte para Personal Médico"
                   className="w-full h-full object-cover"
                 />
@@ -267,7 +267,7 @@ function ServiceAreasSection() {
               {/* Image */}
               <div className="relative h-56 overflow-hidden">
                 <img
-                  src="/health-patient.png"
+                  src="/health-patient.webp"
                   alt="Transporte para Pacientes"
                   className="w-full h-full object-cover"
                 />

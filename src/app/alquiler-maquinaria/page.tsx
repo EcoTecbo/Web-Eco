@@ -81,7 +81,7 @@ function HeroSection() {
         {/* Logo */}
         <div className="flex justify-center mb-6">
           <img
-            src="/ecotaxi-logo.png"
+            src="/ecotaxi-logo.webp"
             alt="Ecotaxi Logo"
             className="h-16 md:h-20 w-auto opacity-90 hover:opacity-100 transition-opacity duration-300"
             style={{ filter: 'drop-shadow(0 0 12px rgba(0,230,118,0.5))' }}

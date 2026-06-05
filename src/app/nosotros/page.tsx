@@ -150,7 +150,7 @@ export default function NosotrosPage() {
                 <div className="relative p-8 md:p-10 rounded-3xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm">
                   <div className="text-center mb-6">
                     <img
-                      src="https://static.wixstatic.com/media/93e1f3_ab4f7e0b7c2e4f4ba3e0be8f1c2a8f44~mv2.png/v1/fill/w_247,h_104,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/Logo%20Vector%20Ecotaxi.png"
+                      src="/logo-ecotaxi.webp"
                       alt="Ecotaxi Logo"
                       className="h-14 w-auto mx-auto mb-4"
                     />

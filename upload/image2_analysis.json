@@ -1,0 +1,28 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "No es posible extraer datos de una tabla de precios o información porque la imagen proporcionada no contiene una tabla con datos estructurados. En su lugar, muestra un diagrama de flujo o un proceso de selección de servicios de transporte con las siguientes etapas:\n\n1. **Etapa 1**: \"Ya sé qué vehículo necesito\" → \"Selecciona Camión Directo\"\n2. **Etapa 2**: \"Conozco el tamaño\" → \"Asigna Camión Automático\" → \"[PANTALLA FINAL DE COSTOS]\" → \"Precio Base Camión + Extras\"\n3. **Etapa 3**: \"Ayúdame a elegir (Muebles)\" → \"Suma m³\" → \"Recomienda\"\n\n### Datos disponibles (sin tabla de precios):\n- **Tipos de vehículos/servicios**:\n  - Camión Directo\n  - Camión Automático\n- **Proceso de selección**:\n  - Opción 1: Para usuarios que conocen el vehículo.\n  - Opción 2: Para usuarios que conocen el tamaño (con cálculo de \"Precio Base Camión + Extras\").\n  - Opción 3: Asistencia para elegir (especializado en muebles, con cálculo de volumen en m³).\n\nNo hay información numérica (precios, costos, dimensiones) visible en la imagen. Si tienes una tabla de precios o más detalles, por favor, compártela para un análisis completo.",
+        "role": "assistant"
+      }
+    }
+  ],
+  "created": 1780274869,
+  "id": "2026060108474292f3dc706fb440f0",
+  "model": "glm-4.6v",
+  "object": "chat.completion",
+  "request_id": "2026060108474292f3dc706fb440f0",
+  "usage": {
+    "completion_tokens": 312,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens": 352,
+    "prompt_tokens_details": {
+      "cached_tokens": 4
+    },
+    "total_tokens": 664
+  }
+}

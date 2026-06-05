@@ -59,7 +59,7 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: "https://static.wixstatic.com/media/93e1f3_ab4f7e0b7c2e4f4ba3e0be8f1c2a8f44~mv2.png/v1/fill/w_247,h_104,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/Logo%20Vector%20Ecotaxi.png",
+    icon: "/logo-ecotaxi.webp",
   },
   openGraph: {
     title: "Ecotaxi Bolivia - Transporte Inteligente, Compromiso Ecológico",
@@ -71,7 +71,7 @@ export const metadata: Metadata = {
     locale: "es_BO",
     images: [
       {
-        url: "https://static.wixstatic.com/media/93e1f3_ab4f7e0b7c2e4f4ba3e0be8f1c2a8f44~mv2.png/v1/fill/w_247,h_104,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/Logo%20Vector%20Ecotaxi.png",
+        url: "/logo-ecotaxi.webp",
         width: 1200,
         height: 630,
         alt: "Ecotaxi Bolivia - Taxi Ecológico",

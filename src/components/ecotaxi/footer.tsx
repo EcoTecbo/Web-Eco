@@ -19,6 +19,7 @@ const serviceLinks = [
   { label: 'Eventos', href: '/eventos' },
   { label: 'Mudanza', href: '/mudanza' },
   { label: 'Logística y Distribución', href: '/logistica' },
+  { label: 'Maquinaria Pesada', href: '/alquiler-maquinaria' },
 ]
 
 const workLinks = [
@@ -46,9 +47,9 @@ export function Footer() {
           <div className="lg:col-span-2">
             <Link href="/">
               <img
-                src="https://static.wixstatic.com/media/93e1f3_ab4f7e0b7c2e4f4ba3e0be8f1c2a8f44~mv2.png/v1/fill/w_247,h_104,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/Logo%20Vector%20Ecotaxi.png"
+                src="/logo-ecotaxi.webp"
                 alt="Ecotaxi Logo"
-                className="h-10 w-auto mb-4"
+                className="h-12 w-auto mb-4"
               />
             </Link>
             <p className="text-white/40 text-sm leading-relaxed mb-6 max-w-xs">

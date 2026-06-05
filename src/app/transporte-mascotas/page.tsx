@@ -56,7 +56,7 @@ function HeroSection() {
       {/* Background image with overlay */}
       <div className="absolute inset-0">
         <img
-          src="/service-mascotas.png"
+          src="/service-mascotas.webp"
           alt="Transporte de Mascotas Ecotaxi"
           className="w-full h-full object-cover"
         />
@@ -175,7 +175,7 @@ const serviceTypes = [
     ],
     color: '#F472B6',
     tag: 'MÁS SOLICITADO',
-    image: '/service-mascotas.png',
+    image: '/service-mascotas.webp',
   },
   {
     icon: Sparkles,
@@ -192,7 +192,7 @@ const serviceTypes = [
     ],
     color: '#22C55E',
     tag: 'POPULAR',
-    image: '/service-mascotas.png',
+    image: '/service-mascotas.webp',
   },
   {
     icon: Truck,
@@ -209,7 +209,7 @@ const serviceTypes = [
     ],
     color: '#0077BD',
     tag: 'ESPECIAL',
-    image: '/service-mascotas.png',
+    image: '/service-mascotas.webp',
   },
 ]
 

@@ -75,7 +75,7 @@ export function NosotrosPage() {
             style={{ transitionDelay: '100ms' }}>
             <div className="relative rounded-3xl overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-[#0077BD]/20 to-[#00E676]/10" />
-              <img src="/hero-taxi-1.png" alt="EcoTaxi - Transporte ecológico en Santa Cruz" className="w-full h-[400px] md:h-[500px] object-cover" />
+              <img src="/hero-taxi-1.webp" alt="EcoTaxi - Transporte ecológico en Santa Cruz" className="w-full h-[400px] md:h-[500px] object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0a0e17] via-transparent to-transparent" />
               <div className="absolute bottom-6 left-6 right-6 grid grid-cols-3 gap-3">
                 {[

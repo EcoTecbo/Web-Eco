@@ -9,7 +9,7 @@ function getLocalBusinessSchema() {
     name: 'Ecotaxi Bolivia',
     alternateName: 'EcoTaxi Bolivia',
     url: BASE_URL,
-    logo: 'https://static.wixstatic.com/media/93e1f3_ab4f7e0b7c2e4f4ba3e0be8f1c2a8f44~mv2.png/v1/fill/w_247,h_104,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/Logo%20Vector%20Ecotaxi.png',
+    logo: '/logo-ecotaxi.webp',
     description:
       'Primera empresa de transporte en Bolivia con plan de medición, reducción y neutralización de emisiones de CO2. Servicio de taxi ecológico y mudanzas profesionales en Santa Cruz de la Sierra.',
     telephone: '+591-3-3296885',

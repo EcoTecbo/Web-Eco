@@ -129,7 +129,7 @@ export function LoadingScreen() {
     >
       <div className="flex flex-col items-center gap-6">
         <img
-          src="/logo-ecotaxi.png"
+          src="/logo-ecotaxi.webp"
           alt="Ecotaxi"
           className="h-12 w-auto object-contain animate-pulse"
         />

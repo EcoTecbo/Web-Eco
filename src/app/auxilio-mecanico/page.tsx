@@ -119,10 +119,10 @@ function HeroSection() {
         <AnimatedSection delay={400}>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10 max-w-5xl mx-auto">
             {[
-              { src: '/auxilio-bateria.png', label: 'Batería Móvil', color: '#F97316' },
-              { src: '/auxilio-neumatico.png', label: 'Gomero Móvil', color: '#F59E0B' },
-              { src: '/auxilio-llave.png', label: 'Llave Móvil', color: '#0077BD' },
-              { src: '/grua-remolque.png', label: 'Grúa Remolque', color: '#EF4444' },
+              { src: '/auxilio-bateria.webp', label: 'Batería Móvil', color: '#F97316' },
+              { src: '/auxilio-neumatico.webp', label: 'Gomero Móvil', color: '#F59E0B' },
+              { src: '/auxilio-llave.webp', label: 'Llave Móvil', color: '#0077BD' },
+              { src: '/grua-remolque.webp', label: 'Grúa Remolque', color: '#EF4444' },
             ].map((img) => (
               <div key={img.label} className="group relative h-44 md:h-56 rounded-2xl overflow-hidden border border-white/[0.06] hover:border-white/15 transition-all duration-500 bg-white/[0.02]">
                 {/* Colored glow behind icon */}
@@ -192,7 +192,7 @@ const mainServices = [
     ],
     color: '#F97316',
     tag: 'MAS SOLICITADO',
-    image: '/auxilio-bateria.png',
+    image: '/auxilio-bateria.webp',
   },
   {
     icon: CarFront,
@@ -209,7 +209,7 @@ const mainServices = [
     ],
     color: '#F59E0B',
     tag: 'RAPIDO',
-    image: '/auxilio-neumatico.png',
+    image: '/auxilio-neumatico.webp',
   },
   {
     icon: Key,
@@ -226,7 +226,7 @@ const mainServices = [
     ],
     color: '#0077BD',
     tag: 'SIN DANOS',
-    image: '/auxilio-llave.png',
+    image: '/auxilio-llave.webp',
   },
   {
     icon: Cog,
@@ -243,7 +243,7 @@ const mainServices = [
     ],
     color: '#EF4444',
     tag: 'EMERGENCIA',
-    image: '/grua-remolque.png',
+    image: '/grua-remolque.webp',
   },
 ]
 
@@ -809,7 +809,7 @@ const gruaTypes = [
       'Traslado al taller de tu elección',
     ],
     color: '#F97316',
-    image: '/grua-moto.png',
+    image: '/grua-moto.webp',
   },
   {
     title: 'Grúa de Arrastre',
@@ -822,7 +822,7 @@ const gruaTypes = [
       'Conduce directo al taller de tu preferencia',
     ],
     color: '#F59E0B',
-    image: '/grua-arrastre.png',
+    image: '/grua-arrastre.webp',
   },
   {
     title: 'Grúa de Remolque',
@@ -835,7 +835,7 @@ const gruaTypes = [
       'Traslado largo distancia disponible',
     ],
     color: '#0077BD',
-    image: '/grua-remolque.png',
+    image: '/grua-remolque.webp',
   },
   {
     title: 'Grúa Telescópica',
@@ -848,7 +848,7 @@ const gruaTypes = [
       'Equipamiento para cargas especiales',
     ],
     color: '#D4AF37',
-    image: '/grua-telescopica.png',
+    image: '/grua-telescopica.webp',
   },
 ]
 

@@ -48,25 +48,25 @@ function AnimatedSection({ children, className = '', delay = 0 }: {
    ═══════════════════════════════════════════════════════════════════════════════ */
 const heroSlides = [
   {
-    image: '/logistica-ruta.jpg',
+    image: '/logistica-ruta.webp',
     label: 'Rutas Optimizadas',
     desc: 'Planificación inteligente de rutas para máxima eficiencia',
     color: '#00E676',
   },
   {
-    image: '/logistica-coordinar.jpg',
+    image: '/logistica-coordinar.webp',
     label: 'Coordinación Total',
     desc: 'Gestión centralizada de tu distribución desde nuestra plataforma',
     color: '#0077BD',
   },
   {
-    image: '/logistica-mapa.jpg',
+    image: '/logistica-mapa.webp',
     label: 'Cobertura Nacional',
     desc: 'Llegamos a todo el territorio boliviano con trazabilidad GPS',
     color: '#FF9800',
   },
   {
-    image: '/logistica-check.jpg',
+    image: '/logistica-check.webp',
     label: 'Entrega Verificada',
     desc: 'Confirmación de cada entrega con evidencia en tiempo real',
     color: '#8B5CF6',

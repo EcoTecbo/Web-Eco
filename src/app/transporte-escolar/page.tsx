@@ -56,7 +56,7 @@ function HeroSection() {
       {/* Background image with overlay */}
       <div className="absolute inset-0">
         <img
-          src="/service-escolar.png"
+          src="/service-escolar.webp"
           alt="Transporte Escolar Ecotaxi"
           className="w-full h-full object-cover"
         />
@@ -194,7 +194,7 @@ function ServiceOverviewSection() {
               {/* Image header */}
               <div className="relative h-56 overflow-hidden">
                 <img
-                  src="/service-escolar.png"
+                  src="/service-escolar.webp"
                   alt="Transporte Regular Escolar"
                   className="w-full h-full object-cover"
                 />
@@ -262,7 +262,7 @@ function ServiceOverviewSection() {
               {/* Image header */}
               <div className="relative h-56 overflow-hidden">
                 <img
-                  src="/service-escolar.png"
+                  src="/service-escolar.webp"
                   alt="Transporte Eventual Escolar"
                   className="w-full h-full object-cover"
                 />

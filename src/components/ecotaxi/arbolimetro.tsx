@@ -129,7 +129,7 @@ export function Arbolimetro() {
               {/* Glow behind image */}
               <div className="absolute inset-0 rounded-3xl bg-[#00E676]/15 blur-[60px] scale-90" />
               <img
-                src="/eco-tree.jpg"
+                src="/eco-tree.webp"
                 alt="Choferes de Ecotaxi plantando árboles - Compromiso ecológico"
                 className="relative w-full max-w-sm rounded-3xl object-cover shadow-[0_0_40px_rgba(0,230,118,0.2)]"
               />

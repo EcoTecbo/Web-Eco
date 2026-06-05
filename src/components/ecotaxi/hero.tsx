@@ -5,13 +5,13 @@ import { ChevronDown, Leaf, Car, Shield, Zap, ChevronLeft, ChevronRight } from '
 
 const slides = [
   {
-    image: '/hero-taxi-1.png',
+    image: '/hero-taxi-1.webp',
     title: 'Transporte Inteligente,',
     highlight: 'Compromiso Ecológico',
     subtitle: 'Somos la primera empresa de transporte en Bolivia con un plan de medición, reducción y neutralización de emisiones de gases de efecto invernadero.',
   },
   {
-    image: '/hero-taxi-2.png',
+    image: '/hero-taxi-2.webp',
     title: 'Toca. Viaja. Llega:',
     highlight: '¡así de sencillo!',
     subtitle: 'Cada trayecto con Ecotaxi es un paso hacia un planeta más limpio. Viaja con nosotros y reduce tu huella de carbono automáticamente.',

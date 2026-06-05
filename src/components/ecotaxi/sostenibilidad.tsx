@@ -131,7 +131,7 @@ export function Sostenibilidad() {
               {/* Glow behind tree */}
               <div className="absolute inset-0 rounded-full bg-[#00E676]/20 blur-[60px] scale-75" />
               <img
-                src="/eco-tree.png"
+                src="/eco-tree.webp"
                 alt="Árbol ecológico - Símbolo de pureza y descontaminación"
                 className="relative w-full max-w-sm rounded-3xl object-contain"
                 style={{ filter: 'drop-shadow(0 0 40px rgba(0,230,118,0.3))' }}

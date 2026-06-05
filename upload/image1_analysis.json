@@ -1,0 +1,28 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "Basándome en la imagen proporcionada, no se muestran datos de una tabla de precios con información como nombre del tipo de vehículo, precio por km, precio mínimo u otros detalles. La imagen corresponde a una interfaz de selección de tipo de vehículo para mudanzas, con las siguientes opciones:\n\n1. **Furgón cerrado**  \n   - Descripción: \"Protegido del clima\"  \n   - Característica: Protege la carga del clima y la vista  \n\n2. **Camioneta abierta**  \n   - Descripción: \"Más económica\"  \n   - Característica: Más económica para mudanzas pequeñas  \n\n\nLa sección \"¿Cómo quieres calcular tu mudanza?\" ofrece métodos de cálculo, pero no incluye datos de precios. Si la tabla de precios está en otra parte de la interfaz (no visible en la imagen), por favor, comparte más detalles o una captura extendida para extraer la información completa.",
+        "role": "assistant"
+      }
+    }
+  ],
+  "created": 1780274846,
+  "id": "2026060108471634c220556a384af8",
+  "model": "glm-4.6v",
+  "object": "chat.completion",
+  "request_id": "2026060108471634c220556a384af8",
+  "usage": {
+    "completion_tokens": 202,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens": 1245,
+    "prompt_tokens_details": {
+      "cached_tokens": 4
+    },
+    "total_tokens": 1447
+  }
+}

@@ -28,6 +28,7 @@ const servicePages = [
   { label: 'Auxilio Mecánico', href: '/auxilio-mecanico' },
   { label: 'Mudanza', href: '/mudanza' },
   { label: 'Logística y Distribución', href: '/logistica' },
+  { label: 'Maquinaria Pesada', href: '/alquiler-maquinaria' },
 ]
 
 /* ─── Animated Taxi SVG Icon ─── */
@@ -160,7 +161,7 @@ export function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0">
             <img
-              src="/logo-ecotaxi.png"
+              src="/logo-ecotaxi.webp"
               alt="Ecotaxi Logo"
               className="h-9 md:h-11 w-auto object-contain drop-shadow-[0_0_10px_rgba(0,230,118,0.15)]"
             />

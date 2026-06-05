@@ -82,7 +82,7 @@ export function Nosotros() {
           <div className="relative rounded-3xl overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-[#0077BD]/20 to-[#00E676]/10" />
             <img
-              src="/hero-taxi-1.png"
+              src="/hero-taxi-1.webp"
               alt="EcoTaxi - Transporte ecológico en Santa Cruz"
               className="w-full h-[400px] md:h-[500px] object-cover"
             />

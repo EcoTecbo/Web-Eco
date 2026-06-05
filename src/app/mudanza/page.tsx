@@ -313,7 +313,7 @@ interface NominatimResult { display_name: string; lat: string; lon: string }
 function HeroSection() {
   const truckRef = useRef<HTMLDivElement>(null)
   const [heroSlide, setHeroSlide] = useState(0)
-  const heroImages = ['/mudanza-hero1.jpg', '/mudanza-hero2.jpg']
+  const heroImages = ['/mudanza-hero1.webp', '/mudanza-hero2.webp']
 
   useEffect(() => {
     if (truckRef.current) {
@@ -480,17 +480,17 @@ function ServiceTypesSection() {
    ═══════════════════════════════════════════════════════════════════════════════ */
 const categories = [
   { id: 'casa', icon: Home, label: 'Mudanza Domiciliaria', color: '#00E676',
-    bgImage: '/mudanza-servicio-casa.jpg',
+    bgImage: '/mudanza-servicio-casa.webp',
     desc: 'Mudanza residencial completa. Transportamos tus muebles, electrodomésticos y pertenencias con el máximo cuidado desde tu hogar actual hasta tu nuevo hogar.',
     included: ['Desmontaje y montaje de muebles', 'Protección con mantas y plástico', 'Transporte de electrodomésticos', 'Carga y descarga profesional'],
     vehicles: 'Camioneta Mediana, Furgón Grande', notes: 'Recomendamos embalaje profesional para cristalería y objetos frágiles.' },
   { id: 'especial', icon: Shield, label: 'Mudanza Especial', color: '#FF9800',
-    bgImage: '/mudanza-servicio-especial.jpg',
+    bgImage: '/mudanza-servicio-especial.webp',
     desc: 'Para artículos de alto valor o delicados: pianos, obras de arte, cajas fuertes, equipo médico y antigüedades. Personal especializado y embalaje a medida.',
     included: ['Embalaje a medida personalizado', 'Personal especializado certificado', 'Seguro premium obligatorio', 'Equipamiento de sujeción profesional'],
     vehicles: 'Furgón Grande con suspensión reforzada', notes: 'Cotización personalizada obligatoria. Se requiere evaluación previa del artículo.' },
   { id: 'oficina', icon: Building2, label: 'Mudanza de Oficina', color: '#0077BD',
-    bgImage: '/mudanza-servicio-oficina.jpg',
+    bgImage: '/mudanza-servicio-oficina.webp',
     desc: 'Relocalización de oficinas con mínima interrupción. Manejamos equipos informáticos, mobiliario corporativo y documentación con protocolos de seguridad especiales.',
     included: ['Protocolo para equipos electrónicos', 'Embalaje de documentación', 'Desconexión/conexión de equipos', 'Montaje de estaciones de trabajo'],
     vehicles: 'Furgón Mediano, Furgón Largo', notes: 'Disponemos de servicio nocturno y fin de semana para no afectar la operatividad.' },
@@ -1080,7 +1080,7 @@ function CalculatorSection() {
   return (
     <section id="calculadora" className="relative py-24 md:py-32">
       {/* Background image */}
-      <div className="absolute inset-0 bg-[url('/mudanza-calculator.jpg')] bg-cover bg-center opacity-[0.15]" />
+      <div className="absolute inset-0 bg-[url('/mudanza-calculator.webp')] bg-cover bg-center opacity-[0.15]" />
       <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17]/95 via-[#0d1320]/90 to-[#0a0e17]/95" />
 
       <div className="absolute top-1/2 left-1/3 w-[600px] h-[600px] rounded-full bg-[#00E676]/5 blur-[150px]" />

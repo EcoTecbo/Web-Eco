@@ -55,7 +55,7 @@ function HeroSection() {
       {/* Background image with overlay */}
       <div className="absolute inset-0">
         <img
-          src="/service-aventura.png"
+          src="/service-aventura.webp"
           alt="Aventura Bolivia Ecotaxi"
           className="w-full h-full object-cover"
         />
