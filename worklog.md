@@ -118,3 +118,33 @@ Stage Summary:
 - All site images now use WebP format for faster loading
 - Total savings: ~182MB disk space, ~85% average image size reduction
 - No more external Wix URLs for logos
+
+---
+Task ID: agencias-page-creation
+Agent: Main
+Task: Create /agencias partner page for OTAs, travel agencies, tour operators and hotels
+
+Work Log:
+- Read current ecotaxi-bo.com/agencias page content via web reader
+- Studied corporativo page design pattern for consistency
+- Created comprehensive /agencias page with 10 sections:
+  1. Hero - "Tu Partner de Transporte Terrestre" with CTA
+  2. Target Audience - OTAs, Agencias, Tour Operadores, Hoteles
+  3. How It Works - 4-step process (Register → Set Rates → Book → Travel)
+  4. Fleet Available - All 7 vehicle categories available
+  5. Benefits - 8 exclusive advantages (commissions, instant confirmation, etc.)
+  6. Services to Resell - 6 service types (airport, tours, VIP, etc.)
+  7. Social Proof - 17 trusted partner logos + 3 testimonials
+  8. Commission Tiers - Básico (10%), Premium (15%), Elite (20%)
+  9. Free Extras - 8 included services at no extra cost
+  10. Registration Form - Complete agency registration form
+- Added "Agencias y OTAs" to navbar services dropdown
+- Updated footer "Agencias de viaje" link to point to /agencias
+- Build verified successful
+
+Stage Summary:
+- Full partner page at /agencias with dark glassmorphic design
+- Emphasizes: own pricing/commissions, full fleet, experience with OTAs
+- 3-tier commission model (10%-15%-20%)
+- Registration form with agency type, volume, contact info
+- Navigation links in navbar and footer

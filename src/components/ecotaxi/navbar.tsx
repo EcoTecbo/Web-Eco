@@ -23,6 +23,7 @@ const servicePages = [
   { label: 'Traslado Aeropuerto', href: '/aeropuerto' },
   { label: 'Interurbano y Turismo', href: '/interurbano' },
   { label: 'Servicios Corporativos', href: '/corporativo' },
+  { label: 'Agencias y OTAs', href: '/agencias' },
   { label: 'Transporte de Salud', href: '/transporte-salud' },
   { label: 'Envíos y Mensajería', href: '/envios' },
   { label: 'Auxilio Mecánico', href: '/auxilio-mecanico' },

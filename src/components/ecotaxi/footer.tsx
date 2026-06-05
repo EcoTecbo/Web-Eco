@@ -23,7 +23,7 @@ const serviceLinks = [
 ]
 
 const workLinks = [
-  { label: 'Agencias de viaje', href: '/corporativo' },
+  { label: 'Agencias de viaje', href: '/agencias' },
   { label: 'Organizadores de eventos', href: '/#multicanal' },
   { label: 'Socios de transporte', href: '/#multicanal' },
   { label: 'Afiliados', href: '/#multicanal' },
