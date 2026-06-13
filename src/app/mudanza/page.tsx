@@ -311,15 +311,8 @@ interface NominatimResult { display_name: string; lat: string; lon: string }
    1. HERO
    ═══════════════════════════════════════════════════════════════════════════════ */
 function HeroSection() {
-  const truckRef = useRef<HTMLDivElement>(null)
   const [heroSlide, setHeroSlide] = useState(0)
-  const heroImages = ['/mudanza-hero1.webp', '/mudanza-hero2.webp']
-
-  useEffect(() => {
-    if (truckRef.current) {
-      anime({ targets: truckRef.current, translateX: [-120, 0], opacity: [0, 1], duration: 1400, easing: 'easeOutExpo' })
-    }
-  }, [])
+  const heroImages = ['/mudanza-hero-bg.webp', '/mudanza-hero1.webp', '/mudanza-hero2.webp']
 
   // Auto-slide hero images
   useEffect(() => {
@@ -331,33 +324,15 @@ function HeroSection() {
 
   return (
     <section className="relative min-h-[92vh] flex items-center justify-center overflow-hidden">
-      {/* Background images with fade transition */}
+      {/* Background images with fade transition - real photos */}
       {heroImages.map((img, i) => (
         <div key={img} className="absolute inset-0 bg-cover bg-center transition-opacity duration-1000"
-          style={{ backgroundImage: `url('${img}')`, opacity: heroSlide === i ? 0.2 : 0 }} />
+          style={{ backgroundImage: `url('${img}')`, opacity: heroSlide === i ? 0.35 : 0 }} />
       ))}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17]/80 via-[#0d1320]/70 to-[#0a0e17]/90" />
-      <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: `linear-gradient(rgba(0,230,118,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(0,230,118,0.3) 1px, transparent 1px)`, backgroundSize: '60px 60px' }} />
-      <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full bg-[#00E676]/12 blur-[120px] animate-pulse" />
-      <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full bg-[#0077BD]/10 blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full bg-[#FF9800]/6 blur-[100px] animate-pulse" style={{ animationDelay: '2s' }} />
-
-      {/* Animated Truck */}
-      <div ref={truckRef} className="absolute bottom-[12%] left-1/2 -translate-x-1/2 md:left-[15%] md:translate-x-0 opacity-0">
-        <svg width="200" height="100" viewBox="0 0 200 100" fill="none">
-          <rect x="60" y="20" width="100" height="50" rx="6" fill="#00E676" opacity="0.15" stroke="#00E676" strokeWidth="1.5" />
-          <rect x="65" y="25" width="90" height="40" rx="3" fill="#00E676" opacity="0.08" />
-          <rect x="160" y="35" width="35" height="35" rx="4" fill="#0077BD" opacity="0.2" stroke="#0077BD" strokeWidth="1.5" />
-          <rect x="170" y="40" width="18" height="20" rx="2" fill="#0077BD" opacity="0.1" />
-          <circle cx="80" cy="75" r="10" fill="#1a1a2e" stroke="#00E676" strokeWidth="1.5" />
-          <circle cx="80" cy="75" r="5" fill="#2a2a3e" />
-          <circle cx="175" cy="75" r="10" fill="#1a1a2e" stroke="#00E676" strokeWidth="1.5" />
-          <circle cx="175" cy="75" r="5" fill="#2a2a3e" />
-          <rect x="85" y="55" width="20" height="8" rx="2" fill="#00E676" opacity="0.25" />
-          <rect x="110" y="55" width="20" height="8" rx="2" fill="#00E676" opacity="0.25" />
-          <rect x="135" y="55" width="20" height="8" rx="2" fill="#00E676" opacity="0.25" />
-        </svg>
-      </div>
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17]/70 via-[#0d1320]/60 to-[#0a0e17]/85" />
+      <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: `linear-gradient(rgba(0,230,118,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(0,230,118,0.3) 1px, transparent 1px)`, backgroundSize: '60px 60px' }} />
+      <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full bg-[#00E676]/8 blur-[120px]" />
+      <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full bg-[#0077BD]/8 blur-[120px]" />
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-28 pb-16">
         <A>
@@ -421,13 +396,13 @@ function HeroSection() {
    2. SERVICE TYPES
    ═══════════════════════════════════════════════════════════════════════════════ */
 const serviceTypes = [
-  { icon: MapPin, title: 'Mudanza Local', color: '#00E676', price: 'Desde Bs 200',
+  { icon: MapPin, title: 'Mudanza Local', color: '#00E676',
     desc: 'Dentro de la misma ciudad. Disponibles en Santa Cruz, La Paz y Cochabamba. Servicio el mismo día con equipo profesional y vehículos adecuados para cada tipo de mudanza.',
     features: ['Servicio el mismo día', 'Cobertura en 3 ciudades principales', 'Rastreo GPS en tiempo real', 'Seguro de carga incluido'] },
-  { icon: Route, title: 'Mudanza Provincial', color: '#0077BD', price: 'Desde Bs 500',
+  { icon: Route, title: 'Mudanza Provincial', color: '#0077BD',
     desc: 'Entre provincias dentro del mismo departamento. Servicio al día siguiente con logística coordinada y protección especial para traslados de mayor distancia dentro del departamento.',
     features: ['Servicio al día siguiente', 'Protección especial para distancia', 'Coordinación logística completa', 'Reporte de ubicación en ruta'] },
-  { icon: Globe, title: 'Mudanza Nacional', color: '#FF9800', price: 'Desde Bs 1,000',
+  { icon: Globe, title: 'Mudanza Nacional', color: '#FF9800',
     desc: 'Entre departamentos y ciudades de toda Bolivia. Servicio programado con seguimiento satelital, protección reforzada y seguro premium para traslados de larga distancia a nivel nacional.',
     features: ['Servicio programado con tracking', 'Seguro premium de carga', 'Protección reforzada', 'Cobertura nacional completa'] },
 ]
@@ -463,8 +438,7 @@ function ServiceTypesSection() {
                   ))}
                 </div>
                 <div className="pt-4 border-t border-white/[0.06]">
-                  <span className="text-lg font-bold" style={{ color: s.color }}>{s.price}</span>
-                  <span className="text-xs text-white/30 ml-2">+ distancia</span>
+                  <a href="#calculadora" className="text-sm font-semibold text-[#00E676] hover:text-[#00ff88] transition-colors">Cotizar ahora →</a>
                 </div>
               </div>
             </A>
@@ -614,7 +588,7 @@ function CalculatorSection() {
   const [selectedVehicle, setSelectedVehicle] = useState<typeof VEHICLES[0]['items'][0] | null>(null)
 
   // Two-path flow
-  const [calcPath, setCalcPath] = useState<'A' | 'B' | null>(null) // A=knows vehicle, B=needs help
+  const [calcPath, setCalcPath] = useState<'A' | 'B' | 'C' | null>(null) // A=knows vehicle, B=by size, C=furniture calculator
   const [mudanzaCategory, setMudanzaCategory] = useState<string | null>(null) // For Path B category selection
   const [additionalVehicles, setAdditionalVehicles] = useState<typeof VEHICLES[0]['items'][0][]>([])
 
@@ -749,7 +723,7 @@ function CalculatorSection() {
 
   // Auto-suggest vehicle when in Path B and volume changes
   useEffect(() => {
-    if (calcPath === 'B' && vehicleType && totalVolume > 0) {
+    if ((calcPath === 'B' || calcPath === 'C') && vehicleType && totalVolume > 0) {
       const suggestion = getVehicleSuggestion(totalVolume, vehicleType)
       setSelectedVehicle(suggestion.vehicle)
       setAdditionalVehicles(suggestion.additional)
@@ -856,7 +830,7 @@ function CalculatorSection() {
   const insuranceCost = useMemo(() => {
     if (!wantsInsurance) return 0
     const amount = customInsurance ? parseFloat(customInsurance) || 0 : insuranceAmount
-    return Math.round(amount * 0.02)
+    return Math.round(amount * 0.03)
   }, [wantsInsurance, insuranceAmount, customInsurance])
 
   const subtotal = basePrice + extrasTotal + insuranceCost
@@ -1065,7 +1039,15 @@ function CalculatorSection() {
     : calcPath === 'B'
     ? [
         { num: 1, label: 'Categoría' },
-        { num: 2, label: 'Inventario' },
+        { num: 2, label: 'Ruta' },
+        { num: 3, label: 'Extras' },
+        { num: 4, label: 'Seguro' },
+        { num: 5, label: 'Envío' },
+      ]
+    : calcPath === 'C'
+    ? [
+        { num: 1, label: 'Categoría' },
+        { num: 2, label: 'Mobiliario' },
         { num: 3, label: 'Ruta' },
         { num: 4, label: 'Extras' },
         { num: 5, label: 'Seguro' },
@@ -1139,25 +1121,34 @@ function CalculatorSection() {
             <h3 className="text-xl font-bold text-white mb-2 text-center">¿Cómo deseas cotizar tu mudanza?</h3>
             <p className="text-sm text-white/40 text-center mb-8">Elige la opción que mejor se adapte a ti</p>
 
-            {/* Two-path selection */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            {/* Three-path selection */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
               <button onClick={() => { setCalcPath('A') }}
-                className="group p-8 rounded-2xl text-left transition-all duration-300 bg-white/[0.03] border border-white/[0.06] hover:border-[#00E676]/40 hover:bg-white/[0.05]">
-                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 bg-[#00E676]/10 group-hover:bg-[#00E676]/20 transition-all">
-                  <Truck className="w-7 h-7 text-[#00E676]" />
+                className="group p-6 rounded-2xl text-left transition-all duration-300 bg-white/[0.03] border border-white/[0.06] hover:border-[#00E676]/40 hover:bg-white/[0.05]">
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4 bg-[#00E676]/10 group-hover:bg-[#00E676]/20 transition-all">
+                  <Truck className="w-6 h-6 text-[#00E676]" />
                 </div>
-                <h4 className="text-lg font-bold text-white mb-2">🚛 Ya sé qué vehículo necesito</h4>
-                <p className="text-sm text-white/50 leading-relaxed mb-3">Selecciona tu camión o furgón directamente y cotiza sin inventario detallado.</p>
-                <span className="text-xs text-[#00E676] font-semibold">Ruta A — Selección directa →</span>
+                <h4 className="text-base font-bold text-white mb-2">Ya sé qué vehículo necesito</h4>
+                <p className="text-xs text-white/50 leading-relaxed mb-3">Selecciona el tipo de vehículo (Furgón o Camioneta), elige tu vehículo y cotiza directamente.</p>
+                <span className="text-xs text-[#00E676] font-semibold">Ruta A →</span>
               </button>
               <button onClick={() => { setCalcPath('B') }}
-                className="group p-8 rounded-2xl text-left transition-all duration-300 bg-white/[0.03] border border-white/[0.06] hover:border-[#818CF8]/40 hover:bg-white/[0.05]">
-                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 bg-[#818CF8]/10 group-hover:bg-[#818CF8]/20 transition-all">
-                  <ClipboardList className="w-7 h-7 text-[#818CF8]" />
+                className="group p-6 rounded-2xl text-left transition-all duration-300 bg-white/[0.03] border border-white/[0.06] hover:border-[#818CF8]/40 hover:bg-white/[0.05]">
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4 bg-[#818CF8]/10 group-hover:bg-[#818CF8]/20 transition-all">
+                  <ClipboardList className="w-6 h-6 text-[#818CF8]" />
                 </div>
-                <h4 className="text-lg font-bold text-white mb-2">📋 Necesito ayuda para elegir</h4>
-                <p className="text-sm text-white/50 leading-relaxed mb-3">Te guiamos según el tamaño de tu mudanza y te sugerimos el vehículo ideal.</p>
-                <span className="text-xs text-[#818CF8] font-semibold">Ruta B — Asistencia guiada →</span>
+                <h4 className="text-base font-bold text-white mb-2">Conozco el tamaño de mi mudanza</h4>
+                <p className="text-xs text-white/50 leading-relaxed mb-3">Selecciona Express, Estándar, Familiar o Premium y te asignamos el vehículo ideal automáticamente.</p>
+                <span className="text-xs text-[#818CF8] font-semibold">Ruta B →</span>
+              </button>
+              <button onClick={() => { setCalcPath('C') }}
+                className="group p-6 rounded-2xl text-left transition-all duration-300 bg-white/[0.03] border border-white/[0.06] hover:border-[#FF9800]/40 hover:bg-white/[0.05]">
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4 bg-[#FF9800]/10 group-hover:bg-[#FF9800]/20 transition-all">
+                  <Calculator className="w-6 h-6 text-[#FF9800]" />
+                </div>
+                <h4 className="text-base font-bold text-white mb-2">Ayúdame a elegir</h4>
+                <p className="text-xs text-white/50 leading-relaxed mb-3">Carga tu mobiliario por ambiente y calculamos el volumen para sugerirte el vehículo perfecto.</p>
+                <span className="text-xs text-[#FF9800] font-semibold">Ruta C →</span>
               </button>
             </div>
 
@@ -1251,8 +1242,7 @@ function CalculatorSection() {
                         <p className="text-xs text-white/40 mb-1">{v.desc}</p>
                         <div className="flex items-center gap-3 text-xs text-white/30">
                           <span>{v.pax} pax</span>
-                          <span>Bs {v.perKm}/km</span>
-                          <span>Ayud. Bs {v.helperPrice}</span>
+                          <span>{v.cap} m³</span>
                         </div>
                       </div>
                     </div>
@@ -1277,7 +1267,7 @@ function CalculatorSection() {
                 className="text-xs text-white/40 hover:text-white/60 transition-colors flex items-center gap-1">
                 ← Cambiar ruta
               </button>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-[#818CF8]/10 text-[#818CF8] font-semibold">Ruta B — Asistencia</span>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-[#818CF8]/10 text-[#818CF8] font-semibold">Ruta B — Tamaño</span>
             </div>
 
             {/* Vehicle type selection */}
@@ -1376,14 +1366,91 @@ function CalculatorSection() {
             <div className="flex justify-end">
               <button onClick={() => setStep(2)} disabled={!mudanzaCategory || !selectedVehicle}
                 className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)] disabled:opacity-40 disabled:cursor-not-allowed">
-                Siguiente: Inventario →
+                Siguiente: Ruta →
               </button>
             </div>
           </div>
         )}
 
-        {/* ═══════════════ Step 2: Inventario (Path B only) ═══════════════ */}
-        {step === 2 && calcPath === 'B' && (
+        {/* ═══════════════ Step 1 (Path C): Category + Furniture Calculator ═══════════════ */}
+        {step === 1 && calcPath === 'C' && (
+          <div className="max-w-4xl mx-auto">
+            <div className="flex items-center gap-2 mb-6">
+              <button onClick={() => { setCalcPath(null); setSelectedVehicle(null); setMudanzaCategory(null); setAdditionalVehicles([]); setInventory({}) }}
+                className="text-xs text-white/40 hover:text-white/60 transition-colors flex items-center gap-1">
+                ← Cambiar ruta
+              </button>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-[#FF9800]/10 text-[#FF9800] font-semibold">Ruta C — Calculadora</span>
+            </div>
+
+            {/* Vehicle type selection */}
+            <h3 className="text-xl font-bold text-white mb-2 text-center">¿Vehículo cerrado o abierto?</h3>
+            <p className="text-sm text-white/40 text-center mb-6">Los furgones protegen del clima, las camionetas tienen caja abierta</p>
+            <div className="grid grid-cols-2 gap-4 mb-8">
+              <button onClick={() => { setVehicleType('cerrado'); setSelectedVehicle(null) }}
+                className={`p-5 rounded-2xl text-center transition-all duration-300 ${vehicleType === 'cerrado' ? 'bg-[#818CF8]/10 border-2 border-[#818CF8]/50' : 'bg-white/[0.03] border border-white/[0.06] hover:border-white/10'}`}>
+                <div className="flex justify-center mb-2 h-16 items-center">
+                  <img src="/vehicles/7-FURGON/mediano.png" alt="Furgón" className="max-h-full max-w-[80px] object-contain" />
+                </div>
+                <div className="text-white font-semibold mb-1">Furgón (Cerrado)</div>
+                <div className="text-xs text-white/40">Protección completa del clima</div>
+              </button>
+              <button onClick={() => { setVehicleType('abierto'); setSelectedVehicle(null) }}
+                className={`p-5 rounded-2xl text-center transition-all duration-300 ${vehicleType === 'abierto' ? 'bg-[#FB923C]/10 border-2 border-[#FB923C]/50' : 'bg-white/[0.03] border border-white/[0.06] hover:border-white/10'}`}>
+                <div className="flex justify-center mb-2 h-16 items-center">
+                  <img src="/vehicles/6-CAMIONETA/mediana.png" alt="Camioneta" className="max-h-full max-w-[80px] object-contain" />
+                </div>
+                <div className="text-white font-semibold mb-1">Camioneta (Abierto)</div>
+                <div className="text-xs text-white/40">Caja abierta, ideal para cargas resistentes</div>
+              </button>
+            </div>
+
+            {/* Vehicle suggestion based on current volume */}
+            {vehicleType && totalVolume > 0 && (
+              <div className="p-4 rounded-xl bg-[#FF9800]/5 border border-[#FF9800]/15 mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-20 h-14 shrink-0 flex items-center justify-center">
+                    {selectedVehicle ? (
+                      <img src={selectedVehicle.img} alt={selectedVehicle.name} className="max-h-full max-w-full object-contain" />
+                    ) : (
+                      <Truck className="w-8 h-8 text-[#FF9800]/40" />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Sparkles className="w-4 h-4 text-[#FF9800]" />
+                      <span className="text-sm font-semibold text-[#FF9800]">Vehículo sugerido por volumen</span>
+                    </div>
+                    <p className="text-sm text-white/60">
+                      {selectedVehicle ? (
+                        <>
+                          <span className="text-white font-semibold">{selectedVehicle.name}</span> ({selectedVehicle.cap} m³)
+                          {totalVolume > selectedVehicle.cap && additionalVehicles.length > 0 && (
+                            <span className="text-[#FF9800]"> + {additionalVehicles.length} vehículo{additionalVehicles.length > 1 ? 's' : ''} adicional{additionalVehicles.length > 1 ? 'es' : ''}</span>
+                          )}
+                        </>
+                      ) : 'Agrega mobiliario para ver la sugerencia'}
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-[#00E676]">{totalVolume}</div>
+                    <div className="text-xs text-white/30">m³ total</div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="flex justify-end">
+              <button onClick={() => setStep(2)} disabled={!vehicleType}
+                className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)] disabled:opacity-40 disabled:cursor-not-allowed">
+                Siguiente: Mobiliario →
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ═══════════════ Step 2 (Path C): Furniture Calculator ═══════════════ */}
+        {step === 2 && calcPath === 'C' && (
           <div className="max-w-5xl mx-auto">
             <h3 className="text-xl font-bold text-white mb-2 text-center">Inventario de Artículos</h3>
             <p className="text-sm text-white/40 text-center mb-6">Selecciona la cantidad de cada artículo por ambiente</p>
@@ -1481,7 +1548,7 @@ function CalculatorSection() {
             </div>
             <div className="flex justify-between">
               <button onClick={() => setStep(1)} className="px-6 py-3 rounded-full text-sm font-semibold text-white/60 border border-white/[0.1] hover:border-white/20 transition-all">← Atrás</button>
-              <button onClick={() => setStep(3)} className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)]">
+              <button onClick={() => setStep(3)} disabled={!selectedVehicle} className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)] disabled:opacity-40 disabled:cursor-not-allowed">
                 Siguiente: Ruta →
               </button>
             </div>
@@ -1489,7 +1556,7 @@ function CalculatorSection() {
         )}
 
         {/* ═══════════════ Step: Ruta y Dirección (MAP) ═══════════════ */}
-        {step === (calcPath === 'A' ? 2 : 3) && calcPath && (
+        {step === (calcPath === 'C' ? 3 : 2) && calcPath && (
           <div className="max-w-7xl mx-auto">
             <h3 className="text-xl font-bold text-white mb-2 text-center">Ruta y Dirección</h3>
             <p className="text-sm text-white/40 text-center mb-6">Define origen, destino y paradas intermedias en el mapa</p>
@@ -1639,8 +1706,8 @@ function CalculatorSection() {
             </div>
 
             <div className="flex justify-between">
-              <button onClick={() => setStep(calcPath === 'A' ? 1 : 2)} className="px-6 py-3 rounded-full text-sm font-semibold text-white/60 border border-white/[0.1] hover:border-white/20 transition-all">← Atrás</button>
-              <button onClick={() => setStep(calcPath === 'A' ? 3 : 4)} className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)]">
+              <button onClick={() => setStep(calcPath === 'C' ? 2 : 1)} className="px-6 py-3 rounded-full text-sm font-semibold text-white/60 border border-white/[0.1] hover:border-white/20 transition-all">← Atrás</button>
+              <button onClick={() => setStep(calcPath === 'C' ? 4 : 3)} className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)]">
                 Siguiente: Extras y Servicios →
               </button>
             </div>
@@ -1648,7 +1715,7 @@ function CalculatorSection() {
         )}
 
         {/* ═══════════════ Step: Extras y Servicios ═══════════════ */}
-        {step === (calcPath === 'A' ? 3 : 4) && calcPath && (
+        {step === (calcPath === 'C' ? 4 : 3) && calcPath && (
           <div className="max-w-4xl mx-auto max-h-[80vh] overflow-y-auto custom-scroll pr-1">
             <h3 className="text-xl font-bold text-white mb-2 text-center">Extras y Servicios</h3>
             <p className="text-sm text-white/40 text-center mb-8">Personaliza tu mudanza con servicios adicionales</p>
@@ -2020,8 +2087,8 @@ function CalculatorSection() {
             </div>
 
             <div className="flex justify-between">
-              <button onClick={() => setStep(calcPath === 'A' ? 2 : 3)} className="px-6 py-3 rounded-full text-sm font-semibold text-white/60 border border-white/[0.1] hover:border-white/20 transition-all">← Atrás</button>
-              <button onClick={() => setStep(calcPath === 'A' ? 4 : 5)} className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)]">
+              <button onClick={() => setStep(calcPath === 'C' ? 3 : 2)} className="px-6 py-3 rounded-full text-sm font-semibold text-white/60 border border-white/[0.1] hover:border-white/20 transition-all">← Atrás</button>
+              <button onClick={() => setStep(calcPath === 'C' ? 5 : 4)} className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)]">
                 Siguiente: Seguro y Pago →
               </button>
             </div>
@@ -2029,7 +2096,7 @@ function CalculatorSection() {
         )}
 
         {/* ═══════════════ Step: Seguro, IVA y Pago ═══════════════ */}
-        {step === (calcPath === 'A' ? 4 : 5) && calcPath && (
+        {step === (calcPath === 'C' ? 5 : 4) && calcPath && (
           <div className="max-w-4xl mx-auto">
             <h3 className="text-xl font-bold text-white mb-2 text-center">Seguro, IVA y Método de Pago</h3>
             <p className="text-sm text-white/40 text-center mb-8">Configura el seguro de carga, facturación y forma de pago</p>
@@ -2070,7 +2137,7 @@ function CalculatorSection() {
                       <span className="text-white font-semibold">Bs {(customInsurance ? parseFloat(customInsurance) || 0 : insuranceAmount).toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between text-sm mt-1">
-                      <span className="text-white/50">Costo del seguro (2%)</span>
+                      <span className="text-white/50">Costo del seguro (3%)</span>
                       <span className="text-[#FF9800] font-bold">Bs {insuranceCost.toLocaleString()}</span>
                     </div>
                   </div>
@@ -2169,8 +2236,8 @@ function CalculatorSection() {
             </div>
 
             <div className="flex justify-between">
-              <button onClick={() => setStep(calcPath === 'A' ? 3 : 4)} className="px-6 py-3 rounded-full text-sm font-semibold text-white/60 border border-white/[0.1] hover:border-white/20 transition-all">← Atrás</button>
-              <button onClick={() => setStep(calcPath === 'A' ? 5 : 6)} className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)]">
+              <button onClick={() => setStep(calcPath === 'C' ? 4 : 3)} className="px-6 py-3 rounded-full text-sm font-semibold text-white/60 border border-white/[0.1] hover:border-white/20 transition-all">← Atrás</button>
+              <button onClick={() => setStep(calcPath === 'C' ? 6 : 5)} className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)]">
                 Siguiente: Datos Personales →
               </button>
             </div>
@@ -2178,7 +2245,7 @@ function CalculatorSection() {
         )}
 
         {/* ═══════════════ Step: Datos Personales y Envío ═══════════════ */}
-        {step === (calcPath === 'A' ? 5 : 6) && calcPath && (
+        {step === (calcPath === 'C' ? 6 : 5) && calcPath && (
           <div className="max-w-4xl mx-auto">
             <h3 className="text-xl font-bold text-white mb-2 text-center">Datos Personales y Envío</h3>
             <p className="text-sm text-white/40 text-center mb-8">Completa tus datos para enviar la cotización</p>
@@ -2277,7 +2344,7 @@ function CalculatorSection() {
                 )}
 
                 <div className="flex justify-between items-center">
-                  <button onClick={() => setStep(calcPath === 'A' ? 4 : 5)} className="px-6 py-3 rounded-full text-sm font-semibold text-white/60 border border-white/[0.1] hover:border-white/20 transition-all">← Atrás</button>
+                  <button onClick={() => setStep(calcPath === 'C' ? 5 : 4)} className="px-6 py-3 rounded-full text-sm font-semibold text-white/60 border border-white/[0.1] hover:border-white/20 transition-all">← Atrás</button>
                   <div className="flex gap-3">
                     <a href={`https://wa.me/59173662803?text=${buildWhatsAppMsg()}`} target="_blank" rel="noopener noreferrer"
                       className="px-6 py-3 rounded-full text-sm font-semibold bg-[#25D366] text-white flex items-center gap-2 hover:bg-[#128C7E] transition-all">

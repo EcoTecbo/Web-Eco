@@ -148,3 +148,26 @@ Stage Summary:
 - 3-tier commission model (10%-15%-20%)
 - Registration form with agency type, volume, contact info
 - Navigation links in navbar and footer
+---
+Task ID: 2
+Agent: Main Agent
+Task: Redesign mudanza page calculator with 3 routes, replace hero image, fix insurance, remove prices
+
+Work Log:
+- Replaced hero SVG truck with real background image (mudanza-hero-bg.webp) at 35% opacity
+- Added 3rd calculator route "Ayúdame a elegir" (Ruta C) with furniture calculator
+- Ruta A: "Ya sé qué vehículo necesito" - Direct vehicle selection → Ruta → Extras → Seguro → Envío
+- Ruta B: "Conozco el tamaño de mi mudanza" - Category selection (Express/Estándar/Familiar/Premium) → auto-assign vehicle → Ruta → Extras → Seguro → Envío
+- Ruta C: "Ayúdame a elegir" - Category → Furniture calculator by room → auto-suggest vehicle → Ruta → Extras → Seguro → Envío
+- Changed insurance from 2% to 3%
+- Removed all visible prices from service types (was "Desde Bs 200/500/1000", now "Cotizar ahora →")
+- Removed per-km and helper prices from vehicle cards in calculator
+- Updated all step navigation for 3 routes
+- Optimized uploaded hero image (8000x5333 → 1920x1279, 2.1MB → 142KB webp)
+
+Stage Summary:
+- Mudanza calculator now has 3 clear routes as requested
+- Hero uses real photos instead of drawn truck SVG
+- No visible prices that might scare customers
+- Insurance correctly at 3%
+- Build successful, server running
