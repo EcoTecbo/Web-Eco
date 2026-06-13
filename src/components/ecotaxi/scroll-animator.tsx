@@ -131,7 +131,7 @@ export function LoadingScreen() {
         <img
           src="/logo-ecotaxi.webp"
           alt="Ecotaxi"
-          className="h-12 w-auto object-contain animate-pulse"
+          className="h-16 w-16 object-contain animate-pulse drop-shadow-[0_0_15px_rgba(0,230,118,0.3)]"
         />
         <div className="flex items-center gap-2">
           <div className="loading-dot w-2 h-2 rounded-full bg-[#00E676]" />

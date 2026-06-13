@@ -10,7 +10,7 @@ import { useEffect, useRef, useState } from 'react'
 
 const services = [
   { icon: DoorOpen, title: 'Puerta a Puerta', desc: 'Te recogemos y llevamos exactamente donde necesitas, con la comodidad de un servicio personalizado puerta a puerta.', href: '/puerta-a-puerta' },
-  { icon: Bus, title: 'Bus', desc: 'Servicio de transporte en bus para grupos grandes, eventos corporativos y excursiones con la máxima comodidad.', href: '/interurbano' },
+  { icon: Bus, title: 'Bus', desc: 'Servicio de transporte en bus para grupos grandes, eventos corporativos y excursiones con la máxima comodidad.', href: '/bus' },
   { icon: Plane, title: 'Aeropuerto', desc: 'Traslados al aeropuerto con puntualidad garantizada. Monitoreo de vuelos en tiempo real para que nunca esperes.', href: '/aeropuerto' },
   { icon: Clock, title: 'Por Hora', desc: 'Alquila un vehículo con conductor por horas. Ideal para reuniones, diligencias o recorridos a tu ritmo.', href: '/por-hora' },
   { icon: Map, title: 'Interurbano y Turismo', desc: 'Viajes entre ciudades y destinos turísticos de Bolivia con seguridad, confort y la mejor atención. Rutas nacionales y tours guiados.', href: '/interurbano' },
@@ -22,7 +22,7 @@ const services = [
   { icon: PawPrint, title: 'Transporte de Mascotas', desc: 'Tu mascota viaja segura y cómoda. Vehículos adaptados para el transporte de tus compañeros peludos.', href: '/transporte-mascotas' },
   { icon: Package, title: 'Envíos', desc: 'Servicio de entrega de paquetes y documentos con seguimiento en tiempo real y confirmación de entrega.', href: '/envios' },
   { icon: Truck, title: 'Mudanza', desc: 'Mudanzas residenciales y comerciales con personal especializado y vehículos de carga apropiados.', href: '/mudanza' },
-  { icon: Warehouse, title: 'Logística', desc: 'Soluciones logísticas integrales para empresas. Cadena de suministro eficiente y rastreo completo.', href: '/corporativo' },
+  { icon: Warehouse, title: 'Logística', desc: 'Soluciones logísticas integrales para empresas. Cadena de suministro eficiente y rastreo completo.', href: '/logistica' },
   { icon: Wrench, title: 'Auxilio Mecánico', desc: 'Asistencia vial 24/7. Remolque, cambio de neumáticos y soluciones mecánicas en el momento que lo necesitas.', href: '/auxilio-mecanico' },
   { icon: HardHat, title: 'Maquinaria', desc: 'Transporte especializado de maquinaria pesada y equipos con los permisos y seguros correspondientes.', href: '/alquiler-maquinaria' },
   { icon: Mountain, title: 'Aventura', desc: 'Expediciones y aventuras al aire libre con transporte adaptado para los caminos más desafiantes de Bolivia.', href: '/aventura' },
@@ -67,7 +67,7 @@ export function Services() {
             </span>
           </h2>
           <p className="text-white/50 max-w-2xl mx-auto text-lg">
-            Más de 17 servicios de transporte diseñados para cubrir cada necesidad. Haz click en cada servicio para conocer más detalles.
+Más de 17 servicios de transporte diseñados para cubrir cada necesidad. Haz click en cada servicio para ver detalles.
           </p>
         </div>
 
@@ -123,7 +123,7 @@ export function Services() {
                         className="inline-flex items-center gap-1 mt-3 text-xs font-semibold text-[#00E676] hover:text-[#00ff88] transition-colors"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        Conocer más →
+Ver servicio →
                       </Link>
                     ) : (
                       <a

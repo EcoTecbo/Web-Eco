@@ -30,7 +30,7 @@ export default function TransferAeropuertoPage() {
               <img
                 src="/logo-ecotaxi.webp"
                 alt="Ecotaxi Logo"
-                className="h-10 md:h-12 w-auto"
+                className="h-10 md:h-12 w-10 md:w-12 object-contain drop-shadow-[0_0_10px_rgba(0,230,118,0.2)]"
               />
             </a>
             <div className="hidden md:flex items-center gap-6">

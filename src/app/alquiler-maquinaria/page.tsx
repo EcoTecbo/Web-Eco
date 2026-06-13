@@ -83,7 +83,7 @@ function HeroSection() {
           <img
             src="/ecotaxi-logo.webp"
             alt="Ecotaxi Logo"
-            className="h-16 md:h-20 w-auto opacity-90 hover:opacity-100 transition-opacity duration-300"
+            className="h-16 md:h-20 w-16 md:w-20 object-contain"
             style={{ filter: 'drop-shadow(0 0 12px rgba(0,230,118,0.5))' }}
           />
         </div>

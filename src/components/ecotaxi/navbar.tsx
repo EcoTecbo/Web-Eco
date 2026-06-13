@@ -11,7 +11,7 @@ const navLinks = [
   { label: 'Servicios', href: '/#servicios', isHash: true },
   { label: 'Flota', href: '/#flota', isHash: true },
   { label: 'Sostenibilidad', href: '/#sostenibilidad', isHash: true },
-  { label: 'Conductores', href: '/#conductores', isHash: true },
+  { label: 'Conductores', href: '/socio-de-transporte' },
   { label: 'Canales', href: '/#multicanal', isHash: true },
   { label: 'Reservas', href: '/#reservas', isHash: true },
 ]
@@ -30,6 +30,16 @@ const servicePages = [
   { label: 'Mudanza', href: '/mudanza' },
   { label: 'Logística y Distribución', href: '/logistica' },
   { label: 'Maquinaria Pesada', href: '/alquiler-maquinaria' },
+  { label: 'Bus', href: '/bus' },
+]
+
+const partnerPages = [
+  { label: 'Agencias de Viaje', href: '/agencias' },
+  { label: 'Organizadores de Eventos', href: '/organizadores-eventos' },
+  { label: 'Socios de Transporte', href: '/socios-transporte' },
+  { label: 'Afiliados', href: '/socio-de-servicios' },
+  { label: 'Conductores', href: '/socio-de-transporte' },
+  { label: 'Eventos y Congresos', href: '/eventos-y-congresos' },
 ]
 
 /* ─── Animated Taxi SVG Icon ─── */
@@ -110,7 +120,10 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [servicesOpen, setServicesOpen] = useState(false)
   const [mobileServicesOpen, setMobileServicesOpen] = useState(false)
+  const [partnersOpen, setPartnersOpen] = useState(false)
+  const [mobilePartnersOpen, setMobilePartnersOpen] = useState(false)
   const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const partnerCloseTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const pathname = usePathname()
 
   useEffect(() => {
@@ -126,6 +139,7 @@ export function Navbar() {
   }
 
   const isServiceActive = servicePages.some(s => pathname === s.href)
+  const isPartnerActive = partnerPages.some(p => pathname === p.href)
 
   // Open with immediate response, close with 600ms delay
   const handleMouseEnter = () => {
@@ -142,10 +156,25 @@ export function Navbar() {
     }, 600)
   }
 
+  const handlePartnersEnter = () => {
+    if (partnerCloseTimeoutRef.current) {
+      clearTimeout(partnerCloseTimeoutRef.current)
+      partnerCloseTimeoutRef.current = null
+    }
+    setPartnersOpen(true)
+  }
+
+  const handlePartnersLeave = () => {
+    partnerCloseTimeoutRef.current = setTimeout(() => {
+      setPartnersOpen(false)
+    }, 600)
+  }
+
   // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
       if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current)
+      if (partnerCloseTimeoutRef.current) clearTimeout(partnerCloseTimeoutRef.current)
     }
   }, [])
 
@@ -215,6 +244,42 @@ export function Navbar() {
                       onClick={() => setServicesOpen(false)}
                     >
                       {service.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Partners Dropdown with 600ms close delay */}
+            <div className="relative"
+              onMouseEnter={handlePartnersEnter}
+              onMouseLeave={handlePartnersLeave}
+            >
+              <button
+                onClick={() => setPartnersOpen(prev => !prev)}
+                className={`flex items-center gap-1 text-sm transition-colors duration-200 ${
+                  isPartnerActive ? 'text-[#00E676]' : 'text-white/85 hover:text-white'
+                }`}>
+                Partners
+                <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${partnersOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {partnersOpen && (
+                <div className="absolute top-full right-0 mt-2 w-56 rounded-xl bg-[#0d1320]/95 backdrop-blur-xl border border-white/[0.08] shadow-xl shadow-black/30 overflow-hidden z-50"
+                  onMouseEnter={handlePartnersEnter}
+                  onMouseLeave={handlePartnersLeave}
+                >
+                  {partnerPages.map((partner) => (
+                    <Link
+                      key={partner.href}
+                      href={partner.href}
+                      className={`block px-4 py-3 text-sm transition-colors duration-200 ${
+                        pathname === partner.href
+                          ? 'text-[#00E676] bg-[#00E676]/5'
+                          : 'text-white/85 hover:text-white hover:bg-white/5'
+                      }`}
+                      onClick={() => setPartnersOpen(false)}
+                    >
+                      {partner.label}
                     </Link>
                   ))}
                 </div>
@@ -300,6 +365,30 @@ export function Navbar() {
                   }`}
                 >
                   {service.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+          {/* Mobile partners - expandable */}
+          <div className="border-t border-white/5 pt-3">
+            <button
+              onClick={() => setMobilePartnersOpen(!mobilePartnersOpen)}
+              className="flex items-center justify-between w-full py-2 px-2 text-lg text-white/70"
+            >
+              <span>Partners</span>
+              <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${mobilePartnersOpen ? 'rotate-180' : ''}`} />
+            </button>
+            <div className={`overflow-hidden transition-all duration-300 ${mobilePartnersOpen ? 'max-h-[500px]' : 'max-h-0'}`}>
+              {partnerPages.map((partner) => (
+                <Link
+                  key={partner.href}
+                  href={partner.href}
+                  onClick={() => { setMobileOpen(false); setMobilePartnersOpen(false) }}
+                  className={`block py-2 px-4 text-base transition-colors ${
+                    pathname === partner.href ? 'text-[#00E676]' : 'text-white/60'
+                  }`}
+                >
+                  {partner.label}
                 </Link>
               ))}
             </div>

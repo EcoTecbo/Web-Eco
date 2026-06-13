@@ -59,7 +59,8 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: "/logo-ecotaxi.webp",
+    icon: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
   },
   openGraph: {
     title: "Ecotaxi Bolivia - Transporte Inteligente, Compromiso Ecológico",
@@ -72,8 +73,8 @@ export const metadata: Metadata = {
     images: [
       {
         url: "/logo-ecotaxi.webp",
-        width: 1200,
-        height: 630,
+        width: 512,
+        height: 512,
         alt: "Ecotaxi Bolivia - Taxi Ecológico",
       },
     ],

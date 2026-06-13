@@ -148,3 +148,32 @@ Stage Summary:
 - 3-tier commission model (10%-15%-20%)
 - Registration form with agency type, volume, contact info
 - Navigation links in navbar and footer
+---
+Task ID: 1
+Agent: Main Agent
+Task: Restore all lost changes - fleet images transparency, code fixes, partner pages
+
+Work Log:
+- Verified all 44 fleet images were RGB (no transparency) - had white backgrounds
+- Installed rembg[cpu] and processed all 44 fleet vehicle images with AI background removal
+- All images now have RGBA mode with transparent backgrounds
+- Updated fleet.tsx: added serviceHref links for each category, changed to native <img> tag, added h-44 container with radial glow, accent line, link to service page per category
+- Updated services.tsx: Bus → /bus, Logística → /logistica, changed "Conocer más" → "Ver servicio"
+- Updated footer.tsx: workLinks now point to /organizadores-eventos, /socios-transporte, /socio-de-servicios, /socio-de-transporte, /eventos-y-congresos
+- Updated navbar.tsx: Added Partners dropdown with 6 partner links, fixed Conductores → /socio-de-transporte, added Bus to servicePages
+- Created 5 new partner pages: socio-de-transporte, organizadores-eventos, socios-transporte, socio-de-servicios, eventos-y-congresos
+- Regenerated logo-ecotaxi.webp (512x512), favicon.ico, apple-touch-icon.png, android-chrome icons
+- Updated layout.tsx: favicon.ico, apple-touch-icon, OpenGraph 512x512
+- Updated logo sizing: scroll-animator, nosotros, transfer-aeropuerto, alquiler-maquinaria
+- Build successful, all pages generated
+- Created ZIP archives for download
+
+Stage Summary:
+- All 44 fleet images now have transparent backgrounds (RGBA)
+- Fleet cards link to their corresponding service pages
+- "Conocer más" replaced with "Ver servicio →"
+- Footer partner links now correctly route to dedicated pages
+- Navbar has Partners dropdown with hover behavior
+- 5 partner pages created with full content
+- Logo regenerated at 512x512 with proper favicons
+- Project builds and runs successfully
