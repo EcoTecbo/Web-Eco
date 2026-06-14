@@ -193,7 +193,7 @@ export function Navbar() {
             <img
               src="/logo-ecotaxi.webp"
               alt="Ecotaxi Logo"
-              className="h-9 md:h-11 w-auto object-contain drop-shadow-[0_0_10px_rgba(0,230,118,0.15)]"
+              className="h-14 md:h-[4.5rem] w-auto object-contain drop-shadow-[0_0_10px_rgba(0,230,118,0.15)]"
             />
           </Link>
 
