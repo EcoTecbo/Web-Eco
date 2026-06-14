@@ -49,3 +49,33 @@ Stage Summary:
 - Cover image corrected (was Cochabamba image, now general airport image)
 - 3 airport cards simplified without bg images
 - Airport images now show in map info panel detail view
+
+---
+Task ID: 3
+Agent: main
+Task: Fix map positions to correct city locations, remove 3 airport cards section
+
+Work Log:
+- Used VLM (vision model) to analyze the Bolivia map image and determine correct city positions
+- Got initial coordinates, verified with VLM, identified Trinidad and Oruro needed adjustment
+- Made second VLM pass for precise Trinidad and Oruro positions
+- Final VLM verification confirmed all 9 positions correct (YES response)
+- Updated all 9 airport mapPosition coordinates:
+  - Cobija (CIJ): 15%,23% (far northwest)
+  - Trinidad (TDD): 48%,32% (northeast)
+  - La Paz (LPB): 29%,32% (western highlands)
+  - Oruro (ORU): 32%,45% (central-west, SW of La Paz)
+  - Cochabamba (CBB): 46%,56% (center)
+  - Santa Cruz (VVI): 69%,53% (east)
+  - Sucre (SRE): 47%,68% (south-central)
+  - Potosí (POI): 38%,66% (southwest)
+  - Tarija (TJA): 46%,79% (far south)
+- Removed entire "3 Main Airport Cards" section (was redundant with map info panel)
+- Cleaned up unused refs (airportSectionRefs, scrollToAirportSection)
+- Removed unused ChevronRight import
+- Build and server test both pass
+
+Stage Summary:
+- Map positions now verified by AI vision model as correct for all 9 cities
+- Redundant 3-airport section removed (info already in map detail panel)
+- Code cleaned up, builds successfully

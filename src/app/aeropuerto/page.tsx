@@ -7,7 +7,7 @@ import {
   Phone, ArrowRight, Star, CheckCircle2,
   Eye, Wifi, Droplets, BadgeCheck,
   Building2, Globe, Heart, UserCheck, Navigation,
-  Calendar, User, ChevronRight, Luggage
+  Calendar, User, Luggage
 } from 'lucide-react'
 import { Navbar } from '@/components/ecotaxi/navbar'
 import { Footer } from '@/components/ecotaxi/footer'
@@ -23,7 +23,7 @@ const airports = [
     desc: 'El aeropuerto más grande de Bolivia. Principal puerta de entrada al oriente boliviano con vuelos internacionales directos.',
     color: '#00E676',
     bgImage: '/viru-viru-bg.png',
-    mapPosition: { x: 68, y: 55 },
+    mapPosition: { x: 69, y: 53 },
   },
   {
     id: 'elalto',
@@ -34,7 +34,7 @@ const airports = [
     desc: 'Aeropuerto internacional más alto del mundo a 4,061 msnm. Hub internacional de Bolivia con vuelos a todo el continente.',
     color: '#0077BD',
     bgImage: '/el-alto-bg.png',
-    mapPosition: { x: 30, y: 38 },
+    mapPosition: { x: 29, y: 32 },
   },
   {
     id: 'wilstermann',
@@ -45,7 +45,7 @@ const airports = [
     desc: 'Hub nacional de conexiones. Ubicado en el corazón de Bolivia, conecta con todas las ciudades principales del país.',
     color: '#FF9800',
     bgImage: '/airport-cocha.png',
-    mapPosition: { x: 44, y: 50 },
+    mapPosition: { x: 46, y: 56 },
   },
   {
     id: 'tarija',
@@ -55,7 +55,7 @@ const airports = [
     city: 'Tarija',
     desc: 'Puerta de entrada al sur de Bolivia y la región vinícola. Vuelos nacionales regulares.',
     color: '#8B5CF6',
-    mapPosition: { x: 48, y: 82 },
+    mapPosition: { x: 46, y: 79 },
   },
   {
     id: 'sucre',
@@ -65,7 +65,7 @@ const airports = [
     city: 'Sucre',
     desc: 'Aeropuerto de la capital constitucional de Bolivia. Conexiones con las principales ciudades.',
     color: '#E91E63',
-    mapPosition: { x: 50, y: 68 },
+    mapPosition: { x: 47, y: 68 },
   },
   {
     id: 'oruro',
@@ -75,7 +75,7 @@ const airports = [
     city: 'Oruro',
     desc: 'Aeropuerto de la capital folklórica de Bolivia. Servicio de vuelos nacionales.',
     color: '#00BCD4',
-    mapPosition: { x: 32, y: 52 },
+    mapPosition: { x: 32, y: 45 },
   },
   {
     id: 'potosi',
@@ -85,7 +85,7 @@ const airports = [
     city: 'Potosí',
     desc: 'Puerta de entrada a Potosí y el Salar de Uyuni. Vuelos nacionales.',
     color: '#9C27B0',
-    mapPosition: { x: 38, y: 68 },
+    mapPosition: { x: 38, y: 66 },
   },
   {
     id: 'trinidad',
@@ -95,7 +95,7 @@ const airports = [
     city: 'Trinidad, Beni',
     desc: 'Aeropuerto de Trinidad, puerta de entrada a la Amazonía boliviana.',
     color: '#4CAF50',
-    mapPosition: { x: 52, y: 32 },
+    mapPosition: { x: 48, y: 32 },
   },
   {
     id: 'cobija',
@@ -105,7 +105,7 @@ const airports = [
     city: 'Cobija, Pando',
     desc: 'Aeropuerto de Cobija, en la región amazónica norte de Bolivia.',
     color: '#FF5722',
-    mapPosition: { x: 28, y: 14 },
+    mapPosition: { x: 15, y: 23 },
   },
 ]
 
@@ -132,16 +132,11 @@ export default function AeropuertoPage() {
   const [clientType, setClientType] = useState<'local' | 'extranjero' | null>(null)
   const [hoveredAirport, setHoveredAirport] = useState<string | null>(null)
   const mapRef = useRef<HTMLDivElement>(null)
-  const airportSectionRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
   const selected = airports.find(a => a.id === selectedAirport)
 
-  const scrollToAirportSection = (airportId: string) => {
+  const selectAirport = (airportId: string) => {
     setSelectedAirport(airportId)
-    const section = airportSectionRefs.current[airportId]
-    if (section) {
-      section.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    }
   }
 
   return (
@@ -268,7 +263,7 @@ export default function AeropuertoPage() {
                         return (
                           <button
                             key={airport.id}
-                            onClick={() => scrollToAirportSection(airport.id)}
+                            onClick={() => selectAirport(airport.id)}
                             onMouseEnter={() => setHoveredAirport(airport.id)}
                             onMouseLeave={() => setHoveredAirport(null)}
                             className="absolute transform -translate-x-1/2 -translate-y-1/2 group z-10 focus:outline-none"
@@ -370,7 +365,7 @@ export default function AeropuertoPage() {
                   {airports.map((apt) => (
                     <button
                       key={apt.id}
-                      onClick={() => scrollToAirportSection(apt.id)}
+                      onClick={() => selectAirport(apt.id)}
                       onMouseEnter={() => setHoveredAirport(apt.id)}
                       onMouseLeave={() => setHoveredAirport(null)}
                       className={`p-2 rounded-lg text-center transition-all duration-300 text-xs ${
@@ -384,102 +379,6 @@ export default function AeropuertoPage() {
                     </button>
                   ))}
                 </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ═══ 3 MAIN AIRPORT CARDS ═══ */}
-        <section className="relative py-24 md:py-32">
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1830] to-[#0a0e17]" />
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00E676]/10 border border-[#00E676]/20 mb-4">
-                <Plane className="w-4 h-4 text-[#00E676]" />
-                <span className="text-sm text-[#00E676]">Principales Aeropuertos</span>
-              </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                Transfer en los{' '}
-                <span className="bg-gradient-to-r from-[#0077BD] to-[#00E676] bg-clip-text text-transparent">
-                  Tres Aeropuertos Principales
-                </span>
-              </h2>
-              <p className="text-white/50 max-w-2xl mx-auto">
-                Servicio de traslado premium en los aeropuertos internacionales con mayor tráfico de Bolivia.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Viru Viru Card */}
-              <div
-                ref={(el) => { airportSectionRefs.current['viruviru'] = el }}
-                className="group p-8 rounded-3xl bg-white/[0.03] border border-white/[0.06] hover:border-[#00E676]/30 transition-all duration-500"
-              >
-                <div className="w-14 h-14 rounded-2xl bg-[#00E676]/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  <Plane className="w-7 h-7 text-[#00E676]" />
-                </div>
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="px-2 py-0.5 rounded-md bg-[#00E676]/20 text-[#00E676] text-xs font-bold">VVI</span>
-                  <span className="text-xs text-white/40">Santa Cruz de la Sierra</span>
-                </div>
-                <h3 className="text-xl font-bold text-white mb-3">Aeropuerto Internacional Viru Viru</h3>
-                <p className="text-sm text-white/50 leading-relaxed mb-4">El aeropuerto más grande de Bolivia. Principal puerta de entrada al oriente boliviano con vuelos internacionales directos desde Miami, Madrid, São Paulo y más.</p>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {['Seguimiento de Vuelo', 'Cartel de Bienvenida', 'Espera sin Cargo'].map((feat) => (
-                    <span key={feat} className="px-2 py-1 rounded-md bg-[#00E676]/10 text-[#00E676] text-[10px]">{feat}</span>
-                  ))}
-                </div>
-                <a href="#reservation" className="inline-flex items-center gap-2 text-sm font-semibold text-[#00E676] hover:text-[#00ff88] transition-colors">
-                  Reservar Transfer <ChevronRight className="w-4 h-4" />
-                </a>
-              </div>
-
-              {/* El Alto Card */}
-              <div
-                ref={(el) => { airportSectionRefs.current['elalto'] = el }}
-                className="group p-8 rounded-3xl bg-white/[0.03] border border-white/[0.06] hover:border-[#0077BD]/30 transition-all duration-500"
-              >
-                <div className="w-14 h-14 rounded-2xl bg-[#0077BD]/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  <Plane className="w-7 h-7 text-[#0077BD]" />
-                </div>
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="px-2 py-0.5 rounded-md bg-[#0077BD]/20 text-[#0077BD] text-xs font-bold">LPB</span>
-                  <span className="text-xs text-white/40">La Paz</span>
-                </div>
-                <h3 className="text-xl font-bold text-white mb-3">Aeropuerto Internacional El Alto</h3>
-                <p className="text-sm text-white/50 leading-relaxed mb-4">Aeropuerto internacional más alto del mundo a 4,061 msnm. Hub internacional con vuelos directos a Lima, Bogotá, Buenos Aires y ciudades principales.</p>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {['Seguimiento de Vuelo', 'Cartel de Bienvenida', 'Oxígeno Disponible'].map((feat) => (
-                    <span key={feat} className="px-2 py-1 rounded-md bg-[#0077BD]/10 text-[#0077BD] text-[10px]">{feat}</span>
-                  ))}
-                </div>
-                <a href="#reservation" className="inline-flex items-center gap-2 text-sm font-semibold text-[#0077BD] hover:text-[#3399dd] transition-colors">
-                  Reservar Transfer <ChevronRight className="w-4 h-4" />
-                </a>
-              </div>
-
-              {/* Jorge Wilstermann Card */}
-              <div
-                ref={(el) => { airportSectionRefs.current['wilstermann'] = el }}
-                className="group p-8 rounded-3xl bg-white/[0.03] border border-white/[0.06] hover:border-[#FF9800]/30 transition-all duration-500"
-              >
-                <div className="w-14 h-14 rounded-2xl bg-[#FF9800]/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  <Plane className="w-7 h-7 text-[#FF9800]" />
-                </div>
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="px-2 py-0.5 rounded-md bg-[#FF9800]/20 text-[#FF9800] text-xs font-bold">CBB</span>
-                  <span className="text-xs text-white/40">Cochabamba</span>
-                </div>
-                <h3 className="text-xl font-bold text-white mb-3">Aeropuerto Int. Jorge Wilstermann</h3>
-                <p className="text-sm text-white/50 leading-relaxed mb-4">Hub nacional de conexiones en el corazón de Bolivia. Conecta con todas las ciudades principales del país y destinos internacionales.</p>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {['Seguimiento de Vuelo', 'Cartel de Bienvenida', 'WiFi Gratuito'].map((feat) => (
-                    <span key={feat} className="px-2 py-1 rounded-md bg-[#FF9800]/10 text-[#FF9800] text-[10px]">{feat}</span>
-                  ))}
-                </div>
-                <a href="#reservation" className="inline-flex items-center gap-2 text-sm font-semibold text-[#FF9800] hover:text-[#ffad33] transition-colors">
-                  Reservar Transfer <ChevronRight className="w-4 h-4" />
-                </a>
               </div>
             </div>
           </div>
