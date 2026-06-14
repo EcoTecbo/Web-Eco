@@ -23,7 +23,7 @@ const airports = [
     desc: 'El aeropuerto más grande de Bolivia. Principal puerta de entrada al oriente boliviano con vuelos internacionales directos.',
     color: '#00E676',
     bgImage: '/viru-viru-bg.png',
-    mapPosition: { x: 72, y: 52 },
+    mapPosition: { x: 68, y: 55 },
   },
   {
     id: 'elalto',
@@ -34,7 +34,7 @@ const airports = [
     desc: 'Aeropuerto internacional más alto del mundo a 4,061 msnm. Hub internacional de Bolivia con vuelos a todo el continente.',
     color: '#0077BD',
     bgImage: '/el-alto-bg.png',
-    mapPosition: { x: 38, y: 35 },
+    mapPosition: { x: 30, y: 38 },
   },
   {
     id: 'wilstermann',
@@ -44,8 +44,8 @@ const airports = [
     city: 'Cochabamba',
     desc: 'Hub nacional de conexiones. Ubicado en el corazón de Bolivia, conecta con todas las ciudades principales del país.',
     color: '#FF9800',
-    bgImage: '/taxi-aeropuerto-bg.jpg',
-    mapPosition: { x: 48, y: 48 },
+    bgImage: '/airport-cocha.png',
+    mapPosition: { x: 44, y: 50 },
   },
   {
     id: 'tarija',
@@ -55,7 +55,7 @@ const airports = [
     city: 'Tarija',
     desc: 'Puerta de entrada al sur de Bolivia y la región vinícola. Vuelos nacionales regulares.',
     color: '#8B5CF6',
-    mapPosition: { x: 52, y: 78 },
+    mapPosition: { x: 48, y: 82 },
   },
   {
     id: 'sucre',
@@ -65,7 +65,7 @@ const airports = [
     city: 'Sucre',
     desc: 'Aeropuerto de la capital constitucional de Bolivia. Conexiones con las principales ciudades.',
     color: '#E91E63',
-    mapPosition: { x: 52, y: 62 },
+    mapPosition: { x: 50, y: 68 },
   },
   {
     id: 'oruro',
@@ -75,7 +75,7 @@ const airports = [
     city: 'Oruro',
     desc: 'Aeropuerto de la capital folklórica de Bolivia. Servicio de vuelos nacionales.',
     color: '#00BCD4',
-    mapPosition: { x: 35, y: 48 },
+    mapPosition: { x: 32, y: 52 },
   },
   {
     id: 'potosi',
@@ -85,7 +85,7 @@ const airports = [
     city: 'Potosí',
     desc: 'Puerta de entrada a Potosí y el Salar de Uyuni. Vuelos nacionales.',
     color: '#9C27B0',
-    mapPosition: { x: 42, y: 62 },
+    mapPosition: { x: 38, y: 68 },
   },
   {
     id: 'trinidad',
@@ -95,7 +95,7 @@ const airports = [
     city: 'Trinidad, Beni',
     desc: 'Aeropuerto de Trinidad, puerta de entrada a la Amazonía boliviana.',
     color: '#4CAF50',
-    mapPosition: { x: 58, y: 35 },
+    mapPosition: { x: 52, y: 32 },
   },
   {
     id: 'cobija',
@@ -105,7 +105,7 @@ const airports = [
     city: 'Cobija, Pando',
     desc: 'Aeropuerto de Cobija, en la región amazónica norte de Bolivia.',
     color: '#FF5722',
-    mapPosition: { x: 40, y: 18 },
+    mapPosition: { x: 28, y: 14 },
   },
 ]
 
@@ -154,7 +154,7 @@ export default function AeropuertoPage() {
           {/* Cover image */}
           <div className="absolute inset-0 z-0">
             <img
-              src="/airport-cocha.png"
+              src="/taxi-aeropuerto-bg.jpg"
               alt="Taxi aeropuerto Bolivia - Ecotaxi"
               className="w-full h-full object-cover"
             />
@@ -260,7 +260,7 @@ export default function AeropuertoPage() {
                       alt="Mapa de aeropuertos de Bolivia"
                       className="w-full h-auto rounded-xl"
                     />
-                    {/* Clickable city dots overlay */}
+                    {/* Clickable city plane icons overlay */}
                     <div className="absolute inset-0">
                       {airports.map((airport) => {
                         const isSelected = selectedAirport === airport.id
@@ -271,24 +271,37 @@ export default function AeropuertoPage() {
                             onClick={() => scrollToAirportSection(airport.id)}
                             onMouseEnter={() => setHoveredAirport(airport.id)}
                             onMouseLeave={() => setHoveredAirport(null)}
-                            className="absolute transform -translate-x-1/2 -translate-y-1/2 group z-10"
+                            className="absolute transform -translate-x-1/2 -translate-y-1/2 group z-10 focus:outline-none"
                             style={{ left: `${airport.mapPosition.x}%`, top: `${airport.mapPosition.y}%` }}
                           >
                             {/* Pulse ring */}
-                            <span className={`absolute inset-0 rounded-full animate-ping opacity-30 ${isSelected ? 'bg-[#00E676]' : 'bg-[#0077BD]'}`}
-                              style={{ width: isSelected ? '40px' : '30px', height: isSelected ? '40px' : '30px', left: isSelected ? '-8px' : '-3px', top: isSelected ? '-8px' : '-3px' }} />
-                            {/* Dot */}
-                            <span className={`relative block rounded-full transition-all duration-300 ${
-                              isSelected ? 'w-6 h-6 ring-4 ring-[#00E676]/30' : 'w-4 h-4 hover:w-5 hover:h-5'
+                            <span className={`absolute rounded-full animate-ping opacity-20 ${isSelected ? 'bg-[#00E676]' : 'bg-white'}`}
+                              style={{ width: '36px', height: '36px', left: '-6px', top: '-4px' }} />
+                            {/* Plane icon button */}
+                            <div className={`relative flex items-center justify-center rounded-full transition-all duration-300 ${
+                              isSelected
+                                ? 'w-7 h-7 ring-4 shadow-lg'
+                                : 'w-6 h-6 hover:w-7 hover:h-7'
                             }`}
-                            style={{ backgroundColor: isSelected ? '#00E676' : airport.color }} />
+                            style={{
+                              backgroundColor: isSelected ? '#00E676' : `${airport.color}`,
+                              boxShadow: isSelected ? '0 0 20px rgba(0,230,118,0.5)' : `0 0 10px ${airport.color}40`,
+                              ...(isSelected ? { ringColor: 'rgba(0,230,118,0.3)' } : {})
+                            }}>
+                              <svg viewBox="0 0 24 24" fill="none" stroke={isSelected ? '#000' : '#fff'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
+                                <path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z" />
+                              </svg>
+                            </div>
 
                             {/* Tooltip */}
-                            <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 rounded-lg bg-[#0a0e17]/95 border backdrop-blur-sm whitespace-nowrap transition-all duration-300 pointer-events-none ${
+                            <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-3 py-2 rounded-lg bg-[#0a0e17]/95 border backdrop-blur-sm whitespace-nowrap transition-all duration-300 pointer-events-none ${
                               isSelected || isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
                             }`}
                             style={{ borderColor: `${airport.color}40` }}>
-                              <p className="text-xs font-bold text-white">{airport.iata}</p>
+                              <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-px">
+                                <div className="w-2 h-2 rotate-45 bg-[#0a0e17]/95 border-r border-b" style={{ borderColor: `${airport.color}40` }} />
+                              </div>
+                              <p className="text-xs font-bold" style={{ color: airport.color }}>{airport.iata}</p>
                               <p className="text-[10px] text-white/50">{airport.city}</p>
                             </div>
                           </button>
@@ -302,41 +315,53 @@ export default function AeropuertoPage() {
               {/* Selected Airport Info Panel */}
               <div className="lg:col-span-2">
                 {selected && (
-                  <div className="p-6 md:p-8 rounded-3xl bg-white/[0.03] border backdrop-blur-sm transition-all duration-500"
+                  <div className="rounded-3xl bg-white/[0.03] border backdrop-blur-sm transition-all duration-500 overflow-hidden"
                     style={{ borderColor: `${selected.color}30` }}>
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: `${selected.color}15` }}>
-                        <Plane className="w-6 h-6" style={{ color: selected.color }} />
+                    {/* Airport image */}
+                    {selected.bgImage && (
+                      <div className="relative h-40 md:h-48 overflow-hidden">
+                        <img src={selected.bgImage} alt={selected.name} className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0e17] via-[#0a0e17]/40 to-transparent" />
+                        <div className="absolute bottom-3 left-4">
+                          <span className="px-3 py-1 rounded-md text-sm font-bold text-black" style={{ backgroundColor: selected.color }}>{selected.iata}</span>
+                        </div>
                       </div>
-                      <div>
-                        <span className="text-2xl font-bold" style={{ color: selected.color }}>{selected.iata}</span>
-                        <p className="text-xs text-white/40">{selected.city}</p>
+                    )}
+                    <div className="p-6 md:p-8">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: `${selected.color}15` }}>
+                          <Plane className="w-6 h-6" style={{ color: selected.color }} />
+                        </div>
+                        <div>
+                          <span className="text-2xl font-bold" style={{ color: selected.color }}>{selected.iata}</span>
+                          <p className="text-xs text-white/40">{selected.city}</p>
+                        </div>
                       </div>
+                      <h3 className="text-xl font-semibold text-white mb-3">{selected.name}</h3>
+                      <p className="text-sm text-white/50 leading-relaxed mb-6">{selected.desc}</p>
+                      <div className="space-y-3 mb-6">
+                        <div className="flex items-center gap-2 text-sm text-white/40">
+                          <MapPin className="w-4 h-4" />
+                          <span>Traslado disponible desde/hacia este aeropuerto</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-white/40">
+                          <Clock className="w-4 h-4" />
+                          <span>Servicio 24/7 - Reserve con anticipación</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-white/40">
+                          <Navigation className="w-4 h-4" />
+                          <span>Seguimiento de vuelo incluido</span>
+                        </div>
+                      </div>
+                      <a
+                        href="#reservation"
+                        className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold text-black transition-all duration-300 shadow-[0_0_15px_rgba(0,230,118,0.2)] hover:shadow-[0_0_25px_rgba(0,230,118,0.4)]"
+                        style={{ backgroundColor: selected.color }}
+                      >
+                        Cotizar Traslado
+                        <ArrowRight className="w-4 h-4" />
+                      </a>
                     </div>
-                    <h3 className="text-xl font-semibold text-white mb-3">{selected.name}</h3>
-                    <p className="text-sm text-white/50 leading-relaxed mb-6">{selected.desc}</p>
-                    <div className="space-y-3 mb-6">
-                      <div className="flex items-center gap-2 text-sm text-white/40">
-                        <MapPin className="w-4 h-4" />
-                        <span>Traslado disponible desde/hacia este aeropuerto</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-white/40">
-                        <Clock className="w-4 h-4" />
-                        <span>Servicio 24/7 - Reserve con anticipación</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-white/40">
-                        <Navigation className="w-4 h-4" />
-                        <span>Seguimiento de vuelo incluido</span>
-                      </div>
-                    </div>
-                    <a
-                      href="#reservation"
-                      className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold text-black transition-all duration-300 shadow-[0_0_15px_rgba(0,230,118,0.2)] hover:shadow-[0_0_25px_rgba(0,230,118,0.4)]"
-                      style={{ backgroundColor: selected.color }}
-                    >
-                      Cotizar Traslado
-                      <ArrowRight className="w-4 h-4" />
-                    </a>
                   </div>
                 )}
 
@@ -364,7 +389,7 @@ export default function AeropuertoPage() {
           </div>
         </section>
 
-        {/* ═══ 3 MAIN AIRPORT CARDS WITH BG IMAGES ═══ */}
+        {/* ═══ 3 MAIN AIRPORT CARDS ═══ */}
         <section className="relative py-24 md:py-32">
           <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1830] to-[#0a0e17]" />
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -388,82 +413,73 @@ export default function AeropuertoPage() {
               {/* Viru Viru Card */}
               <div
                 ref={(el) => { airportSectionRefs.current['viruviru'] = el }}
-                className="group relative rounded-3xl overflow-hidden border border-white/[0.06] hover:border-[#00E676]/30 transition-all duration-500 min-h-[400px]"
+                className="group p-8 rounded-3xl bg-white/[0.03] border border-white/[0.06] hover:border-[#00E676]/30 transition-all duration-500"
               >
-                <div className="absolute inset-0">
-                  <img src="/viru-viru-bg.png" alt="Aeropuerto Viru Viru" className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0a0e17] via-[#0a0e17]/80 to-[#0a0e17]/40" />
+                <div className="w-14 h-14 rounded-2xl bg-[#00E676]/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <Plane className="w-7 h-7 text-[#00E676]" />
                 </div>
-                <div className="relative z-10 p-8 flex flex-col justify-end h-full">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="px-2 py-0.5 rounded-md bg-[#00E676]/20 text-[#00E676] text-xs font-bold">VVI</span>
-                    <span className="text-xs text-white/40">Santa Cruz</span>
-                  </div>
-                  <h3 className="text-2xl font-bold text-white mb-3">Aeropuerto Internacional Viru Viru</h3>
-                  <p className="text-sm text-white/50 leading-relaxed mb-4">El aeropuerto más grande de Bolivia. Principal puerta de entrada al oriente boliviano con vuelos internacionales directos desde Miami, Madrid, São Paulo y más.</p>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {['Seguimiento de Vuelo', 'Cartel de Bienvenida', 'Espera sin Cargo'].map((feat) => (
-                      <span key={feat} className="px-2 py-1 rounded-md bg-[#00E676]/10 text-[#00E676] text-[10px]">{feat}</span>
-                    ))}
-                  </div>
-                  <a href="#reservation" className="inline-flex items-center gap-2 text-sm font-semibold text-[#00E676] hover:text-[#00ff88] transition-colors">
-                    Reservar Transfer <ChevronRight className="w-4 h-4" />
-                  </a>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="px-2 py-0.5 rounded-md bg-[#00E676]/20 text-[#00E676] text-xs font-bold">VVI</span>
+                  <span className="text-xs text-white/40">Santa Cruz de la Sierra</span>
                 </div>
+                <h3 className="text-xl font-bold text-white mb-3">Aeropuerto Internacional Viru Viru</h3>
+                <p className="text-sm text-white/50 leading-relaxed mb-4">El aeropuerto más grande de Bolivia. Principal puerta de entrada al oriente boliviano con vuelos internacionales directos desde Miami, Madrid, São Paulo y más.</p>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {['Seguimiento de Vuelo', 'Cartel de Bienvenida', 'Espera sin Cargo'].map((feat) => (
+                    <span key={feat} className="px-2 py-1 rounded-md bg-[#00E676]/10 text-[#00E676] text-[10px]">{feat}</span>
+                  ))}
+                </div>
+                <a href="#reservation" className="inline-flex items-center gap-2 text-sm font-semibold text-[#00E676] hover:text-[#00ff88] transition-colors">
+                  Reservar Transfer <ChevronRight className="w-4 h-4" />
+                </a>
               </div>
 
               {/* El Alto Card */}
               <div
                 ref={(el) => { airportSectionRefs.current['elalto'] = el }}
-                className="group relative rounded-3xl overflow-hidden border border-white/[0.06] hover:border-[#0077BD]/30 transition-all duration-500 min-h-[400px]"
+                className="group p-8 rounded-3xl bg-white/[0.03] border border-white/[0.06] hover:border-[#0077BD]/30 transition-all duration-500"
               >
-                <div className="absolute inset-0">
-                  <img src="/el-alto-bg.png" alt="Aeropuerto El Alto" className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0a0e17] via-[#0a0e17]/80 to-[#0a0e17]/40" />
+                <div className="w-14 h-14 rounded-2xl bg-[#0077BD]/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <Plane className="w-7 h-7 text-[#0077BD]" />
                 </div>
-                <div className="relative z-10 p-8 flex flex-col justify-end h-full">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="px-2 py-0.5 rounded-md bg-[#0077BD]/20 text-[#0077BD] text-xs font-bold">LPB</span>
-                    <span className="text-xs text-white/40">La Paz</span>
-                  </div>
-                  <h3 className="text-2xl font-bold text-white mb-3">Aeropuerto Internacional El Alto</h3>
-                  <p className="text-sm text-white/50 leading-relaxed mb-4">Aeropuerto internacional más alto del mundo a 4,061 msnm. Hub internacional con vuelos directos a Lima, Bogotá, Buenos Aires y ciudades principales.</p>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {['Seguimiento de Vuelo', 'Cartel de Bienvenida', 'Oxígeno Disponible'].map((feat) => (
-                      <span key={feat} className="px-2 py-1 rounded-md bg-[#0077BD]/10 text-[#0077BD] text-[10px]">{feat}</span>
-                    ))}
-                  </div>
-                  <a href="#reservation" className="inline-flex items-center gap-2 text-sm font-semibold text-[#0077BD] hover:text-[#3399dd] transition-colors">
-                    Reservar Transfer <ChevronRight className="w-4 h-4" />
-                  </a>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="px-2 py-0.5 rounded-md bg-[#0077BD]/20 text-[#0077BD] text-xs font-bold">LPB</span>
+                  <span className="text-xs text-white/40">La Paz</span>
                 </div>
+                <h3 className="text-xl font-bold text-white mb-3">Aeropuerto Internacional El Alto</h3>
+                <p className="text-sm text-white/50 leading-relaxed mb-4">Aeropuerto internacional más alto del mundo a 4,061 msnm. Hub internacional con vuelos directos a Lima, Bogotá, Buenos Aires y ciudades principales.</p>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {['Seguimiento de Vuelo', 'Cartel de Bienvenida', 'Oxígeno Disponible'].map((feat) => (
+                    <span key={feat} className="px-2 py-1 rounded-md bg-[#0077BD]/10 text-[#0077BD] text-[10px]">{feat}</span>
+                  ))}
+                </div>
+                <a href="#reservation" className="inline-flex items-center gap-2 text-sm font-semibold text-[#0077BD] hover:text-[#3399dd] transition-colors">
+                  Reservar Transfer <ChevronRight className="w-4 h-4" />
+                </a>
               </div>
 
               {/* Jorge Wilstermann Card */}
               <div
                 ref={(el) => { airportSectionRefs.current['wilstermann'] = el }}
-                className="group relative rounded-3xl overflow-hidden border border-white/[0.06] hover:border-[#FF9800]/30 transition-all duration-500 min-h-[400px]"
+                className="group p-8 rounded-3xl bg-white/[0.03] border border-white/[0.06] hover:border-[#FF9800]/30 transition-all duration-500"
               >
-                <div className="absolute inset-0">
-                  <img src="/taxi-aeropuerto-bg.jpg" alt="Aeropuerto Jorge Wilstermann" className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0a0e17] via-[#0a0e17]/80 to-[#0a0e17]/40" />
+                <div className="w-14 h-14 rounded-2xl bg-[#FF9800]/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <Plane className="w-7 h-7 text-[#FF9800]" />
                 </div>
-                <div className="relative z-10 p-8 flex flex-col justify-end h-full">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="px-2 py-0.5 rounded-md bg-[#FF9800]/20 text-[#FF9800] text-xs font-bold">CBB</span>
-                    <span className="text-xs text-white/40">Cochabamba</span>
-                  </div>
-                  <h3 className="text-2xl font-bold text-white mb-3">Aeropuerto Int. Jorge Wilstermann</h3>
-                  <p className="text-sm text-white/50 leading-relaxed mb-4">Hub nacional de conexiones en el corazón de Bolivia. Conecta con todas las ciudades principales del país y destinos internacionales.</p>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {['Seguimiento de Vuelo', 'Cartel de Bienvenida', 'WiFi Gratuito'].map((feat) => (
-                      <span key={feat} className="px-2 py-1 rounded-md bg-[#FF9800]/10 text-[#FF9800] text-[10px]">{feat}</span>
-                    ))}
-                  </div>
-                  <a href="#reservation" className="inline-flex items-center gap-2 text-sm font-semibold text-[#FF9800] hover:text-[#ffad33] transition-colors">
-                    Reservar Transfer <ChevronRight className="w-4 h-4" />
-                  </a>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="px-2 py-0.5 rounded-md bg-[#FF9800]/20 text-[#FF9800] text-xs font-bold">CBB</span>
+                  <span className="text-xs text-white/40">Cochabamba</span>
                 </div>
+                <h3 className="text-xl font-bold text-white mb-3">Aeropuerto Int. Jorge Wilstermann</h3>
+                <p className="text-sm text-white/50 leading-relaxed mb-4">Hub nacional de conexiones en el corazón de Bolivia. Conecta con todas las ciudades principales del país y destinos internacionales.</p>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {['Seguimiento de Vuelo', 'Cartel de Bienvenida', 'WiFi Gratuito'].map((feat) => (
+                    <span key={feat} className="px-2 py-1 rounded-md bg-[#FF9800]/10 text-[#FF9800] text-[10px]">{feat}</span>
+                  ))}
+                </div>
+                <a href="#reservation" className="inline-flex items-center gap-2 text-sm font-semibold text-[#FF9800] hover:text-[#ffad33] transition-colors">
+                  Reservar Transfer <ChevronRight className="w-4 h-4" />
+                </a>
               </div>
             </div>
           </div>

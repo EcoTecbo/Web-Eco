@@ -21,3 +21,31 @@ Stage Summary:
 - Map: real Bolivia map with interactive city dots
 - 3 airport cards with bg images for VVI, LPB, CBB
 - Dual form: local (dispatch system) vs foreigner (webbooker payment)
+
+---
+Task ID: 2
+Agent: main
+Task: Fix aeropuerto page - map positions, plane icons, cover image swap, remove card bg images
+
+Work Log:
+- Updated all 9 airport map positions to match real geography on bolivia-map.png:
+  - Cobija: 28%,14% (far north-west)
+  - Trinidad: 52%,32% (north-center)
+  - La Paz: 30%,38% (western highland)
+  - Oruro: 32%,52% (central-west)
+  - Cochabamba: 44%,50% (center)
+  - Santa Cruz: 68%,55% (east)
+  - Sucre: 50%,68% (south-center)
+  - Potosí: 38%,68% (southwest)
+  - Tarija: 48%,82% (far south)
+- Replaced dot markers with plane SVG icons on the Bolivia map
+- Swapped cover image: hero now uses taxi-aeropuerto-bg.jpg, airport-cocha.png assigned to Cochabamba card
+- Removed background images from 3 main airport cards, made them simple cards with plane icon headers
+- Added airport image to the map info panel when an airport with bgImage is selected
+- Added tooltip arrow pointer for better UX
+
+Stage Summary:
+- Map plane icons positioned at correct city locations
+- Cover image corrected (was Cochabamba image, now general airport image)
+- 3 airport cards simplified without bg images
+- Airport images now show in map info panel detail view
