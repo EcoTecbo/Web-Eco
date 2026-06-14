@@ -141,42 +141,17 @@ export function ConductorSection() {
         <div className={`text-center mb-16 transition-all duration-700 ${
           visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}>
-          {/* Large Steering Wheel Icon */}
+          {/* Foto motivacional del conductor */}
           <div className="mb-8 flex justify-center">
-            <div className="relative">
+            <div className="relative w-full max-w-md">
               {/* Glow behind */}
-              <div className="absolute inset-0 w-40 h-40 md:w-48 md:h-48 rounded-full bg-[#00E676]/8 blur-[40px] animate-pulse" />
-              {/* Animated ring */}
-              <div className="absolute inset-[-8px] rounded-full border-2 border-[#00E676]/10 animate-spin" style={{ animationDuration: '20s' }} />
-              <div className="absolute inset-[-16px] rounded-full border border-[#0077BD]/5 animate-spin" style={{ animationDuration: '30s', animationDirection: 'reverse' }} />
-              <svg viewBox="0 0 120 120" className="w-36 h-36 md:w-44 md:h-44 relative z-10" fill="none">
-                {/* Outer ring with gradient */}
-                <circle cx="60" cy="60" r="52" stroke="url(#steeringGrad)" strokeWidth="5" />
-                {/* Inner ring */}
-                <circle cx="60" cy="60" r="22" stroke="#0077BD" strokeWidth="3.5" opacity="0.7" />
-                {/* Center hub */}
-                <circle cx="60" cy="60" r="10" fill="#00E676" opacity="0.2" />
-                <circle cx="60" cy="60" r="5" fill="#00E676" opacity="0.5" />
-                {/* Spokes */}
-                <line x1="60" y1="8" x2="60" y2="38" stroke="#00E676" strokeWidth="4.5" strokeLinecap="round" opacity="0.8" />
-                <line x1="13" y1="85" x2="39" y2="68" stroke="#0077BD" strokeWidth="4.5" strokeLinecap="round" opacity="0.8" />
-                <line x1="107" y1="85" x2="81" y2="68" stroke="#71B124" strokeWidth="4.5" strokeLinecap="round" opacity="0.8" />
-                {/* Grip details */}
-                <circle cx="60" cy="8" r="4" fill="#00E676" opacity="0.5" />
-                <circle cx="13" cy="85" r="4" fill="#0077BD" opacity="0.5" />
-                <circle cx="107" cy="85" r="4" fill="#71B124" opacity="0.5" />
-                {/* Decorative dashes on outer ring */}
-                <path d="M 60 8 A 52 52 0 0 1 107 85" stroke="#00E676" strokeWidth="2" strokeDasharray="4 8" opacity="0.3" fill="none" />
-                <path d="M 107 85 A 52 52 0 0 1 13 85" stroke="#0077BD" strokeWidth="2" strokeDasharray="4 8" opacity="0.3" fill="none" />
-                <path d="M 13 85 A 52 52 0 0 1 60 8" stroke="#71B124" strokeWidth="2" strokeDasharray="4 8" opacity="0.3" fill="none" />
-                <defs>
-                  <linearGradient id="steeringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#00E676" />
-                    <stop offset="50%" stopColor="#71B124" />
-                    <stop offset="100%" stopColor="#0077BD" />
-                  </linearGradient>
-                </defs>
-              </svg>
+              <div className="absolute inset-0 rounded-3xl bg-[#00E676]/15 blur-[50px] animate-pulse" />
+              <div className="absolute inset-[-6px] rounded-3xl border-2 border-[#00E676]/10" />
+              <img
+                src="/conductor-ecotaxi.webp"
+                alt="Conductor de EcoTaxi feliz ganando dinero"
+                className="relative z-10 w-full rounded-3xl shadow-2xl object-cover aspect-[3/2] border-2 border-[#00E676]/20"
+              />
             </div>
           </div>
 
