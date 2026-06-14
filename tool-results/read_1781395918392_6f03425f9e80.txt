@@ -1,0 +1,680 @@
+     1→/**
+     2→ * SEO Data Configuration for Ecotaxi Bolivia
+     3→ * Central source of truth for all page metadata, structured data, and keywords.
+     4→ * 
+     5→ * This file powers:
+     6→ * - generateMetadata() in each route's layout.tsx
+     7→ * - JSON-LD schemas per page
+     8→ * - Sitemap generation
+     9→ * - Open Graph / Twitter cards
+    10→ */
+    11→
+    12→export const SITE = {
+    13→  name: 'Ecotaxi Bolivia',
+    14→  domain: 'https://www.ecotaxi-bo.com',
+    15→  phone: '+591-3-3296885',
+    16→  whatsapp: '59173662803',
+    17→  email: 'ecotaxi@oyc-srl.com',
+    18→  city: 'Santa Cruz de la Sierra',
+    19→  country: 'Bolivia',
+    20→  org: 'O&C Ingeniería y Representaciones SRL',
+    21→  social: {
+    22→    facebook: 'https://facebook.com/ecotaxibolivia',
+    23→    instagram: 'https://instagram.com/ecotaxibo',
+    24→    linkedin: 'https://linkedin.com/company/ecotaxibolivia',
+    25→  },
+    26→} as const
+    27→
+    28→export interface PageSeoData {
+    29→  title: string
+    30→  description: string
+    31→  keywords: string[]
+    32→  canonical: string
+    33→  ogImage?: string
+    34→  ogType?: string
+    35→  schemaType?: string
+    36→  schemaData?: Record<string, unknown>
+    37→  changeFrequency?: 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never'
+    38→  priority?: number
+    39→}
+    40→
+    41→/* ═══════════════════════════════════════════════════════════════════════════════
+    42→   PAGE SEO DATA — Each page gets unique title, description, keywords, schema
+    43→   ═══════════════════════════════════════════════════════════════════════════════ */
+    44→
+    45→export const PAGES: Record<string, PageSeoData> = {
+    46→  '/': {
+    47→    title: 'Ecotaxi Bolivia — Taxi Ecológico, Mudanzas y Transporte Profesional',
+    48→    description: 'Primera empresa de transporte en Bolivia con neutralización de CO2. Taxi ejecutivo, traslados aeropuerto, mudanzas profesionales, transporte corporativo y logística. Reserva online 24/7 con GPS en tiempo real.',
+    49→    keywords: [
+    50→      'ecotaxi', 'taxi Bolivia', 'taxi Santa Cruz', 'taxi ecológico', 
+    51→      'transporte Bolivia', 'taxi aeropuerto Viru Viru', 'reserva taxi online',
+    52→      'taxi CO2 neutro', 'mudanza Bolivia', 'transporte corporativo Santa Cruz',
+    53→      'radio taxi Santa Cruz', 'pedir taxi Bolivia', 'taxi 24 horas',
+    54→      'traslado aeropuerto Bolivia', 'taxi ejecutivo Bolivia',
+    55→      'transporte ecológico Bolivia', 'carbono neutro transporte',
+    56→      'app taxi Bolivia', 'taxi con GPS', 'servicio taxi profesional',
+    57→    ],
+    58→    canonical: SITE.domain,
+    59→    ogImage: '/logo-ecotaxi.webp',
+    60→    ogType: 'website',
+    61→    changeFrequency: 'weekly',
+    62→    priority: 1.0,
+    63→    schemaType: 'TaxiService',
+    64→  },
+    65→
+    66→  '/puerta-a-puerta': {
+    67→    title: 'Taxi Puerta a Puerta en Bolivia — Recogida y Entrega Exacta | Ecotaxi',
+    68→    description: 'Servicio de taxi puerta a puerta en Santa Cruz, La Paz y Cochabamba. Te recogemos en tu dirección exacta y te llevamos a tu destino sin esperas. Tarifa transparente, GPS en tiempo real y conductores certificados.',
+    69→    keywords: [
+    70→      'taxi puerta a puerta', 'taxi recogida domicilio', 'taxi a mi puerta',
+    71→      'transporte puerta a puerta Bolivia', 'taxi sin espera', 'taxi domicilio',
+    72→      'taxi Santa Cruz domicilio', 'pedir taxi a casa', 'taxi punto exacto',
+    73→      'servicio taxi recogida', 'taxi dirección exacta', 'radio taxi domicilio',
+    74→      'taxi追踪 GPS', 'taxi Bolivia domicilio', 'transporte directo Bolivia',
+    75→    ],
+    76→    canonical: `${SITE.domain}/puerta-a-puerta`,
+    77→    changeFrequency: 'monthly',
+    78→    priority: 0.8,
+    79→    schemaType: 'Service',
+    80→  },
+    81→
+    82→  '/por-hora': {
+    83→    title: 'Taxi por Hora en Bolivia — Alquila tu Taxi con Chofer | Ecotaxi',
+    84→    description: 'Alquila un taxi por hora con chofer profesional en Bolivia. Ideal para diligencias, citas médicas, compras o turismo. Tarifa fija por hora sin sorpresas, conductor espera contigo y te lleva a múltiples destinos.',
+    85→    keywords: [
+    86→      'taxi por hora', 'alquilar taxi con chofer', 'taxi hora Bolivia',
+    87→      'taxi por hora Santa Cruz', 'rentar taxi hora', 'chofer por hora',
+    88→      'taxi dispuesto hora', 'taxi múltiples paradas', 'taxi espera',
+    89→      'servicio taxi horas', 'taxi con conductor hora', 'taxi privado hora',
+    90→      'taxi turismo hora Bolivia', 'chofer profesional hora', 'taxi itinerary',
+    91→    ],
+    92→    canonical: `${SITE.domain}/por-hora`,
+    93→    changeFrequency: 'monthly',
+    94→    priority: 0.8,
+    95→    schemaType: 'Service',
+    96→  },
+    97→
+    98→  '/ejecutivo': {
+    99→    title: 'Taxi Ejecutivo VIP en Bolivia — Servicio Premium de Transporte | Ecotaxi',
+   100→    description: 'Servicio de taxi ejecutivo VIP en Bolivia con vehículos premium, conductores bilingües y protocolo corporativo. Ideal para ejecutivos, diplomáticos y viajeros de alto nivel. Wifi, agua y amenities a bordo.',
+   101→    keywords: [
+   102→      'taxi ejecutivo', 'taxi VIP Bolivia', 'transporte ejecutivo Santa Cruz',
+   103→      'taxi premium', 'taxi empresarial', 'chofer ejecutivo Bolivia',
+   104→      'taxi lujo Bolivia', 'servicio VIP transporte', 'taxi diplomático',
+   105→      'transporte corporativo VIP', 'taxi negocios Bolivia', 'taxi alto nivel',
+   106→      'chofer bilingüe', 'taxi ejecutivo aeropuerto', 'limousine Bolivia',
+   107→      'transporte ejecutivo La Paz', 'taxi ejecutivo Cochabamba',
+   108→    ],
+   109→    canonical: `${SITE.domain}/ejecutivo`,
+   110→    changeFrequency: 'monthly',
+   111→    priority: 0.8,
+   112→    schemaType: 'Service',
+   113→  },
+   114→
+   115→  '/aeropuerto': {
+   116→    title: 'Taxi Aeropuerto Viru Viru y Todos los Aeropuertos de Bolivia | Ecotaxi',
+   117→    description: 'Traslados desde y hacia todos los aeropuertos de Bolivia: Viru Viru (VVI), El Alto (LPB), Wilstermann (CBB) y más. Servicio 24/7 con monitor de vuelos, espera sin cargo por retrasos y tarifa fija transparente.',
+   118→    keywords: [
+   119→      'taxi aeropuerto Viru Viru', 'traslado aeropuerto Bolivia', 'taxi aeropuerto Santa Cruz',
+   120→      'taxi aeropuerto La Paz', 'taxi aeropuerto Cochabamba', 'taxi VVI',
+   121→      'taxi LPB', 'transfer aeropuerto Bolivia', 'taxi aeropuerto 24 horas',
+   122→      'recogida aeropuerto', 'taxi ida aeropuerto', 'taxi vuelta aeropuerto',
+   123→      'servicio aeropuerto taxi', 'transporte aeropuerto Bolivia',
+   124→      'taxi aeropuerto El Alto', 'taxi aeropuerto Wilstermann',
+   125→      'aeropuerto taxi tarifa fija', 'taxi aeropuerto sin espera',
+   126→    ],
+   127→    canonical: `${SITE.domain}/aeropuerto`,
+   128→    changeFrequency: 'weekly',
+   129→    priority: 0.9,
+   130→    schemaType: 'Service',
+   131→  },
+   132→
+   133→  '/transfer-aeropuerto': {
+   134→    title: 'Transfer Aeropuerto en Bolivia — Traslado Privado con Chofer | Ecotaxi',
+   135→    description: 'Servicio de transfer privado desde y hacia aeropuertos de Bolivia. Chofer con cartel de bienvenida, asistencia con equipaje, vehículo exclusivo y monitor de vuelos en tiempo real. Reserva anticipada con confirmación.',
+   136→    keywords: [
+   137→      'transfer aeropuerto Bolivia', 'traslado privado aeropuerto', 'transfer Viru Viru',
+   138→      'transfer aeropuerto Santa Cruz', 'chofer aeropuerto cartel', 'transfer privado',
+   139→      'transfer aeropuerto La Paz', 'transfer aeropuerto Cochabamba',
+   140→      'servicio transfer Bolivia', 'transfer ejecutivo aeropuerto',
+   141→      'transfer llegada aeropuerto', 'transfer salida aeropuerto',
+   142→    ],
+   143→    canonical: `${SITE.domain}/transfer-aeropuerto`,
+   144→    changeFrequency: 'monthly',
+   145→    priority: 0.9,
+   146→    schemaType: 'Service',
+   147→  },
+   148→
+   149→  '/interurbano': {
+   150→    title: 'Taxi Interurbano en Bolivia — Viajes entre Ciudades Seguros | Ecotaxi',
+   151→    description: 'Servicio de taxi interurbano entre ciudades de Bolivia. Viajes seguros Santa Cruz-La Paz-Cochabamba y todas las rutas nacionales. Vehículos confortables, choferes profesionales y rastreo GPS satelital en toda la ruta.',
+   152→    keywords: [
+   153→      'taxi interurbano Bolivia', 'taxi entre ciudades', 'viaje Santa Cruz La Paz',
+   154→      'taxi ruta nacional', 'transporte interdepartamental', 'taxi largo recorrido',
+   155→      'taxi Santa Cruz Cochabamba', 'taxi interprovincial', 'viaje seguro Bolivia',
+   156→      'transporte interurbano Bolivia', 'taxi viaje largo', 'taxi carretera Bolivia',
+   157→      'servicio interurbano taxi', 'taxi otra ciudad Bolivia', 'taxi turismo Bolivia',
+   158→    ],
+   159→    canonical: `${SITE.domain}/interurbano`,
+   160→    changeFrequency: 'monthly',
+   161→    priority: 0.8,
+   162→    schemaType: 'Service',
+   163→  },
+   164→
+   165→  '/inter-urbanos': {
+   166→    title: 'Transporte Inter Urbano en Bolivia — Conexión entre Ciudades | Ecotaxi',
+   167→    description: 'Servicio de transporte inter urbano conectando todas las ciudades principales de Bolivia. Rutas frecuentes, horarios flexibles y la seguridad de viajar con la empresa de transporte más confiable del país.',
+   168→    keywords: [
+   169→      'transporte inter urbano', 'inter urbano Bolivia', 'transporte entre ciudades Bolivia',
+   170→      'conexión urbana Bolivia', 'transporte inter ciudades', 'viaje inter urbano',
+   171→    ],
+   172→    canonical: `${SITE.domain}/inter-urbanos`,
+   173→    changeFrequency: 'monthly',
+   174→    priority: 0.7,
+   175→    schemaType: 'Service',
+   176→  },
+   177→
+   178→  '/corporativo': {
+   179→    title: 'Transporte Corporativo Empresarial en Bolivia | Ecotaxi',
+   180→    description: 'Soluciones de transporte corporativo para empresas en Bolivia. Cuentas empresariales, facturación fiscal, reportes de gastos, panel de administración y servicio dedicado 24/7. Más de 200 empresas confían en nosotros.',
+   181→    keywords: [
+   182→      'transporte corporativo Bolivia', 'taxi empresarial', 'cuenta corporativa taxi',
+   183→      'transporte empresa Santa Cruz', 'taxi factura fiscal', 'taxi corporativo Bolivia',
+   184→      'servicio transporte empresarial', 'panel administración transporte',
+   185→      'transporte ejecutivo empresa', 'taxi cuenta empresa', 'movilidad corporativa',
+   186→      'transporte empleados empresa', 'taxi corporativo La Paz',
+   187→      'transporte corporativo Cochabamba', 'facturación transporte Bolivia',
+   188→    ],
+   189→    canonical: `${SITE.domain}/corporativo`,
+   190→    changeFrequency: 'monthly',
+   191→    priority: 0.8,
+   192→    schemaType: 'Service',
+   193→  },
+   194→
+   195→  '/transporte-salud': {
+   196→    title: 'Transporte de Salud y Traslado Médico en Bolivia | Ecotaxi',
+   197→    description: 'Servicio de transporte de salud y traslado médico en Bolivia. Traslados hospitalarios, consultas médicas, terapia y rehabilitación. Vehículos adaptados, conductores capacitados y servicio puerta a puerta para pacientes.',
+   198→    keywords: [
+   199→      'transporte salud Bolivia', 'traslado médico', 'taxi hospital',
+   200→      'transporte paciente', 'taxi médico Bolivia', 'ambulancia no emergencia',
+   201→      'traslado hospitalario', 'transporte médico Santa Cruz', 'taxi consulta médica',
+   202→      'transporte terapia rehabilitación', 'taxi clínica Bolivia',
+   203→      'traslado médico La Paz', 'transporte salud discapacidad',
+   204→      'vehículo médico transporte', 'taxi médico puerta a puerta',
+   205→    ],
+   206→    canonical: `${SITE.domain}/transporte-salud`,
+   207→    changeFrequency: 'monthly',
+   208→    priority: 0.7,
+   209→    schemaType: 'Service',
+   210→  },
+   211→
+   212→  '/transporte-de-salud': {
+   213→    title: 'Transporte de Salud — Traslados Médicos Seguros en Bolivia | Ecotaxi',
+   214→    description: 'Traslados médicos seguros y puntuales en Bolivia. Transporte de pacientes a hospitales, clínicas y centros de salud con vehículos confortables y conductores capacitados en atención al paciente.',
+   215→    keywords: [
+   216→      'transporte de salud', 'traslado médico Bolivia', 'transporte pacientes',
+   217→    ],
+   218→    canonical: `${SITE.domain}/transporte-de-salud`,
+   219→    changeFrequency: 'monthly',
+   220→    priority: 0.6,
+   221→    schemaType: 'Service',
+   222→  },
+   223→
+   224→  '/envios': {
+   225→    title: 'Envíos y Mensajería en Bolivia — Paquetería Rápida y Segura | Ecotaxi',
+   226→    description: 'Servicio de envíos y mensajería en Bolivia. Paquetería urbana e interurbana con recogida a domicilio, rastreo GPS en tiempo real y entrega garantizada. Documentos, paquetes y carga ligera con seguro incluido.',
+   227→    keywords: [
+   228→      'envíos Bolivia', 'mensajería Santa Cruz', 'paquetería Bolivia',
+   229→      'envío paquetes Bolivia', 'mensajería urbana', 'envío documentos',
+   230→      'servicio mensajería Bolivia', 'envío urgente Bolivia', 'courier Bolivia',
+   231→      'envío a domicilio Bolivia', 'paquetería Santa Cruz', 'envío interurbano',
+   232→      'mensajería empresarial', 'envío same day', 'delivery Bolivia',
+   233→      'envío rápido Bolivia', 'paquete seguro GPS', 'envío La Paz',
+   234→    ],
+   235→    canonical: `${SITE.domain}/envios`,
+   236→    changeFrequency: 'monthly',
+   237→    priority: 0.7,
+   238→    schemaType: 'Service',
+   239→  },
+   240→
+   241→  '/auxilio-mecanico': {
+   242→    title: 'Auxilio Mecánico y Grúa en Bolivia — Asistencia Vial 24/7 | Ecotaxi',
+   243→    description: 'Servicio de auxilio mecánico y grúa en Bolivia 24/7. Asistencia vial por avería, pinchazo, batería descargada o accidente. Grúa plataformera, servicio de cerrajería automotriz y remolque a taller. Cobertura en Santa Cruz, La Paz y Cochabamba.',
+   244→    keywords: [
+   245→      'auxilio mecánico Bolivia', 'grúa Bolivia', 'asistencia vial',
+   246→      'auxilio mecánico Santa Cruz', 'grúa remolque', 'servicio grúa 24 horas',
+   247→      'asistencia vial Bolivia', 'grúa plataformera', 'remolque vehículo',
+   248→      'auxilio carretera', 'cerrajería automotriz', 'batería descargada auxilio',
+   249→      'pinchazo auxilio', 'avería vehículo Bolivia', 'grúa accidente',
+   250→      'auxilio mecánico La Paz', 'asistencia vial Cochabamba', 'grúa económica',
+   251→    ],
+   252→    canonical: `${SITE.domain}/auxilio-mecanico`,
+   253→    changeFrequency: 'monthly',
+   254→    priority: 0.7,
+   255→    schemaType: 'Service',
+   256→  },
+   257→
+   258→  '/transporte-escolar': {
+   259→    title: 'Transporte Escolar Seguro en Bolivia — Rutas Escolares con GPS | Ecotaxi',
+   260→    description: 'Servicio de transporte escolar seguro en Bolivia. Rutas escolares con rastreo GPS, conductores con certificación de antecedentes, vehículos equipados y notificación a padres en tiempo real. Idel para colegios y familias.',
+   261→    keywords: [
+   262→      'transporte escolar Bolivia', 'ruta escolar Santa Cruz', 'taxi escolar',
+   263→      'transporte niños escuela', 'bus escolar Bolivia', 'transporte estudiantes',
+   264→      'ruta escolar GPS', 'transporte escolar seguro', 'movilidad escolar',
+   265→      'transporte colegio Bolivia', 'escolar con rastreo', 'transporte escolar La Paz',
+   266→      'bus escolar Cochabamba', 'transporte menores escuela', 'escolar puerta a puerta',
+   267→    ],
+   268→    canonical: `${SITE.domain}/transporte-escolar`,
+   269→    changeFrequency: 'monthly',
+   270→    priority: 0.7,
+   271→    schemaType: 'Service',
+   272→  },
+   273→
+   274→  '/transporte-mascotas': {
+   275→    title: 'Transporte de Mascotas en Bolivia — Viaje Seguro para tu Mascota | Ecotaxi',
+   276→    description: 'Servicio de transporte de mascotas en Bolivia. Viaje seguro para perros, gatos y otras mascotas al veterinario, peluquería canina o mudanza. Vehículos ventilados, jaulas disponibles y conductores capacitados.',
+   277→    keywords: [
+   278→      'transporte mascotas Bolivia', 'taxi mascotas', 'taxi perros Bolivia',
+   279→      'transporte mascotas Santa Cruz', 'taxi gatos', 'traslado mascotas',
+   280→      'transporte mascotas veterinario', 'taxi mascotas aeropuerto',
+   281→      'mudanza mascotas Bolivia', 'transporte animales Bolivia',
+   282→      'viaje mascotas seguro', 'taxi mascota La Paz', 'pet taxi Bolivia',
+   283→      'transporte mascota puerta a puerta', 'jaula transporte mascota',
+   284→    ],
+   285→    canonical: `${SITE.domain}/transporte-mascotas`,
+   286→    changeFrequency: 'monthly',
+   287→    priority: 0.7,
+   288→    schemaType: 'Service',
+   289→  },
+   290→
+   291→  '/aventura': {
+   292→    title: 'Turismo de Aventura en Bolivia — Tours y Excursiones | Ecotaxi',
+   293→    description: 'Tours de aventura y excursiones en Bolivia con Ecotaxi. Visita el Salar de Uyuni, Amboró, Samaipata, Lomas de Arena y más. Transporte 4x4, chofer guía y rutas personalizadas para tu aventura.',
+   294→    keywords: [
+   295→      'turismo aventura Bolivia', 'tours Bolivia', 'excursiones Santa Cruz',
+   296→      'Salar de Uyuni tour', 'tour Samaipata', 'tour Amboró',
+   297→      'turismo Bolivia Ecotaxi', 'excursión Lomas de Arena', 'tour 4x4 Bolivia',
+   298→      'aventura Bolivia transporte', 'tour naturaleza Bolivia',
+   299→      'turismo ecológico Bolivia', 'tour selva Bolivia', 'excursión Bolivia',
+   300→      'tour personalizado Bolivia', 'chofer guía turismo',
+   301→    ],
+   302→    canonical: `${SITE.domain}/aventura`,
+   303→    changeFrequency: 'monthly',
+   304→    priority: 0.7,
+   305→    schemaType: 'Service',
+   306→  },
+   307→
+   308→  '/eventos': {
+   309→    title: 'Transporte para Eventos en Bolivia — Logística de Eventos | Ecotaxi',
+   310→    description: 'Servicio de transporte para eventos, congresos y convenciones en Bolivia. Logística completa de movilidad para eventos corporativos, sociales y culturales. Flota dedicada, coordinación en sitio y servicio VIP.',
+   311→    keywords: [
+   312→      'transporte eventos Bolivia', 'logística eventos Santa Cruz',
+   313→      'transporte congresos Bolivia', 'taxi eventos corporativos',
+   314→      'transporte convenciones', 'movilidad eventos Bolivia',
+   315→      'servicio transporte eventos', 'flota eventos Bolivia',
+   316→      'coordinación transporte evento', 'taxi eventos La Paz',
+   317→      'transporte ferias Bolivia', 'eventos corporativos transporte',
+   318→    ],
+   319→    canonical: `${SITE.domain}/eventos`,
+   320→    changeFrequency: 'monthly',
+   321→    priority: 0.7,
+   322→    schemaType: 'Service',
+   323→  },
+   324→
+   325→  '/mudanza': {
+   326→    title: 'Mudanzas Profesionales en Bolivia — Local, Provincial y Nacional | Ecotaxi',
+   327→    description: 'Servicio de mudanzas profesionales en Bolivia. Mudanza local, provincial y nacional con calculadora de precio online. Furgones cerrados y camionetas, embalaje profesional, ayudantes, seguro de carga y rastreo GPS. Cotiza gratis.',
+   328→    keywords: [
+   329→      'mudanza Bolivia', 'mudanza Santa Cruz', 'mudanza profesional',
+   330→      'mudanza local Bolivia', 'mudanza nacional Bolivia', 'mudanza provincial',
+   331→      'furgón mudanza', 'camioneta mudanza', 'calculadora mudanza',
+   332→      'cotizar mudanza Bolivia', 'mudanza económica', 'mudanza casa Bolivia',
+   333→      'mudanza oficina Bolivia', 'mudanza embalaje', 'mudanza con seguro',
+   334→      'empresa mudanzas Bolivia', 'mudanza La Paz', 'mudanza Cochabamba',
+   335→      'mudanza interdepartamental', 'traslado muebles Bolivia',
+   336→      'mudanza precio Bolivia', 'mudanza barata Santa Cruz',
+   337→    ],
+   338→    canonical: `${SITE.domain}/mudanza`,
+   339→    changeFrequency: 'weekly',
+   340→    priority: 0.9,
+   341→    schemaType: 'Service',
+   342→  },
+   343→
+   344→  '/logistica': {
+   345→    title: 'Logística y Distribución en Bolivia — Transporte de Carga | Ecotaxi',
+   346→    description: 'Servicio de logística y distribución en Bolivia. Transporte de carga, distribución última milla, almacén temporal y logística empresarial. Cobertura nacional con rastreo satelital y seguro de carga.',
+   347→    keywords: [
+   348→      'logística Bolivia', 'distribución Bolivia', 'transporte carga Santa Cruz',
+   349→      'logística empresarial Bolivia', 'distribución última milla',
+   350→      'almacén logístico Bolivia', 'transporte mercancía Bolivia',
+   351→      'logística nacional Bolivia', 'distribución productos Bolivia',
+   352→      'cadena suministro Bolivia', 'logística Santa Cruz',
+   353→    ],
+   354→    canonical: `${SITE.domain}/logistica`,
+   355→    changeFrequency: 'monthly',
+   356→    priority: 0.8,
+   357→    schemaType: 'Service',
+   358→  },
+   359→
+   360→  '/alquiler-maquinaria': {
+   361→    title: 'Alquiler de Maquinaria Pesada en Bolivia — Excavadoras, Grúas | Ecotaxi',
+   362→    description: 'Alquiler de maquinaria pesada en Bolivia: excavadoras, grúas, retroexcavadoras, volquetas y más. Operador incluido, transporte al sitio y seguro. Servicio para construcción, minería y obras públicas.',
+   363→    keywords: [
+   364→      'alquiler maquinaria pesada Bolivia', 'alquiler excavadora Bolivia',
+   365→      'alquiler grúa Bolivia', 'maquinaria construcción Bolivia',
+   366→      'alquiler retroexcavadora', 'volqueta alquiler', 'maquinaria obra',
+   367→      'alquiler maquinaria Santa Cruz', 'maquinaria pesada precio',
+   368→      'alquiler grúa plataforma', 'maquinaria minería Bolivia',
+   369→      'alquiler maquinaria La Paz', 'construcción Bolivia maquinaria',
+   370→    ],
+   371→    canonical: `${SITE.domain}/alquiler-maquinaria`,
+   372→    changeFrequency: 'monthly',
+   373→    priority: 0.7,
+   374→    schemaType: 'Service',
+   375→  },
+   376→
+   377→  '/agencias': {
+   378→    title: 'Agencias de Viaje y OTAs — Programa de Partners | Ecotaxi Bolivia',
+   379→    description: 'Programa para agencias de viaje y OTAs con Ecotaxi Bolivia. Ofrece transporte premium a tus clientes con comisiones atractivas, panel de reservas, facturación automática y soporte dedicado.',
+   380→    keywords: [
+   381→      'agencias viaje Bolivia', 'OTA transporte', 'programa partners Ecotaxi',
+   382→      'agencia viaje taxi', 'comisión agencia transporte', 'reserva transporte agencia',
+   383→      'transporte turístico agencias', 'B2B transporte Bolivia',
+   384→      'agencia viaje Santa Cruz', 'partners transporte Bolivia',
+   385→    ],
+   386→    canonical: `${SITE.domain}/agencias`,
+   387→    changeFrequency: 'monthly',
+   388→    priority: 0.7,
+   389→    schemaType: 'Service',
+   390→  },
+   391→
+   392→  '/bus': {
+   393→    title: 'Alquiler de Bus y Minibus en Bolivia — Transporte Grupal | Ecotaxi',
+   394→    description: 'Alquiler de bus, minibus y micros en Bolivia para transporte grupal, viajes corporativos, excursiones y eventos. Chofer profesional, aire acondicionado y capacidad de 15 a 45 pasajeros. Cotiza tu viaje grupal.',
+   395→    keywords: [
+   396→      'alquiler bus Bolivia', 'alquiler minibus Santa Cruz', 'bus turismo Bolivia',
+   397→      'transporte grupal Bolivia', 'alquiler micro Bolivia', 'bus eventos',
+   398→      'bus corporativo Bolivia', 'alquiler bus La Paz', 'minibus Cochabamba',
+   399→      'bus excursion Bolivia', 'transporte grupo Bolivia', 'bus privado alquiler',
+   400→      'bus aeropuerto grupo', 'bus 45 pasajeros Bolivia', 'minibus 20 pasajeros',
+   401→    ],
+   402→    canonical: `${SITE.domain}/bus`,
+   403→    changeFrequency: 'monthly',
+   404→    priority: 0.8,
+   405→    schemaType: 'Service',
+   406→  },
+   407→
+   408→  '/maquinaria': {
+   409→    title: 'Maquinaria Pesada en Bolivia — Equipos para Construcción | Ecotaxi',
+   410→    description: 'Maquinaria pesada para construcción, minería y obras públicas en Bolivia. Excavadoras, grúas, retroexcavadoras, volquetas con operador profesional y transporte incluido.',
+   411→    keywords: [
+   412→      'maquinaria pesada Bolivia', 'equipos construcción Bolivia',
+   413→      'excavadora Bolivia', 'grúa Bolivia', 'retroexcavadora Bolivia',
+   414→    ],
+   415→    canonical: `${SITE.domain}/maquinaria`,
+   416→    changeFrequency: 'monthly',
+   417→    priority: 0.6,
+   418→    schemaType: 'Service',
+   419→  },
+   420→
+   421→  '/nosotros': {
+   422→    title: 'Sobre Ecotaxi Bolivia — Nuestra Historia y Compromiso Ecológico',
+   423→    description: 'Conoce Ecotaxi Bolivia: la primera empresa de transporte con neutralización de CO2 en Bolivia. Nuestra historia desde 2015, valores de excelencia e innovación, y compromiso con la sostenibilidad y la comunidad.',
+   424→    keywords: [
+   425→      'ecotaxi nosotros', 'historia Ecotaxi', 'empresa transporte Bolivia',
+   426→      'transporte ecológico Bolivia', 'CO2 neutro transporte', 'O&C Ingeniería',
+   427→      'empresa Santa Cruz transporte', 'valores Ecotaxi', 'sostenibilidad Bolivia',
+   428→      'compromiso ecológico', 'transporte responsable Bolivia',
+   429→    ],
+   430→    canonical: `${SITE.domain}/nosotros`,
+   431→    changeFrequency: 'monthly',
+   432→    priority: 0.6,
+   433→    schemaType: 'AboutPage',
+   434→  },
+   435→}
+   436→
+   437→/**
+   438→ * Get SEO data for a page path, with fallback
+   439→ */
+   440→export function getPageSeo(path: string): PageSeoData {
+   441→  return PAGES[path] || {
+   442→    title: 'Ecotaxi Bolivia — Transporte Profesional',
+   443→    description: 'Servicio de transporte profesional en Bolivia con Ecotaxi.',
+   444→    keywords: ['ecotaxi', 'transporte Bolivia'],
+   445→    canonical: `${SITE.domain}${path}`,
+   446→    changeFrequency: 'monthly',
+   447→    priority: 0.5,
+   448→  }
+   449→}
+   450→
+   451→/**
+   452→ * Generate Next.js Metadata object from PageSeoData
+   453→ */
+   454→export function generatePageMetadata(path: string) {
+   455→  const seo = getPageSeo(path)
+   456→  
+   457→  return {
+   458→    title: seo.title,
+   459→    description: seo.description,
+   460→    keywords: seo.keywords,
+   461→    alternates: {
+   462→      canonical: seo.canonical,
+   463→    },
+   464→    openGraph: {
+   465→      title: seo.title,
+   466→      description: seo.description,
+   467→      url: seo.canonical,
+   468→      siteName: SITE.name,
+   469→      type: (seo.ogType || 'website') as 'website' | 'article',
+   470→      locale: 'es_BO',
+   471→      images: seo.ogImage ? [{
+   472→        url: seo.ogImage,
+   473→        width: 1200,
+   474→        height: 630,
+   475→        alt: seo.title,
+   476→      }] : undefined,
+   477→    },
+   478→    twitter: {
+   479→      card: 'summary_large_image' as const,
+   480→      title: seo.title,
+   481→      description: seo.description,
+   482→    },
+   483→    robots: {
+   484→      index: true,
+   485→      follow: true,
+   486→    },
+   487→  }
+   488→}
+   489→
+   490→/**
+   491→ * Generate JSON-LD schema for a specific page
+   492→ */
+   493→export function generatePageSchema(path: string): Record<string, unknown>[] {
+   494→  const seo = getPageSeo(path)
+   495→  const schemas: Record<string, unknown>[] = []
+   496→
+   497→  // Base LocalBusiness schema (only on homepage)
+   498→  if (path === '/') {
+   499→    schemas.push({
+   500→      '@context': 'https://schema.org',
+   501→      '@type': 'TaxiService',
+   502→      name: SITE.name,
+   503→      alternateName: 'EcoTaxi Bolivia',
+   504→      url: SITE.domain,
+   505→      logo: `${SITE.domain}/logo-ecotaxi.webp`,
+   506→      description: seo.description,
+   507→      telephone: SITE.phone,
+   508→      email: SITE.email,
+   509→      address: {
+   510→        '@type': 'PostalAddress',
+   511→        streetAddress: 'Santa Cruz de la Sierra',
+   512→        addressLocality: 'Santa Cruz de la Sierra',
+   513→        addressRegion: 'Santa Cruz',
+   514→        addressCountry: 'BO',
+   515→      },
+   516→      geo: {
+   517→        '@type': 'GeoCoordinates',
+   518→        latitude: -17.7833,
+   519→        longitude: -63.1833,
+   520→      },
+   521→      areaServed: [
+   522→        { '@type': 'City', name: 'Santa Cruz de la Sierra' },
+   523→        { '@type': 'City', name: 'La Paz' },
+   524→        { '@type': 'City', name: 'Cochabamba' },
+   525→        { '@type': 'Country', name: 'Bolivia' },
+   526→      ],
+   527→      priceRange: '$$',
+   528→      openingHoursSpecification: {
+   529→        '@type': 'OpeningHoursSpecification',
+   530→        dayOfWeek: ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'],
+   531→        opens: '00:00',
+   532→        closes: '23:59',
+   533→      },
+   534→      sameAs: Object.values(SITE.social),
+   535→      parentOrganization: {
+   536→        '@type': 'Organization',
+   537→        name: SITE.org,
+   538→        url: 'https://crm.oyc-srl.com',
+   539→      },
+   540→      hasOfferCatalog: {
+   541→        '@type': 'OfferCatalog',
+   542→        name: 'Servicios de Transporte',
+   543→        itemListElement: Object.entries(PAGES)
+   544→          .filter(([p]) => p !== '/' && p !== '/nosotros')
+   545→          .map(([, s]) => ({
+   546→            '@type': 'Offer',
+   547→            name: s.title.split(' | ')[0].split(' — ')[0],
+   548→            description: s.description.substring(0, 120),
+   549→            url: s.canonical,
+   550→          })),
+   551→      },
+   552→    })
+   553→
+   554→    // WebSite with SearchAction
+   555→    schemas.push({
+   556→      '@context': 'https://schema.org',
+   557→      '@type': 'WebSite',
+   558→      name: SITE.name,
+   559→      url: SITE.domain,
+   560→      potentialAction: {
+   561→        '@type': 'SearchAction',
+   562→        target: `${SITE.domain}/?q={search_term_string}`,
+   563→        'query-input': 'required name=search_term_string',
+   564→      },
+   565→    })
+   566→  }
+   567→
+   568→  // Service schema for all service pages
+   569→  if (path !== '/' && path !== '/nosotros') {
+   570→    schemas.push({
+   571→      '@context': 'https://schema.org',
+   572→      '@type': 'Service',
+   573→      name: seo.title.split(' | ')[0].split(' — ')[0],
+   574→      description: seo.description,
+   575→      url: seo.canonical,
+   576→      provider: {
+   577→        '@type': 'TaxiService',
+   578→        name: SITE.name,
+   579→        url: SITE.domain,
+   580→        telephone: SITE.phone,
+   581→      },
+   582→      areaServed: [
+   583→        { '@type': 'City', name: 'Santa Cruz de la Sierra' },
+   584→        { '@type': 'Country', name: 'Bolivia' },
+   585→      ],
+   586→      serviceType: seo.schemaType || 'Service',
+   587→    })
+   588→  }
+   589→
+   590→  // BreadcrumbList for all pages
+   591→  const pathParts = path.split('/').filter(Boolean)
+   592→  const breadcrumbItems = [
+   593→    { '@type': 'ListItem', position: 1, name: 'Inicio', item: SITE.domain },
+   594→    ...pathParts.map((part, i) => ({
+   595→      '@type': 'ListItem',
+   596→      position: i + 2,
+   597→      name: seo.title.split(' | ')[0].split(' — ')[0],
+   598→      item: `${SITE.domain}/${pathParts.slice(0, i + 1).join('/')}`,
+   599→    })),
+   600→  ]
+   601→
+   602→  schemas.push({
+   603→    '@context': 'https://schema.org',
+   604→    '@type': 'BreadcrumbList',
+   605→    itemListElement: breadcrumbItems,
+   606→  })
+   607→
+   608→  // Specific schemas for specific pages
+   609→  if (path === '/mudanza') {
+   610→    schemas.push({
+   611→      '@context': 'https://schema.org',
+   612→      '@type': 'FAQPage',
+   613→      mainEntity: [
+   614→        {
+   615→          '@type': 'Question',
+   616→          name: '¿Cuánto cuesta una mudanza en Bolivia?',
+   617→          acceptedAnswer: {
+   618→            '@type': 'Answer',
+   619→            text: 'El costo de una mudanza en Bolivia depende del volumen, distancia y servicios adicionales. Usa nuestra calculadora de mudanza online para obtener una cotización instantánea y personalizada.',
+   620→          },
+   621→        },
+   622→        {
+   623→          '@type': 'Question',
+   624→          name: '¿Qué incluye el servicio de mudanza de Ecotaxi?',
+   625→          acceptedAnswer: {
+   626→            '@type': 'Answer',
+   627→            text: 'El servicio incluye transporte con vehículo adecuado, ayudantes para carga y descarga, seguro de carga al 3%, y opcionalmente embalaje profesional, desarmado de muebles y limpieza post-mudanza.',
+   628→          },
+   629→        },
+   630→        {
+   631→          '@type': 'Question',
+   632→          name: '¿Hacen mudanzas entre ciudades de Bolivia?',
+   633→          acceptedAnswer: {
+   634→            '@type': 'Answer',
+   635→            text: 'Sí, realizamos mudanzas locales, provinciales y nacionales entre todas las ciudades y departamentos de Bolivia con seguimiento GPS y seguro de carga.',
+   636→          },
+   637→        },
+   638→      ],
+   639→    })
+   640→  }
+   641→
+   642→  if (path === '/aeropuerto' || path === '/transfer-aeropuerto') {
+   643→    schemas.push({
+   644→      '@context': 'https://schema.org',
+   645→      '@type': 'FAQPage',
+   646→      mainEntity: [
+   647→        {
+   648→          '@type': 'Question',
+   649→          name: '¿Cuánto cuesta un taxi al aeropuerto Viru Viru?',
+   650→          acceptedAnswer: {
+   651→            '@type': 'Answer',
+   652→            text: 'El traslado al aeropuerto Viru Viru desde Santa Cruz tiene tarifa fija transparente. Reserva online para conocer el precio exacto según tu punto de partida.',
+   653→          },
+   654→        },
+   655→        {
+   656→          '@type': 'Question',
+   657→          name: '¿El taxi al aeropuerto incluye espera por retrasos de vuelo?',
+   658→          acceptedAnswer': {
+   659→            '@type': 'Answer',
+   660→            text: 'Sí, monitoreamos tu vuelo en tiempo real y ajustamos la hora de recogida sin costo adicional por retrasos del vuelo.',
+   661→          },
+   662→        },
+   663→      ],
+   664→    })
+   665→  }
+   666→
+   667→  return schemas
+   668→}
+   669→
+   670→/**
+   671→ * All page paths for sitemap generation
+   672→ */
+   673→export function getAllPagePaths(): { path: string; priority: number; changeFrequency: string }[] {
+   674→  return Object.entries(PAGES).map(([path, seo]) => ({
+   675→    path,
+   676→    priority: seo.priority || 0.5,
+   677→    changeFrequency: seo.changeFrequency || 'monthly',
+   678→  }))
+   679→}
+   680→

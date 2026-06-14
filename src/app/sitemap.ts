@@ -1,45 +1,29 @@
 import type { MetadataRoute } from 'next'
+import { getAllPagePaths, SITE } from '@/lib/seo-data'
 
-const BASE_URL = 'https://www.ecotaxi-bo.com'
-
-const servicePages = [
-  { url: '/puerta-a-puerta', priority: 0.8 },
-  { url: '/por-hora', priority: 0.8 },
-  { url: '/ejecutivo', priority: 0.8 },
-  { url: '/aeropuerto', priority: 0.9 },
-  { url: '/transfer-aeropuerto', priority: 0.9 },
-  { url: '/interurbano', priority: 0.8 },
-  { url: '/inter-urbanos', priority: 0.8 },
-  { url: '/corporativo', priority: 0.8 },
-  { url: '/transporte-salud', priority: 0.7 },
-  { url: '/transporte-de-salud', priority: 0.7 },
-  { url: '/envios', priority: 0.7 },
-  { url: '/auxilio-mecanico', priority: 0.7 },
-  { url: '/transporte-escolar', priority: 0.7 },
-  { url: '/transporte-mascotas', priority: 0.7 },
-  { url: '/aventura', priority: 0.7 },
-  { url: '/eventos', priority: 0.7 },
-  { url: '/alquiler-maquinaria', priority: 0.7 },
-  { url: '/mudanza', priority: 0.9 },
-  { url: '/nosotros', priority: 0.6 },
+// Additional pages not in seo-data.ts (partner pages, etc.)
+const ADDITIONAL_PAGES = [
+  { path: '/socio-de-transporte', priority: 0.5, changeFrequency: 'monthly' },
+  { path: '/organizadores-eventos', priority: 0.5, changeFrequency: 'monthly' },
+  { path: '/socios-transporte', priority: 0.5, changeFrequency: 'monthly' },
+  { path: '/socio-de-servicios', priority: 0.5, changeFrequency: 'monthly' },
+  { path: '/eventos-y-congresos', priority: 0.5, changeFrequency: 'monthly' },
 ]
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const homepage: MetadataRoute.Sitemap = [
-    {
-      url: BASE_URL,
-      lastModified: new Date().toISOString(),
-      changeFrequency: 'weekly',
-      priority: 1.0,
-    },
-  ]
-
-  const pages: MetadataRoute.Sitemap = servicePages.map((page) => ({
-    url: `${BASE_URL}${page.url}`,
+  const mainPages: MetadataRoute.Sitemap = getAllPagePaths().map((page) => ({
+    url: `${SITE.domain}${page.path}`,
     lastModified: new Date().toISOString(),
-    changeFrequency: 'monthly' as const,
+    changeFrequency: page.changeFrequency as MetadataRoute.Sitemap[0]['changeFrequency'],
     priority: page.priority,
   }))
 
-  return [...homepage, ...pages]
+  const additionalPages: MetadataRoute.Sitemap = ADDITIONAL_PAGES.map((page) => ({
+    url: `${SITE.domain}${page.path}`,
+    lastModified: new Date().toISOString(),
+    changeFrequency: page.changeFrequency as MetadataRoute.Sitemap[0]['changeFrequency'],
+    priority: page.priority,
+  }))
+
+  return [...mainPages, ...additionalPages]
 }

@@ -1,0 +1,1087 @@
+     1→'use client'
+     2→
+     3→import { useEffect, useRef, useState } from 'react'
+     4→import {
+     5→  Bus, Shield, MapPin, Route, Bell, Users, Phone,
+     6→  ArrowRight, CheckCircle2, Star, UserCheck, Clock,
+     7→  BadgeCheck, ShieldCheck, PhoneCall, MessageCircle,
+     8→  Navigation, Baby, Car, GraduationCap, Eye,
+     9→  Sparkles, ChevronRight, Handshake, Home, BookOpen,
+    10→  ClipboardCheck, Send, CircleCheck, Wrench, Cog
+    11→} from 'lucide-react'
+    12→import { Navbar } from '@/components/ecotaxi/navbar'
+    13→import { Footer } from '@/components/ecotaxi/footer'
+    14→
+    15→/* ─────────────────────── scroll-triggered animation hook ──────────────────── */
+    16→function useInView(threshold = 0.1) {
+    17→  const ref = useRef<HTMLDivElement>(null)
+    18→  const [visible, setVisible] = useState(false)
+    19→  useEffect(() => {
+    20→    const el = ref.current
+    21→    if (!el) return
+    22→    const obs = new IntersectionObserver(
+    23→      ([e]) => { if (e.isIntersecting) setVisible(true) },
+    24→      { threshold }
+    25→    )
+    26→    obs.observe(el)
+    27→    return () => obs.disconnect()
+    28→  }, [threshold])
+    29→  return { ref, visible }
+    30→}
+    31→
+    32→/* ─────────────────────── animated section wrapper ─────────────────────────── */
+    33→function AnimatedSection({ children, className = '', delay = 0 }: {
+    34→  children: React.ReactNode; className?: string; delay?: number
+    35→}) {
+    36→  const { ref, visible } = useInView(0.08)
+    37→  return (
+    38→    <div
+    39→      ref={ref}
+    40→      className={`transition-all duration-700 ease-out ${
+    41→        visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+    42→      } ${className}`}
+    43→      style={{ transitionDelay: visible ? `${delay}ms` : '0ms' }}
+    44→    >
+    45→      {children}
+    46→    </div>
+    47→  )
+    48→}
+    49→
+    50→/* ═══════════════════════════════════════════════════════════════════════════════
+    51→   1. HERO SECTION — School Transport Theme
+    52→   ═══════════════════════════════════════════════════════════════════════════════ */
+    53→function HeroSection() {
+    54→  return (
+    55→    <section className="relative min-h-[92vh] flex items-center justify-center overflow-hidden">
+    56→      {/* Background image with overlay */}
+    57→      <div className="absolute inset-0">
+    58→        <img
+    59→          src="/service-escolar.webp"
+    60→          alt="Transporte Escolar Ecotaxi"
+    61→          className="w-full h-full object-cover"
+    62→        />
+    63→        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17]/70 via-[#0a0e17]/85 to-[#0a0e17]" />
+    64→      </div>
+    65→
+    66→      {/* Grid pattern */}
+    67→      <div
+    68→        className="absolute inset-0 opacity-[0.03]"
+    69→        style={{
+    70→          backgroundImage: `linear-gradient(rgba(59,130,246,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(59,130,246,0.4) 1px, transparent 1px)`,
+    71→          backgroundSize: '60px 60px',
+    72→        }}
+    73→      />
+    74→
+    75→      {/* Glow orbs */}
+    76→      <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full bg-[#3B82F6]/12 blur-[120px] animate-pulse" />
+    77→      <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full bg-[#22C55E]/10 blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
+    78→      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full bg-[#3B82F6]/6 blur-[100px] animate-pulse" style={{ animationDelay: '2s' }} />
+    79→
+    80→      {/* Decorative icons */}
+    81→      <div className="absolute top-32 right-[8%] md:right-[18%] opacity-[0.07]">
+    82→        <GraduationCap className="w-28 h-28 md:w-40 md:h-40 text-[#3B82F6]" />
+    83→      </div>
+    84→      <div className="absolute bottom-28 left-[5%] md:left-[12%] opacity-[0.05]">
+    85→        <Bus className="w-20 h-20 md:w-28 md:h-28 text-[#22C55E]" />
+    86→      </div>
+    87→
+    88→      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-28 pb-16">
+    89→        {/* Badge */}
+    90→        <AnimatedSection>
+    91→          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#3B82F6]/10 border border-[#3B82F6]/25 mb-8 backdrop-blur-sm">
+    92→            <GraduationCap className="w-4 h-4 text-[#3B82F6]" />
+    93→            <span className="text-sm text-[#3B82F6] font-medium">Transporte Escolar</span>
+    94→          </div>
+    95→        </AnimatedSection>
+    96→
+    97→        {/* Title */}
+    98→        <AnimatedSection delay={100}>
+    99→          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6">
+   100→            Seguridad y Confianza{' '}
+   101→            <br className="hidden sm:block" />
+   102→            para tus{' '}
+   103→            <span className="bg-gradient-to-r from-[#3B82F6] via-[#22C55E] to-[#3B82F6] bg-clip-text text-transparent">
+   104→              Hijos
+   105→            </span>
+   106→          </h1>
+   107→        </AnimatedSection>
+   108→
+   109→        {/* Subtitle */}
+   110→        <AnimatedSection delay={200}>
+   111→          <p className="text-lg md:text-xl text-white/60 max-w-3xl mx-auto mb-10 leading-relaxed">
+   112→            Transporte escolar seguro con conductores certificados, vehículos monitoreados y 
+   113→            seguimiento GPS en tiempo real. La tranquilidad que tus hijos merecen y tú necesitas 
+   114→            para cada trayecto hacia su centro educativo.
+   115→          </p>
+   116→        </AnimatedSection>
+   117→
+   118→        {/* CTA buttons */}
+   119→        <AnimatedSection delay={300}>
+   120→          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-14">
+   121→            <a
+   122→              href="#servicios"
+   123→              className="px-8 py-4 rounded-full text-lg font-semibold text-white bg-[#3B82F6] hover:bg-[#2563EB] transition-all duration-300 shadow-[0_0_30px_rgba(59,130,246,0.3)] hover:shadow-[0_0_50px_rgba(59,130,246,0.5)] hover:scale-105"
+   124→            >
+   125→              Conocer Servicios
+   126→            </a>
+   127→            <a
+   128→              href="#contacto"
+   129→              className="px-8 py-4 rounded-full text-lg font-semibold text-[#3B82F6] border border-[#3B82F6]/30 hover:border-[#3B82F6]/60 hover:bg-[#3B82F6]/5 transition-all duration-300"
+   130→            >
+   131→              Solicitar Transporte
+   132→            </a>
+   133→          </div>
+   134→        </AnimatedSection>
+   135→
+   136→        {/* Stats bar */}
+   137→        <AnimatedSection delay={400}>
+   138→          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
+   139→            {[
+   140→              { value: '2.500+', label: 'Estudiantes transportados', icon: GraduationCap },
+   141→              { value: '50+', label: 'Rutas escolares', icon: Route },
+   142→              { value: '100%', label: 'Conductores certificados', icon: UserCheck },
+   143→              { value: 'GPS', label: 'Monitoreo en tiempo real', icon: Navigation },
+   144→            ].map((stat) => (
+   145→              <div
+   146→                key={stat.label}
+   147→                className="p-4 rounded-2xl bg-white/[0.03] border border-[#3B82F6]/10 backdrop-blur-sm hover:border-[#3B82F6]/20 transition-all duration-300"
+   148→              >
+   149→                <stat.icon className="w-5 h-5 text-[#3B82F6] mx-auto mb-2" />
+   150→                <div className="text-2xl md:text-3xl font-bold text-white">{stat.value}</div>
+   151→                <div className="text-xs text-white/50 mt-1">{stat.label}</div>
+   152→              </div>
+   153→            ))}
+   154→          </div>
+   155→        </AnimatedSection>
+   156→      </div>
+   157→    </section>
+   158→  )
+   159→}
+   160→
+   161→/* ═══════════════════════════════════════════════════════════════════════════════
+   162→   2. SERVICE OVERVIEW — Transporte Regular & Transporte Eventual
+   163→   ═══════════════════════════════════════════════════════════════════════════════ */
+   164→function ServiceOverviewSection() {
+   165→  return (
+   166→    <section id="servicios" className="relative py-24 md:py-32">
+   167→      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1320] to-[#0a0e17]" />
+   168→      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] rounded-full bg-[#3B82F6]/5 blur-[150px]" />
+   169→
+   170→      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   171→        <AnimatedSection>
+   172→          <div className="text-center mb-16">
+   173→            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#3B82F6]/10 border border-[#3B82F6]/20 mb-4">
+   174→              <Bus className="w-4 h-4 text-[#3B82F6]" />
+   175→              <span className="text-sm text-[#3B82F6]">Dos Modalidades, Una Prioridad</span>
+   176→            </div>
+   177→            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+   178→              Nuestros Servicios{' '}
+   179→              <span className="bg-gradient-to-r from-[#3B82F6] via-[#22C55E] to-[#3B82F6] bg-clip-text text-transparent">
+   180→                Escolares
+   181→              </span>
+   182→            </h2>
+   183→            <p className="text-white/50 max-w-3xl mx-auto text-lg">
+   184→              Ofrecemos dos modalidades de transporte escolar diseñadas para cubrir todas las necesidades 
+   185→              de movilidad estudiantil: desde el recorrido diario hasta salidas especiales y eventos educativos.
+   186→            </p>
+   187→          </div>
+   188→        </AnimatedSection>
+   189→
+   190→        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+   191→          {/* CARD 1: Transporte Regular */}
+   192→          <AnimatedSection delay={100}>
+   193→            <div className="relative rounded-2xl overflow-hidden bg-white/[0.03] border border-[#3B82F6]/15 backdrop-blur-sm h-full">
+   194→              {/* Image header */}
+   195→              <div className="relative h-56 overflow-hidden">
+   196→                <img
+   197→                  src="/service-escolar.webp"
+   198→                  alt="Transporte Regular Escolar"
+   199→                  className="w-full h-full object-cover"
+   200→                />
+   201→                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0e17] via-[#0a0e17]/50 to-transparent" />
+   202→                <div className="absolute top-4 left-4">
+   203→                  <span className="px-4 py-1.5 rounded-full text-xs font-bold text-white bg-[#3B82F6] uppercase tracking-wider shadow-[0_0_20px_rgba(59,130,246,0.3)]">
+   204→                    Regular
+   205→                  </span>
+   206→                </div>
+   207→              </div>
+   208→
+   209→              <div className="p-6 md:p-8">
+   210→                <div className="flex items-center gap-4 mb-6">
+   211→                  <div className="w-16 h-16 rounded-2xl bg-[#3B82F6]/10 flex items-center justify-center">
+   212→                    <Bus className="w-8 h-8 text-[#3B82F6]" />
+   213→                  </div>
+   214→                  <div>
+   215→                    <h3 className="text-2xl font-bold text-white">Transporte Regular</h3>
+   216→                    <p className="text-sm text-[#3B82F6]">Rutas diarias escuela-casa</p>
+   217→                  </div>
+   218→                </div>
+   219→
+   220→                <p className="text-white/50 leading-relaxed mb-6">
+   221→                  Nuestro servicio de transporte regular cubre las rutas diarias de ida y vuelta 
+   222→                  entre el hogar y el centro educativo. Cada estudiante tiene una ruta designada 
+   223→                  con horarios fijos, paradas establecidas y un conductor asignado que conoce 
+   224→                  personalmente a cada niño y su familia. La puntualidad y la seguridad son 
+   225→                  nuestros compromisos más importantes en cada recorrido.
+   226→                </p>
+   227→
+   228→                <div className="space-y-3 mb-6">
+   229→                  {[
+   230→                    { icon: MapPin, text: 'Ruta fija con paradas establecidas' },
+   231→                    { icon: Clock, text: 'Horarios programados de recogida y entrega' },
+   232→                    { icon: UserCheck, text: 'Conductor asignado y certificado' },
+   233→                    { icon: Navigation, text: 'Seguimiento GPS en tiempo real' },
+   234→                    { icon: Bell, text: 'Notificación al padre al subir y bajar' },
+   235→                    { icon: ShieldCheck, text: 'Protocolo de seguridad en cada viaje' },
+   236→                  ].map((item) => (
+   237→                    <div key={item.text} className="flex items-start gap-3">
+   238→                      <item.icon className="w-4 h-4 text-[#3B82F6] mt-0.5 shrink-0" />
+   239→                      <span className="text-sm text-white/55">{item.text}</span>
+   240→                    </div>
+   241→                  ))}
+   242→                </div>
+   243→
+   244→                <div className="p-4 rounded-xl bg-[#3B82F6]/5 border border-[#3B82F6]/10">
+   245→                  <div className="flex items-center gap-2 mb-2">
+   246→                    <GraduationCap className="w-4 h-4 text-[#3B82F6]" />
+   247→                    <span className="text-xs font-bold text-[#3B82F6] uppercase tracking-wider">Para Todos los Niveles</span>
+   248→                  </div>
+   249→                  <p className="text-xs text-white/40 leading-relaxed">
+   250→                    Cubrimos transporte para estudiantes de inicial, primaria y secundaria. 
+   251→                    Cada nivel tiene protocolos diferenciados de atención y cuidado, con 
+   252→                    acompañamiento especial para los más pequeños.
+   253→                  </p>
+   254→                </div>
+   255→              </div>
+   256→            </div>
+   257→          </AnimatedSection>
+   258→
+   259→          {/* CARD 2: Transporte Eventual */}
+   260→          <AnimatedSection delay={200}>
+   261→            <div className="relative rounded-2xl overflow-hidden bg-white/[0.04] border-2 border-[#22C55E]/20 backdrop-blur-sm h-full shadow-[0_0_40px_rgba(34,197,94,0.08)]">
+   262→              {/* Image header */}
+   263→              <div className="relative h-56 overflow-hidden">
+   264→                <img
+   265→                  src="/service-escolar.webp"
+   266→                  alt="Transporte Eventual Escolar"
+   267→                  className="w-full h-full object-cover"
+   268→                />
+   269→                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0e17] via-[#0a0e17]/50 to-transparent" />
+   270→                <div className="absolute top-4 left-4">
+   271→                  <span className="px-4 py-1.5 rounded-full text-xs font-bold text-black bg-[#22C55E] uppercase tracking-wider shadow-[0_0_20px_rgba(34,197,94,0.4)]">
+   272→                    Eventual
+   273→                  </span>
+   274→                </div>
+   275→                <div className="absolute top-4 right-4">
+   276→                  <span className="px-3 py-1 rounded-full text-[10px] font-bold text-[#22C55E] bg-[#22C55E]/10 border border-[#22C55E]/20">
+   277→                    BAJO DEMANDA
+   278→                  </span>
+   279→                </div>
+   280→              </div>
+   281→
+   282→              <div className="p-6 md:p-8">
+   283→                <div className="flex items-center gap-4 mb-6">
+   284→                  <div className="w-16 h-16 rounded-2xl bg-[#22C55E]/10 flex items-center justify-center">
+   285→                    <BookOpen className="w-8 h-8 text-[#22C55E]" />
+   286→                  </div>
+   287→                  <div>
+   288→                    <h3 className="text-2xl font-bold text-white">Transporte Eventual</h3>
+   289→                    <p className="text-sm text-[#22C55E]">Excursiones y eventos especiales</p>
+   290→                  </div>
+   291→                </div>
+   292→
+   293→                <p className="text-white/50 leading-relaxed mb-6">
+   294→                  El transporte eventual está diseñado para salidas pedagógicas, visitas 
+   295→                  educativas, competencias deportivas, olimpiadas y todo tipo de eventos 
+   296→                  escolares que requieran movilización de estudiantes. Coordinamos con el 
+   297→                  colegio la logística completa del traslado, incluyendo rutas optimizadas, 
+   298→                  vehículos adecuados al tamaño del grupo y acompañamiento durante todo el recorrido.
+   299→                </p>
+   300→
+   301→                <div className="space-y-3 mb-6">
+   302→                  {[
+   303→                    { icon: MapPin, text: 'Rutas personalizadas según el destino' },
+   304→                    { icon: Bus, text: 'Vehículos adecuados al tamaño del grupo' },
+   305→                    { icon: Users, text: 'Transporte grupal con supervisión' },
+   306→                    { icon: Navigation, text: 'Rastreo GPS del vehículo durante todo el trayecto' },
+   307→                    { icon: ShieldCheck, text: 'Conductor experimentado en transporte de menores' },
+   308→                    { icon: Phone, text: 'Comunicación directa con el colegio organizador' },
+   309→                  ].map((item) => (
+   310→                    <div key={item.text} className="flex items-start gap-3">
+   311→                      <item.icon className="w-4 h-4 text-[#22C55E] mt-0.5 shrink-0" />
+   312→                      <span className="text-sm text-white/55">{item.text}</span>
+   313→                    </div>
+   314→                  ))}
+   315→                </div>
+   316→
+   317→                <div className="p-4 rounded-xl bg-[#22C55E]/5 border border-[#22C55E]/10">
+   318→                  <div className="flex items-center gap-2 mb-2">
+   319→                    <Sparkles className="w-4 h-4 text-[#22C55E]" />
+   320→                    <span className="text-xs font-bold text-[#22C55E] uppercase tracking-wider">Flexibilidad Total</span>
+   321→                  </div>
+   322→                  <p className="text-xs text-white/40 leading-relaxed">
+   323→                    Sin contratos de permanencia. Solicita el transporte eventual cuando lo 
+   324→                    necesites, con la antelación suficiente para coordinar la logística. 
+   325→                    Ideal para colegios que requieren transporte esporádico o complementario.
+   326→                  </p>
+   327→                </div>
+   328→              </div>
+   329→            </div>
+   330→          </AnimatedSection>
+   331→        </div>
+   332→      </div>
+   333→    </section>
+   334→  )
+   335→}
+   336→
+   337→/* ═══════════════════════════════════════════════════════════════════════════════
+   338→   3. HOW IT WORKS — 4 Steps
+   339→   ═══════════════════════════════════════════════════════════════════════════════ */
+   340→const howItWorksSteps = [
+   341→  {
+   342→    step: 1,
+   343→    icon: MapPin,
+   344→    title: 'Registra a tu Estudiante',
+   345→    desc: 'Inscribe a tu hijo proporcionando sus datos personales, la dirección del hogar, el colegio al que asiste y los horarios de entrada y salida. Nuestro sistema procesa la información y asigna la ruta más eficiente para tu hijo, garantizando un recorrido seguro y puntual.',
+   346→    color: '#3B82F6',
+   347→  },
+   348→  {
+   349→    step: 2,
+   350→    icon: Route,
+   351→    title: 'Ruta Designada',
+   352→    desc: 'Se asigna una ruta específica con horarios fijos de recogida y entrega. Cada estudiante tiene paradas establecidas cerca de su domicilio y su centro educativo. La ruta es optimizada para minimizar el tiempo de viaje y maximizar la seguridad de todos los pasajeros a bordo.',
+   353→    color: '#22C55E',
+   354→  },
+   355→  {
+   356→    step: 3,
+   357→    icon: Bus,
+   358→    title: 'Recogida y Traslado',
+   359→    desc: 'El conductor certificado llega puntualmente a la parada asignada, verifica la identidad del estudiante y lo aborda al vehículo. Durante todo el trayecto, el GPS del vehículo es monitoreado en tiempo real por nuestra central, garantizando que la ruta se cumpla exactamente como fue programada.',
+   360→    color: '#0077BD',
+   361→  },
+   362→  {
+   363→    step: 4,
+   364→    icon: Bell,
+   365→    title: 'Confirmación de Llegada',
+   366→    desc: 'Al llegar al colegio o de vuelta al hogar, el padre o tutor recibe una notificación automática confirmando la llegada del estudiante. Esta confirmación incluye la hora exacta y la ubicación, proporcionando la tranquilidad de saber que tu hijo llegó seguro a su destino.',
+   367→    color: '#00E676',
+   368→  },
+   369→]
+   370→
+   371→function HowItWorksSection() {
+   372→  return (
+   373→    <section id="como-funciona" className="relative py-24 md:py-32">
+   374→      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1320] to-[#0a0e17]" />
+   375→      <div
+   376→        className="absolute inset-0 opacity-[0.02]"
+   377→        style={{
+   378→          backgroundImage: `radial-gradient(circle, rgba(59,130,246,0.3) 1px, transparent 1px)`,
+   379→          backgroundSize: '30px 30px',
+   380→        }}
+   381→      />
+   382→      <div className="absolute top-1/3 right-0 w-[500px] h-[500px] rounded-full bg-[#3B82F6]/5 blur-[120px]" />
+   383→
+   384→      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   385→        <AnimatedSection>
+   386→          <div className="text-center mb-16">
+   387→            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#3B82F6]/10 border border-[#3B82F6]/20 mb-4">
+   388→              <ClipboardCheck className="w-4 h-4 text-[#3B82F6]" />
+   389→              <span className="text-sm text-[#3B82F6]">Proceso Simple y Seguro</span>
+   390→            </div>
+   391→            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+   392→              Cómo Funciona el{' '}
+   393→              <span className="bg-gradient-to-r from-[#3B82F6] via-[#22C55E] to-[#3B82F6] bg-clip-text text-transparent">
+   394→                Transporte Escolar
+   395→              </span>
+   396→            </h2>
+   397→            <p className="text-white/50 max-w-3xl mx-auto text-lg">
+   398→              En cuatro pasos simples, tu hijo queda inscrito en nuestro sistema de transporte escolar 
+   399→              con toda la seguridad y monitoreo que merece. Cada etapa está diseñada para dar tranquilidad a los padres.
+   400→            </p>
+   401→          </div>
+   402→        </AnimatedSection>
+   403→
+   404→        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+   405→          {howItWorksSteps.map((step, i) => (
+   406→            <AnimatedSection key={step.title} delay={i * 100}>
+   407→              <div className="group relative p-6 md:p-7 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm hover:border-white/10 transition-all duration-500 h-full">
+   408→                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/0 to-white/0 group-hover:from-white/[0.02] transition-all duration-500" />
+   409→
+   410→                {/* Step number */}
+   411→                <div className="absolute -top-3 -left-3 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-lg" style={{ background: step.color }}>
+   412→                  {step.step}
+   413→                </div>
+   414→
+   415→                <div className="relative z-10 pt-4">
+   416→                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300" style={{ backgroundColor: `${step.color}12` }}>
+   417→                    <step.icon className="w-7 h-7" style={{ color: step.color }} />
+   418→                  </div>
+   419→                  <h3 className="text-lg font-semibold text-white mb-3">{step.title}</h3>
+   420→                  <p className="text-sm text-white/45 leading-relaxed">{step.desc}</p>
+   421→                </div>
+   422→              </div>
+   423→            </AnimatedSection>
+   424→          ))}
+   425→        </div>
+   426→      </div>
+   427→    </section>
+   428→  )
+   429→}
+   430→
+   431→/* ═══════════════════════════════════════════════════════════════════════════════
+   432→   4. SAFETY FEATURES — 6 Safety Cards
+   433→   ═══════════════════════════════════════════════════════════════════════════════ */
+   434→const safetyFeatures = [
+   435→  {
+   436→    icon: Navigation,
+   437→    title: 'GPS en Tiempo Real',
+   438→    desc: 'Cada vehículo cuenta con un sistema de rastreo GPS que permite monitorear su ubicación en tiempo real desde nuestra central de despacho. Los padres pueden verificar la posición del vehículo en cualquier momento a través de la aplicación, conociendo exactamente dónde se encuentra su hijo durante el trayecto escolar.',
+   439→    color: '#3B82F6',
+   440→  },
+   441→  {
+   442→    icon: BadgeCheck,
+   443→    title: 'Conductores Certificados con Antecedentes',
+   444→    desc: 'Todos nuestros conductores pasan por un riguroso proceso de verificación que incluye revisión de antecedentes penales, certificación de conducir profesional, examen psicológico y evaluación de idoneidad para el transporte de menores. Solo los más calificados y confiables obtienen la certificación para transportar estudiantes.',
+   445→    color: '#22C55E',
+   446→  },
+   447→  {
+   448→    icon: UserCheck,
+   449→    title: 'Verificación de Identidad',
+   450→    desc: 'Antes de cada viaje, el conductor verifica la identidad del estudiante al subir y al bajar del vehículo. Solo las personas autorizadas por los padres pueden recibir al niño en la parada de entrega. Este protocolo elimina cualquier riesgo de entrega a personas no autorizadas o desconocidas.',
+   451→    color: '#0077BD',
+   452→  },
+   453→  {
+   454→    icon: Phone,
+   455→    title: 'Comunicación Directa con Padres',
+   456→    desc: 'Los padres tienen un canal de comunicación directa con nuestro equipo de atención y con el conductor asignado. En caso de cualquier eventualidad, retraso o cambio de ruta, se notifica inmediatamente al padre o tutor. La transparencia en la comunicación es fundamental para la confianza familiar.',
+   457→    color: '#00E676',
+   458→  },
+   459→  {
+   460→    icon: Eye,
+   461→    title: 'Vehículos Monitoreados',
+   462→    desc: 'Nuestra central de despacho monitorea permanentemente todos los vehículos asignados al servicio escolar. Se verifica la velocidad, el cumplimiento de la ruta, las paradas realizadas y los tiempos de viaje. Cualquier desviación genera una alerta automática que es atendida de inmediato por nuestro equipo de supervisión.',
+   463→    color: '#8B5CF6',
+   464→  },
+   465→  {
+   466→    icon: Shield,
+   467→    title: 'Protocolos de Seguridad',
+   468→    desc: 'Contamos con protocolos detallados de seguridad para cada situación: procedimientos de emergencia, protocolos de evacuación, normas de comportamiento dentro del vehículo, y procedimientos en caso de incidentes viales. Cada conductor está entrenado para seguir estos protocolos al pie de la letra.',
+   469→    color: '#FF9800',
+   470→  },
+   471→]
+   472→
+   473→function SafetyFeaturesSection() {
+   474→  return (
+   475→    <section id="seguridad" className="relative py-24 md:py-32">
+   476→      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1320] to-[#0a0e17]" />
+   477→      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] rounded-full bg-[#22C55E]/5 blur-[150px]" />
+   478→
+   479→      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   480→        <AnimatedSection>
+   481→          <div className="text-center mb-16">
+   482→            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#22C55E]/10 border border-[#22C55E]/20 mb-4">
+   483→              <Shield className="w-4 h-4 text-[#22C55E]" />
+   484→              <span className="text-sm text-[#22C55E]">Seguridad Garantizada</span>
+   485→            </div>
+   486→            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+   487→              Características de{' '}
+   488→              <span className="bg-gradient-to-r from-[#22C55E] via-[#3B82F6] to-[#22C55E] bg-clip-text text-transparent">
+   489→                Seguridad
+   490→              </span>
+   491→            </h2>
+   492→            <p className="text-white/50 max-w-3xl mx-auto text-lg">
+   493→              La seguridad de tus hijos es nuestra máxima prioridad. Cada aspecto de nuestro servicio 
+   494→              está diseñado con los más altos estándares de protección y monitoreo para que puedas estar 
+   495→              tranquilo mientras ellos viajan.
+   496→            </p>
+   497→          </div>
+   498→        </AnimatedSection>
+   499→
+   500→        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+   501→          {safetyFeatures.map((feature, i) => (
+   502→            <AnimatedSection key={feature.title} delay={i * 100}>
+   503→              <div className="group relative p-6 md:p-7 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm hover:border-white/10 transition-all duration-500 h-full">
+   504→                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/0 to-white/0 group-hover:from-white/[0.02] transition-all duration-500" />
+   505→                <div className="relative z-10">
+   506→                  <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300" style={{ backgroundColor: `${feature.color}12` }}>
+   507→                    <feature.icon className="w-6 h-6" style={{ color: feature.color }} />
+   508→                  </div>
+   509→                  <h3 className="text-lg font-semibold text-white mb-2">{feature.title}</h3>
+   510→                  <p className="text-sm text-white/45 leading-relaxed">{feature.desc}</p>
+   511→                </div>
+   512→              </div>
+   513→            </AnimatedSection>
+   514→          ))}
+   515→        </div>
+   516→      </div>
+   517→    </section>
+   518→  )
+   519→}
+   520→
+   521→/* ═══════════════════════════════════════════════════════════════════════════════
+   522→   5. VEHICLE TYPES — 3 Vehicle Types
+   523→   ═══════════════════════════════════════════════════════════════════════════════ */
+   524→const vehicleTypes = [
+   525→  {
+   526→    icon: Car,
+   527→    name: 'Sedán Confort',
+   528→    desc: 'Vehículo individual ideal para el traslado personalizado de un estudiante. Equipado con aire acondicionado, cinturones de seguridad para todas las plazas y un ambiente cómodo para que el niño viaje tranquilo. Perfecto para padres que prefieren un servicio exclusivo y directo sin paradas intermedias adicionales.',
+   529→    passengers: '1-3',
+   530→    tag: 'INDIVIDUAL',
+   531→    color: '#3B82F6',
+   532→    features: ['Aire acondicionado', 'Viaje directo sin paradas', 'Servicio exclusivo', 'Cinturones de seguridad'],
+   533→  },
+   534→  {
+   535→    icon: Bus,
+   536→    name: 'Van Escolar',
+   537→    desc: 'Vehículo de tamaño intermedio diseñado para grupos pequeños de estudiantes que comparten la misma ruta escolar. Puertas laterales deslizantes para un acceso seguro y fácil, asientos reclinables y amplio espacio interior. El conductor verifica la identidad de cada niño al subir y bajar del vehículo.',
+   538→    passengers: '6-10',
+   539→    tag: 'GRUPO PEQUEÑO',
+   540→    color: '#22C55E',
+   541→    features: ['Puertas deslizantes seguras', 'Verificación de identidad', 'Ruta compartida optimizada', 'Asientos reclinables'],
+   542→  },
+   543→  {
+   544→    icon: Bus,
+   545→    name: 'Bus Escolar',
+   546→    desc: 'Bus de gran capacidad para el transporte masivo de estudiantes, ideal para colegios que necesitan movilizar grupos numerosos de manera eficiente. El vehículo cuenta con señalización escolar, protocolos de abordaje ordenado, y supervisión durante todo el trayecto para garantizar la seguridad de cada pasajero.',
+   547→    passengers: '15-30',
+   548→    tag: 'GRUPO GRANDE',
+   549→    color: '#0077BD',
+   550→    features: ['Señalización escolar', 'Capacidad masiva', 'Protocolos de abordaje', 'Supervisión permanente'],
+   551→  },
+   552→]
+   553→
+   554→function VehicleTypesSection() {
+   555→  return (
+   556→    <section id="vehiculos" className="relative py-24 md:py-32">
+   557→      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1a12] to-[#0a0e17]" />
+   558→      <div className="absolute top-1/2 left-1/3 w-[600px] h-[600px] rounded-full bg-[#3B82F6]/5 blur-[150px]" />
+   559→
+   560→      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   561→        <AnimatedSection>
+   562→          <div className="text-center mb-16">
+   563→            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#3B82F6]/10 border border-[#3B82F6]/20 mb-4">
+   564→              <Car className="w-4 h-4 text-[#3B82F6]" />
+   565→              <span className="text-sm text-[#3B82F6]">Flota Escolar</span>
+   566→            </div>
+   567→            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+   568→              Vehículos Según la{' '}
+   569→              <span className="bg-gradient-to-r from-[#3B82F6] to-[#22C55E] bg-clip-text text-transparent">
+   570→                Necesidad
+   571→              </span>
+   572→            </h2>
+   573→            <p className="text-white/50 max-w-3xl mx-auto text-lg">
+   574→              Contamos con diferentes tipos de vehículos adaptados a las necesidades del transporte escolar. 
+   575→              Desde un sedán exclusivo hasta buses de gran capacidad, cada vehículo cumple con los más altos estándares de seguridad.
+   576→            </p>
+   577→          </div>
+   578→        </AnimatedSection>
+   579→
+   580→        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+   581→          {vehicleTypes.map((vehicle, i) => (
+   582→            <AnimatedSection key={vehicle.name} delay={i * 100}>
+   583→              <div className="group relative p-6 rounded-2xl bg-white/[0.03] border backdrop-blur-sm transition-all duration-500 overflow-hidden hover:border-white/10 h-full">
+   584→                {/* Hover glow */}
+   585→                <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+   586→                  style={{ boxShadow: `0 0 30px ${vehicle.color}08` }}
+   587→                />
+   588→
+   589→                {/* Tag */}
+   590→                <div className="absolute top-4 right-4">
+   591→                  <span className="px-2 py-1 rounded-full text-[10px] font-bold bg-white/[0.05] text-white/40 border border-white/[0.08]">
+   592→                    {vehicle.tag}
+   593→                  </span>
+   594→                </div>
+   595→
+   596→                <div className="relative z-10">
+   597→                  <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-4" style={{ background: `${vehicle.color}12` }}>
+   598→                    <vehicle.icon className="w-7 h-7" style={{ color: vehicle.color }} />
+   599→                  </div>
+   600→
+   601→                  <h3 className="text-lg font-semibold text-white mb-2">{vehicle.name}</h3>
+   602→                  <div className="flex items-center gap-3 text-xs text-white/30 mb-4">
+   603→                    <div className="flex items-center gap-1">
+   604→                      <Users className="w-3 h-3" />
+   605→                      <span>{vehicle.passengers} pasajeros</span>
+   606→                    </div>
+   607→                  </div>
+   608→
+   609→                  <p className="text-sm text-white/45 leading-relaxed mb-5">{vehicle.desc}</p>
+   610→
+   611→                  <div className="space-y-2">
+   612→                    {vehicle.features.map((feature) => (
+   613→                      <div key={feature} className="flex items-center gap-2">
+   614→                        <CheckCircle2 className="w-3.5 h-3.5 shrink-0" style={{ color: vehicle.color }} />
+   615→                        <span className="text-xs text-white/50">{feature}</span>
+   616→                      </div>
+   617→                    ))}
+   618→                  </div>
+   619→                </div>
+   620→              </div>
+   621→            </AnimatedSection>
+   622→          ))}
+   623→        </div>
+   624→      </div>
+   625→    </section>
+   626→  )
+   627→}
+   628→
+   629→/* ═══════════════════════════════════════════════════════════════════════════════
+   630→   6. PARENT BENEFITS — Split Layout
+   631→   ═══════════════════════════════════════════════════════════════════════════════ */
+   632→const parentBenefits = [
+   633→  {
+   634→    icon: Bell,
+   635→    title: 'Notificaciones en Tiempo Real',
+   636→    desc: 'Recibe alertas automáticas cuando tu hijo sube al vehículo, durante el trayecto y al llegar a su destino.',
+   637→    color: '#3B82F6',
+   638→  },
+   639→  {
+   640→    icon: Navigation,
+   641→    title: 'Rastreo GPS del Vehículo',
+   642→    desc: 'Visualiza la ubicación exacta del transporte escolar en tiempo real desde tu teléfono en cualquier momento.',
+   643→    color: '#22C55E',
+   644→  },
+   645→  {
+   646→    icon: Clock,
+   647→    title: 'Historial de Viajes',
+   648→    desc: 'Accede al registro completo de todos los trayectos realizados con fechas, horarios y rutas seguidas.',
+   649→    color: '#0077BD',
+   650→  },
+   651→  {
+   652→    icon: Phone,
+   653→    title: 'Comunicación Directa con el Conductor',
+   654→    desc: 'Canal directo de comunicación con el conductor asignado para consultas o situaciones imprevistas.',
+   655→    color: '#00E676',
+   656→  },
+   657→  {
+   658→    icon: ClipboardCheck,
+   659→    title: 'Reportes Mensuales',
+   660→    desc: 'Recibe informes detallados mensuales sobre la puntualidad, asistencia y calidad del servicio.',
+   661→    color: '#8B5CF6',
+   662→  },
+   663→  {
+   664→    icon: Shield,
+   665→    title: 'Control de Acceso',
+   666→    desc: 'Solo personas autorizadas por ti pueden recibir a tu hijo. Sistema de verificación al momento de la entrega.',
+   667→    color: '#FF9800',
+   668→  },
+   669→]
+   670→
+   671→function ParentBenefitsSection() {
+   672→  return (
+   673→    <section className="relative py-24 md:py-32 overflow-hidden">
+   674→      <div className="absolute inset-0 bg-gradient-to-br from-[#0a0e17] via-[#0d1320] to-[#0a0e17]" />
+   675→      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[500px] rounded-full bg-[#3B82F6]/5 blur-[180px]" />
+   676→
+   677→      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   678→        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+   679→          {/* Left: Content */}
+   680→          <AnimatedSection>
+   681→            <div>
+   682→              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#3B82F6]/10 border border-[#3B82F6]/20 mb-6">
+   683→                <Home className="w-4 h-4 text-[#3B82F6]" />
+   684→                <span className="text-sm text-[#3B82F6]">Tranquilidad para los Padres</span>
+   685→              </div>
+   686→
+   687→              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
+   688→                La paz mental que{' '}
+   689→                <span className="bg-gradient-to-r from-[#3B82F6] to-[#22C55E] bg-clip-text text-transparent">
+   690→                  mereces
+   691→                </span>
+   692→              </h2>
+   693→
+   694→              <p className="text-white/55 text-lg leading-relaxed mb-6">
+   695→                Sabemos que entregar el transporte de tus hijos a otra persona es una de las decisiones 
+   696→                más difíciles como padre. Por eso hemos diseñado un sistema completo de monitoreo, 
+   697→                comunicación y control que te mantiene informado en todo momento. No tienes que 
+   698→                preguntar si llegaron bien: tú lo sabes al instante.
+   699→              </p>
+   700→
+   701→              <p className="text-white/55 text-lg leading-relaxed mb-8">
+   702→                Desde la notificación de abordaje hasta la confirmación de llegada, cada etapa del 
+   703→                trayecto es transparente y verificable. Tu confianza es nuestro compromiso más 
+   704→                valioso, y trabajamos todos los días para mantenerla intacta.
+   705→              </p>
+   706→
+   707→              {/* Key points */}
+   708→              <div className="space-y-4 mb-10">
+   709→                {[
+   710→                  { icon: CheckCircle2, text: 'Monitoreo completo del trayecto escolar' },
+   711→                  { icon: CheckCircle2, text: 'Conductores con verificación de antecedentes' },
+   712→                  { icon: CheckCircle2, text: 'Central de atención disponible en horario escolar' },
+   713→                  { icon: CheckCircle2, text: 'Protocolo de emergencia activo las 24 horas' },
+   714→                ].map((point) => (
+   715→                  <div key={point.text} className="flex items-center gap-3">
+   716→                    <point.icon className="w-5 h-5 text-[#3B82F6] shrink-0" />
+   717→                    <span className="text-white/70">{point.text}</span>
+   718→                  </div>
+   719→                ))}
+   720→              </div>
+   721→
+   722→              <a
+   723→                href="#contacto"
+   724→                className="inline-flex items-center gap-3 px-8 py-4 rounded-xl text-lg font-bold text-white bg-[#3B82F6] hover:bg-[#2563EB] transition-all duration-300 shadow-[0_0_40px_rgba(59,130,246,0.3)] hover:shadow-[0_0_60px_rgba(59,130,246,0.5)] hover:scale-105"
+   725→              >
+   726→                Inscribir a mi Hijo
+   727→                <ArrowRight className="w-5 h-5" />
+   728→              </a>
+   729→            </div>
+   730→          </AnimatedSection>
+   731→
+   732→          {/* Right: Benefit cards */}
+   733→          <AnimatedSection delay={200}>
+   734→            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+   735→              {parentBenefits.map((benefit, i) => (
+   736→                <div
+   737→                  key={benefit.title}
+   738→                  className="group p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] hover:border-white/10 transition-all duration-300"
+   739→                  style={{ transitionDelay: `${i * 80}ms` }}
+   740→                >
+   741→                  <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300" style={{ backgroundColor: `${benefit.color}12` }}>
+   742→                    <benefit.icon className="w-5 h-5" style={{ color: benefit.color }} />
+   743→                  </div>
+   744→                  <h3 className="text-white font-semibold text-sm mb-1">{benefit.title}</h3>
+   745→                  <p className="text-xs text-white/45 leading-relaxed">{benefit.desc}</p>
+   746→                </div>
+   747→              ))}
+   748→            </div>
+   749→          </AnimatedSection>
+   750→        </div>
+   751→      </div>
+   752→    </section>
+   753→  )
+   754→}
+   755→
+   756→/* ═══════════════════════════════════════════════════════════════════════════════
+   757→   7. COST MODEL — Ecotaxi is a Technology Platform
+   758→   ═══════════════════════════════════════════════════════════════════════════════ */
+   759→function CostModelSection() {
+   760→  return (
+   761→    <section id="costos" className="relative py-24 md:py-32">
+   762→      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1320] to-[#0a0e17]" />
+   763→      <div className="absolute bottom-0 left-1/3 w-[600px] h-[400px] rounded-full bg-[#3B82F6]/5 blur-[150px]" />
+   764→
+   765→      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   766→        <AnimatedSection>
+   767→          <div className="text-center mb-16">
+   768→            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#3B82F6]/10 border border-[#3B82F6]/20 mb-4">
+   769→              <Cog className="w-4 h-4 text-[#3B82F6]" />
+   770→              <span className="text-sm text-[#3B82F6]">Modelo de Costos Transparente</span>
+   771→            </div>
+   772→            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+   773→              ¿Cómo Funcionan los{' '}
+   774→              <span className="bg-gradient-to-r from-[#3B82F6] to-[#22C55E] bg-clip-text text-transparent">
+   775→                Costos
+   776→              </span>
+   777→              ?
+   778→            </h2>
+   779→            <p className="text-white/50 max-w-3xl mx-auto text-lg">
+   780→              Es importante que entiendas cómo funcionan los costos en Ecotaxi. Somos una plataforma 
+   781→              tecnológica que conecta a los padres y colegios con conductores profesionales, y la 
+   782→              transparencia en las tarifas es uno de nuestros valores fundamentales.
+   783→            </p>
+   784→          </div>
+   785→        </AnimatedSection>
+   786→
+   787→        {/* Main pricing card */}
+   788→        <AnimatedSection delay={100}>
+   789→          <div className="max-w-4xl mx-auto mb-10">
+   790→            <div className="relative p-6 md:p-10 rounded-2xl bg-white/[0.04] border border-[#3B82F6]/20 backdrop-blur-sm shadow-[0_0_40px_rgba(59,130,246,0.08)]">
+   791→              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+   792→                {/* Left: How the cost works */}
+   793→                <div>
+   794→                  <div className="flex items-center gap-3 mb-6">
+   795→                    <div className="w-12 h-12 rounded-xl bg-[#3B82F6]/12 flex items-center justify-center">
+   796→                      <Cog className="w-6 h-6 text-[#3B82F6]" />
+   797→                    </div>
+   798→                    <div>
+   799→                      <h3 className="text-xl font-bold text-white">Costo de Desplazamiento</h3>
+   800→                      <p className="text-sm text-[#3B82F6]">Lo que refleja la APP</p>
+   801→                    </div>
+   802→                  </div>
+   803→
+   804→                  <p className="text-white/55 leading-relaxed mb-6">
+   805→                    El costo que refleja la APP es solo el costo del desplazamiento. Los demás costos 
+   806→                    dependen del servicio contratado y se coordinan directamente con el agente. Puedes 
+   807→                    conocer la tarifa en línea antes de solicitar el servicio, lo que garantiza total 
+   808→                    transparencia desde el primer momento.
+   809→                  </p>
+   810→
+   811→                  <div className="space-y-3">
+   812→                    {[
+   813→                      { icon: CheckCircle2, text: 'Conoces la tarifa antes de solicitar', color: '#22C55E' },
+   814→                      { icon: CheckCircle2, text: 'Costo puede ser fijo, mínimo, por tiempo o distancia', color: '#3B82F6' },
+   815→                      { icon: CheckCircle2, text: 'Sin planes obligatorios ni suscripciones', color: '#0077BD' },
+   816→                      { icon: CheckCircle2, text: 'Solo pagas cuando utilizas el servicio', color: '#00E676' },
+   817→                    ].map((item) => (
+   818→                      <div key={item.text} className="flex items-center gap-3">
+   819→                        <item.icon className="w-5 h-5 shrink-0" style={{ color: item.color }} />
+   820→                        <span className="text-sm text-white/65">{item.text}</span>
+   821→                      </div>
+   822→                    ))}
+   823→                  </div>
+   824→                </div>
+   825→
+   826→                {/* Right: Cost breakdown cards */}
+   827→                <div className="space-y-4">
+   828→                  <div className="p-5 rounded-xl bg-[#3B82F6]/8 border border-[#3B82F6]/15">
+   829→                    <div className="flex items-center gap-2 mb-3">
+   830→                      <Navigation className="w-4 h-4 text-[#3B82F6]" />
+   831→                      <span className="text-xs font-bold text-[#3B82F6] uppercase tracking-wider">Tarifa en la APP</span>
+   832→                    </div>
+   833→                    <p className="text-2xl font-bold text-white mb-2">Solo Desplazamiento</p>
+   834→                    <p className="text-xs text-white/40 leading-relaxed">
+   835→                      El monto que aparece en la APP cubre exclusivamente el costo del desplazamiento del vehículo. 
+   836→                      Es transparente y lo ves antes de confirmar tu solicitud de servicio escolar.
+   837→                    </p>
+   838→                  </div>
+   839→
+   840→                  <div className="p-5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+   841→                    <div className="flex items-center gap-2 mb-3">
+   842→                      <Handshake className="w-4 h-4 text-[#22C55E]" />
+   843→                      <span className="text-xs font-bold text-[#22C55E] uppercase tracking-wider">Servicios Adicionales</span>
+   844→                    </div>
+   845→                    <p className="text-sm font-semibold text-white mb-2">Se coordinan con el agente</p>
+   846→                    <p className="text-xs text-white/40 leading-relaxed">
+   847→                      Los demás costos dependen del servicio contratado y se coordinan directamente con el agente. 
+   848→                      El costo puede ser fijo, mínimo, por tiempo o por distancia, esto depende de cada agente. 
+   849→                      Tú decides qué servicio contratar según tus necesidades.
+   850→                    </p>
+   851→                  </div>
+   852→
+   853→                  <div className="p-5 rounded-xl bg-[#22C55E]/5 border border-[#22C55E]/10">
+   854→                    <div className="flex items-center gap-2 mb-3">
+   855→                      <Shield className="w-4 h-4 text-[#22C55E]" />
+   856→                      <span className="text-xs font-bold text-[#22C55E] uppercase tracking-wider">Cobertura con Seguro</span>
+   857→                    </div>
+   858→                    <p className="text-sm font-semibold text-white mb-2">Sin costo para ti</p>
+   859→                    <p className="text-xs text-white/40 leading-relaxed">
+   860→                      Si tienes seguro que cubre este servicio dentro de Ecotaxi, se te notificará que no tiene 
+   861→                      costo para ti. Tu aseguradora cubre el servicio completo, y nosotros gestionamos todo 
+   862→                      el proceso para que no tengas que preocuparte por nada.
+   863→                    </p>
+   864→                  </div>
+   865→                </div>
+   866→              </div>
+   867→            </div>
+   868→          </div>
+   869→        </AnimatedSection>
+   870→
+   871→        {/* Key points grid */}
+   872→        <AnimatedSection delay={200}>
+   873→          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
+   874→            {[
+   875→              {
+   876→                icon: Cog,
+   877→                title: 'Plataforma Tecnológica',
+   878→                desc: 'Ecotaxi conecta padres y colegios con conductores certificados. No somos el proveedor del servicio, somos la plataforma que garantiza calidad y seguridad.',
+   879→                color: '#3B82F6',
+   880→              },
+   881→              {
+   882→                icon: Star,
+   883→                title: 'Tarifa Transparente',
+   884→                desc: 'Conoces el costo de desplazamiento antes de confirmar. Cada agente define su tarifa que puede ser fija, mínima, por tiempo o por distancia. Sin sorpresas ni costos ocultos.',
+   885→                color: '#22C55E',
+   886→              },
+   887→              {
+   888→                icon: Handshake,
+   889→                title: 'Coordina con el Agente',
+   890→                desc: 'Los costos adicionales del servicio escolar se coordinan directamente con el agente conductor. Él te informará sobre los detalles y condiciones antes de iniciar el servicio.',
+   891→                color: '#0077BD',
+   892→              },
+   893→              {
+   894→                icon: Shield,
+   895→                title: 'Cubierto por Seguro',
+   896→                desc: 'Si tu seguro incluye transporte escolar a través de Ecotaxi, se te notificará automáticamente que el servicio no tiene costo. Tu aseguradora cubre todo el traslado.',
+   897→                color: '#00E676',
+   898→              },
+   899→            ].map((point) => (
+   900→              <div key={point.title} className="group p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm hover:border-white/10 transition-all duration-500">
+   901→                <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300"
+   902→                  style={{ backgroundColor: `${point.color}12` }}
+   903→                >
+   904→                  <point.icon className="w-5 h-5" style={{ color: point.color }} />
+   905→                </div>
+   906→                <h3 className="text-sm font-semibold text-white mb-2">{point.title}</h3>
+   907→                <p className="text-xs text-white/40 leading-relaxed">{point.desc}</p>
+   908→              </div>
+   909→            ))}
+   910→          </div>
+   911→        </AnimatedSection>
+   912→      </div>
+   913→    </section>
+   914→  )
+   915→}
+   916→
+   917→/* ═══════════════════════════════════════════════════════════════════════════════
+   918→   8. CONTACT / CTA SECTION
+   919→   ═══════════════════════════════════════════════════════════════════════════════ */
+   920→function ContactSection() {
+   921→  return (
+   922→    <section id="contacto" className="relative py-24 md:py-32">
+   923→      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1320] to-[#0a0e17]" />
+   924→      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] rounded-full bg-[#3B82F6]/8 blur-[150px]" />
+   925→
+   926→      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   927→        <AnimatedSection>
+   928→          <div className="text-center mb-16">
+   929→            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#3B82F6]/10 border border-[#3B82F6]/20 mb-4">
+   930→              <Phone className="w-4 h-4 text-[#3B82F6]" />
+   931→              <span className="text-sm text-[#3B82F6]">Contáctanos</span>
+   932→            </div>
+   933→            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+   934→              Solicita el{' '}
+   935→              <span className="bg-gradient-to-r from-[#3B82F6] via-[#22C55E] to-[#3B82F6] bg-clip-text text-transparent">
+   936→                Transporte Escolar
+   937→              </span>
+   938→            </h2>
+   939→            <p className="text-white/50 max-w-2xl mx-auto text-lg">
+   940→              Inscribe a tu hijo en nuestro servicio de transporte escolar o consulta por rutas 
+   941→              y tarifas. Estamos disponibles para resolver todas tus dudas y diseñar la mejor 
+   942→              solución de movilidad para tu familia.
+   943→            </p>
+   944→          </div>
+   945→        </AnimatedSection>
+   946→
+   947→        {/* Contact options */}
+   948→        <AnimatedSection delay={100}>
+   949→          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto mb-12">
+   950→            {[
+   951→              {
+   952→                icon: PhoneCall,
+   953→                title: 'Llámanos',
+   954→                info: '(+591) 3 3296885',
+   955→                desc: 'Línea directa para solicitar transporte escolar',
+   956→                color: '#3B82F6',
+   957→                href: 'tel:+59133296885',
+   958→              },
+   959→              {
+   960→                icon: MessageCircle,
+   961→                title: 'WhatsApp',
+   962→                info: '+591 73662803',
+   963→                desc: 'Escríbenos y recibe atención inmediata',
+   964→                color: '#25D366',
+   965→                href: 'https://wa.me/59173662803?text=Hola%2C%20necesito%20informaci%C3%B3n%20sobre%20transporte%20escolar',
+   966→              },
+   967→              {
+   968→                icon: Navigation,
+   969→                title: 'Reserva en Línea',
+   970→                info: 'Sistema de Reservas',
+   971→                desc: 'Accede a nuestra plataforma de reservas',
+   972→                color: '#0077BD',
+   973→                href: '#reservas',
+   974→              },
+   975→            ].map((item) => (
+   976→              <a
+   977→                key={item.title}
+   978→                href={item.href}
+   979→                target={item.href.startsWith('http') ? '_blank' : undefined}
+   980→                rel={item.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+   981→                className="group p-6 rounded-2xl bg-white/[0.03] border border-white/[0.06] hover:border-white/10 transition-all duration-300 text-center"
+   982→              >
+   983→                <div className="w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" style={{ backgroundColor: `${item.color}12` }}>
+   984→                  <item.icon className="w-7 h-7" style={{ color: item.color }} />
+   985→                </div>
+   986→                <h3 className="text-white font-semibold mb-1">{item.title}</h3>
+   987→                <p className="text-sm font-medium mb-2" style={{ color: item.color }}>{item.info}</p>
+   988→                <p className="text-xs text-white/40">{item.desc}</p>
+   989→              </a>
+   990→            ))}
+   991→          </div>
+   992→        </AnimatedSection>
+   993→
+   994→        {/* CTA Buttons */}
+   995→        <AnimatedSection delay={200}>
+   996→          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
+   997→            <a
+   998→              href="https://id3251.tm.taxi:58443/?cid=1"
+   999→              target="_blank"
+  1000→              rel="noopener noreferrer"
+  1001→              className="px-8 py-4 rounded-full text-lg font-semibold text-white bg-[#3B82F6] hover:bg-[#2563EB] transition-all duration-300 shadow-[0_0_30px_rgba(59,130,246,0.3)] hover:shadow-[0_0_50px_rgba(59,130,246,0.5)] hover:scale-105 flex items-center gap-2"
+  1002→            >
+  1003→              Reservar Transporte
+  1004→              <ArrowRight className="w-5 h-5" />
+  1005→            </a>
+  1006→            <a
+  1007→              href="https://wa.me/59173662803?text=Hola%2C%20necesito%20informaci%C3%B3n%20sobre%20transporte%20escolar"
+  1008→              target="_blank"
+  1009→              rel="noopener noreferrer"
+  1010→              className="px-8 py-4 rounded-full text-lg font-semibold text-white border border-[#25D366]/40 bg-[#25D366]/10 hover:bg-[#25D366]/20 hover:border-[#25D366]/60 transition-all duration-300 flex items-center gap-2"
+  1011→            >
+  1012→              <MessageCircle className="w-5 h-5 text-[#25D366]" />
+  1013→              WhatsApp
+  1014→            </a>
+  1015→          </div>
+  1016→        </AnimatedSection>
+  1017→
+  1018→        {/* Reservation iframe */}
+  1019→        <AnimatedSection delay={300}>
+  1020→          <div id="reservas" className="max-w-5xl mx-auto">
+  1021→            <div className="relative rounded-2xl overflow-hidden bg-white/[0.03] border border-[#3B82F6]/10 backdrop-blur-sm">
+  1022→              <div className="p-4 md:p-6">
+  1023→                <div className="flex items-center gap-3 mb-4">
+  1024→                  <div className="w-10 h-10 rounded-xl bg-[#3B82F6]/12 flex items-center justify-center">
+  1025→                    <Navigation className="w-5 h-5 text-[#3B82F6]" />
+  1026→                  </div>
+  1027→                  <div>
+  1028→                    <h3 className="text-lg font-bold text-white">Reserva tu Transporte Escolar</h3>
+  1029→                    <p className="text-xs text-white/40">Accede directamente a nuestro sistema de reservas</p>
+  1030→                  </div>
+  1031→                </div>
+  1032→                <div className="rounded-xl overflow-hidden border border-white/[0.06]" style={{ height: '600px' }}>
+  1033→                  <iframe
+  1034→                    src="https://id3251.tm.taxi:58443/?cid=1"
+  1035→                    title="Reservas Ecotaxi"
+  1036→                    className="w-full h-full border-0"
+  1037→                    allow="geolocation"
+  1038→                  />
+  1039→                </div>
+  1040→              </div>
+  1041→            </div>
+  1042→          </div>
+  1043→        </AnimatedSection>
+  1044→
+  1045→        {/* Trust indicators */}
+  1046→        <AnimatedSection delay={400}>
+  1047→          <div className="flex flex-wrap items-center justify-center gap-6 mt-12">
+  1048→            {[
+  1049→              { icon: ShieldCheck, text: 'Conductores certificados', color: '#3B82F6' },
+  1050→              { icon: Navigation, text: 'GPS en tiempo real', color: '#22C55E' },
+  1051→              { icon: Clock, text: 'Disponibilidad escolar', color: '#0077BD' },
+  1052→              { icon: Star, text: '+2,500 estudiantes', color: '#FF9800' },
+  1053→            ].map((item) => (
+  1054→              <div key={item.text} className="flex items-center gap-2 text-white/40">
+  1055→                <item.icon className="w-4 h-4" style={{ color: item.color }} />
+  1056→                <span className="text-sm">{item.text}</span>
+  1057→              </div>
+  1058→            ))}
+  1059→          </div>
+  1060→        </AnimatedSection>
+  1061→      </div>
+  1062→    </section>
+  1063→  )
+  1064→}
+  1065→
+  1066→/* ═══════════════════════════════════════════════════════════════════════════════
+  1067→   MAIN PAGE
+  1068→   ═══════════════════════════════════════════════════════════════════════════════ */
+  1069→export default function TransporteEscolarPage() {
+  1070→  return (
+  1071→    <div className="min-h-screen flex flex-col bg-[#0a0e17]">
+  1072→      <Navbar />
+  1073→      <main className="flex-1">
+  1074→        <HeroSection />
+  1075→        <ServiceOverviewSection />
+  1076→        <HowItWorksSection />
+  1077→        <SafetyFeaturesSection />
+  1078→        <VehicleTypesSection />
+  1079→        <ParentBenefitsSection />
+  1080→        <CostModelSection />
+  1081→        <ContactSection />
+  1082→      </main>
+  1083→      <Footer />
+  1084→    </div>
+  1085→  )
+  1086→}
+  1087→

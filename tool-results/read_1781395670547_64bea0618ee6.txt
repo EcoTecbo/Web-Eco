@@ -1,0 +1,768 @@
+     1→'use client'
+     2→
+     3→import { useEffect, useRef, useState } from 'react'
+     4→import {
+     5→  Car, Bus, Users, Shield, CheckCircle2, ArrowRight,
+     6→  Phone, MapPin, MessageCircle, Headphones,
+     7→  User, Navigation, Clock, Heart,
+     8→  Crown, CircleDollarSign, Compass,
+     9→  BusFront, Truck as VanIcon, Wind, ShieldCheck,
+    10→  Stethoscope, Activity, HeartPulse, Accessibility,
+    11→  Building2, FlaskConical, Pill, GraduationCap,
+    12→  Baby, UserCheck, HandHeart, Ambulance,
+    13→  Eye, Sparkles, BadgeCheck, Route,
+    14→  PhoneCall, AlertCircle, Timer
+    15→} from 'lucide-react'
+    16→import { Navbar } from '@/components/ecotaxi/navbar'
+    17→import { Footer } from '@/components/ecotaxi/footer'
+    18→
+    19→/* ─────────────────────── scroll-triggered animation hook ──────────────────── */
+    20→function useInView(threshold = 0.1) {
+    21→  const ref = useRef<HTMLDivElement>(null)
+    22→  const [visible, setVisible] = useState(false)
+    23→  useEffect(() => {
+    24→    const el = ref.current
+    25→    if (!el) return
+    26→    const obs = new IntersectionObserver(
+    27→      ([e]) => { if (e.isIntersecting) setVisible(true) },
+    28→      { threshold }
+    29→    )
+    30→    obs.observe(el)
+    31→    return () => obs.disconnect()
+    32→  }, [threshold])
+    33→  return { ref, visible }
+    34→}
+    35→
+    36→function AnimatedSection({ children, className = '', delay = 0 }: {
+    37→  children: React.ReactNode; className?: string; delay?: number
+    38→}) {
+    39→  const { ref, visible } = useInView(0.08)
+    40→  return (
+    41→    <div
+    42→      ref={ref}
+    43→      className={`transition-all duration-700 ease-out ${
+    44→        visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+    45→      } ${className}`}
+    46→      style={{ transitionDelay: visible ? `${delay}ms` : '0ms' }}
+    47→    >
+    48→      {children}
+    49→    </div>
+    50→  )
+    51→}
+    52→
+    53→/* ═══════════════════════════════════════════════════════════════════════════════
+    54→   1. HERO SECTION
+    55→   ═══════════════════════════════════════════════════════════════════════════════ */
+    56→function HeroSection() {
+    57→  return (
+    58→    <section className="relative min-h-[92vh] flex items-center justify-center overflow-hidden">
+    59→      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1320] to-[#0a0e17]" />
+    60→      <div
+    61→        className="absolute inset-0 opacity-[0.03]"
+    62→        style={{
+    63→          backgroundImage: `linear-gradient(rgba(14,165,233,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(14,165,233,0.3) 1px, transparent 1px)`,
+    64→          backgroundSize: '60px 60px',
+    65→        }}
+    66→      />
+    67→      <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full bg-[#0EA5E9]/12 blur-[120px] animate-pulse" />
+    68→      <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full bg-[#F43F5E]/8 blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
+    69→      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full bg-[#00E676]/6 blur-[100px] animate-pulse" style={{ animationDelay: '2s' }} />
+    70→
+    71→      <div className="absolute top-32 right-[8%] md:right-[18%] opacity-[0.07]">
+    72→        <HeartPulse className="w-28 h-28 md:w-40 md:h-40 text-[#0EA5E9]" />
+    73→      </div>
+    74→      <div className="absolute bottom-28 left-[5%] md:left-[12%] opacity-[0.06]">
+    75→        <Stethoscope className="w-20 h-20 md:w-28 md:h-28 text-[#F43F5E]" />
+    76→      </div>
+    77→
+    78→      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-28 pb-16">
+    79→        <AnimatedSection>
+    80→          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#0EA5E9]/10 border border-[#0EA5E9]/20 mb-8 backdrop-blur-sm">
+    81→            <HeartPulse className="w-4 h-4 text-[#0EA5E9]" />
+    82→            <span className="text-sm text-[#0EA5E9] font-medium">Transporte de Salud</span>
+    83→          </div>
+    84→        </AnimatedSection>
+    85→        <AnimatedSection delay={100}>
+    86→          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6">
+    87→            Tu salud merece{' '}
+    88→            <span className="bg-gradient-to-r from-[#0EA5E9] via-[#00E676] to-[#F43F5E] bg-clip-text text-transparent">
+    89→              confianza
+    90→            </span>
+    91→          </h1>
+    92→        </AnimatedSection>
+    93→        <AnimatedSection delay={200}>
+    94→          <p className="text-lg md:text-xl text-white/60 max-w-3xl mx-auto mb-10 leading-relaxed">
+    95→            Transporte especializado para personal de salud y pacientes. Choferes capacitados,
+    96→            trato humano y la puntualidad que la vida exige. Desde el médico que vuelve a casa
+    97→            después de guardia, hasta el paciente que necesita un traslado con cuidado.
+    98→          </p>
+    99→        </AnimatedSection>
+   100→        <AnimatedSection delay={300}>
+   101→          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-14">
+   102→            <a href="#personal" className="px-8 py-4 rounded-full text-lg font-semibold text-white bg-[#0EA5E9] hover:bg-[#38bdf8] transition-all duration-300 shadow-[0_0_30px_rgba(14,165,233,0.3)] hover:shadow-[0_0_50px_rgba(14,165,233,0.5)] hover:scale-105">
+   103→              Personal de Salud
+   104→            </a>
+   105→            <a href="#pacientes" className="px-8 py-4 rounded-full text-lg font-semibold text-white border border-[#F43F5E]/40 hover:border-[#F43F5E]/70 hover:bg-[#F43F5E]/5 transition-all duration-300">
+   106→              Traslado de Pacientes
+   107→            </a>
+   108→          </div>
+   109→        </AnimatedSection>
+   110→        <AnimatedSection delay={400}>
+   111→          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
+   112→            {[
+   113→              { value: '2', label: 'Áreas de servicio', icon: HeartPulse },
+   114→              { value: '24/7', label: 'Disponibilidad', icon: Clock },
+   115→              { value: '100%', label: 'Choferes capacitados', icon: UserCheck },
+   116→              { value: 'Pronto', label: 'Vehículos adaptados', icon: Accessibility },
+   117→            ].map((stat) => (
+   118→              <div key={stat.label} className="p-4 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm hover:border-[#0EA5E9]/20 transition-all duration-300">
+   119→                <stat.icon className="w-5 h-5 text-[#0EA5E9] mx-auto mb-2" />
+   120→                <div className="text-2xl md:text-3xl font-bold text-white">{stat.value}</div>
+   121→                <div className="text-xs text-white/50 mt-1">{stat.label}</div>
+   122→              </div>
+   123→            ))}
+   124→          </div>
+   125→        </AnimatedSection>
+   126→      </div>
+   127→    </section>
+   128→  )
+   129→}
+   130→
+   131→/* ═══════════════════════════════════════════════════════════════════════════════
+   132→   2. TWO AREAS — Personal Médico vs Pacientes
+   133→   ═══════════════════════════════════════════════════════════════════════════════ */
+   134→function TwoAreasSection() {
+   135→  return (
+   136→    <section className="relative py-24 md:py-32">
+   137→      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1320] to-[#0a0e17]" />
+   138→      <div className="absolute top-1/2 left-1/4 w-[500px] h-[500px] rounded-full bg-[#0EA5E9]/4 blur-[150px]" />
+   139→      <div className="absolute top-1/2 right-1/4 w-[500px] h-[500px] rounded-full bg-[#F43F5E]/4 blur-[150px]" />
+   140→      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   141→        <AnimatedSection>
+   142→          <div className="text-center mb-16">
+   143→            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.03] border border-white/[0.08] mb-4">
+   144→              <Activity className="w-4 h-4 text-[#0EA5E9]" />
+   145→              <span className="text-sm text-white/60">Dos áreas, un mismo compromiso</span>
+   146→            </div>
+   147→            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+   148→              Diseñado para{' '}
+   149→              <span className="bg-gradient-to-r from-[#0EA5E9] to-[#F43F5E] bg-clip-text text-transparent">
+   150→                quienes cuidan
+   151→              </span>
+   152→            </h2>
+   153→            <p className="text-white/50 max-w-3xl mx-auto text-lg">
+   154→              Ya seas personal de salud que necesita movilidad confiable, o un paciente que requiere
+   155→              un traslado con el cuidado y respeto que merece — Ecotaxi Salud está aquí para ti.
+   156→            </p>
+   157→          </div>
+   158→        </AnimatedSection>
+   159→
+   160→        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
+   161→          {/* Personal Médico */}
+   162→          <AnimatedSection delay={100}>
+   163→            <div className="group relative p-8 rounded-2xl bg-white/[0.03] border border-[#0EA5E9]/15 backdrop-blur-sm hover:border-[#0EA5E9]/30 transition-all duration-500 h-full">
+   164→              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#0EA5E9]/0 to-[#0EA5E9]/0 group-hover:from-[#0EA5E9]/3 transition-all duration-500" />
+   165→              <div className="relative z-10">
+   166→                <div className="w-16 h-16 rounded-2xl bg-[#0EA5E9]/10 flex items-center justify-center mb-6">
+   167→                  <Stethoscope className="w-8 h-8 text-[#0EA5E9]" />
+   168→                </div>
+   169→                <h3 className="text-2xl font-bold text-white mb-3">Personal de Salud</h3>
+   170→                <p className="text-white/45 leading-relaxed mb-6">
+   171→                  Para médicos, enfermeras, técnicos y personal administrativo que necesita
+   172→                  llegar a casa después de una larga jornada de guardia, o ser recogidos
+   173→                  desde su domicilio para iniciar el turno. También para el desplazamiento
+   174→                  de tu personal en gestiones que requiera tu centro de salud.
+   175→                </p>
+   176→                <div className="space-y-3 mb-6">
+   177→                  {[
+   178→                    { icon: Clock, text: 'Recogida y retorno después de guardias nocturnas', color: '#0EA5E9' },
+   179→                    { icon: MapPin, text: 'Traslado para gestiones del centro de salud', color: '#0EA5E9' },
+   180→                    { icon: Users, text: 'Movilidad de personal administrativo y médico', color: '#0EA5E9' },
+   181→                    { icon: Building2, text: 'Consultorios, clínicas, hospitales, laboratorios y farmacias', color: '#0EA5E9' },
+   182→                  ].map((item) => (
+   183→                    <div key={item.text} className="flex items-center gap-3">
+   184→                      <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `${item.color}12` }}>
+   185→                        <item.icon className="w-4 h-4" style={{ color: item.color }} />
+   186→                      </div>
+   187→                      <span className="text-white/60 text-sm">{item.text}</span>
+   188→                    </div>
+   189→                  ))}
+   190→                </div>
+   191→                <a href="#personal" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold text-white bg-[#0EA5E9]/15 border border-[#0EA5E9]/25 hover:bg-[#0EA5E9]/25 transition-all duration-300">
+   192→                  Conocer más
+   193→                  <ArrowRight className="w-4 h-4" />
+   194→                </a>
+   195→              </div>
+   196→            </div>
+   197→          </AnimatedSection>
+   198→
+   199→          {/* Pacientes */}
+   200→          <AnimatedSection delay={200}>
+   201→            <div className="group relative p-8 rounded-2xl bg-white/[0.03] border border-[#F43F5E]/15 backdrop-blur-sm hover:border-[#F43F5E]/30 transition-all duration-500 h-full">
+   202→              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#F43F5E]/0 to-[#F43F5E]/0 group-hover:from-[#F43F5E]/3 transition-all duration-500" />
+   203→              <div className="relative z-10">
+   204→                <div className="w-16 h-16 rounded-2xl bg-[#F43F5E]/10 flex items-center justify-center mb-6">
+   205→                  <Heart className="w-8 h-8 text-[#F43F5E]" />
+   206→                </div>
+   207→                <h3 className="text-2xl font-bold text-white mb-3">Traslado de Pacientes</h3>
+   208→                <p className="text-white/45 leading-relaxed mb-6">
+   209→                  Para pacientes que necesitan trasladarse con choferes capacitados para este
+   210→                  tipo de pasajeros. Personas adultas, con discapacidad o movilidad reducida
+   211→                  que requieren un trato diferente, personalizado y lleno de respeto.
+   212→                  Muy pronto: vehículos adaptados para una mejor gestión.
+   213→                </p>
+   214→                <div className="space-y-3 mb-6">
+   215→                  {[
+   216→                    { icon: HandHeart, text: 'Choferes capacitados en trato a pacientes', color: '#F43F5E' },
+   217→                    { icon: Accessibility, text: 'Atención a personas con movilidad reducida', color: '#F43F5E' },
+   218→                    { icon: UserCheck, text: 'Trato personalizado y respetuoso', color: '#F43F5E' },
+   219→                    { icon: Accessibility, text: 'Pronto: vehículos adaptados para sillas de ruedas', color: '#F43F5E' },
+   220→                  ].map((item) => (
+   221→                    <div key={item.text} className="flex items-center gap-3">
+   222→                      <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `${item.color}12` }}>
+   223→                        <item.icon className="w-4 h-4" style={{ color: item.color }} />
+   224→                      </div>
+   225→                      <span className="text-white/60 text-sm">{item.text}</span>
+   226→                    </div>
+   227→                  ))}
+   228→                </div>
+   229→                <a href="#pacientes" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold text-white bg-[#F43F5E]/15 border border-[#F43F5E]/25 hover:bg-[#F43F5E]/25 transition-all duration-300">
+   230→                  Conocer más
+   231→                  <ArrowRight className="w-4 h-4" />
+   232→                </a>
+   233→              </div>
+   234→            </div>
+   235→          </AnimatedSection>
+   236→        </div>
+   237→      </div>
+   238→    </section>
+   239→  )
+   240→}
+   241→
+   242→/* ═══════════════════════════════════════════════════════════════════════════════
+   243→   3. PERSONAL MÉDICO — Detalle
+   244→   ═══════════════════════════════════════════════════════════════════════════════ */
+   245→function PersonalMedicoSection() {
+   246→  return (
+   247→    <section id="personal" className="relative py-24 md:py-32">
+   248→      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1320] to-[#0a0e17]" />
+   249→      <div className="absolute top-1/3 right-0 w-[500px] h-[500px] rounded-full bg-[#0EA5E9]/4 blur-[120px]" />
+   250→      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   251→        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+   252→          <AnimatedSection>
+   253→            <div>
+   254→              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#0EA5E9]/10 border border-[#0EA5E9]/20 mb-6">
+   255→                <Stethoscope className="w-4 h-4 text-[#0EA5E9]" />
+   256→                <span className="text-sm text-[#0EA5E9]">Personal de Salud</span>
+   257→              </div>
+   258→              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
+   259→                Movilidad para quienes{' '}
+   260→                <span className="bg-gradient-to-r from-[#0EA5E9] to-[#00E676] bg-clip-text text-transparent">cuidan vidas</span>
+   261→              </h2>
+   262→              <p className="text-white/50 text-lg leading-relaxed mb-6">
+   263→                Después de una larga jornada de guardia, lo último que necesitas es preocuparte por cómo llegar a casa.
+   264→                Ecotaxi Salud te recoge en la puerta de tu hospital, clínica o consultorio y te lleva directo a tu hogar
+   265→                con la comodidad y seguridad que mereces. Choferes que entienden tus horarios y la importancia de tu descanso.
+   266→              </p>
+   267→              <p className="text-white/50 text-lg leading-relaxed mb-8">
+   268→                También cubrimos el desplazamiento de tu personal administrativo y médico para gestiones que requieran
+   269→                movilidad fuera del centro de salud. Ya sea un traslado a otra sede, una capacitación o una gestión externa,
+   270→                nosotros nos encargamos del transporte.
+   271→              </p>
+   272→            </div>
+   273→          </AnimatedSection>
+   274→          <AnimatedSection delay={200}>
+   275→            <div className="space-y-4">
+   276→              {[
+   277→                {
+   278→                  icon: Clock,
+   279→                  title: 'Después de Guardia',
+   280→                  desc: 'Recogida nocturna o en cualquier horario después de tu turno. Chofer esperando en la puerta de tu centro de salud para llevarte directo a casa. Sin esperas, sin estrés.',
+   281→                  color: '#0EA5E9',
+   282→                },
+   283→                {
+   284→                  icon: MapPin,
+   285→                  title: 'Recogida Domiciliaria',
+   286→                  desc: 'Te recogemos en tu casa para llevarte al turno. Puntualidad garantizada para que nunca llegues tarde a tu guardia o consulta. Tu vehículo estará ahí cuando lo necesites.',
+   287→                  color: '#00E676',
+   288→                },
+   289→                {
+   290→                  icon: Users,
+   291→                  title: 'Movilidad de Personal',
+   292→                  desc: 'Transporte para gestiones del centro de salud: traslados entre sedes, capacitaciones, reuniones externas, visitas domiciliarias. Coordinamos rutas y horarios según tu agenda.',
+   293→                  color: '#0077BD',
+   294→                },
+   295→                {
+   296→                  icon: Building2,
+   297→                  title: 'Para Todo Centro de Salud',
+   298→                  desc: 'Consultorios médicos, clínicas privadas, hospitales públicos y privados, laboratorios clínicos y farmacias. Cualquiera sea tu centro de salud, lo tenemos cubierto.',
+   299→                  color: '#8B5CF6',
+   300→                },
+   301→              ].map((item) => (
+   302→                <div key={item.title} className="group p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm hover:border-white/10 transition-all duration-500">
+   303→                  <div className="flex items-start gap-4">
+   304→                    <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: `${item.color}12` }}>
+   305→                      <item.icon className="w-5 h-5" style={{ color: item.color }} />
+   306→                    </div>
+   307→                    <div>
+   308→                      <h3 className="text-white font-semibold mb-1">{item.title}</h3>
+   309→                      <p className="text-sm text-white/40 leading-relaxed">{item.desc}</p>
+   310→                    </div>
+   311→                  </div>
+   312→                </div>
+   313→              ))}
+   314→            </div>
+   315→          </AnimatedSection>
+   316→        </div>
+   317→      </div>
+   318→    </section>
+   319→  )
+   320→}
+   321→
+   322→/* ═══════════════════════════════════════════════════════════════════════════════
+   323→   4. CENTROS DE SALUD — Quiénes se benefician
+   324→   ═══════════════════════════════════════════════════════════════════════════════ */
+   325→const centrosSalud = [
+   326→  { icon: Stethoscope, title: 'Consultorios Médicos', desc: 'Transporte para médicos con consulta privada. Recogida y retorno garantizado para tu jornada de consultas, con la discreción y puntualidad que tu práctica requiere.', color: '#0EA5E9' },
+   327→  { icon: Building2, title: 'Clínicas Privadas', desc: 'Movilidad integral para el equipo médico y administrativo de tu clínica. Desde médicos especialistas hasta personal de limpieza — todos llegan a tiempo y seguros.', color: '#00E676' },
+   328→  { icon: HeartPulse, title: 'Hospitales', desc: 'Servicio a gran escala para hospitales. Gestión de flota para personal de guardia, traslados entre sedes hospitalarias y movilidad de pacientes ambulatorios.', color: '#0077BD' },
+   329→  { icon: FlaskConical, title: 'Laboratorios', desc: 'Traslado seguro de personal de laboratorio y transporte controlado de muestras biológicas cuando se requiere movilidad entre puntos de recolección y análisis.', color: '#8B5CF6' },
+   330→  { icon: Pill, title: 'Farmacias', desc: 'Movilidad para farmacéuticos y personal de farmacia. También cubrimos el transporte de insumos farmacéuticos entre sucursales cuando se requiere servicio de entrega urgente.', color: '#FF6B35' },
+   331→]
+   332→
+   333→function CentrosSaludSection() {
+   334→  return (
+   335→    <section className="relative py-24 md:py-32">
+   336→      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1320] to-[#0a0e17]" />
+   337→      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] rounded-full bg-[#0EA5E9]/4 blur-[150px]" />
+   338→      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   339→        <AnimatedSection>
+   340→          <div className="text-center mb-16">
+   341→            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#0077BD]/10 border border-[#0077BD]/20 mb-4">
+   342→              <Building2 className="w-4 h-4 text-[#0077BD]" />
+   343→              <span className="text-sm text-[#0077BD]">Centros de Salud</span>
+   344→            </div>
+   345→            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+   346→              Lo tenemos{' '}
+   347→              <span className="bg-gradient-to-r from-[#0EA5E9] to-[#00E676] bg-clip-text text-transparent">
+   348→                cubierto
+   349→              </span>
+   350→            </h2>
+   351→            <p className="text-white/50 max-w-3xl mx-auto text-lg">
+   352→              Ya seas un consultorio médico, una clínica, un hospital, un laboratorio o una farmacia —
+   353→              Ecotaxi Salud tiene la solución de transporte que tu centro necesita.
+   354→            </p>
+   355→          </div>
+   356→        </AnimatedSection>
+   357→        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+   358→          {centrosSalud.map((centro, i) => (
+   359→            <AnimatedSection key={centro.title} delay={i * 70}>
+   360→              <div className="group relative p-6 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm hover:border-white/10 transition-all duration-500 h-full">
+   361→                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/0 to-white/0 group-hover:from-white/[0.02] transition-all duration-500" />
+   362→                <div className="relative z-10">
+   363→                  <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300" style={{ backgroundColor: `${centro.color}12` }}>
+   364→                    <centro.icon className="w-6 h-6" style={{ color: centro.color }} />
+   365→                  </div>
+   366→                  <h3 className="text-lg font-semibold text-white mb-2">{centro.title}</h3>
+   367→                  <p className="text-sm text-white/40 leading-relaxed">{centro.desc}</p>
+   368→                </div>
+   369→              </div>
+   370→            </AnimatedSection>
+   371→          ))}
+   372→        </div>
+   373→      </div>
+   374→    </section>
+   375→  )
+   376→}
+   377→
+   378→/* ═══════════════════════════════════════════════════════════════════════════════
+   379→   5. PACIENTES — Detalle
+   380→   ═══════════════════════════════════════════════════════════════════════════════ */
+   381→function PacientesSection() {
+   382→  return (
+   383→    <section id="pacientes" className="relative py-24 md:py-32 overflow-hidden">
+   384→      <div className="absolute inset-0 bg-gradient-to-br from-[#0a0e17] via-[#1a0a14] to-[#0a0e17]" />
+   385→      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] rounded-full bg-[#F43F5E]/6 blur-[150px]" />
+   386→      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   387→        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+   388→          <AnimatedSection>
+   389→            <div>
+   390→              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#F43F5E]/10 border border-[#F43F5E]/20 mb-6">
+   391→                <Heart className="w-4 h-4 text-[#F43F5E]" />
+   392→                <span className="text-sm text-[#F43F5E]">Traslado de Pacientes</span>
+   393→              </div>
+   394→              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
+   395→                Un trato que{' '}
+   396→                <span className="bg-gradient-to-r from-[#F43F5E] to-[#FF9EC6] bg-clip-text text-transparent">inspira confianza</span>
+   397→              </h2>
+   398→              <p className="text-white/50 text-lg leading-relaxed mb-6">
+   399→                Sabemos que un paciente no es un pasajero cualquiera. Requiere un trato diferente,
+   400→                más suave, más atento, más humano. Nuestros choferes están capacitados específicamente
+   401→                para asistir a personas adultas mayores, pacientes con movilidad reducida y personas
+   402→                con discapacidad que necesitan apoyo durante el traslado.
+   403→              </p>
+   404→              <p className="text-white/50 text-lg leading-relaxed mb-8">
+   405→                No es solo llevar a alguien de un punto a otro — es acompañar, ayudar, tener paciencia
+   406→                y tratar a cada persona con la dignidad que merece. Ese es el enfoque de Ecotaxi Salud:
+   407→                generar confianza en cada viaje.
+   408→              </p>
+   409→            </div>
+   410→          </AnimatedSection>
+   411→          <AnimatedSection delay={200}>
+   412→            <div className="space-y-4">
+   413→              {[
+   414→                {
+   415→                  icon: HandHeart,
+   416→                  title: 'Choferes Capacitados',
+   417→                  desc: 'Entrenados en primeros auxilios, asistencia a personas con movilidad reducida, protocolo de trato a pacientes y manejo de situaciones de emergencia durante el traslado.',
+   418→                  color: '#F43F5E',
+   419→                },
+   420→                {
+   421→                  icon: Accessibility,
+   422→                  title: 'Movilidad Reducida',
+   423→                  desc: 'Asistencia especial para personas con discapacidad o movilidad reducida. Ayuda para subir y bajar del vehículo, acomodación cómoda y acompañamiento hasta la puerta.',
+   424→                  color: '#E91E63',
+   425→                },
+   426→                {
+   427→                  icon: Heart,
+   428→                  title: 'Adultos Mayores',
+   429→                  desc: 'Trato respetuoso y paciente con personas de la tercera edad. Conducción suave, sin frenadas bruscas, y la cortesía que la experiencia de vida merece.',
+   430→                  color: '#FF6B35',
+   431→                },
+   432→                {
+   433→                  icon: UserCheck,
+   434→                  title: 'Trato Personalizado',
+   435→                  desc: 'Cada paciente es diferente. Nos adaptamos a las necesidades específicas de cada persona: paradas adicionales, velocidad de conducción, asistencia en puertas y más.',
+   436→                  color: '#8B5CF6',
+   437→                },
+   438→              ].map((item) => (
+   439→                <div key={item.title} className="group p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm hover:border-white/10 transition-all duration-500">
+   440→                  <div className="flex items-start gap-4">
+   441→                    <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: `${item.color}12` }}>
+   442→                      <item.icon className="w-5 h-5" style={{ color: item.color }} />
+   443→                    </div>
+   444→                    <div>
+   445→                      <h3 className="text-white font-semibold mb-1">{item.title}</h3>
+   446→                      <p className="text-sm text-white/40 leading-relaxed">{item.desc}</p>
+   447→                    </div>
+   448→                  </div>
+   449→                </div>
+   450→              ))}
+   451→            </div>
+   452→          </AnimatedSection>
+   453→        </div>
+   454→      </div>
+   455→    </section>
+   456→  )
+   457→}
+   458→
+   459→/* ═══════════════════════════════════════════════════════════════════════════════
+   460→   6. VEHÍCULOS
+   461→   ═══════════════════════════════════════════════════════════════════════════════ */
+   462→const healthVehicles = [
+   463→  { icon: Car, name: 'Sedán', capacity: '3-4 pasajeros', desc: 'Vehículo cómodo para traslados individuales. Ideal para el médico que vuelve a casa o el paciente que va a consulta.', color: '#0EA5E9', type: 'Personal' },
+   464→  { icon: Car, name: 'Sedán VIP', capacity: '3 pasajeros', desc: 'Alta gama para directores médicos, especialistas y pacientes que requieren máxima comodidad y privacidad durante el traslado.', color: '#D4AF37', type: 'VIP' },
+   465→  { icon: Car, name: 'SUV', capacity: '4-5 pasajeros', desc: 'SUV amplio y accesible. Mayor altura para facilitar el ingreso de pacientes con movilidad reducida y espacio para equipamiento médico.', color: '#00E676', type: 'Pacientes' },
+   466→  { icon: VanIcon, name: 'Minivan / Van', capacity: '8-12 pasajeros', desc: 'Para transporte de equipos médicos completos, personal de guardia o grupos de pacientes ambulatorios con acompañantes.', color: '#FF6B35', type: 'Ambos' },
+   467→  { icon: BusFront, name: 'Minibus', capacity: '15-25 pasajeros', desc: 'Para hospitales y clínicas que necesitan movilizar personal en grandes grupos entre sedes o capacitaciones fuera de la ciudad.', color: '#8B5CF6', type: 'Personal' },
+   468→  { icon: Accessibility, name: 'Vehículo Adaptado', capacity: '1-3 pasajeros', desc: 'Próximamente: vehículos con rampa o plataforma elevadora para sillas de ruedas. Un compromiso con la inclusión y la accesibilidad total.', color: '#F43F5E', type: 'PRONTO' },
+   469→]
+   470→
+   471→function VehicleOptionsSection() {
+   472→  return (
+   473→    <section id="vehiculos" className="relative py-24 md:py-32">
+   474→      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1320] to-[#0a0e17]" />
+   475→      <div className="absolute top-1/3 left-0 w-[500px] h-[500px] rounded-full bg-[#00E676]/4 blur-[120px]" />
+   476→      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   477→        <AnimatedSection>
+   478→          <div className="text-center mb-16">
+   479→            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00E676]/10 border border-[#00E676]/20 mb-4">
+   480→              <Car className="w-4 h-4 text-[#00E676]" />
+   481→              <span className="text-sm text-[#00E676]">Vehículos</span>
+   482→            </div>
+   483→            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+   484→              Un vehículo para cada{' '}
+   485→              <span className="bg-gradient-to-r from-[#0EA5E9] via-[#00E676] to-[#F43F5E] bg-clip-text text-transparent">
+   486→                necesidad
+   487→              </span>
+   488→            </h2>
+   489→            <p className="text-white/50 max-w-3xl mx-auto text-lg">
+   490→              Desde el médico que necesita llegar rápido hasta el paciente que requiere un traslado
+   491→              cuidadoso — tenemos el vehículo adecuado y el chofer capacitado.
+   492→            </p>
+   493→          </div>
+   494→        </AnimatedSection>
+   495→
+   496→        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+   497→          {healthVehicles.map((vehicle, i) => (
+   498→            <AnimatedSection key={vehicle.name} delay={i * 70}>
+   499→              <div className={`group relative p-6 rounded-2xl bg-white/[0.03] border backdrop-blur-sm hover:border-white/10 transition-all duration-500 h-full ${
+   500→                vehicle.type === 'PRONTO' ? 'border-[#F43F5E]/20' : 'border-white/[0.06]'
+   501→              }`}>
+   502→                <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ boxShadow: `0 0 20px ${vehicle.color}08` }} />
+   503→                <div className="absolute top-3 right-3">
+   504→                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase ${vehicle.type === 'PRONTO' ? 'animate-pulse' : ''}`} style={{ backgroundColor: `${vehicle.color}12`, color: vehicle.color }}>{vehicle.type}</span>
+   505→                </div>
+   506→                <div className="relative z-10">
+   507→                  <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300" style={{ background: `${vehicle.color}12` }}>
+   508→                    <vehicle.icon className="w-6 h-6" style={{ color: vehicle.color }} />
+   509→                  </div>
+   510→                  <h3 className="text-white font-semibold mb-1">{vehicle.name}</h3>
+   511→                  <p className="text-xs text-white/30 mb-3">{vehicle.capacity}</p>
+   512→                  <p className="text-sm text-white/40 leading-relaxed">{vehicle.desc}</p>
+   513→                </div>
+   514→              </div>
+   515→            </AnimatedSection>
+   516→          ))}
+   517→        </div>
+   518→      </div>
+   519→    </section>
+   520→  )
+   521→}
+   522→
+   523→/* ═══════════════════════════════════════════════════════════════════════════════
+   524→   7. CONFIANZA — Seguridad y compromiso
+   525→   ═══════════════════════════════════════════════════════════════════════════════ */
+   526→function ConfianzaSection() {
+   527→  return (
+   528→    <section className="relative py-24 md:py-32">
+   529→      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1320] to-[#0a0e17]" />
+   530→      <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: `radial-gradient(circle, rgba(14,165,233,0.3) 1px, transparent 1px)`, backgroundSize: '30px 30px' }} />
+   531→      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   532→        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+   533→          <AnimatedSection>
+   534→            <div>
+   535→              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#0EA5E9]/10 border border-[#0EA5E9]/20 mb-6">
+   536→                <Shield className="w-4 h-4 text-[#0EA5E9]" />
+   537→                <span className="text-sm text-[#0EA5E9]">Confianza</span>
+   538→              </div>
+   539→              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
+   540→                Generamos la confianza que{' '}
+   541→                <span className="bg-gradient-to-r from-[#0EA5E9] to-[#F43F5E] bg-clip-text text-transparent">la salud exige</span>
+   542→              </h2>
+   543→              <p className="text-white/50 text-lg leading-relaxed mb-6">
+   544→                Cuando se trata de salud, no hay margen para errores ni improvisaciones. Por eso cada
+   545→                aspecto de nuestro servicio está diseñado para inspirar tranquilidad: desde la selección
+   546→                y capacitación de choferes, hasta el seguimiento en tiempo real y la comunicación constante
+   547→                con la central y con el centro de salud.
+   548→              </p>
+   549→              <p className="text-white/50 text-lg leading-relaxed mb-8">
+   550→                Sabemos que detrás de cada servicio hay una persona que depende de nosotros — un médico
+   551→                que necesita descansar, un paciente que necesita llegar a su tratamiento, un familiar que
+   552→                confía en que su ser querido llegará bien. Esa responsabilidad nos toma en serio.
+   553→              </p>
+   554→              <div className="space-y-3">
+   555→                {[
+   556→                  { icon: ShieldCheck, text: 'Seguro de pasajeros en todos los vehículos', color: '#0EA5E9' },
+   557→                  { icon: UserCheck, text: 'Choferes con certificación en trato a pacientes', color: '#00E676' },
+   558→                  { icon: Navigation, text: 'GPS y seguimiento en tiempo real', color: '#0077BD' },
+   559→                  { icon: Eye, text: 'Monitoreo 24/7 desde central de operaciones', color: '#FF6B35' },
+   560→                  { icon: Phone, text: 'Comunicación directa con chofer y centro de salud', color: '#8B5CF6' },
+   561→                  { icon: Clock, text: 'Puntualidad garantizada para citas y tratamientos', color: '#F43F5E' },
+   562→                ].map((item) => (
+   563→                  <div key={item.text} className="flex items-center gap-3">
+   564→                    <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `${item.color}12` }}>
+   565→                      <item.icon className="w-4 h-4" style={{ color: item.color }} />
+   566→                    </div>
+   567→                    <span className="text-white/60 text-sm">{item.text}</span>
+   568→                  </div>
+   569→                ))}
+   570→              </div>
+   571→            </div>
+   572→          </AnimatedSection>
+   573→          <AnimatedSection delay={200}>
+   574→            <div className="relative">
+   575→              <div className="absolute -inset-4 rounded-3xl border border-[#0EA5E9]/8 animate-glow-pulse" />
+   576→              <div className="relative p-8 rounded-2xl bg-white/[0.04] border border-[#0EA5E9]/12 backdrop-blur-xl">
+   577→                <div className="flex items-center justify-between mb-6">
+   578→                  <div className="flex items-center gap-2">
+   579→                    <div className="w-3 h-3 rounded-full bg-[#0EA5E9] animate-pulse" />
+   580→                    <span className="text-sm text-white/60">Servicio Activo</span>
+   581→                  </div>
+   582→                  <div className="flex gap-1.5">
+   583→                    <div className="w-2.5 h-2.5 rounded-full bg-red-500/60" />
+   584→                    <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/60" />
+   585→                    <div className="w-2.5 h-2.5 rounded-full bg-green-500/60" />
+   586→                  </div>
+   587→                </div>
+   588→                {/* Trip card */}
+   589→                <div className="p-4 rounded-xl bg-[#0EA5E9]/5 border border-[#0EA5E9]/10 mb-6">
+   590→                  <div className="flex items-center gap-2 mb-3">
+   591→                    <HeartPulse className="w-4 h-4 text-[#0EA5E9]" />
+   592→                    <span className="text-sm font-semibold text-white">Traslado de Paciente</span>
+   593→                  </div>
+   594→                  <div className="grid grid-cols-3 gap-2">
+   595→                    <div className="text-center p-2 rounded-lg bg-white/[0.03]">
+   596→                      <div className="text-lg font-bold text-[#0EA5E9]">Dr. R.</div>
+   597→                      <div className="text-[10px] text-white/30">Médico</div>
+   598→                    </div>
+   599→                    <div className="text-center p-2 rounded-lg bg-white/[0.03]">
+   600→                      <div className="text-lg font-bold text-[#F43F5E]">SRA.</div>
+   601→                      <div className="text-[10px] text-white/30">Paciente</div>
+   602→                    </div>
+   603→                    <div className="text-center p-2 rounded-lg bg-white/[0.03]">
+   604→                      <div className="text-lg font-bold text-[#00E676]">SUV</div>
+   605→                      <div className="text-[10px] text-white/30">Vehículo</div>
+   606→                    </div>
+   607→                  </div>
+   608→                </div>
+   609→                {/* Status items */}
+   610→                <div className="space-y-2.5">
+   611→                  {[
+   612→                    { label: 'Chofer', value: 'María L. · Certificada', color: '#0EA5E9' },
+   613→                    { label: 'Paciente', value: 'Sra. Fernández · Adulto mayor', color: '#F43F5E' },
+   614→                    { label: 'Ruta', value: 'Clínica Santa Cruz → Domicilio', color: '#00E676' },
+   615→                    { label: 'Estado', value: 'En camino · GPS activo', color: '#8B5CF6' },
+   616→                    { label: 'Asistencia', value: 'Acompañamiento hasta puerta', color: '#FF6B35' },
+   617→                  ].map((item) => (
+   618→                    <div key={item.label} className="flex items-center justify-between p-2.5 rounded-lg bg-white/[0.02]">
+   619→                      <span className="text-xs text-white/30">{item.label}</span>
+   620→                      <span className="text-xs font-semibold" style={{ color: item.color }}>{item.value}</span>
+   621→                    </div>
+   622→                  ))}
+   623→                </div>
+   624→                <div className="mt-4 p-3 rounded-xl bg-[#F43F5E]/5 border border-[#F43F5E]/10">
+   625→                  <div className="flex items-center gap-2">
+   626→                    <HandHeart className="w-4 h-4 text-[#F43F5E]" />
+   627→                    <span className="text-xs text-[#F43F5E] font-semibold">Trato personalizado — Paciente acompañada</span>
+   628→                  </div>
+   629→                </div>
+   630→              </div>
+   631→            </div>
+   632→          </AnimatedSection>
+   633→        </div>
+   634→      </div>
+   635→    </section>
+   636→  )
+   637→}
+   638→
+   639→/* ═══════════════════════════════════════════════════════════════════════════════
+   640→   8. PRÓXIMAMENTE — Vehículos adaptados
+   641→   ═══════════════════════════════════════════════════════════════════════════════ */
+   642→function ProximamenteSection() {
+   643→  return (
+   644→    <section className="relative py-24 md:py-32 overflow-hidden">
+   645→      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1320] to-[#0a0e17]" />
+   646→      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] rounded-full bg-[#F43F5E]/6 blur-[150px]" />
+   647→      <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+   648→        <AnimatedSection>
+   649→          <div className="relative p-8 md:p-12 rounded-3xl bg-white/[0.03] border border-[#F43F5E]/15 backdrop-blur-sm">
+   650→            <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-[#F43F5E]/5 via-transparent to-[#0EA5E9]/5" />
+   651→            <div className="relative z-10 text-center">
+   652→              <div className="w-16 h-16 rounded-2xl bg-[#F43F5E]/10 flex items-center justify-center mx-auto mb-6">
+   653→                <Accessibility className="w-8 h-8 text-[#F43F5E]" />
+   654→              </div>
+   655→              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#F43F5E]/10 border border-[#F43F5E]/20 mb-6">
+   656→                <Sparkles className="w-4 h-4 text-[#F43F5E]" />
+   657→                <span className="text-sm text-[#F43F5E] font-semibold">Próximamente</span>
+   658→              </div>
+   659→              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+   660→                Vehículos{' '}
+   661→                <span className="bg-gradient-to-r from-[#F43F5E] to-[#FF9EC6] bg-clip-text text-transparent">
+   662→                  Adaptados
+   663→                </span>
+   664→              </h2>
+   665→              <p className="text-white/50 text-lg leading-relaxed max-w-2xl mx-auto mb-6">
+   666→                Estamos trabajando para incorporar vehículos con rampa de acceso y plataforma elevadora
+   667→                para sillas de ruedas. Un compromiso con la inclusión y la accesibilidad que todos merecen.
+   668→                Porque la movilidad es un derecho, no un privilegio.
+   669→              </p>
+   670→              <p className="text-white/40 text-base leading-relaxed max-w-xl mx-auto mb-8">
+   671→                Si quieres ser notificado cuando tengamos disponibles los vehículos adaptados,
+   672→                déjanos tu contacto y te avisamos de inmediato.
+   673→              </p>
+   674→              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+   675→                <a href="https://wa.me/59173662803?text=Hola%2C%20quiero%20informaci%C3%B3n%20sobre%20los%20veh%C3%ADculos%20adaptados%20para%20pacientes" target="_blank" rel="noopener noreferrer"
+   676→                  className="px-6 py-3 rounded-full text-base font-semibold text-white bg-[#F43F5E] hover:bg-[#fb7185] transition-all duration-300 shadow-[0_0_25px_rgba(244,63,94,0.3)] hover:shadow-[0_0_40px_rgba(244,63,94,0.5)] flex items-center gap-2">
+   677→                  <MessageCircle className="w-5 h-5" />
+   678→                  Quiero ser notificado
+   679→                </a>
+   680→                <a href="tel:+59133296885"
+   681→                  className="px-6 py-3 rounded-full text-base font-semibold text-white/70 border border-white/15 hover:border-white/30 hover:bg-white/5 transition-all duration-300 flex items-center gap-2">
+   682→                  <Phone className="w-4 h-4" />
+   683→                  Llamar ahora
+   684→                </a>
+   685→              </div>
+   686→            </div>
+   687→          </div>
+   688→        </AnimatedSection>
+   689→      </div>
+   690→    </section>
+   691→  )
+   692→}
+   693→
+   694→/* ═══════════════════════════════════════════════════════════════════════════════
+   695→   9. CTA
+   696→   ═══════════════════════════════════════════════════════════════════════════════ */
+   697→function CTASection() {
+   698→  return (
+   699→    <section className="relative py-24 md:py-32 overflow-hidden">
+   700→      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1320] to-[#0a0e17]" />
+   701→      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-[#0EA5E9]/8 blur-[120px]" />
+   702→      <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+   703→        <AnimatedSection>
+   704→          <HeartPulse className="w-12 h-12 text-[#0EA5E9] mx-auto mb-4" />
+   705→          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+   706→            Tu salud merece{' '}
+   707→            <span className="bg-gradient-to-r from-[#0EA5E9] via-[#00E676] to-[#F43F5E] bg-clip-text text-transparent">
+   708→              transporte confiable
+   709→            </span>
+   710→          </h2>
+   711→          <p className="text-white/50 text-lg leading-relaxed mb-10 max-w-xl mx-auto">
+   712→            Ya seas personal de salud que necesita llegar a casa, o un paciente que requiere
+   713→            un traslado con el cuidado que merece — estamos aquí para ti.
+   714→          </p>
+   715→          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
+   716→            <a href="https://id3251.tm.taxi:58443/?cid=1" target="_blank" rel="noopener noreferrer"
+   717→              className="px-8 py-4 rounded-full text-lg font-semibold text-white bg-[#0EA5E9] hover:bg-[#38bdf8] transition-all duration-300 shadow-[0_0_30px_rgba(14,165,233,0.3)] hover:shadow-[0_0_50px_rgba(14,165,233,0.5)] hover:scale-105 flex items-center gap-2">
+   718→              Reservar Servicio
+   719→              <ArrowRight className="w-5 h-5" />
+   720→            </a>
+   721→            <a href="https://wa.me/59173662803?text=Hola%2C%20necesito%20transporte%20de%20salud" target="_blank" rel="noopener noreferrer"
+   722→              className="px-8 py-4 rounded-full text-lg font-semibold text-[#25D366] border border-[#25D366]/30 bg-[#25D366]/5 hover:bg-[#25D366]/10 hover:border-[#25D366]/50 transition-all duration-300 flex items-center gap-2">
+   723→              <MessageCircle className="w-5 h-5" />
+   724→              WhatsApp Salud
+   725→            </a>
+   726→          </div>
+   727→          <div className="flex flex-wrap items-center justify-center gap-6">
+   728→            {[
+   729→              { icon: Shield, text: 'Choferes capacitados' },
+   730→              { icon: Heart, text: 'Trato humano' },
+   731→              { icon: Navigation, text: 'GPS en tiempo real' },
+   732→              { icon: Clock, text: 'Disponible 24/7' },
+   733→            ].map((item) => (
+   734→              <div key={item.text} className="flex items-center gap-2 text-white/30">
+   735→                <item.icon className="w-4 h-4 text-[#0EA5E9]/50" />
+   736→                <span className="text-sm">{item.text}</span>
+   737→              </div>
+   738→            ))}
+   739→          </div>
+   740→        </AnimatedSection>
+   741→      </div>
+   742→    </section>
+   743→  )
+   744→}
+   745→
+   746→/* ═══════════════════════════════════════════════════════════════════════════════
+   747→   MAIN PAGE
+   748→   ═══════════════════════════════════════════════════════════════════════════════ */
+   749→export default function TransporteSaludPage() {
+   750→  return (
+   751→    <div className="min-h-screen flex flex-col bg-[#0a0e17]">
+   752→      <Navbar />
+   753→      <main className="flex-1">
+   754→        <HeroSection />
+   755→        <TwoAreasSection />
+   756→        <PersonalMedicoSection />
+   757→        <CentrosSaludSection />
+   758→        <PacientesSection />
+   759→        <VehicleOptionsSection />
+   760→        <ConfianzaSection />
+   761→        <ProximamenteSection />
+   762→        <CTASection />
+   763→      </main>
+   764→      <Footer />
+   765→    </div>
+   766→  )
+   767→}
+   768→

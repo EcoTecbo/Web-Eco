@@ -1062,7 +1062,7 @@ function CalculatorSection() {
   return (
     <section id="calculadora" className="relative py-24 md:py-32">
       {/* Background image */}
-      <div className="absolute inset-0 bg-[url('/mudanza-calculator.webp')] bg-cover bg-center opacity-[0.15]" />
+      <div className="absolute inset-0 opacity-[0.15]" style={{ backgroundImage: "url('/mudanza-calculator.webp')", backgroundSize: 'cover', backgroundPosition: 'center' }} />
       <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17]/95 via-[#0d1320]/90 to-[#0a0e17]/95" />
 
       <div className="absolute top-1/2 left-1/3 w-[600px] h-[600px] rounded-full bg-[#00E676]/5 blur-[150px]" />
