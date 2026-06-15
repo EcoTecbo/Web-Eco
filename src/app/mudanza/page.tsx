@@ -203,9 +203,9 @@ const PACKING_MATERIALS = [
 
 /* Handling extras - Precios según tabla oficial EcoTaxi */
 const HANDLING_EXTRAS = [
-  { id: 'muebles_simples', name: 'Muebles Simples (Camas, Mesas)', price: 40, unit: 'mueble', emoji: '🛏️', desc: 'Camas, mesas, sillas, mesitas de noche' },
-  { id: 'muebles_medianos', name: 'Muebles Medianos (Roperos medianos)', price: 70, unit: 'mueble', emoji: '🗄️', desc: 'Roperos medianos, libreros, vitrinas' },
-  { id: 'muebles_complejos', name: 'Muebles Complejos (Roperos gigantes)', price: 100, unit: 'mueble', emoji: '🔧', desc: 'Roperos gigantes, muebles modulares grandes, closets enteros' },
+  { id: 'armado_muebles', name: 'Armado / Desarmado de Muebles', price: 80, unit: 'mueble', emoji: '🔧', desc: 'Desarmar en origen y armar en destino: roperos, camas, cunas, escritorios' },
+  { id: 'puesta_marcha', name: 'Puesta en Marcha de Equipos', price: 60, unit: 'equipo', emoji: '🔌', desc: 'Instalación y conexión: TV, lavadoras, refrigeradores, equipos de sonido' },
+  { id: 'objetos_pesados', name: 'Manipulación Especial de Objetos Pesados', price: 120, unit: 'objeto', emoji: '🏋️', desc: 'Trato especializado: pianos, cajas fuertes, objetos de valor que requieren técnica especial' },
 ]
 
 /* Accessibility extras (per location - origin and destination separately) */
@@ -1133,7 +1133,7 @@ function CalculatorSection() {
   return (
     <section id="calculadora" className="relative py-24 md:py-32">
       {/* Background image */}
-      <div className="absolute inset-0 bg-[url('/mudanza-calculator.webp')] bg-cover bg-center opacity-[0.15]" />
+      <div className="absolute inset-0 bg-cover bg-center opacity-[0.15]" style={{ backgroundImage: "url('/mudanza-calculator.webp')" }} />
       <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17]/95 via-[#0d1320]/90 to-[#0a0e17]/95" />
 
       <div className="absolute top-1/2 left-1/3 w-[600px] h-[600px] rounded-full bg-[#00E676]/5 blur-[150px]" />
@@ -2138,11 +2138,12 @@ function CalculatorSection() {
               )}
             </div>
 
-            {/* ──── D) MANIPULEO DE OBJETOS ──── */}
+            {/* ──── D) ARMADO, DESARMADO Y PUESTA EN MARCHA ──── */}
             <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] mb-4">
-              <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
-                <span className="text-lg">🏋️</span> Manipuleo de Objetos
+              <h4 className="text-white font-semibold mb-1 flex items-center gap-2">
+                <span className="text-lg">🔧</span> Armado, Desarmado y Puesta en Marcha
               </h4>
+              <p className="text-xs text-white/40 mb-4 ml-7">Servicios de armado/desarmado de muebles y puesta en marcha de equipos. No incluye carga ni traslado (eso ya está incluido en el servicio base).</p>
               <div className="space-y-3">
                 {HANDLING_EXTRAS.map((extra) => {
                   const qty = handlingExtras[extra.id] || 0
