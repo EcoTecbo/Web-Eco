@@ -613,9 +613,10 @@ function CalculatorSection() {
   const [vehicleType, setVehicleType] = useState<'cerrado' | 'abierto'>('cerrado')
   const [selectedVehicle, setSelectedVehicle] = useState<typeof VEHICLES[0]['items'][0] | null>(null)
 
-  // Two-path flow
-  const [calcPath, setCalcPath] = useState<'A' | 'B' | null>(null) // A=knows vehicle, B=needs help
+  // Three-path flow
+  const [calcPath, setCalcPath] = useState<'A' | 'B' | 'C' | null>(null) // A=knows vehicle, B=knows size, C=needs help
   const [mudanzaCategory, setMudanzaCategory] = useState<string | null>(null) // For Path B category selection
+  const [showVehicleChange, setShowVehicleChange] = useState(false) // Path B vehicle change expand
   const [additionalVehicles, setAdditionalVehicles] = useState<typeof VEHICLES[0]['items'][0][]>([])
 
   // Step 3: Route & Direction
@@ -636,6 +637,8 @@ function CalculatorSection() {
 
   // Embalaje
   const [embalajeType, setEmbalajeType] = useState<'ninguno' | 'completo' | 'solo_embalaje' | 'solo_desembalaje'>('ninguno')
+  const [needsEmbalaje, setNeedsEmbalaje] = useState<boolean | null>(null) // null = not answered, true = yes, false = no
+  const [showMaterialsShop, setShowMaterialsShop] = useState(false)
 
   // Boxes and materials
   const [boxes, setBoxes] = useState<Record<string, number>>({})
@@ -661,6 +664,7 @@ function CalculatorSection() {
 
   // Logistics
   const [logisticsExtras, setLogisticsExtras] = useState<Record<string, number>>({})
+  const [retiroMaterial, setRetiroMaterial] = useState(false) // Retiro de Material y Limpieza toggle
 
   // Step 5: Insurance, IVA, Payment
   const [wantsInsurance, setWantsInsurance] = useState(false)
@@ -747,9 +751,9 @@ function CalculatorSection() {
     return { vehicle: 'Camioneta Grande + Furgón Largo', detail: '2 vehículos o 2 viajes recomendados' }
   }
 
-  // Auto-suggest vehicle when in Path B and volume changes
+  // Auto-suggest vehicle when in Path C and volume changes
   useEffect(() => {
-    if (calcPath === 'B' && vehicleType && totalVolume > 0) {
+    if (calcPath === 'C' && vehicleType && totalVolume > 0) {
       const suggestion = getVehicleSuggestion(totalVolume, vehicleType)
       setSelectedVehicle(suggestion.vehicle)
       setAdditionalVehicles(suggestion.additional)
@@ -815,13 +819,11 @@ function CalculatorSection() {
     return t
   }, [handlingExtras])
 
-  // Accessibility extras cost
+  // Accessibility extras cost (no fachada - removed per design)
   const accessibilityCost = useMemo(() => {
     const caminataPrice = ACCESSIBILITY_EXTRAS.find(a => a.id === 'distancia_caminata')!.price
-    const fachadaPrice = ACCESSIBILITY_EXTRAS.find(a => a.id === 'elevador_fachada')!.price
-    return (originCaminata * caminataPrice) + (originFachada * fachadaPrice)
-      + (destCaminata * caminataPrice) + (destFachada * fachadaPrice)
-  }, [originCaminata, originFachada, destCaminata, destFachada])
+    return (originCaminata * caminataPrice) + (destCaminata * caminataPrice)
+  }, [originCaminata, destCaminata])
 
   // Helpers cost
   const helpersCost = useMemo(() => {
@@ -839,7 +841,7 @@ function CalculatorSection() {
     return t
   }, [logisticsExtras])
 
-  const extrasTotal = embalajeCost + boxesCost + materialsCost + handlingCost + originFloorCost + destFloorCost + accessibilityCost + helpersCost + logisticsCost
+  const extrasTotal = embalajeCost + boxesCost + materialsCost + handlingCost + originFloorCost + destFloorCost + accessibilityCost + helpersCost + logisticsCost + (retiroMaterial ? 150 : 0)
 
   const basePrice = useMemo(() => {
     const d = routeDistance > 0 ? routeDistance : 10
@@ -856,7 +858,7 @@ function CalculatorSection() {
   const insuranceCost = useMemo(() => {
     if (!wantsInsurance) return 0
     const amount = customInsurance ? parseFloat(customInsurance) || 0 : insuranceAmount
-    return Math.round(amount * 0.02)
+    return Math.round(amount * 0.03)
   }, [wantsInsurance, insuranceAmount, customInsurance])
 
   const subtotal = basePrice + extrasTotal + insuranceCost
@@ -957,7 +959,7 @@ function CalculatorSection() {
 
     let text = `COTIZACIÓN DE MUDANZA\n`
     text += `═══════════════════════\n`
-    text += `Ruta: ${calcPath === 'A' ? 'A (Selección directa)' : 'B (Asistencia guiada)'}\n`
+    text += `Ruta: ${calcPath === 'A' ? 'A (Selección directa)' : calcPath === 'B' ? 'B (Tamaño de mudanza)' : 'C (Asistencia guiada)'}\n`
     text += `Tipo: ${moveType.toUpperCase()}\n`
     text += `Categoría: ${catLabel.toUpperCase()}\n`
     text += `Vehículo: ${vehicleName}\n`
@@ -973,6 +975,7 @@ function CalculatorSection() {
     if (originFloorCost > 0) text += `  Costo piso: Bs ${originFloorCost}\n`
     if (originCaminata > 0) text += `  Distancia caminata: ${originCaminata} x 10m\n`
     if (originFachada > 0) text += `  Elevador fachada: ${originFachada} hr\n`
+    if (retiroMaterial) text += `  Retiro de Material y Limpieza: Bs 150\n`
     text += `\nDESTINO: ${destAddress || 'No especificado'}\n`
     text += `  Piso: ${destFloor === 'baja' ? 'Planta baja' : `Piso ${destFloor}`}${elevatorDest ? ' (con elevador)' : ' (sin elevador)'}\n`
     if (destFloorCost > 0) text += `  Costo piso: Bs ${destFloorCost}\n`
@@ -1033,6 +1036,7 @@ function CalculatorSection() {
           destFloor, elevatorDest, destFloorCost, destCaminata, destFachada,
           accessibilityCost,
           helpers, helpersCost,
+          retiroMaterial,
           logisticsExtras, logisticsCost,
           wantsInsurance, insuranceAmount: customInsurance || insuranceAmount, insuranceCost,
           includeIva, ivaAmount, razonSocial, nit, paymentMethod,
@@ -1064,16 +1068,60 @@ function CalculatorSection() {
       ]
     : calcPath === 'B'
     ? [
-        { num: 1, label: 'Categoría' },
-        { num: 2, label: 'Inventario' },
+        { num: 1, label: 'Tamaño' },
+        { num: 2, label: 'Vehículo' },
         { num: 3, label: 'Ruta' },
         { num: 4, label: 'Extras' },
         { num: 5, label: 'Seguro' },
         { num: 6, label: 'Envío' },
       ]
+    : calcPath === 'C'
+    ? [
+        { num: 1, label: 'Inventario' },
+        { num: 2, label: 'Ruta' },
+        { num: 3, label: 'Extras' },
+        { num: 4, label: 'Seguro' },
+        { num: 5, label: 'Envío' },
+      ]
     : [
         { num: 1, label: 'Inicio' },
       ]
+
+  // ──── Step type helper ────
+  const getStepType = (stepNum: number, path: string) => {
+    if (path === 'A') {
+      if (stepNum === 1) return 'vehicle'
+      if (stepNum === 2) return 'route'
+      if (stepNum === 3) return 'extras'
+      if (stepNum === 4) return 'insurance'
+      if (stepNum === 5) return 'submit'
+    }
+    if (path === 'B') {
+      if (stepNum === 1) return 'size'
+      if (stepNum === 2) return 'vehicle'
+      if (stepNum === 3) return 'route'
+      if (stepNum === 4) return 'extras'
+      if (stepNum === 5) return 'insurance'
+      if (stepNum === 6) return 'submit'
+    }
+    if (path === 'C') {
+      if (stepNum === 1) return 'inventory'
+      if (stepNum === 2) return 'route'
+      if (stepNum === 3) return 'extras'
+      if (stepNum === 4) return 'insurance'
+      if (stepNum === 5) return 'submit'
+    }
+    return null
+  }
+
+  // ──── Volume-based helper recommendation ────
+  const getRecommendedHelpers = (vol: number) => {
+    if (vol <= 0) return 1
+    if (vol <= 6) return 1
+    if (vol <= 14) return 2
+    if (vol <= 25) return 3
+    return 4
+  }
 
   const inputClass = 'w-full bg-white/[0.04] border border-white/[0.08] text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#00E676]/40 transition-all'
 
@@ -1121,7 +1169,7 @@ function CalculatorSection() {
               <span className="text-lg font-bold text-[#0077BD]">{routeDistance} km</span>
             </div>
           )}
-          {calcPath === 'B' && totalVolume > 0 && selectedVehicle && (
+          {(calcPath === 'B' || calcPath === 'C') && selectedVehicle && (
             <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-white/[0.04] border border-[#818CF8]/20">
               <Truck className="w-4 h-4 text-[#818CF8]" />
               <span className="text-sm text-white/60">Sugerido:</span>
@@ -1139,8 +1187,8 @@ function CalculatorSection() {
             <h3 className="text-xl font-bold text-white mb-2 text-center">¿Cómo deseas cotizar tu mudanza?</h3>
             <p className="text-sm text-white/40 text-center mb-8">Elige la opción que mejor se adapte a ti</p>
 
-            {/* Two-path selection */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            {/* Three-path selection */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               <button onClick={() => { setCalcPath('A') }}
                 className="group p-8 rounded-2xl text-left transition-all duration-300 bg-white/[0.03] border border-white/[0.06] hover:border-[#00E676]/40 hover:bg-white/[0.05]">
                 <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 bg-[#00E676]/10 group-hover:bg-[#00E676]/20 transition-all">
@@ -1151,13 +1199,22 @@ function CalculatorSection() {
                 <span className="text-xs text-[#00E676] font-semibold">Ruta A — Selección directa →</span>
               </button>
               <button onClick={() => { setCalcPath('B') }}
+                className="group p-8 rounded-2xl text-left transition-all duration-300 bg-white/[0.03] border border-white/[0.06] hover:border-[#0077BD]/40 hover:bg-white/[0.05]">
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 bg-[#0077BD]/10 group-hover:bg-[#0077BD]/20 transition-all">
+                  <Package className="w-7 h-7 text-[#0077BD]" />
+                </div>
+                <h4 className="text-lg font-bold text-white mb-2">📦 Conozco el tamaño de mi mudanza</h4>
+                <p className="text-sm text-white/50 leading-relaxed mb-3">Selecciona el tamaño de tu mudanza y te asignamos el vehículo ideal automáticamente.</p>
+                <span className="text-xs text-[#0077BD] font-semibold">Ruta B — Por tamaño →</span>
+              </button>
+              <button onClick={() => { setCalcPath('C') }}
                 className="group p-8 rounded-2xl text-left transition-all duration-300 bg-white/[0.03] border border-white/[0.06] hover:border-[#818CF8]/40 hover:bg-white/[0.05]">
                 <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 bg-[#818CF8]/10 group-hover:bg-[#818CF8]/20 transition-all">
                   <ClipboardList className="w-7 h-7 text-[#818CF8]" />
                 </div>
-                <h4 className="text-lg font-bold text-white mb-2">📋 Necesito ayuda para elegir</h4>
-                <p className="text-sm text-white/50 leading-relaxed mb-3">Te guiamos según el tamaño de tu mudanza y te sugerimos el vehículo ideal.</p>
-                <span className="text-xs text-[#818CF8] font-semibold">Ruta B — Asistencia guiada →</span>
+                <h4 className="text-lg font-bold text-white mb-2">📋 Ayúdame a elegir</h4>
+                <p className="text-sm text-white/50 leading-relaxed mb-3">Te guiamos con un inventario detallado para sugerirte el vehículo ideal.</p>
+                <span className="text-xs text-[#818CF8] font-semibold">Ruta C — Asistencia guiada →</span>
               </button>
             </div>
 
@@ -1269,22 +1326,22 @@ function CalculatorSection() {
           </div>
         )}
 
-        {/* ═══════════════ Step 1 (Path B): Category + Vehicle Type ═══════════════ */}
+        {/* ═══════════════ Step 1 (Path B): Tamaño de Mudanza ═══════════════ */}
         {step === 1 && calcPath === 'B' && (
           <div className="max-w-4xl mx-auto">
             <div className="flex items-center gap-2 mb-6">
-              <button onClick={() => { setCalcPath(null); setSelectedVehicle(null); setMudanzaCategory(null); setAdditionalVehicles([]) }}
+              <button onClick={() => { setCalcPath(null); setSelectedVehicle(null); setMudanzaCategory(null); setAdditionalVehicles([]); setShowVehicleChange(false) }}
                 className="text-xs text-white/40 hover:text-white/60 transition-colors flex items-center gap-1">
                 ← Cambiar ruta
               </button>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-[#818CF8]/10 text-[#818CF8] font-semibold">Ruta B — Asistencia</span>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-[#0077BD]/10 text-[#0077BD] font-semibold">Ruta B — Tamaño</span>
             </div>
 
             {/* Vehicle type selection */}
             <h3 className="text-xl font-bold text-white mb-2 text-center">¿Vehículo cerrado o abierto?</h3>
             <p className="text-sm text-white/40 text-center mb-6">Los furgones protegen del clima, las camionetas tienen caja abierta</p>
             <div className="grid grid-cols-2 gap-4 mb-8">
-              <button onClick={() => { setVehicleType('cerrado'); setSelectedVehicle(null); setMudanzaCategory(null) }}
+              <button onClick={() => { setVehicleType('cerrado'); setSelectedVehicle(null); setMudanzaCategory(null); setShowVehicleChange(false) }}
                 className={`p-5 rounded-2xl text-center transition-all duration-300 ${vehicleType === 'cerrado' ? 'bg-[#818CF8]/10 border-2 border-[#818CF8]/50' : 'bg-white/[0.03] border border-white/[0.06] hover:border-white/10'}`}>
                 <div className="flex justify-center mb-2 h-16 items-center">
                   <img src="/vehicles/7-FURGON/mediano.png" alt="Furgón" className="max-h-full max-w-[80px] object-contain" />
@@ -1292,7 +1349,7 @@ function CalculatorSection() {
                 <div className="text-white font-semibold mb-1">Furgón (Cerrado)</div>
                 <div className="text-xs text-white/40">Protección completa del clima</div>
               </button>
-              <button onClick={() => { setVehicleType('abierto'); setSelectedVehicle(null); setMudanzaCategory(null) }}
+              <button onClick={() => { setVehicleType('abierto'); setSelectedVehicle(null); setMudanzaCategory(null); setShowVehicleChange(false) }}
                 className={`p-5 rounded-2xl text-center transition-all duration-300 ${vehicleType === 'abierto' ? 'bg-[#FB923C]/10 border-2 border-[#FB923C]/50' : 'bg-white/[0.03] border border-white/[0.06] hover:border-white/10'}`}>
                 <div className="flex justify-center mb-2 h-16 items-center">
                   <img src="/vehicles/6-CAMIONETA/mediana.png" alt="Camioneta" className="max-h-full max-w-[80px] object-contain" />
@@ -1314,6 +1371,7 @@ function CalculatorSection() {
                 return (
                   <button key={cat.id} onClick={() => {
                     setMudanzaCategory(cat.id)
+                    setShowVehicleChange(false)
                     // Auto-suggest vehicle based on category
                     if (suggestedVehicle) { setSelectedVehicle(suggestedVehicle); setAdditionalVehicles([]) }
                   }}
@@ -1342,53 +1400,187 @@ function CalculatorSection() {
               })}
             </div>
 
-            {mudanzaCategory && (
-              <div className="p-4 rounded-xl bg-[#818CF8]/5 border border-[#818CF8]/15 mb-6">
+            {/* Vehículo Asignado */}
+            {mudanzaCategory && selectedVehicle && (
+              <div className="p-4 rounded-xl bg-[#0077BD]/5 border border-[#0077BD]/15 mb-6">
                 <div className="flex items-center gap-3">
                   <div className="w-20 h-14 shrink-0 flex items-center justify-center">
-                    {selectedVehicle ? (
-                      <img src={selectedVehicle.img} alt={selectedVehicle.name} className="max-h-full max-w-full object-contain" />
-                    ) : (
-                      <Truck className="w-8 h-8 text-[#818CF8]/40" />
-                    )}
+                    <img src={selectedVehicle.img} alt={selectedVehicle.name} className="max-h-full max-w-full object-contain" />
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <Sparkles className="w-4 h-4 text-[#818CF8]" />
-                      <span className="text-sm font-semibold text-[#818CF8]">Vehículo sugerido</span>
+                      <Sparkles className="w-4 h-4 text-[#0077BD]" />
+                      <span className="text-sm font-semibold text-[#0077BD]">Vehículo asignado</span>
                     </div>
                     <p className="text-sm text-white/60">
-                      {selectedVehicle ? (
-                        <>
-                          <span className="text-white font-semibold">{selectedVehicle.name}</span> ({selectedVehicle.cap} m³)
-                          {additionalVehicles.length > 0 && (
-                            <span className="text-[#FF9800]"> + {additionalVehicles.length} vehículo{additionalVehicles.length > 1 ? 's' : ''} adicional{additionalVehicles.length > 1 ? 'es' : ''}</span>
-                          )}
-                        </>
-                      ) : 'Selecciona una categoría para ver la sugerencia'}
+                      <span className="text-white font-semibold">{selectedVehicle.name}</span> ({selectedVehicle.cap} m³)
+                      {additionalVehicles.length > 0 && (
+                        <span className="text-[#FF9800]"> + {additionalVehicles.length} vehículo{additionalVehicles.length > 1 ? 's' : ''} adicional{additionalVehicles.length > 1 ? 'es' : ''}</span>
+                      )}
                     </p>
-                    <p className="text-xs text-white/30 mt-1">También puedes ajustar tu selección en el paso de inventario</p>
+                    <button onClick={() => setShowVehicleChange(!showVehicleChange)}
+                      className="text-xs text-[#0077BD] hover:text-[#0077BD]/80 mt-1 transition-colors underline">
+                      ¿Deseas cambiar el vehículo?
+                    </button>
                   </div>
                 </div>
+                {showVehicleChange && (
+                  <div className="mt-4 pt-4 border-t border-[#0077BD]/15">
+                    <p className="text-xs text-white/40 mb-3">Selecciona otro vehículo:</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {(vehicleType === 'cerrado' ? VEHICLES.find(v => v.cat === 'Furgón')! : VEHICLES.find(v => v.cat === 'Camioneta')!).items.map((v) => {
+                        const isSelected = selectedVehicle?.name === v.name
+                        return (
+                          <button key={v.name} onClick={() => { setSelectedVehicle(v); setAdditionalVehicles([]); setShowVehicleChange(false) }}
+                            className={`p-3 rounded-xl text-left text-xs transition-all ${isSelected ? 'bg-[#0077BD]/10 border border-[#0077BD]/30' : 'bg-white/[0.02] border border-white/[0.06] hover:border-white/10'}`}>
+                            <div className="flex items-center gap-2">
+                              <img src={v.img} alt={v.name} className="h-8 object-contain" />
+                              <div>
+                                <span className="text-white font-semibold">{v.name}</span>
+                                <span className="text-white/30 ml-1">({v.cap} m³)</span>
+                              </div>
+                            </div>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
             <div className="flex justify-end">
               <button onClick={() => setStep(2)} disabled={!mudanzaCategory || !selectedVehicle}
                 className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)] disabled:opacity-40 disabled:cursor-not-allowed">
-                Siguiente: Inventario →
+                Siguiente: Vehículo →
               </button>
             </div>
           </div>
         )}
 
-        {/* ═══════════════ Step 2: Inventario (Path B only) ═══════════════ */}
+        {/* ═══════════════ Step 2 (Path B): Vehicle Confirmation ═══════════════ */}
         {step === 2 && calcPath === 'B' && (
+          <div className="max-w-4xl mx-auto">
+            <h3 className="text-xl font-bold text-white mb-2 text-center">Confirma tu Vehículo</h3>
+            <p className="text-sm text-white/40 text-center mb-6">Este es el vehículo sugerido para tu mudanza. Puedes cambiarlo si lo deseas.</p>
+
+            {/* Prominent vehicle display */}
+            {selectedVehicle && (
+              <div className="p-6 rounded-2xl bg-[#0077BD]/8 border-2 border-[#0077BD]/30 mb-6">
+                <div className="flex items-center gap-5">
+                  <div className="w-28 h-20 shrink-0 flex items-center justify-center">
+                    <img src={selectedVehicle.img} alt={selectedVehicle.name} className="max-h-full max-w-full object-contain" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Sparkles className="w-5 h-5 text-[#0077BD]" />
+                      <span className="text-base font-semibold text-[#0077BD]">Vehículo asignado</span>
+                    </div>
+                    <h4 className="text-2xl font-bold text-white mb-1">{selectedVehicle.name}</h4>
+                    <div className="flex items-center gap-4 text-sm">
+                      <span className="px-2.5 py-0.5 rounded-full font-semibold" style={{ backgroundColor: '#0077BD15', color: '#0077BD' }}>{selectedVehicle.cap} m³</span>
+                      <span className="text-white/40">{selectedVehicle.pax} pasajeros</span>
+                      <span className="text-white/40">Bs {selectedVehicle.perKm}/km</span>
+                    </div>
+                    <p className="text-xs text-white/40 mt-2">{selectedVehicle.desc}</p>
+                    {additionalVehicles.length > 0 && (
+                      <div className="mt-2 flex items-center gap-2">
+                        {additionalVehicles.map((av, i) => (
+                          <span key={i} className="text-xs px-2 py-1 rounded-lg bg-[#FF9800]/10 text-[#FF9800]">+ {av.name} ({av.cap} m³)</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Collapsible change vehicle */}
+            <div className="mb-6">
+              <button onClick={() => setShowVehicleChange(!showVehicleChange)}
+                className="w-full p-4 rounded-xl bg-white/[0.03] border border-white/[0.06] text-left flex items-center justify-between hover:border-white/10 transition-all">
+                <span className="text-sm text-white/60 flex items-center gap-2">
+                  <ChevronDown className={`w-4 h-4 transition-transform ${showVehicleChange ? 'rotate-180' : ''}`} />
+                  Cambiar vehículo
+                </span>
+                <Truck className="w-4 h-4 text-white/30" />
+              </button>
+              {showVehicleChange && (
+                <div className="mt-3 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {(vehicleType === 'cerrado' ? VEHICLES.find(v => v.cat === 'Furgón')! : VEHICLES.find(v => v.cat === 'Camioneta')!).items.map((v) => {
+                      const isSelected = selectedVehicle?.name === v.name
+                      const catColor = vehicleType === 'cerrado' ? '#818CF8' : '#FB923C'
+                      return (
+                        <button key={v.name} onClick={() => { setSelectedVehicle(v); setAdditionalVehicles([]) }}
+                          className={`p-4 rounded-xl text-left transition-all duration-200 ${isSelected ? `border-2` : 'bg-white/[0.02] border border-white/[0.06] hover:border-white/10'}`}
+                          style={isSelected ? { backgroundColor: `${catColor}08`, borderColor: `${catColor}50` } : {}}>
+                          <div className="flex items-center gap-3">
+                            <div className="w-16 h-12 shrink-0 flex items-center justify-center">
+                              <img src={v.img} alt={v.name} className="max-h-full max-w-full object-contain" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="text-white font-semibold text-sm">{v.name}</span>
+                                <span className="text-xs px-2 py-0.5 rounded-full font-semibold shrink-0" style={{ backgroundColor: `${catColor}15`, color: catColor }}>{v.cap} m³</span>
+                              </div>
+                              <p className="text-xs text-white/40">{v.desc}</p>
+                            </div>
+                          </div>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-between">
+              <button onClick={() => setStep(1)} className="px-6 py-3 rounded-full text-sm font-semibold text-white/60 border border-white/[0.1] hover:border-white/20 transition-all">← Atrás</button>
+              <button onClick={() => setStep(3)} className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)]">
+                Siguiente: Ruta →
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ═══════════════ Step 1 (Path C): Inventario ═══════════════ */}
+        {step === 1 && calcPath === 'C' && (
           <div className="max-w-5xl mx-auto">
+            <div className="flex items-center gap-2 mb-6">
+              <button onClick={() => { setCalcPath(null); setSelectedVehicle(null); setMudanzaCategory(null); setAdditionalVehicles([]) }}
+                className="text-xs text-white/40 hover:text-white/60 transition-colors flex items-center gap-1">
+                ← Cambiar ruta
+              </button>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-[#818CF8]/10 text-[#818CF8] font-semibold">Ruta C — Inventario</span>
+            </div>
+
+            {/* Vehicle type selection */}
+            <h3 className="text-xl font-bold text-white mb-2 text-center">¿Vehículo cerrado o abierto?</h3>
+            <p className="text-sm text-white/40 text-center mb-6">Los furgones protegen del clima, las camionetas tienen caja abierta</p>
+            <div className="grid grid-cols-2 gap-4 mb-8">
+              <button onClick={() => { setVehicleType('cerrado'); setSelectedVehicle(null) }}
+                className={`p-5 rounded-2xl text-center transition-all duration-300 ${vehicleType === 'cerrado' ? 'bg-[#818CF8]/10 border-2 border-[#818CF8]/50' : 'bg-white/[0.03] border border-white/[0.06] hover:border-white/10'}`}>
+                <div className="flex justify-center mb-2 h-16 items-center">
+                  <img src="/vehicles/7-FURGON/mediano.png" alt="Furgón" className="max-h-full max-w-[80px] object-contain" />
+                </div>
+                <div className="text-white font-semibold mb-1">Furgón (Cerrado)</div>
+                <div className="text-xs text-white/40">Protección completa del clima</div>
+              </button>
+              <button onClick={() => { setVehicleType('abierto'); setSelectedVehicle(null) }}
+                className={`p-5 rounded-2xl text-center transition-all duration-300 ${vehicleType === 'abierto' ? 'bg-[#FB923C]/10 border-2 border-[#FB923C]/50' : 'bg-white/[0.03] border border-white/[0.06] hover:border-white/10'}`}>
+                <div className="flex justify-center mb-2 h-16 items-center">
+                  <img src="/vehicles/6-CAMIONETA/mediana.png" alt="Camioneta" className="max-h-full max-w-[80px] object-contain" />
+                </div>
+                <div className="text-white font-semibold mb-1">Camioneta (Abierto)</div>
+                <div className="text-xs text-white/40">Caja abierta, ideal para cargas resistentes</div>
+              </button>
+            </div>
+
             <h3 className="text-xl font-bold text-white mb-2 text-center">Inventario de Artículos</h3>
             <p className="text-sm text-white/40 text-center mb-6">Selecciona la cantidad de cada artículo por ambiente</p>
 
-            {/* Live vehicle suggestion card for Path B */}
+            {/* Live vehicle suggestion card for Path C */}
             {totalVolume > 0 && selectedVehicle && (
               <div className="mb-6 p-4 rounded-2xl bg-[#818CF8]/5 border border-[#818CF8]/15">
                 <div className="flex items-center justify-between flex-wrap gap-3">
@@ -1479,9 +1671,8 @@ function CalculatorSection() {
                 )
               })}
             </div>
-            <div className="flex justify-between">
-              <button onClick={() => setStep(1)} className="px-6 py-3 rounded-full text-sm font-semibold text-white/60 border border-white/[0.1] hover:border-white/20 transition-all">← Atrás</button>
-              <button onClick={() => setStep(3)} className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)]">
+            <div className="flex justify-end">
+              <button onClick={() => setStep(2)} className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)]">
                 Siguiente: Ruta →
               </button>
             </div>
@@ -1489,7 +1680,7 @@ function CalculatorSection() {
         )}
 
         {/* ═══════════════ Step: Ruta y Dirección (MAP) ═══════════════ */}
-        {step === (calcPath === 'A' ? 2 : 3) && calcPath && (
+        {calcPath && getStepType(step, calcPath) === 'route' && (
           <div className="max-w-7xl mx-auto">
             <h3 className="text-xl font-bold text-white mb-2 text-center">Ruta y Dirección</h3>
             <p className="text-sm text-white/40 text-center mb-6">Define origen, destino y paradas intermedias en el mapa</p>
@@ -1639,8 +1830,8 @@ function CalculatorSection() {
             </div>
 
             <div className="flex justify-between">
-              <button onClick={() => setStep(calcPath === 'A' ? 1 : 2)} className="px-6 py-3 rounded-full text-sm font-semibold text-white/60 border border-white/[0.1] hover:border-white/20 transition-all">← Atrás</button>
-              <button onClick={() => setStep(calcPath === 'A' ? 3 : 4)} className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)]">
+              <button onClick={() => setStep(calcPath === 'A' ? 1 : calcPath === 'B' ? 2 : 1)} className="px-6 py-3 rounded-full text-sm font-semibold text-white/60 border border-white/[0.1] hover:border-white/20 transition-all">← Atrás</button>
+              <button onClick={() => setStep(calcPath === 'A' ? 3 : calcPath === 'B' ? 4 : 3)} className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)]">
                 Siguiente: Extras y Servicios →
               </button>
             </div>
@@ -1648,113 +1839,304 @@ function CalculatorSection() {
         )}
 
         {/* ═══════════════ Step: Extras y Servicios ═══════════════ */}
-        {step === (calcPath === 'A' ? 3 : 4) && calcPath && (
+        {calcPath && getStepType(step, calcPath) === 'extras' && (
           <div className="max-w-4xl mx-auto max-h-[80vh] overflow-y-auto custom-scroll pr-1">
             <h3 className="text-xl font-bold text-white mb-2 text-center">Extras y Servicios</h3>
             <p className="text-sm text-white/40 text-center mb-8">Personaliza tu mudanza con servicios adicionales</p>
 
-            {/* Section A: Embalaje y Cajas */}
+            {/* ──── A) AYUDANTE ──── */}
             <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] mb-4">
               <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
-                <span className="text-lg">📦</span> Embalaje y Cajas
+                <span className="text-lg">👥</span> Ayudante
               </h4>
+              <div className="flex items-center justify-center gap-6 mb-3">
+                <button onClick={() => setHelpers(Math.max(0, helpers - 1))}
+                  className="w-12 h-12 rounded-xl bg-white/[0.06] flex items-center justify-center text-white/60 hover:bg-white/10 transition-all">
+                  <Minus className="w-5 h-5" />
+                </button>
+                <span className="text-3xl font-bold text-white w-12 text-center">{helpers}</span>
+                <button onClick={() => setHelpers(helpers + 1)}
+                  className="w-12 h-12 rounded-xl bg-[#818CF8]/20 flex items-center justify-center text-[#818CF8] hover:bg-[#818CF8]/30 transition-all">
+                  <Plus className="w-5 h-5" />
+                </button>
+              </div>
+              <p className="text-xs text-white/30 text-center mb-2">
+                Recomendado: {getRecommendedHelpers(totalVolume || (mudanzaCategory ? MUDANZA_CATEGORIES.find(c => c.id === mudanzaCategory)?.maxVolume || 0 : 0))} ayudantes según el tamaño
+              </p>
+              <p className="text-xs text-white/40 text-center">
+                Bs {selectedVehicle?.helperPrice || 80} c/u
+                {helpers > 0 && <span className="text-[#818CF8] font-semibold ml-2">→ Bs {helpersCost}</span>}
+              </p>
+            </div>
 
-              {/* Embalaje type */}
-              <div className="mb-5">
-                <label className="text-xs text-white/40 block mb-2">Servicio de Embalaje</label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  {([['ninguno', 'Ninguno', '#666'], ['completo', 'Completo (Bs 45/m³)', '#00E676'], ['solo_embalaje', 'Solo Embalaje (Bs 30/m³)', '#0077BD'], ['solo_desembalaje', 'Solo Desembalaje (Bs 15/m³)', '#FF9800']] as const).map(([id, label, color]) => (
-                    <button key={id} onClick={() => setEmbalajeType(id as typeof embalajeType)}
-                      className={`p-3 rounded-xl text-xs font-semibold transition-all text-center ${embalajeType === id ? `border-2` : 'bg-white/[0.03] border border-white/[0.06] hover:border-white/10 text-white/50'}`}
-                      style={embalajeType === id ? { backgroundColor: `${color}10`, borderColor: `${color}50`, color } : {}}>
-                      {label}
-                    </button>
-                  ))}
-                </div>
-                {embalajeType !== 'ninguno' && totalVolume > 0 && (
-                  <div className="mt-2 p-3 rounded-xl bg-white/[0.02] border border-white/[0.06] text-xs text-white/50">
-                    {embalajeType === 'completo' && (
-                      <span>Embalaje (Bs 30/m³) + Desembalaje (Bs 15/m³) = Bs 45/m³ × {totalVolume}m³ = <span className="text-[#00E676] font-bold">Bs {embalajeCost}</span></span>
-                    )}
-                    {embalajeType === 'solo_embalaje' && (
-                      <span>Bs 30/m³ × {totalVolume}m³ = <span className="text-[#0077BD] font-bold">Bs {embalajeCost}</span></span>
-                    )}
-                    {embalajeType === 'solo_desembalaje' && (
-                      <span>Bs 15/m³ × {totalVolume}m³ = <span className="text-[#FF9800] font-bold">Bs {embalajeCost}</span></span>
-                    )}
+            {/* ──── B) ACCESIBILIDAD (two columns: Origen | Destino) ──── */}
+            <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] mb-4">
+              <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
+                <span className="text-lg">🏢</span> Accesibilidad
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Origen column */}
+                <div className="p-4 rounded-xl bg-white/[0.02] border border-[#00E676]/10">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Flag className="w-3.5 h-3.5 text-[#00E676]" />
+                    <span className="text-sm font-semibold text-[#00E676]">Origen</span>
                   </div>
-                )}
-              </div>
-
-              {/* Box purchase */}
-              <div className="mb-4">
-                <label className="text-xs text-white/40 block mb-2">Compra de Cajas</label>
-                <div className="space-y-2">
-                  {BOX_OPTIONS.map((box) => {
-                    const qty = boxes[box.id] || 0
-                    return (
-                      <div key={box.id} className={`flex items-center justify-between p-3 rounded-xl transition-all ${qty > 0 ? 'bg-[#00E676]/5 border border-[#00E676]/15' : 'bg-white/[0.02] border border-white/[0.04]'}`}>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm">{box.emoji}</span>
-                          <div>
-                            <div className="text-xs text-white/70">{box.name}</div>
-                            <div className="text-xs text-white/30">Bs {box.price} c/u</div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <button onClick={() => setBoxes(prev => { const n = Math.max(0, (prev[box.id] || 0) - 1); if (n === 0) { const { [box.id]: _, ...rest } = prev; return rest }; return { ...prev, [box.id]: n } })}
-                            className="w-7 h-7 rounded-lg bg-white/[0.06] flex items-center justify-center text-white/60 hover:bg-white/10 transition-all">
-                            <Minus className="w-3 h-3" />
-                          </button>
-                          <span className="w-6 text-center text-sm font-semibold text-white">{qty}</span>
-                          <button onClick={() => setBoxes(prev => ({ ...prev, [box.id]: (prev[box.id] || 0) + 1 }))}
-                            className="w-7 h-7 rounded-lg bg-[#00E676]/20 flex items-center justify-center text-[#00E676] hover:bg-[#00E676]/30 transition-all">
-                            <Plus className="w-3 h-3" />
-                          </button>
-                        </div>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-xs text-white/40 block mb-1">Piso</label>
+                      <select value={originFloor} onChange={e => setOriginFloor(e.target.value)}
+                        className={inputClass + ' appearance-none'}>
+                        {['baja', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'].map(f => <option key={f} value={f} className="bg-[#0a0e17]">{f === 'baja' ? 'Planta baja' : f + '° piso'}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-xs text-white/40 block mb-1">Ascensor</label>
+                      <div className="flex gap-2">
+                        <button onClick={() => setElevatorOrigin(true)}
+                          className={`flex-1 px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1 ${elevatorOrigin ? 'bg-[#00E676] text-black' : 'bg-white/[0.04] text-white/40 border border-white/[0.08]'}`}>
+                          {elevatorOrigin && <CheckCircle className="w-3 h-3" />} Con ascensor
+                        </button>
+                        <button onClick={() => setElevatorOrigin(false)}
+                          className={`flex-1 px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1 ${!elevatorOrigin ? 'bg-white/[0.08] text-white border border-white/20' : 'bg-white/[0.04] text-white/40 border border-white/[0.08]'}`}>
+                          Sin ascensor
+                        </button>
                       </div>
-                    )
-                  })}
+                    </div>
+                    {originFloorCost > 0 && (
+                      <div className="p-2 rounded-lg bg-[#00E676]/5 border border-[#00E676]/10 text-xs text-white/50">
+                        {getFloorCount(originFloor)} pisos × Bs {elevatorOrigin ? selectedVehicle?.floorElev : selectedVehicle?.floorNoElev}/piso = <span className="text-[#00E676] font-bold">Bs {originFloorCost}</span>
+                      </div>
+                    )}
+                    <div>
+                      <label className="text-xs text-white/40 block mb-1">Distancia de acarreo</label>
+                      <div className="flex items-center gap-2 text-xs text-white/30 mb-1">
+                        <span>Solo si excede 10m</span>
+                        <span>· Bs 20/10m</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button onClick={() => setOriginCaminata(Math.max(0, originCaminata - 1))}
+                          className="w-7 h-7 rounded-lg bg-white/[0.06] flex items-center justify-center text-white/60 hover:bg-white/10 transition-all">
+                          <Minus className="w-3 h-3" />
+                        </button>
+                        <span className="w-8 text-center text-sm font-semibold text-white">{originCaminata}</span>
+                        <button onClick={() => setOriginCaminata(originCaminata + 1)}
+                          className="w-7 h-7 rounded-lg bg-[#00E676]/20 flex items-center justify-center text-[#00E676] hover:bg-[#00E676]/30 transition-all">
+                          <Plus className="w-3 h-3" />
+                        </button>
+                        <span className="text-xs text-white/30 ml-1">× 10m</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
 
-              {/* Packing materials */}
-              <div>
-                <label className="text-xs text-white/40 block mb-2">Materiales de Embalaje</label>
-                <div className="space-y-2">
-                  {PACKING_MATERIALS.map((mat) => {
-                    const qty = materials[mat.id] || 0
-                    return (
-                      <div key={mat.id} className={`flex items-center justify-between p-3 rounded-xl transition-all ${qty > 0 ? 'bg-[#0077BD]/5 border border-[#0077BD]/15' : 'bg-white/[0.02] border border-white/[0.04]'}`}>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm">{mat.emoji}</span>
-                          <div>
-                            <div className="text-xs text-white/70">{mat.name}</div>
-                            <div className="text-xs text-white/30">Bs {mat.price} c/u</div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <button onClick={() => setMaterials(prev => { const n = Math.max(0, (prev[mat.id] || 0) - 1); if (n === 0) { const { [mat.id]: _, ...rest } = prev; return rest }; return { ...prev, [mat.id]: n } })}
-                            className="w-7 h-7 rounded-lg bg-white/[0.06] flex items-center justify-center text-white/60 hover:bg-white/10 transition-all">
-                            <Minus className="w-3 h-3" />
-                          </button>
-                          <span className="w-6 text-center text-sm font-semibold text-white">{qty}</span>
-                          <button onClick={() => setMaterials(prev => ({ ...prev, [mat.id]: (prev[mat.id] || 0) + 1 }))}
-                            className="w-7 h-7 rounded-lg bg-[#0077BD]/20 flex items-center justify-center text-[#0077BD] hover:bg-[#0077BD]/30 transition-all">
-                            <Plus className="w-3 h-3" />
-                          </button>
-                        </div>
+                {/* Destino column */}
+                <div className="p-4 rounded-xl bg-white/[0.02] border border-[#0077BD]/10">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Flag className="w-3.5 h-3.5 text-[#0077BD]" />
+                    <span className="text-sm font-semibold text-[#0077BD]">Destino</span>
+                  </div>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-xs text-white/40 block mb-1">Piso</label>
+                      <select value={destFloor} onChange={e => setDestFloor(e.target.value)}
+                        className={inputClass + ' appearance-none'}>
+                        {['baja', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'].map(f => <option key={f} value={f} className="bg-[#0a0e17]">{f === 'baja' ? 'Planta baja' : f + '° piso'}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-xs text-white/40 block mb-1">Ascensor</label>
+                      <div className="flex gap-2">
+                        <button onClick={() => setElevatorDest(true)}
+                          className={`flex-1 px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1 ${elevatorDest ? 'bg-[#0077BD] text-white' : 'bg-white/[0.04] text-white/40 border border-white/[0.08]'}`}>
+                          {elevatorDest && <CheckCircle className="w-3 h-3" />} Con ascensor
+                        </button>
+                        <button onClick={() => setElevatorDest(false)}
+                          className={`flex-1 px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1 ${!elevatorDest ? 'bg-white/[0.08] text-white border border-white/20' : 'bg-white/[0.04] text-white/40 border border-white/[0.08]'}`}>
+                          Sin ascensor
+                        </button>
                       </div>
-                    )
-                  })}
+                    </div>
+                    {destFloorCost > 0 && (
+                      <div className="p-2 rounded-lg bg-[#0077BD]/5 border border-[#0077BD]/10 text-xs text-white/50">
+                        {getFloorCount(destFloor)} pisos × Bs {elevatorDest ? selectedVehicle?.floorElev : selectedVehicle?.floorNoElev}/piso = <span className="text-[#0077BD] font-bold">Bs {destFloorCost}</span>
+                      </div>
+                    )}
+                    <div>
+                      <label className="text-xs text-white/40 block mb-1">Distancia de acarreo</label>
+                      <div className="flex items-center gap-2 text-xs text-white/30 mb-1">
+                        <span>Solo si excede 10m</span>
+                        <span>· Bs 20/10m</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button onClick={() => setDestCaminata(Math.max(0, destCaminata - 1))}
+                          className="w-7 h-7 rounded-lg bg-white/[0.06] flex items-center justify-center text-white/60 hover:bg-white/10 transition-all">
+                          <Minus className="w-3 h-3" />
+                        </button>
+                        <span className="w-8 text-center text-sm font-semibold text-white">{destCaminata}</span>
+                        <button onClick={() => setDestCaminata(destCaminata + 1)}
+                          className="w-7 h-7 rounded-lg bg-[#0077BD]/20 flex items-center justify-center text-[#0077BD] hover:bg-[#0077BD]/30 transition-all">
+                          <Plus className="w-3 h-3" />
+                        </button>
+                        <span className="text-xs text-white/30 ml-1">× 10m</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Section B: Manipulación de Objetos */}
+            {/* ──── C) EMBALAJE ──── */}
             <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] mb-4">
               <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
-                <span className="text-lg">🔧</span> Manipulación de Objetos
+                <span className="text-lg">📦</span> Embalaje
+              </h4>
+
+              {/* Yes/No question */}
+              {needsEmbalaje === null ? (
+                <div>
+                  <p className="text-sm text-white/60 mb-3">¿Necesitas servicio de embalaje?</p>
+                  <div className="flex gap-3">
+                    <button onClick={() => { setNeedsEmbalaje(true); setShowMaterialsShop(false); setEmbalajeType('completo') }}
+                      className="flex-1 px-4 py-3 rounded-xl text-sm font-semibold transition-all bg-[#00E676]/10 border border-[#00E676]/30 text-[#00E676] hover:bg-[#00E676]/20">
+                      ✅ Sí, necesito embalaje
+                    </button>
+                    <button onClick={() => { setNeedsEmbalaje(false); setShowMaterialsShop(true); setEmbalajeType('ninguno') }}
+                      className="flex-1 px-4 py-3 rounded-xl text-sm font-semibold transition-all bg-white/[0.04] border border-white/[0.08] text-white/60 hover:bg-white/[0.06]">
+                      ❌ No, solo materiales
+                    </button>
+                  </div>
+                </div>
+              ) : needsEmbalaje ? (
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-sm text-white/60">Servicio de embalaje</p>
+                    <button onClick={() => { setNeedsEmbalaje(null); setEmbalajeType('ninguno'); setShowMaterialsShop(false) }}
+                      className="text-xs text-white/30 hover:text-white/50 underline">Cambiar</button>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 mb-3">
+                    {([['completo', 'Completo', 'Bs 45/m³', '#00E676'], ['solo_embalaje', 'Solo Embalaje', 'Bs 30/m³', '#0077BD'], ['solo_desembalaje', 'Solo Desembalaje', 'Bs 15/m³', '#FF9800']] as const).map(([id, label, price, color]) => (
+                      <button key={id} onClick={() => setEmbalajeType(id as typeof embalajeType)}
+                        className={`p-3 rounded-xl text-xs font-semibold transition-all text-center ${embalajeType === id ? `border-2` : 'bg-white/[0.03] border border-white/[0.06] hover:border-white/10 text-white/50'}`}
+                        style={embalajeType === id ? { backgroundColor: `${color}10`, borderColor: `${color}50`, color } : {}}>
+                        <div className="font-bold">{label}</div>
+                        <div className="text-[10px] opacity-70 mt-0.5">{price}</div>
+                      </button>
+                    ))}
+                  </div>
+                  {embalajeType !== 'ninguno' && totalVolume > 0 && (
+                    <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.06] text-xs text-white/50">
+                      {embalajeType === 'completo' && <span>Bs 45/m³ × {totalVolume}m³ = <span className="text-[#00E676] font-bold">Bs {embalajeCost}</span></span>}
+                      {embalajeType === 'solo_embalaje' && <span>Bs 30/m³ × {totalVolume}m³ = <span className="text-[#0077BD] font-bold">Bs {embalajeCost}</span></span>}
+                      {embalajeType === 'solo_desembalaje' && <span>Bs 15/m³ × {totalVolume}m³ = <span className="text-[#FF9800] font-bold">Bs {embalajeCost}</span></span>}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-sm text-white/60">Sin servicio de embalaje</p>
+                    <button onClick={() => { setNeedsEmbalaje(null); setEmbalajeType('ninguno'); setShowMaterialsShop(false) }}
+                      className="text-xs text-white/30 hover:text-white/50 underline">Cambiar</button>
+                  </div>
+                </div>
+              )}
+
+              {/* Materials shop (shown when needsEmbalaje is false, or always as expandable when true) */}
+              {(showMaterialsShop || needsEmbalaje === false) && (
+                <div className="mt-4 pt-4 border-t border-white/[0.06]">
+                  <div className="flex items-center justify-between mb-3">
+                    <h5 className="text-sm font-semibold text-white/70 flex items-center gap-2">
+                      🛒 Material de embalaje
+                    </h5>
+                    {needsEmbalaje === false && (
+                      <button onClick={() => setShowMaterialsShop(!showMaterialsShop)}
+                        className="text-xs text-white/30 hover:text-white/50">
+                        {showMaterialsShop ? 'Ocultar' : 'Mostrar'}
+                      </button>
+                    )}
+                  </div>
+                  {(showMaterialsShop || needsEmbalaje === false) && (
+                    <div className="space-y-2">
+                      {/* Cajas */}
+                      <div className="mb-3">
+                        <label className="text-xs text-white/40 block mb-2">Cajas</label>
+                        <div className="space-y-2">
+                          {BOX_OPTIONS.map((box) => {
+                            const qty = boxes[box.id] || 0
+                            return (
+                              <div key={box.id} className={`flex items-center justify-between p-2.5 rounded-xl transition-all ${qty > 0 ? 'bg-[#00E676]/5 border border-[#00E676]/15' : 'bg-white/[0.02] border border-white/[0.04]'}`}>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm">{box.emoji}</span>
+                                  <div>
+                                    <div className="text-xs text-white/70">{box.name.replace(/ \(.*/, '')}</div>
+                                    <div className="text-xs text-white/30">Bs {box.price} c/u</div>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                  <button onClick={() => setBoxes(prev => { const n = Math.max(0, (prev[box.id] || 0) - 1); if (n === 0) { const { [box.id]: _, ...rest } = prev; return rest }; return { ...prev, [box.id]: n } })}
+                                    className="w-6 h-6 rounded-lg bg-white/[0.06] flex items-center justify-center text-white/60 hover:bg-white/10 transition-all">
+                                    <Minus className="w-3 h-3" />
+                                  </button>
+                                  <span className="w-5 text-center text-xs font-semibold text-white">{qty}</span>
+                                  <button onClick={() => setBoxes(prev => ({ ...prev, [box.id]: (prev[box.id] || 0) + 1 }))}
+                                    className="w-6 h-6 rounded-lg bg-[#00E676]/20 flex items-center justify-center text-[#00E676] hover:bg-[#00E676]/30 transition-all">
+                                    <Plus className="w-3 h-3" />
+                                  </button>
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </div>
+                      {/* Materiales */}
+                      <div>
+                        <label className="text-xs text-white/40 block mb-2">Materiales</label>
+                        <div className="space-y-2">
+                          {PACKING_MATERIALS.map((mat) => {
+                            const qty = materials[mat.id] || 0
+                            return (
+                              <div key={mat.id} className={`flex items-center justify-between p-2.5 rounded-xl transition-all ${qty > 0 ? 'bg-[#0077BD]/5 border border-[#0077BD]/15' : 'bg-white/[0.02] border border-white/[0.04]'}`}>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm">{mat.emoji}</span>
+                                  <div>
+                                    <div className="text-xs text-white/70">{mat.name}</div>
+                                    <div className="text-xs text-white/30">Bs {mat.price} c/u</div>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                  <button onClick={() => setMaterials(prev => { const n = Math.max(0, (prev[mat.id] || 0) - 1); if (n === 0) { const { [mat.id]: _, ...rest } = prev; return rest }; return { ...prev, [mat.id]: n } })}
+                                    className="w-6 h-6 rounded-lg bg-white/[0.06] flex items-center justify-center text-white/60 hover:bg-white/10 transition-all">
+                                    <Minus className="w-3 h-3" />
+                                  </button>
+                                  <span className="w-5 text-center text-xs font-semibold text-white">{qty}</span>
+                                  <button onClick={() => setMaterials(prev => ({ ...prev, [mat.id]: (prev[mat.id] || 0) + 1 }))}
+                                    className="w-6 h-6 rounded-lg bg-[#0077BD]/20 flex items-center justify-center text-[#0077BD] hover:bg-[#0077BD]/30 transition-all">
+                                    <Plus className="w-3 h-3" />
+                                  </button>
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </div>
+                      {(boxesCost > 0 || materialsCost > 0) && (
+                        <div className="p-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06] text-xs text-white/50 mt-2">
+                          <div className="flex justify-between">
+                            <span>Subtotal materiales</span>
+                            <span className="text-white font-semibold">Bs {(boxesCost + materialsCost).toLocaleString()}</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* ──── D) MANIPULEO DE OBJETOS ──── */}
+            <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] mb-4">
+              <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
+                <span className="text-lg">🏋️</span> Manipuleo de Objetos
               </h4>
               <div className="space-y-3">
                 {HANDLING_EXTRAS.map((extra) => {
@@ -1791,223 +2173,20 @@ function CalculatorSection() {
               </div>
             </div>
 
-            {/* Section C: Accesibilidad - Origen */}
-            <div className="p-5 rounded-2xl bg-white/[0.03] border border-[#00E676]/10 mb-4">
-              <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
-                <span className="text-lg">🏢</span> Accesibilidad — Origen
-                <span className="text-xs px-2 py-0.5 rounded-full bg-[#00E676]/10 text-[#00E676] font-semibold">Origen</span>
-              </h4>
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label className="text-xs text-white/40 block mb-1">Piso de origen</label>
-                  <select value={originFloor} onChange={e => setOriginFloor(e.target.value)}
-                    className={inputClass + ' appearance-none'}>
-                    {['baja', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'].map(f => <option key={f} value={f} className="bg-[#0a0e17]">Planta {f === 'baja' ? 'baja' : f + '°'}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="text-xs text-white/40 block mb-1">Elevador</label>
-                  <button onClick={() => setElevatorOrigin(!elevatorOrigin)}
-                    className={`w-full px-4 py-3 rounded-xl text-sm font-semibold transition-all ${elevatorOrigin ? 'bg-[#00E676] text-black' : 'bg-white/[0.04] text-white/40 border border-white/[0.08]'}`}>
-                    {elevatorOrigin ? 'Sí' : 'No'}
-                  </button>
-                </div>
-              </div>
-              {originFloorCost > 0 && (
-                <div className="p-2 rounded-lg bg-[#00E676]/5 border border-[#00E676]/10 text-xs text-white/50 mb-4">
-                  Costo piso: {getFloorCount(originFloor)} pisos × Bs {elevatorOrigin ? selectedVehicle?.floorElev : selectedVehicle?.floorNoElev}/piso = <span className="text-[#00E676] font-bold">Bs {originFloorCost}</span>
-                </div>
-              )}
-              {/* Distancia caminata origen */}
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm">🚶</span>
-                  <div>
-                    <div className="text-xs text-white/70">Distancia de caminata</div>
-                    <div className="text-xs text-white/30">Bs 20 / 10m</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button onClick={() => setOriginCaminata(Math.max(0, originCaminata - 1))}
-                    className="w-7 h-7 rounded-lg bg-white/[0.06] flex items-center justify-center text-white/60 hover:bg-white/10 transition-all">
-                    <Minus className="w-3 h-3" />
-                  </button>
-                  <span className="w-8 text-center text-sm font-semibold text-white">{originCaminata}</span>
-                  <button onClick={() => setOriginCaminata(originCaminata + 1)}
-                    className="w-7 h-7 rounded-lg bg-[#00E676]/20 flex items-center justify-center text-[#00E676] hover:bg-[#00E676]/30 transition-all">
-                    <Plus className="w-3 h-3" />
-                  </button>
-                </div>
-              </div>
-              {/* Elevador fachada origen */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm">🏗️</span>
-                  <div>
-                    <div className="text-xs text-white/70">Elevador por fachada (grúa)</div>
-                    <div className="text-xs text-white/30">Bs 200 / hr</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button onClick={() => setOriginFachada(Math.max(0, originFachada - 1))}
-                    className="w-7 h-7 rounded-lg bg-white/[0.06] flex items-center justify-center text-white/60 hover:bg-white/10 transition-all">
-                    <Minus className="w-3 h-3" />
-                  </button>
-                  <span className="w-8 text-center text-sm font-semibold text-white">{originFachada}</span>
-                  <button onClick={() => setOriginFachada(originFachada + 1)}
-                    className="w-7 h-7 rounded-lg bg-[#00E676]/20 flex items-center justify-center text-[#00E676] hover:bg-[#00E676]/30 transition-all">
-                    <Plus className="w-3 h-3" />
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Section D: Accesibilidad - Destino */}
-            <div className="p-5 rounded-2xl bg-white/[0.03] border border-[#0077BD]/10 mb-4">
-              <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
-                <span className="text-lg">🏢</span> Accesibilidad — Destino
-                <span className="text-xs px-2 py-0.5 rounded-full bg-[#0077BD]/10 text-[#0077BD] font-semibold">Destino</span>
-              </h4>
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label className="text-xs text-white/40 block mb-1">Piso de destino</label>
-                  <select value={destFloor} onChange={e => setDestFloor(e.target.value)}
-                    className={inputClass + ' appearance-none'}>
-                    {['baja', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'].map(f => <option key={f} value={f} className="bg-[#0a0e17]">Planta {f === 'baja' ? 'baja' : f + '°'}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="text-xs text-white/40 block mb-1">Elevador</label>
-                  <button onClick={() => setElevatorDest(!elevatorDest)}
-                    className={`w-full px-4 py-3 rounded-xl text-sm font-semibold transition-all ${elevatorDest ? 'bg-[#0077BD] text-white' : 'bg-white/[0.04] text-white/40 border border-white/[0.08]'}`}>
-                    {elevatorDest ? 'Sí' : 'No'}
-                  </button>
-                </div>
-              </div>
-              {destFloorCost > 0 && (
-                <div className="p-2 rounded-lg bg-[#0077BD]/5 border border-[#0077BD]/10 text-xs text-white/50 mb-4">
-                  Costo piso: {getFloorCount(destFloor)} pisos × Bs {elevatorDest ? selectedVehicle?.floorElev : selectedVehicle?.floorNoElev}/piso = <span className="text-[#0077BD] font-bold">Bs {destFloorCost}</span>
-                </div>
-              )}
-              {/* Distancia caminata destino */}
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm">🚶</span>
-                  <div>
-                    <div className="text-xs text-white/70">Distancia de caminata</div>
-                    <div className="text-xs text-white/30">Bs 20 / 10m</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button onClick={() => setDestCaminata(Math.max(0, destCaminata - 1))}
-                    className="w-7 h-7 rounded-lg bg-white/[0.06] flex items-center justify-center text-white/60 hover:bg-white/10 transition-all">
-                    <Minus className="w-3 h-3" />
-                  </button>
-                  <span className="w-8 text-center text-sm font-semibold text-white">{destCaminata}</span>
-                  <button onClick={() => setDestCaminata(destCaminata + 1)}
-                    className="w-7 h-7 rounded-lg bg-[#0077BD]/20 flex items-center justify-center text-[#0077BD] hover:bg-[#0077BD]/30 transition-all">
-                    <Plus className="w-3 h-3" />
-                  </button>
-                </div>
-              </div>
-              {/* Elevador fachada destino */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm">🏗️</span>
-                  <div>
-                    <div className="text-xs text-white/70">Elevador por fachada (grúa)</div>
-                    <div className="text-xs text-white/30">Bs 200 / hr</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button onClick={() => setDestFachada(Math.max(0, destFachada - 1))}
-                    className="w-7 h-7 rounded-lg bg-white/[0.06] flex items-center justify-center text-white/60 hover:bg-white/10 transition-all">
-                    <Minus className="w-3 h-3" />
-                  </button>
-                  <span className="w-8 text-center text-sm font-semibold text-white">{destFachada}</span>
-                  <button onClick={() => setDestFachada(destFachada + 1)}
-                    className="w-7 h-7 rounded-lg bg-[#0077BD]/20 flex items-center justify-center text-[#0077BD] hover:bg-[#0077BD]/30 transition-all">
-                    <Plus className="w-3 h-3" />
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Section E: Ayudantes */}
+            {/* ──── E) RETIRO DE MATERIAL Y LIMPIEZA ──── */}
             <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] mb-4">
               <div className="flex items-center justify-between">
-                <div>
+                <div className="flex-1">
                   <h4 className="text-white font-semibold flex items-center gap-2">
-                    <span className="text-lg">👥</span> Ayudantes (carga y descarga)
+                    <span className="text-lg">♻️</span> Retiro de Material y Limpieza
                   </h4>
-                  <p className="text-xs text-white/30 mt-1">Bs {selectedVehicle?.helperPrice || 80} c/u</p>
+                  <p className="text-xs text-white/30 mt-1">Retornamos días después para retirar cajas, cartón y material de embalaje</p>
+                  <p className="text-xs text-white/40 mt-0.5">Bs 150 · Pago único</p>
                 </div>
-                <div className="flex items-center gap-3">
-                  <button onClick={() => setHelpers(Math.max(0, helpers - 1))}
-                    className="w-9 h-9 rounded-xl bg-white/[0.06] flex items-center justify-center text-white/60 hover:bg-white/10 transition-all">
-                    <Minus className="w-4 h-4" />
-                  </button>
-                  <span className="text-xl font-bold text-white w-8 text-center">{helpers}</span>
-                  <button onClick={() => setHelpers(helpers + 1)}
-                    className="w-9 h-9 rounded-xl bg-[#818CF8]/20 flex items-center justify-center text-[#818CF8] hover:bg-[#818CF8]/30 transition-all">
-                    <Plus className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-              {helpers > 0 && (
-                <div className="mt-2 text-sm text-[#818CF8]">{helpers} × Bs {selectedVehicle?.helperPrice || 80} = Bs {helpersCost}</div>
-              )}
-            </div>
-
-            {/* Section F: Logística y Seguridad */}
-            <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] mb-4">
-              <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
-                <span className="text-lg">🚚</span> Logística y Seguridad
-              </h4>
-              <div className="space-y-3">
-                {LOGISTICS_EXTRAS.map((extra) => {
-                  if (extra.id === 'retiro_cajas') {
-                    const qty = logisticsExtras[extra.id] || 0
-                    return (
-                      <div key={extra.id} className={`flex items-center justify-between p-3 rounded-xl transition-all ${qty > 0 ? 'bg-[#818CF8]/5 border border-[#818CF8]/15' : 'bg-white/[0.02] border border-white/[0.06]'}`}>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm">{extra.emoji}</span>
-                          <div>
-                            <div className="text-sm text-white font-medium">{extra.name}</div>
-                            <div className="text-xs text-white/30">{extra.desc} — Bs {extra.price}</div>
-                          </div>
-                        </div>
-                        <button onClick={() => setLogisticsExtras(prev => prev[extra.id] ? (prev[extra.id] ? (() => { const { [extra.id]: _, ...rest } = prev; return rest })() : prev) : { ...prev, [extra.id]: 1 })}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${qty > 0 ? 'bg-[#818CF8] text-white' : 'bg-white/[0.06] text-white/40 border border-white/[0.08]'}`}>
-                          {qty > 0 ? 'Incluido' : 'Agregar'}
-                        </button>
-                      </div>
-                    )
-                  }
-                  const qty = logisticsExtras[extra.id] || 0
-                  return (
-                    <div key={extra.id} className={`flex items-center justify-between p-3 rounded-xl transition-all ${qty > 0 ? 'bg-[#818CF8]/5 border border-[#818CF8]/15' : 'bg-white/[0.02] border border-white/[0.06]'}`}>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm">{extra.emoji}</span>
-                        <div>
-                          <div className="text-sm text-white font-medium">{extra.name}</div>
-                          <div className="text-xs text-white/30">Bs {extra.price}{extra.unit ? `/${extra.unit}` : ''}</div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <button onClick={() => setLogisticsExtras(prev => { const n = Math.max(0, (prev[extra.id] || 0) - 1); if (n === 0) { const { [extra.id]: _, ...rest } = prev; return rest }; return { ...prev, [extra.id]: n } })}
-                          className="w-7 h-7 rounded-lg bg-white/[0.06] flex items-center justify-center text-white/60 hover:bg-white/10 transition-all">
-                          <Minus className="w-3 h-3" />
-                        </button>
-                        <span className="w-6 text-center text-sm font-semibold text-white">{qty}</span>
-                        <button onClick={() => setLogisticsExtras(prev => ({ ...prev, [extra.id]: (prev[extra.id] || 0) + 1 }))}
-                          className="w-7 h-7 rounded-lg bg-[#818CF8]/20 flex items-center justify-center text-[#818CF8] hover:bg-[#818CF8]/30 transition-all">
-                          <Plus className="w-3 h-3" />
-                        </button>
-                      </div>
-                    </div>
-                  )
-                })}
+                <button onClick={() => setRetiroMaterial(!retiroMaterial)}
+                  className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${retiroMaterial ? 'bg-[#818CF8] text-white' : 'bg-white/[0.06] text-white/40 border border-white/[0.08]'}`}>
+                  {retiroMaterial ? 'Incluido' : 'Agregar'}
+                </button>
               </div>
             </div>
 
@@ -2020,8 +2199,14 @@ function CalculatorSection() {
             </div>
 
             <div className="flex justify-between">
-              <button onClick={() => setStep(calcPath === 'A' ? 2 : 3)} className="px-6 py-3 rounded-full text-sm font-semibold text-white/60 border border-white/[0.1] hover:border-white/20 transition-all">← Atrás</button>
-              <button onClick={() => setStep(calcPath === 'A' ? 4 : 5)} className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)]">
+              <button onClick={() => {
+                const routeStep = calcPath === 'A' ? 2 : calcPath === 'B' ? 3 : 2
+                setStep(routeStep)
+              }} className="px-6 py-3 rounded-full text-sm font-semibold text-white/60 border border-white/[0.1] hover:border-white/20 transition-all">← Atrás</button>
+              <button onClick={() => {
+                const insuranceStep = calcPath === 'A' ? 4 : calcPath === 'B' ? 5 : 4
+                setStep(insuranceStep)
+              }} className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)]">
                 Siguiente: Seguro y Pago →
               </button>
             </div>
@@ -2029,7 +2214,7 @@ function CalculatorSection() {
         )}
 
         {/* ═══════════════ Step: Seguro, IVA y Pago ═══════════════ */}
-        {step === (calcPath === 'A' ? 4 : 5) && calcPath && (
+        {calcPath && getStepType(step, calcPath) === 'insurance' && (
           <div className="max-w-4xl mx-auto">
             <h3 className="text-xl font-bold text-white mb-2 text-center">Seguro, IVA y Método de Pago</h3>
             <p className="text-sm text-white/40 text-center mb-8">Configura el seguro de carga, facturación y forma de pago</p>
@@ -2070,7 +2255,7 @@ function CalculatorSection() {
                       <span className="text-white font-semibold">Bs {(customInsurance ? parseFloat(customInsurance) || 0 : insuranceAmount).toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between text-sm mt-1">
-                      <span className="text-white/50">Costo del seguro (2%)</span>
+                      <span className="text-white/50">Costo del seguro (3%)</span>
                       <span className="text-[#FF9800] font-bold">Bs {insuranceCost.toLocaleString()}</span>
                     </div>
                   </div>
@@ -2169,8 +2354,14 @@ function CalculatorSection() {
             </div>
 
             <div className="flex justify-between">
-              <button onClick={() => setStep(calcPath === 'A' ? 3 : 4)} className="px-6 py-3 rounded-full text-sm font-semibold text-white/60 border border-white/[0.1] hover:border-white/20 transition-all">← Atrás</button>
-              <button onClick={() => setStep(calcPath === 'A' ? 5 : 6)} className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)]">
+              <button onClick={() => {
+                const extrasStep = calcPath === 'A' ? 3 : calcPath === 'B' ? 4 : 3
+                setStep(extrasStep)
+              }} className="px-6 py-3 rounded-full text-sm font-semibold text-white/60 border border-white/[0.1] hover:border-white/20 transition-all">← Atrás</button>
+              <button onClick={() => {
+                const submitStep = calcPath === 'A' ? 5 : calcPath === 'B' ? 6 : 5
+                setStep(submitStep)
+              }} className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)]">
                 Siguiente: Datos Personales →
               </button>
             </div>
@@ -2178,7 +2369,7 @@ function CalculatorSection() {
         )}
 
         {/* ═══════════════ Step: Datos Personales y Envío ═══════════════ */}
-        {step === (calcPath === 'A' ? 5 : 6) && calcPath && (
+        {calcPath && getStepType(step, calcPath) === 'submit' && (
           <div className="max-w-4xl mx-auto">
             <h3 className="text-xl font-bold text-white mb-2 text-center">Datos Personales y Envío</h3>
             <p className="text-sm text-white/40 text-center mb-8">Completa tus datos para enviar la cotización</p>
@@ -2262,6 +2453,7 @@ function CalculatorSection() {
                     {accessibilityCost > 0 && <div className="flex justify-between"><span className="text-white/40">Accesibilidad</span><span className="text-white">Bs {accessibilityCost.toLocaleString()}</span></div>}
                     {helpersCost > 0 && <div className="flex justify-between"><span className="text-white/40">Ayudantes ({helpers})</span><span className="text-white">Bs {helpersCost.toLocaleString()}</span></div>}
                     {logisticsCost > 0 && <div className="flex justify-between"><span className="text-white/40">Logística</span><span className="text-white">Bs {logisticsCost.toLocaleString()}</span></div>}
+                    {retiroMaterial && <div className="flex justify-between"><span className="text-white/40">Retiro de Material</span><span className="text-white">Bs 150</span></div>}
                     <div className="flex justify-between"><span className="text-white/40">Total extras</span><span className="text-white">Bs {extrasTotal.toLocaleString()}</span></div>
                     {wantsInsurance && <div className="flex justify-between"><span className="text-white/40">Seguro</span><span className="text-white">Bs {insuranceCost.toLocaleString()}</span></div>}
                     {includeIva && <div className="flex justify-between"><span className="text-white/40">IVA 16%</span><span className="text-white">Bs {ivaAmount.toLocaleString()}</span></div>}
@@ -2277,7 +2469,10 @@ function CalculatorSection() {
                 )}
 
                 <div className="flex justify-between items-center">
-                  <button onClick={() => setStep(calcPath === 'A' ? 4 : 5)} className="px-6 py-3 rounded-full text-sm font-semibold text-white/60 border border-white/[0.1] hover:border-white/20 transition-all">← Atrás</button>
+                  <button onClick={() => {
+                    const insuranceStep = calcPath === 'A' ? 4 : calcPath === 'B' ? 5 : 4
+                    setStep(insuranceStep)
+                  }} className="px-6 py-3 rounded-full text-sm font-semibold text-white/60 border border-white/[0.1] hover:border-white/20 transition-all">← Atrás</button>
                   <div className="flex gap-3">
                     <a href={`https://wa.me/59173662803?text=${buildWhatsAppMsg()}`} target="_blank" rel="noopener noreferrer"
                       className="px-6 py-3 rounded-full text-sm font-semibold bg-[#25D366] text-white flex items-center gap-2 hover:bg-[#128C7E] transition-all">
