@@ -1,8 +1,8 @@
 'use client'
 
-import { Car, Bus, Bike, Crown, Wind, Users, Package, ChevronRight, ArrowRight, Truck, Wrench, Tractor, HardHat, Caravan } from 'lucide-react'
+import { Car, Bus, Bike, Crown, Wind, Users, Package, ArrowRight, Truck, Wrench, Tractor, HardHat, Caravan } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import Image from 'next/image'
+import Link from 'next/link'
 
 type VehicleCategoryKey = 'clasico' | 'confort' | 'vip' | 'bus' | 'moto' | 'camioneta' | 'furgon' | 'grua' | 'auxilio' | 'construccion' | 'agro'
 
@@ -25,6 +25,7 @@ interface CategoryDef {
   borderColor: string
   hex: string
   vehicles: Vehicle[]
+  serviceHref: string
 }
 
 const categories: CategoryDef[] = [
@@ -36,6 +37,7 @@ const categories: CategoryDef[] = [
     bgColor: 'bg-yellow-400/10',
     borderColor: 'border-yellow-400/30 hover:border-yellow-400/60',
     hex: '#FACC15',
+    serviceHref: '/puerta-a-puerta',
     vehicles: [
       { name: 'Auto', passengers: 4, ac: false, icon: Car, luggage: '3 grandes, 2 pequeños', description: 'Vehículo clásico ideal para traslados urbanos cómodos y económicos.', image: '/fleet-clasico-auto.webp' },
       { name: 'Vagoneta', passengers: 4, ac: false, icon: Car, luggage: '4 grandes, 3 pequeños', description: 'Mayor espacio de equipaje, perfecta para viajes con carga adicional.', image: '/fleet-clasico-vagoneta.webp' },
@@ -49,6 +51,7 @@ const categories: CategoryDef[] = [
     bgColor: 'bg-[#0077BD]/10',
     borderColor: 'border-[#0077BD]/30 hover:border-[#0077BD]/60',
     hex: '#0077BD',
+    serviceHref: '/puerta-a-puerta',
     vehicles: [
       { name: 'Compacto', passengers: 4, ac: true, icon: Car, luggage: '1 grande, 1 pequeño', description: 'Compacto con aire acondicionado para viajes cómodos en la ciudad.', image: '/fleet-confort-compacto.webp' },
       { name: 'Sedan', passengers: 4, ac: true, icon: Car, luggage: '1 grande, 1 pequeño', description: 'Sedán confortable con A/C para un viaje placentero y seguro.', image: '/fleet-confort-sedan.webp' },
@@ -64,6 +67,7 @@ const categories: CategoryDef[] = [
     bgColor: 'bg-amber-400/10',
     borderColor: 'border-amber-400/30 hover:border-amber-400/60',
     hex: '#FBBF24',
+    serviceHref: '/ejecutivo',
     vehicles: [
       { name: 'Sedan VIP', passengers: 4, ac: true, icon: Car, luggage: '1 grande, 1 pequeño', description: 'Sedán premium con conductor profesional, total discreción y comodidad.', image: '/fleet-vip-sedan.webp' },
       { name: 'SUV VIP', passengers: 4, ac: true, icon: Car, luggage: '1 grande, 1 pequeño', description: 'SUV de alta gama para ejecutivos que exigen lo mejor.', image: '/fleet-vip-suv.webp' },
@@ -79,6 +83,7 @@ const categories: CategoryDef[] = [
     bgColor: 'bg-sky-400/10',
     borderColor: 'border-sky-400/30 hover:border-sky-400/60',
     hex: '#38BDF8',
+    serviceHref: '/bus',
     vehicles: [
       { name: 'MiniBus', passengers: 12, ac: true, icon: Bus, luggage: 'Espacio amplio', description: 'MiniBus de 12 pasajeros con A/C, ideal para eventos y excursiones.', image: '/fleet-bus-minibus.webp' },
       { name: 'Micro', passengers: 20, ac: true, icon: Bus, luggage: '1 grande, 1 pequeño', description: 'Microbús con A/C para grupos medianos y recorridos urbanos.', image: '/fleet-bus-micro.webp' },
@@ -93,6 +98,7 @@ const categories: CategoryDef[] = [
     bgColor: 'bg-gray-400/10',
     borderColor: 'border-gray-400/30 hover:border-gray-400/60',
     hex: '#9CA3AF',
+    serviceHref: '/envios',
     vehicles: [
       { name: 'Moto Taxi', passengers: 1, ac: false, icon: Bike, luggage: '1 pequeño', description: 'Motocicleta taxi para traslados rápidos y ágiles en la ciudad.', image: '/fleet-moto-taxi.webp' },
       { name: 'Envío', passengers: 0, ac: false, icon: Package, luggage: 'Paquetes', description: 'Servicio de entrega de paquetes y documentos a cualquier punto.', image: '/fleet-moto-envios.webp' },
@@ -108,6 +114,7 @@ const categories: CategoryDef[] = [
     bgColor: 'bg-orange-400/10',
     borderColor: 'border-orange-400/30 hover:border-orange-400/60',
     hex: '#FB923C',
+    serviceHref: '/mudanza',
     vehicles: [
       { name: 'Pickup', passengers: 4, ac: true, icon: Truck, luggage: 'Caja abierta grande', description: 'Pickup versátil para transporte de carga y pasajeros con caja abierta.', image: '/fleet-camioneta-pickup.webp' },
       { name: 'Camioneta Pequeña', passengers: 4, ac: true, icon: Caravan, luggage: '2 grandes, 2 pequeños', description: 'Camioneta compacta ideal para terrenos urbanos y suburbanos.', image: '/fleet-camioneta-pequena.webp' },
@@ -124,6 +131,7 @@ const categories: CategoryDef[] = [
     bgColor: 'bg-indigo-400/10',
     borderColor: 'border-indigo-400/30 hover:border-indigo-400/60',
     hex: '#818CF8',
+    serviceHref: '/logistica',
     vehicles: [
       { name: 'Furgón Pequeño', passengers: 2, ac: true, icon: Truck, luggage: 'Carga pequeña', description: 'Furgón compacto para entregas y traslados de carga ligera en la ciudad.', image: '/fleet-furgon-pequeno.webp' },
       { name: 'Furgón Mediano', passengers: 2, ac: true, icon: Truck, luggage: 'Carga mediana', description: 'Furgón mediano ideal para transporte de mercancías de tamaño moderado.', image: '/fleet-furgon-mediano.webp' },
@@ -139,6 +147,7 @@ const categories: CategoryDef[] = [
     bgColor: 'bg-red-400/10',
     borderColor: 'border-red-400/30 hover:border-red-400/60',
     hex: '#F87171',
+    serviceHref: '/auxilio-mecanico',
     vehicles: [
       { name: 'Moto Grúa', passengers: 1, ac: false, icon: Bike, luggage: 'Moto', description: 'Grúa especializada para el traslado seguro de motocicletas.', image: '/fleet-grua-moto.webp' },
       { name: 'Grúa Arrastre', passengers: 2, ac: false, icon: Truck, luggage: 'Vehículo liviano', description: 'Grúa de arrastre para vehículos livianos y medianos en situaciones de emergencia.', image: '/fleet-grua-arrastre.webp' },
@@ -156,6 +165,7 @@ const categories: CategoryDef[] = [
     bgColor: 'bg-cyan-400/10',
     borderColor: 'border-cyan-400/30 hover:border-cyan-400/60',
     hex: '#22D3EE',
+    serviceHref: '/auxilio-mecanico',
     vehicles: [
       { name: 'Gomería Móvil', passengers: 2, ac: false, icon: Wrench, luggage: 'Repuestos de neumáticos', description: 'Servicio de gomería móvil que acude a tu ubicación para reparar o cambiar neumáticos en el lugar.', image: '/fleet-auxilio-gomero.webp' },
       { name: 'Batería Móvil', passengers: 2, ac: false, icon: Wrench, luggage: 'Baterías y cables', description: 'Servicio de batería móvil para arranque asistido o reemplazo de batería en el sitio.', image: '/fleet-auxilio-bateria.webp' },
@@ -170,6 +180,7 @@ const categories: CategoryDef[] = [
     bgColor: 'bg-amber-500/10',
     borderColor: 'border-amber-500/30 hover:border-amber-500/60',
     hex: '#F59E0B',
+    serviceHref: '/alquiler-maquinaria',
     vehicles: [
       { name: 'Volqueta', passengers: 2, ac: false, icon: Truck, luggage: 'Material de construcción', description: 'Volqueta para transporte de áridos, escombros y materiales de construcción.', image: '/fleet-construccion-volqueta.webp' },
       { name: 'Bobcat', passengers: 1, ac: false, icon: HardHat, luggage: 'Carga compacta', description: 'Minicargador Bobcat para movimientos de tierra y cargas compactas.', image: '/fleet-construccion-bobcat.webp' },
@@ -188,6 +199,7 @@ const categories: CategoryDef[] = [
     bgColor: 'bg-green-500/10',
     borderColor: 'border-green-500/30 hover:border-green-500/60',
     hex: '#22C55E',
+    serviceHref: '/alquiler-maquinaria',
     vehicles: [
       { name: 'Tractor', passengers: 1, ac: false, icon: Tractor, luggage: 'Implementos agrícolas', description: 'Tractor para laboreo, siembra y tareas agrícolas en el campo.', image: '/fleet-agro-tractor.webp' },
       { name: 'Cosechadora', passengers: 1, ac: true, icon: Tractor, luggage: 'Cosecha', description: 'Cosechadora para recolección eficiente de cultivos a gran escala.', image: '/fleet-agro-cosechadora.webp' },
@@ -262,7 +274,7 @@ export function Fleet() {
         <div className={`transition-all duration-700 ${
           visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}>
-          {/* Category description */}
+          {/* Category description + link to service page */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2">
               {(() => { const Ic = currentCategory.icon; return <Ic className={`w-5 h-5 ${currentCategory.color}`} /> })()}
@@ -270,6 +282,14 @@ export function Fleet() {
                 {currentCategory.label}
               </span>
               <span className="text-white/30 text-sm">— {currentCategory.vehicles.length} vehículos disponibles</span>
+            </div>
+            <div className="mt-2">
+              <Link
+                href={currentCategory.serviceHref}
+                className="inline-flex items-center gap-1 text-sm font-semibold text-[#00E676] hover:text-[#00ff88] transition-colors"
+              >
+                Ver servicio de {currentCategory.label} <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
             </div>
           </div>
 
@@ -294,16 +314,24 @@ export function Fleet() {
                   }`} />
 
                   <div className="relative z-10 p-5">
-                    {/* Vehicle Image */}
-                    <div className="w-full h-32 flex items-center justify-center mb-4 rounded-xl overflow-hidden">
-                      <Image
+                    {/* Vehicle Image - native img for transparency */}
+                    <div className="w-full h-44 flex items-center justify-center mb-4 rounded-xl overflow-hidden relative">
+                      {/* Radial glow behind vehicle */}
+                      <div
+                        className="absolute inset-0 opacity-30"
+                        style={{
+                          background: `radial-gradient(circle at center, ${currentCategory.hex}20 0%, transparent 70%)`
+                        }}
+                      />
+                      <img
                         src={vehicle.image}
                         alt={vehicle.name}
-                        width={140}
-                        height={90}
-                        className="max-h-[90px] max-w-[140px] w-auto h-auto object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)] transition-transform duration-500 group-hover:scale-110"
+                        className="max-h-36 max-w-full w-auto h-auto object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.4)] transition-transform duration-500 group-hover:scale-110 relative z-10"
                       />
                     </div>
+
+                    {/* Accent line */}
+                    <div className="h-0.5 w-12 rounded-full mb-3" style={{ backgroundColor: `${currentCategory.hex}60` }} />
 
                     {/* Vehicle Name */}
                     <h3 className={`text-lg font-semibold mb-1 transition-colors duration-300 ${
@@ -354,14 +382,14 @@ export function Fleet() {
                             <span>{vehicle.ac ? 'Aire acondicionado incluido' : 'Sin aire acondicionado'}</span>
                           </div>
                         </div>
-                        {/* Reservar Button */}
-                        <a
-                          href="#reservas"
+                        {/* Link to service page */}
+                        <Link
+                          href={currentCategory.serviceHref}
                           className={`inline-flex items-center gap-2 mt-2 px-5 py-2.5 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_15px_rgba(0,230,118,0.2)] hover:shadow-[0_0_25px_rgba(0,230,118,0.4)]`}
                         >
                           Reservar Ahora
                           <ArrowRight className="w-4 h-4" />
-                        </a>
+                        </Link>
                       </div>
                     </div>
                   </div>

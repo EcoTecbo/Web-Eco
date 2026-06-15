@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "standalone",
   /* config options here */
   typescript: {
     ignoreBuildErrors: true,
@@ -11,6 +10,9 @@ const nextConfig: NextConfig = {
     ".space.z.ai",
     ".space.chatglm.site",
   ],
+  images: {
+    unoptimized: true,
+  },
 };
 
 export default nextConfig;

@@ -24,10 +24,11 @@ const serviceLinks = [
 
 const workLinks = [
   { label: 'Agencias de viaje', href: '/agencias' },
-  { label: 'Organizadores de eventos', href: '/#multicanal' },
-  { label: 'Socios de transporte', href: '/#multicanal' },
-  { label: 'Afiliados', href: '/#multicanal' },
-  { label: 'Conductores', href: '/#multicanal' },
+  { label: 'Organizadores de eventos', href: '/organizadores-eventos' },
+  { label: 'Socios de transporte', href: '/socios-transporte' },
+  { label: 'Afiliados', href: '/socio-de-servicios' },
+  { label: 'Conductores', href: '/socio-de-transporte' },
+  { label: 'Eventos y Congresos', href: '/eventos-y-congresos' },
   { label: 'Aerolíneas', href: '/aeropuerto' },
 ]
 

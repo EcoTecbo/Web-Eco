@@ -152,7 +152,7 @@ export default function NosotrosPage() {
                     <img
                       src="/logo-ecotaxi.webp"
                       alt="Ecotaxi Logo"
-                      className="h-14 w-auto mx-auto mb-4"
+                      className="h-20 w-20 object-contain drop-shadow-[0_0_12px_rgba(0,230,118,0.25)] mx-auto mb-4"
                     />
                     <p className="text-white/30 text-sm">Marca registrada de</p>
                     <p className="text-[#0077BD] font-semibold">O&C Ingeniería y Representaciones SRL</p>

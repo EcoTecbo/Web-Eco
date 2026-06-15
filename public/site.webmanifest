@@ -1,21 +1,12 @@
 {
   "name": "Ecotaxi Bolivia",
   "short_name": "Ecotaxi",
-  "description": "Transporte Inteligente, Compromiso Ecológico. Taxi, mudanzas, traslados aeropuerto y más en Bolivia.",
+  "description": "Transporte Inteligente, Compromiso Ecológico",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0e17",
   "theme_color": "#00E676",
-  "orientation": "portrait-primary",
-  "lang": "es",
-  "scope": "/",
   "icons": [
-    {
-      "src": "/logo-ecotaxi.webp",
-      "sizes": "512x512",
-      "type": "image/webp",
-      "purpose": "any maskable"
-    },
     {
       "src": "/android-chrome-192x192.png",
       "sizes": "192x192",
@@ -26,7 +17,5 @@
       "sizes": "512x512",
       "type": "image/png"
     }
-  ],
-  "categories": ["transportation", "travel", "business"],
-  "prefer_related_applications": false
+  ]
 }
