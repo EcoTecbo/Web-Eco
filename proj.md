@@ -1,0 +1,1 @@
+- Dark glassmorphic design with gradient backgrounds and glow orbs

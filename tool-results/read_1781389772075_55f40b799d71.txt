@@ -1,0 +1,2002 @@
+     1→'use client'
+     2→
+     3→import { useEffect, useRef, useState, useMemo, useCallback } from 'react'
+     4→import dynamic from 'next/dynamic'
+     5→import anime from 'animejs'
+     6→import {
+     7→  MapPin, Route, Globe, Home, Building2, Shield, Truck, Package,
+     8→  CheckCircle, Calculator, ClipboardList, ChevronRight, Minus, Plus,
+     9→  ArrowRight, Phone, Sparkles, Box, Sofa, Bed, Tv, Refrigerator,
+    10→  ChefHat, Bath, Printer, Piano, Dumbbell, Bike as BikeIcon, CircleDollarSign,
+    11→  MessageCircle, Clock, Users, Star, AlertCircle, Mail, CreditCard,
+    12→  Search, Navigation, Flag, X, Send, Loader2, ChevronDown
+    13→} from 'lucide-react'
+    14→import { Navbar } from '@/components/ecotaxi/navbar'
+    15→import { Footer } from '@/components/ecotaxi/footer'
+    16→import { SchemaOrg } from '@/components/ecotaxi/schema-org'
+    17→
+    18→// Dynamic import for map component (avoids SSR issues with leaflet)
+    19→const MudanzaMap = dynamic(() => import('@/components/mudanza-map'), { ssr: false })
+    20→
+    21→/* Nominatim search */
+    22→async function searchAddress(query: string): Promise<NominatimResult[]> {
+    23→  if (!query || query.length < 3) return []
+    24→  try {
+    25→    const res = await fetch(
+    26→      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=bo&limit=5`,
+    27→      { headers: { 'Accept-Language': 'es' } }
+    28→    )
+    29→    if (!res.ok) return []
+    30→    return await res.json()
+    31→  } catch {
+    32→    return []
+    33→  }
+    34→}
+    35→
+    36→/* OSRM route calculation */
+    37→async function calculateRoute(
+    38→  origin: LatLng,
+    39→  destination: LatLng,
+    40→  stops: LatLng[]
+    41→): Promise<{ distance: number; duration: number; geometry: [number, number][] } | null> {
+    42→  const coords = [origin, ...stops, destination]
+    43→    .map(c => `${c.lng},${c.lat}`)
+    44→    .join(';')
+    45→  try {
+    46→    const res = await fetch(
+    47→      `https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&steps=true`
+    48→    )
+    49→    if (!res.ok) return null
+    50→    const data = await res.json()
+    51→    if (!data.routes || data.routes.length === 0) return null
+    52→    const route = data.routes[0]
+    53→    const geometry: [number, number][] = []
+    54→    if (route.geometry) {
+    55→      if (typeof route.geometry === 'string') {
+    56→        // Decode polyline
+    57→        let index = 0
+    58→        let lat = 0
+    59→        let lng = 0
+    60→        while (index < (route.geometry as string).length) {
+    61→          let byte: number
+    62→          let shift = 0
+    63→          let result = 0
+    64→          do {
+    65→            byte = (route.geometry as string).charCodeAt(index++) - 63
+    66→            result |= (byte & 0x1f) << shift
+    67→            shift += 5
+    68→          } while (byte >= 0x20)
+    69→          const dlat = ((result & 1) !== 0 ? ~(result >> 1) : (result >> 1))
+    70→          lat += dlat
+    71→          shift = 0
+    72→          result = 0
+    73→          do {
+    74→            byte = (route.geometry as string).charCodeAt(index++) - 63
+    75→            result |= (byte & 0x1f) << shift
+    76→            shift += 5
+    77→          } while (byte >= 0x20)
+    78→          const dlng = ((result & 1) !== 0 ? ~(result >> 1) : (result >> 1))
+    79→          lng += dlng
+    80→          geometry.push([lat / 1e5, lng / 1e5])
+    81→        }
+    82→      } else if (Array.isArray(route.geometry)) {
+    83→        for (const coord of route.geometry) {
+    84→          if (Array.isArray(coord) && coord.length >= 2) {
+    85→            geometry.push([coord[1], coord[0]])
+    86→          }
+    87→        }
+    88→      }
+    89→    }
+    90→    return {
+    91→      distance: route.distance / 1000,
+    92→      duration: route.duration / 60,
+    93→      geometry,
+    94→    }
+    95→  } catch {
+    96→    return null
+    97→  }
+    98→}
+    99→
+   100→/* ─────────── scroll-triggered animation ─────────── */
+   101→function useInView(threshold = 0.1) {
+   102→  const ref = useRef<HTMLDivElement>(null)
+   103→  const [visible, setVisible] = useState(false)
+   104→  useEffect(() => {
+   105→    const el = ref.current
+   106→    if (!el) return
+   107→    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) setVisible(true) }, { threshold })
+   108→    obs.observe(el)
+   109→    return () => obs.disconnect()
+   110→  }, [threshold])
+   111→  return { ref, visible }
+   112→}
+   113→
+   114→function A({ children, className = '', delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
+   115→  const { ref, visible } = useInView(0.08)
+   116→  return (
+   117→    <div ref={ref} className={`transition-all duration-700 ease-out ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'} ${className}`}
+   118→      style={{ transitionDelay: visible ? `${delay}ms` : '0ms' }}>{children}</div>
+   119→  )
+   120→}
+   121→
+   122→/* ═══════════════════════════════════════════════════════════════════════════════
+   123→   FURNITURE DATA
+   124→   ═══════════════════════════════════════════════════════════════════════════════ */
+   125→interface FurnitureItem { name: string; vol: number; emoji: string }
+   126→
+   127→const ROOMS: Record<string, { label: string; items: FurnitureItem[] }> = {
+   128→  recamara: { label: 'Recámara', items: [
+   129→    { name: 'Cama Individual', vol: 1.2, emoji: '🛏️' }, { name: 'Cama Matrimonial', vol: 1.8, emoji: '🛏️' },
+   130→    { name: 'Cama Queen', vol: 2.2, emoji: '🛏️' }, { name: 'Cama King', vol: 2.5, emoji: '🛏️' },
+   131→    { name: 'Buró', vol: 0.3, emoji: '🪑' }, { name: 'Cabecera', vol: 0.4, emoji: '🪵' },
+   132→    { name: 'Ropero Mediano', vol: 1.0, emoji: '🚪' }, { name: 'Ropero Grande', vol: 1.5, emoji: '🚪' },
+   133→    { name: 'Cómoda/Tocador', vol: 0.6, emoji: '🪞' }, { name: 'Cajonera', vol: 0.5, emoji: '🗄️' },
+   134→    { name: 'Litera', vol: 1.8, emoji: '🛏️' }, { name: 'Escritorio', vol: 0.5, emoji: '🖥️' },
+   135→    { name: 'Silla', vol: 0.3, emoji: '🪑' }, { name: 'Ventilador de techo', vol: 0.2, emoji: '🌀' },
+   136→    { name: 'Aire acondicionado', vol: 0.3, emoji: '❄️' }, { name: 'Baúl', vol: 0.5, emoji: '📦' },
+   137→    { name: 'Mecedora', vol: 0.6, emoji: '🪑' }, { name: 'Cuna', vol: 0.5, emoji: '👶' },
+   138→    { name: 'Zapatera', vol: 0.3, emoji: '👟' },
+   139→  ]},
+   140→  sala: { label: 'Sala', items: [
+   141→    { name: 'Sofá 2 cuerpos', vol: 1.2, emoji: '🛋️' }, { name: 'Sofá 3 cuerpos', vol: 1.8, emoji: '🛋️' },
+   142→    { name: 'Sofá esquinero (L)', vol: 2.5, emoji: '🛋️' }, { name: 'Mesa de centro', vol: 0.4, emoji: '🪵' },
+   143→    { name: 'Mesa de centro vidrio', vol: 0.3, emoji: '🪟' }, { name: 'Mueble de TV', vol: 0.8, emoji: '📺' },
+   144→    { name: 'Sillón individual', vol: 0.6, emoji: '🛋️' }, { name: 'Estantería/Bibliorato', vol: 0.7, emoji: '📚' },
+   145→    { name: 'Cuadro grande', vol: 0.2, emoji: '🖼️' }, { name: 'Alfombra', vol: 0.3, emoji: '🟫' },
+   146→    { name: 'Lámpara de piso', vol: 0.2, emoji: '💡' }, { name: 'Rack de componentes', vol: 0.5, emoji: '🎵' },
+   147→  ]},
+   148→  cocina: { label: 'Cocina', items: [
+   149→    { name: 'Refrigerador', vol: 1.0, emoji: '🧊' }, { name: 'Cocina/Estufa', vol: 0.8, emoji: '🍳' },
+   150→    { name: 'Microondas', vol: 0.3, emoji: '📦' }, { name: 'Horno', vol: 0.5, emoji: '🫕' },
+   151→    { name: 'Lavadora', vol: 0.6, emoji: '🫧' }, { name: 'Secadora', vol: 0.6, emoji: '🌀' },
+   152→    { name: 'Mesa de cocina', vol: 0.5, emoji: '🪑' }, { name: 'Silla de cocina (c/u)', vol: 0.2, emoji: '🪑' },
+   153→    { name: 'Gabinete cocina', vol: 0.6, emoji: '🗄️' }, { name: 'Lavavajillas', vol: 0.5, emoji: '🫧' },
+   154→    { name: 'Licuadora', vol: 0.1, emoji: '🥤' },
+   155→  ]},
+   156→  comedor: { label: 'Comedor', items: [
+   157→    { name: 'Mesa comedor 4 puestos', vol: 1.0, emoji: '🪑' }, { name: 'Mesa comedor 6 puestos', vol: 1.5, emoji: '🪑' },
+   158→    { name: 'Mesa comedor 8 puestos', vol: 2.0, emoji: '🪑' }, { name: 'Silla comedor (c/u)', vol: 0.3, emoji: '🪑' },
+   159→    { name: 'Vitrina/Mueble cristal', vol: 1.0, emoji: '🪟' }, { name: 'Cristalera', vol: 0.8, emoji: '🍷' },
+   160→  ]},
+   161→  bano: { label: 'Baño', items: [
+   162→    { name: 'Mueble de baño', vol: 0.3, emoji: '🪞' }, { name: 'Espejo grande', vol: 0.1, emoji: '🪞' },
+   163→  ]},
+   164→  oficina: { label: 'Oficina', items: [
+   165→    { name: 'Escritorio ejecutivo', vol: 1.0, emoji: '🖥️' }, { name: 'Silla ejecutiva', vol: 0.5, emoji: '🪑' },
+   166→    { name: 'Archivador', vol: 0.5, emoji: '🗄️' }, { name: 'Impresora', vol: 0.3, emoji: '🖨️' },
+   167→    { name: 'Gabinete servidores', vol: 1.0, emoji: '🖥️' }, { name: 'Pizarra', vol: 0.2, emoji: '📋' },
+   168→    { name: 'Proyector', vol: 0.1, emoji: '📽️' }, { name: 'Mesa de reunión', vol: 1.5, emoji: '🪑' },
+   169→  ]},
+   170→  otros: { label: 'Otros', items: [
+   171→    { name: 'Caja grande', vol: 0.15, emoji: '📦' }, { name: 'Caja mediana', vol: 0.08, emoji: '📦' },
+   172→    { name: 'Caja pequeña', vol: 0.04, emoji: '📦' }, { name: 'Bicicleta', vol: 0.5, emoji: '🚲' },
+   173→    { name: 'Piano vertical', vol: 1.5, emoji: '🎹' }, { name: 'Piano de cola', vol: 2.5, emoji: '🎹' },
+   174→    { name: 'Caja fuerte', vol: 1.0, emoji: '🔐' }, { name: 'Máquina de ejercicio', vol: 0.8, emoji: '🏋️' },
+   175→    { name: 'Refrigerador comercial', vol: 2.0, emoji: '🧊' }, { name: 'Equipo médico', vol: 0.5, emoji: '🏥' },
+   176→    { name: 'Mascota (jaula grande)', vol: 0.5, emoji: '🐾' }, { name: 'Plantas', vol: 0.2, emoji: '🪴' },
+   177→    { name: 'TV 32-50"', vol: 0.3, emoji: '📺' }, { name: 'TV 50"+', vol: 0.5, emoji: '📺' },
+   178→    { name: 'Bicicleta estática', vol: 0.6, emoji: '🚲' }, { name: 'Caminadora', vol: 0.8, emoji: '🏃' },
+   179→  ]},
+   180→}
+   181→
+   182→const ROOM_KEYS = Object.keys(ROOMS)
+   183→
+   184→/* extras (legacy - kept for type reference) */
+   185→interface Extra { name: string; price: number; unit?: string }
+   186→
+   187→/* Box purchase options */
+   188→const BOX_OPTIONS = [
+   189→  { id: 'caja_peq', name: 'Caja Pequeña (30×30×30 cm)', price: 15, emoji: '📦' },
+   190→  { id: 'caja_med', name: 'Caja Mediana (40×40×40 cm)', price: 25, emoji: '📦' },
+   191→  { id: 'caja_gra', name: 'Caja Grande (50×50×50 cm)', price: 35, emoji: '📦' },
+   192→]
+   193→
+   194→/* Packing materials */
+   195→const PACKING_MATERIALS = [
+   196→  { id: 'papel_film', name: 'Papel Film (rollo)', price: 30, emoji: '🔀' },
+   197→  { id: 'papel_burbuja', name: 'Papel Burbuja (rollo)', price: 45, emoji: '🫧' },
+   198→  { id: 'papel_kraft', name: 'Papel Kraft (rollo)', price: 25, emoji: '🟫' },
+   199→  { id: 'manta_proteccion', name: 'Manta de Protección', price: 50, emoji: '🛡️' },
+   200→  { id: 'cinta_embalar', name: 'Cinta de Embalar (rollo)', price: 15, emoji: '📎' },
+   201→  { id: 'etiquetas', name: 'Etiquetas y Marcadores', price: 10, emoji: '🏷️' },
+   202→]
+   203→
+   204→/* Handling extras (per item, applies to both origin/dest) */
+   205→const HANDLING_EXTRAS = [
+   206→  { id: 'armado_muebles', name: 'Armado y Desarmado de Muebles Grandes', price: 80, unit: 'mueble', emoji: '🔧', desc: 'Roperos, camas, cunas, escritorios grandes' },
+   207→  { id: 'embalaje_fragil', name: 'Embalaje Especial Objetos Frágiles', price: 60, unit: 'juego', emoji: '🍷', desc: 'Vajilla, espejos, obras de arte, pantallas TV' },
+   208→  { id: 'objetos_pesados', name: 'Objetos de Gran Peso / Línea Blanca', price: 120, unit: 'objeto', emoji: '🏋️', desc: 'Pianos, cajas fuertes, refrigeradores 2 puertas' },
+   209→]
+   210→
+   211→/* Accessibility extras (per location - origin and destination separately) */
+   212→const ACCESSIBILITY_EXTRAS = [
+   213→  { id: 'distancia_caminata', name: 'Distancia de Caminata / Acarreo', price: 20, unit: '10m', emoji: '🚶', desc: 'Si el camión no puede estacionar frente a la puerta' },
+   214→  { id: 'elevador_fachada', name: 'Elevador por Fachada (Grúa)', price: 200, unit: 'hr', emoji: '🏗️', desc: 'Grúa externa para subir muebles por ventana' },
+   215→]
+   216→
+   217→/* Logistics extras */
+   218→const LOGISTICS_EXTRAS = [
+   219→  { id: 'punto_carga_extra', name: 'Punto de Carga Adicional (parada extra)', price: 100, unit: 'parada', emoji: '📍' },
+   220→  { id: 'retiro_cajas', name: 'Desescombro / Retiro de Cajas y Material', price: 150, emoji: '♻️', desc: 'Retornamos días después para llevar cartón y plástico' },
+   221→]
+   222→
+   223→/* Mudanza size categories for Path B */
+   224→const MUDANZA_CATEGORIES = [
+   225→  {
+   226→    id: 'express',
+   227→    name: 'Mudanza Express',
+   228→    subtitle: 'Monoambiente / Departamento Pequeño',
+   229→    emoji: '📦',
+   230→    color: '#00E676',
+   231→    desc: 'Ideal para departamentos de 1 dormitorio o monoambientes. Incluye camas, un ropero mediano, heladera, electrodomésticos básicos y 10-15 cajas.',
+   232→    suggestedVehicle: { cerrado: 'Furgón Pequeño', abierto: 'Pickup' },
+   233→    maxVolume: 6,
+   234→  },
+   235→  {
+   236→    id: 'estandar',
+   237→    name: 'Mudanza Estándar',
+   238→    subtitle: 'Departamento Familiar',
+   239→    emoji: '🏠',
+   240→    color: '#0077BD',
+   241→    desc: 'Ideal para departamentos de 2 a 3 dormitorios. Muebles de living, comedor, camas, línea blanca completa y 20-30 cajas.',
+   242→    suggestedVehicle: { cerrado: 'Furgón Mediano', abierto: 'Camioneta Mediana' },
+   243→    maxVolume: 14,
+   244→  },
+   245→  {
+   246→    id: 'familiar',
+   247→    name: 'Mudanza Familiar',
+   248→    subtitle: 'Casa Familiar Mediana',
+   249→    emoji: '🏡',
+   250→    color: '#FF9800',
+   251→    desc: 'Ideal para casas de 3 a 4 dormitorios. Mobiliario completo de casa, muebles de jardín, múltiples roperos y más de 40 cajas.',
+   252→    suggestedVehicle: { cerrado: 'Furgón Grande', abierto: 'Camioneta Larga' },
+   253→    maxVolume: 25,
+   254→  },
+   255→  {
+   256→    id: 'premium',
+   257→    name: 'Mudanza Premium',
+   258→    subtitle: 'Casa Grande / Corporativa',
+   259→    emoji: '🏢',
+   260→    color: '#818CF8',
+   261→    desc: 'Ideal para casas amplias de más de 4 dormitorios o traslados de oficinas. Residencias grandes en un solo viaje o múltiples vehículos.',
+   262→    suggestedVehicle: { cerrado: 'Furgón Largo', abierto: 'Camioneta Grande' },
+   263→    maxVolume: 35,
+   264→  },
+   265→]
+   266→
+   267→/* vehicles */
+   268→const VEHICLES = [
+   269→  { cat: 'Camioneta', color: '#FB923C', items: [
+   270→    { name: 'Pickup', cap: 8, desc: 'Caja abierta grande, ideal para cargas sin protección del clima', pax: 2, floorElev: 5, floorNoElev: 10, helperPrice: 60, perKm: 8, img: '/vehicles/6-CAMIONETA/pickup.png' },
+   271→    { name: 'Camioneta Pequeña', cap: 5, desc: 'Mudanzas pequeñas, departamento studio o 1 dormitorio', pax: 2, floorElev: 10, floorNoElev: 15, helperPrice: 80, perKm: 10, img: '/vehicles/6-CAMIONETA/pequena.png' },
+   272→    { name: 'Camioneta Mediana', cap: 12, desc: 'Mudanzas medianas, departamento 2 dormitorios', pax: 3, floorElev: 15, floorNoElev: 20, helperPrice: 100, perKm: 12, img: '/vehicles/6-CAMIONETA/mediana.png' },
+   273→    { name: 'Camioneta Grande', cap: 35, desc: 'Mudanzas extra grandes o múltiples destinos', pax: 3, floorElev: 20, floorNoElev: 25, helperPrice: 120, perKm: 15, img: '/vehicles/6-CAMIONETA/grande.jpg' },
+   274→    { name: 'Camioneta Larga', cap: 22, desc: 'Mudanzas grandes, casa 3+ dormitorios', pax: 3, floorElev: 25, floorNoElev: 30, helperPrice: 150, perKm: 18, img: '/vehicles/6-CAMIONETA/larga.png' },
+   275→  ]},
+   276→  { cat: 'Furgón', color: '#818CF8', items: [
+   277→    { name: 'Furgón Pequeño', cap: 6, desc: 'Carga pequeña, mudanzas studio (6m³)', pax: 2, floorElev: 10, floorNoElev: 15, helperPrice: 80, perKm: 10, img: '/vehicles/7-FURGON/pequeno.png' },
+   278→    { name: 'Furgón Mediano', cap: 12, desc: 'Carga mediana, mudanzas 1-2 dormitorios (12m³)', pax: 2, floorElev: 15, floorNoElev: 20, helperPrice: 100, perKm: 12, img: '/vehicles/7-FURGON/mediano.png' },
+   279→    { name: 'Furgón Grande', cap: 20, desc: 'Carga grande, mudanzas 2-3 dormitorios (20m³)', pax: 3, floorElev: 20, floorNoElev: 25, helperPrice: 120, perKm: 15, img: '/vehicles/7-FURGON/grande.png' },
+   280→    { name: 'Furgón Largo', cap: 30, desc: 'Carga extra grande, casas grandes (30m³)', pax: 3, floorElev: 25, floorNoElev: 30, helperPrice: 150, perKm: 18, img: '/vehicles/7-FURGON/largo.png' },
+   281→  ]},
+   282→]
+   283→
+   284→/* Payment methods */
+   285→const PAYMENT_METHODS = [
+   286→  { id: 'efectivo', label: 'Efectivo', icon: CircleDollarSign },
+   287→  { id: 'qr', label: 'QR', icon: CreditCard },
+   288→  { id: 'transferencia', label: 'Transferencia bancaria', icon: Building2 },
+   289→  { id: 'tarjeta', label: 'Tarjeta crédito/débito', icon: CreditCard },
+   290→  { id: 'corporativa', label: 'Cuenta corporativa', icon: Building2 },
+   291→]
+   292→
+   293→/* Insurance options */
+   294→const INSURANCE_OPTIONS = [
+   295→  { amount: 5000, label: 'Bs 5,000' },
+   296→  { amount: 10000, label: 'Bs 10,000' },
+   297→  { amount: 20000, label: 'Bs 20,000' },
+   298→  { amount: 50000, label: 'Bs 50,000' },
+   299→]
+   300→
+   301→/* Shared types */
+   302→type MoveType = 'local' | 'provincial' | 'nacional'
+   303→type CatType = 'casa' | 'oficina' | 'especial'
+   304→type PaymentMethod = 'efectivo' | 'qr' | 'transferencia' | 'tarjeta' | 'corporativa'
+   305→
+   306→interface LatLng { lat: number; lng: number }
+   307→interface IntermediateStop { id: string; latlng: LatLng; address: string }
+   308→interface NominatimResult { display_name: string; lat: string; lon: string }
+   309→
+   310→/* ═══════════════════════════════════════════════════════════════════════════════
+   311→   1. HERO
+   312→   ═══════════════════════════════════════════════════════════════════════════════ */
+   313→function HeroSection() {
+   314→  const truckRef = useRef<HTMLDivElement>(null)
+   315→  const [heroSlide, setHeroSlide] = useState(0)
+   316→  const heroImages = ['/mudanza-hero1.webp', '/mudanza-hero2.webp']
+   317→
+   318→  useEffect(() => {
+   319→    if (truckRef.current) {
+   320→      anime({ targets: truckRef.current, translateX: [-120, 0], opacity: [0, 1], duration: 1400, easing: 'easeOutExpo' })
+   321→    }
+   322→  }, [])
+   323→
+   324→  // Auto-slide hero images
+   325→  useEffect(() => {
+   326→    const interval = setInterval(() => {
+   327→      setHeroSlide(prev => (prev + 1) % heroImages.length)
+   328→    }, 5000)
+   329→    return () => clearInterval(interval)
+   330→  }, [heroImages.length])
+   331→
+   332→  return (
+   333→    <section className="relative min-h-[92vh] flex items-center justify-center overflow-hidden">
+   334→      {/* Background images with fade transition */}
+   335→      {heroImages.map((img, i) => (
+   336→        <div key={img} className="absolute inset-0 bg-cover bg-center transition-opacity duration-1000"
+   337→          style={{ backgroundImage: `url('${img}')`, opacity: heroSlide === i ? 0.2 : 0 }} />
+   338→      ))}
+   339→      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17]/80 via-[#0d1320]/70 to-[#0a0e17]/90" />
+   340→      <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: `linear-gradient(rgba(0,230,118,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(0,230,118,0.3) 1px, transparent 1px)`, backgroundSize: '60px 60px' }} />
+   341→      <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full bg-[#00E676]/12 blur-[120px] animate-pulse" />
+   342→      <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full bg-[#0077BD]/10 blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
+   343→      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full bg-[#FF9800]/6 blur-[100px] animate-pulse" style={{ animationDelay: '2s' }} />
+   344→
+   345→      {/* Animated Truck */}
+   346→      <div ref={truckRef} className="absolute bottom-[12%] left-1/2 -translate-x-1/2 md:left-[15%] md:translate-x-0 opacity-0">
+   347→        <svg width="200" height="100" viewBox="0 0 200 100" fill="none">
+   348→          <rect x="60" y="20" width="100" height="50" rx="6" fill="#00E676" opacity="0.15" stroke="#00E676" strokeWidth="1.5" />
+   349→          <rect x="65" y="25" width="90" height="40" rx="3" fill="#00E676" opacity="0.08" />
+   350→          <rect x="160" y="35" width="35" height="35" rx="4" fill="#0077BD" opacity="0.2" stroke="#0077BD" strokeWidth="1.5" />
+   351→          <rect x="170" y="40" width="18" height="20" rx="2" fill="#0077BD" opacity="0.1" />
+   352→          <circle cx="80" cy="75" r="10" fill="#1a1a2e" stroke="#00E676" strokeWidth="1.5" />
+   353→          <circle cx="80" cy="75" r="5" fill="#2a2a3e" />
+   354→          <circle cx="175" cy="75" r="10" fill="#1a1a2e" stroke="#00E676" strokeWidth="1.5" />
+   355→          <circle cx="175" cy="75" r="5" fill="#2a2a3e" />
+   356→          <rect x="85" y="55" width="20" height="8" rx="2" fill="#00E676" opacity="0.25" />
+   357→          <rect x="110" y="55" width="20" height="8" rx="2" fill="#00E676" opacity="0.25" />
+   358→          <rect x="135" y="55" width="20" height="8" rx="2" fill="#00E676" opacity="0.25" />
+   359→        </svg>
+   360→      </div>
+   361→
+   362→      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-28 pb-16">
+   363→        <A>
+   364→          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00E676]/10 border border-[#00E676]/20 mb-8 backdrop-blur-sm">
+   365→            <Truck className="w-4 h-4 text-[#00E676]" />
+   366→            <span className="text-sm text-[#00E676] font-medium">Servicio de Mudanza</span>
+   367→          </div>
+   368→        </A>
+   369→        <A delay={100}>
+   370→          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6">
+   371→            Mudanzas Profesionales en{' '}
+   372→            <span className="bg-gradient-to-r from-[#00E676] via-[#0077BD] to-[#00E676] bg-clip-text text-transparent">Bolivia</span>
+   373→          </h1>
+   374→        </A>
+   375→        <A delay={200}>
+   376→          <p className="text-lg md:text-xl text-white/60 max-w-3xl mx-auto mb-10 leading-relaxed">
+   377→            Servicio profesional de mudanzas local, provincial y nacional. Transportamos tus pertenencias
+   378→            con cuidado, seguridad y la tecnología de seguimiento GPS que nos distingue.
+   379→          </p>
+   380→        </A>
+   381→        <A delay={300}>
+   382→          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-14">
+   383→            <a href="#calculadora" className="px-8 py-4 rounded-full text-lg font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_30px_rgba(0,230,118,0.3)] hover:shadow-[0_0_50px_rgba(0,230,118,0.5)] hover:scale-105">
+   384→              Calcular Mi Mudanza
+   385→            </a>
+   386→            <a href="#flota" className="px-8 py-4 rounded-full text-lg font-semibold text-white border border-white/20 hover:border-[#00E676]/50 hover:bg-white/5 transition-all duration-300">
+   387→              Ver Flota
+   388→            </a>
+   389→          </div>
+   390→        </A>
+   391→        <A delay={400}>
+   392→          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
+   393→            {[
+   394→              { value: '3', label: 'Tipos de Mudanza', icon: MapPin },
+   395→              { value: '9+', label: 'Vehículos', icon: Truck },
+   396→              { value: 'GPS', label: 'Rastreo en Vivo', icon: Globe },
+   397→              { value: '100%', label: 'Seguro Disponible', icon: Shield },
+   398→            ].map((s) => (
+   399→              <div key={s.label} className="p-4 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm hover:border-[#00E676]/20 transition-all duration-300">
+   400→                <s.icon className="w-5 h-5 text-[#00E676] mx-auto mb-2" />
+   401→                <div className="text-2xl md:text-3xl font-bold text-white">{s.value}</div>
+   402→                <div className="text-xs text-white/50 mt-1">{s.label}</div>
+   403→              </div>
+   404→            ))}
+   405→          </div>
+   406→        </A>
+   407→      </div>
+   408→
+   409→      {/* Slide indicators */}
+   410→      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+   411→        {heroImages.map((_, i) => (
+   412→          <button key={i} onClick={() => setHeroSlide(i)}
+   413→            className={`h-1.5 rounded-full transition-all duration-300 ${heroSlide === i ? 'bg-[#00E676] w-12' : 'bg-white/20 w-8'}`} />
+   414→        ))}
+   415→      </div>
+   416→    </section>
+   417→  )
+   418→}
+   419→
+   420→/* ═══════════════════════════════════════════════════════════════════════════════
+   421→   2. SERVICE TYPES
+   422→   ═══════════════════════════════════════════════════════════════════════════════ */
+   423→const serviceTypes = [
+   424→  { icon: MapPin, title: 'Mudanza Local', color: '#00E676', price: 'Desde Bs 200',
+   425→    desc: 'Dentro de la misma ciudad. Disponibles en Santa Cruz, La Paz y Cochabamba. Servicio el mismo día con equipo profesional y vehículos adecuados para cada tipo de mudanza.',
+   426→    features: ['Servicio el mismo día', 'Cobertura en 3 ciudades principales', 'Rastreo GPS en tiempo real', 'Seguro de carga incluido'] },
+   427→  { icon: Route, title: 'Mudanza Provincial', color: '#0077BD', price: 'Desde Bs 500',
+   428→    desc: 'Entre provincias dentro del mismo departamento. Servicio al día siguiente con logística coordinada y protección especial para traslados de mayor distancia dentro del departamento.',
+   429→    features: ['Servicio al día siguiente', 'Protección especial para distancia', 'Coordinación logística completa', 'Reporte de ubicación en ruta'] },
+   430→  { icon: Globe, title: 'Mudanza Nacional', color: '#FF9800', price: 'Desde Bs 1,000',
+   431→    desc: 'Entre departamentos y ciudades de toda Bolivia. Servicio programado con seguimiento satelital, protección reforzada y seguro premium para traslados de larga distancia a nivel nacional.',
+   432→    features: ['Servicio programado con tracking', 'Seguro premium de carga', 'Protección reforzada', 'Cobertura nacional completa'] },
+   433→]
+   434→
+   435→function ServiceTypesSection() {
+   436→  return (
+   437→    <section className="relative py-24 md:py-32">
+   438→      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1320] to-[#0a0e17]" />
+   439→      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] rounded-full bg-[#00E676]/5 blur-[150px]" />
+   440→      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   441→        <A><div className="text-center mb-16">
+   442→          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00E676]/10 border border-[#00E676]/20 mb-4">
+   443→            <MapPin className="w-4 h-4 text-[#00E676]" /><span className="text-sm text-[#00E676]">Tipos de Servicio</span>
+   444→          </div>
+   445→          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">Mudanzas a tu <span className="bg-gradient-to-r from-[#00E676] via-[#0077BD] to-[#FF9800] bg-clip-text text-transparent">Medida</span></h2>
+   446→          <p className="text-white/50 max-w-2xl mx-auto text-lg">Cobertura local, provincial y nacional con la misma calidad y profesionalismo.</p>
+   447→        </div></A>
+   448→        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+   449→          {serviceTypes.map((s, i) => (
+   450→            <A key={s.title} delay={i * 100}>
+   451→              <div className="group relative p-6 md:p-8 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm hover:border-white/10 transition-all duration-500 h-full flex flex-col">
+   452→                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300" style={{ backgroundColor: `${s.color}12` }}>
+   453→                  <s.icon className="w-7 h-7" style={{ color: s.color }} />
+   454→                </div>
+   455→                <h3 className="text-xl font-bold text-white mb-3">{s.title}</h3>
+   456→                <p className="text-sm text-white/50 leading-relaxed mb-5 flex-1">{s.desc}</p>
+   457→                <div className="space-y-2 mb-5">
+   458→                  {s.features.map((f) => (
+   459→                    <div key={f} className="flex items-start gap-2">
+   460→                      <CheckCircle className="w-4 h-4 mt-0.5 shrink-0" style={{ color: s.color }} />
+   461→                      <span className="text-sm text-white/60">{f}</span>
+   462→                    </div>
+   463→                  ))}
+   464→                </div>
+   465→                <div className="pt-4 border-t border-white/[0.06]">
+   466→                  <span className="text-lg font-bold" style={{ color: s.color }}>{s.price}</span>
+   467→                  <span className="text-xs text-white/30 ml-2">+ distancia</span>
+   468→                </div>
+   469→              </div>
+   470→            </A>
+   471→          ))}
+   472→        </div>
+   473→      </div>
+   474→    </section>
+   475→  )
+   476→}
+   477→
+   478→/* ═══════════════════════════════════════════════════════════════════════════════
+   479→   3. MOVING CATEGORIES (TABS)
+   480→   ═══════════════════════════════════════════════════════════════════════════════ */
+   481→const categories = [
+   482→  { id: 'casa', icon: Home, label: 'Mudanza Domiciliaria', color: '#00E676',
+   483→    bgImage: '/mudanza-servicio-casa.webp',
+   484→    desc: 'Mudanza residencial completa. Transportamos tus muebles, electrodomésticos y pertenencias con el máximo cuidado desde tu hogar actual hasta tu nuevo hogar.',
+   485→    included: ['Desmontaje y montaje de muebles', 'Protección con mantas y plástico', 'Transporte de electrodomésticos', 'Carga y descarga profesional'],
+   486→    vehicles: 'Camioneta Mediana, Furgón Grande', notes: 'Recomendamos embalaje profesional para cristalería y objetos frágiles.' },
+   487→  { id: 'especial', icon: Shield, label: 'Mudanza Especial', color: '#FF9800',
+   488→    bgImage: '/mudanza-servicio-especial.webp',
+   489→    desc: 'Para artículos de alto valor o delicados: pianos, obras de arte, cajas fuertes, equipo médico y antigüedades. Personal especializado y embalaje a medida.',
+   490→    included: ['Embalaje a medida personalizado', 'Personal especializado certificado', 'Seguro premium obligatorio', 'Equipamiento de sujeción profesional'],
+   491→    vehicles: 'Furgón Grande con suspensión reforzada', notes: 'Cotización personalizada obligatoria. Se requiere evaluación previa del artículo.' },
+   492→  { id: 'oficina', icon: Building2, label: 'Mudanza de Oficina', color: '#0077BD',
+   493→    bgImage: '/mudanza-servicio-oficina.webp',
+   494→    desc: 'Relocalización de oficinas con mínima interrupción. Manejamos equipos informáticos, mobiliario corporativo y documentación con protocolos de seguridad especiales.',
+   495→    included: ['Protocolo para equipos electrónicos', 'Embalaje de documentación', 'Desconexión/conexión de equipos', 'Montaje de estaciones de trabajo'],
+   496→    vehicles: 'Furgón Mediano, Furgón Largo', notes: 'Disponemos de servicio nocturno y fin de semana para no afectar la operatividad.' },
+   497→]
+   498→
+   499→function CategoriesSection() {
+   500→  return (
+   501→    <section className="relative py-24 md:py-32">
+   502→      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#080c15] to-[#0a0e17]" />
+   503→      <div className="absolute bottom-1/3 right-0 w-[500px] h-[500px] rounded-full bg-[#0077BD]/5 blur-[120px]" />
+   504→      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   505→        <A><div className="text-center mb-12">
+   506→          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#0077BD]/10 border border-[#0077BD]/20 mb-4">
+   507→            <Home className="w-4 h-4 text-[#0077BD]" /><span className="text-sm text-[#0077BD]">Categorías</span>
+   508→          </div>
+   509→          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">Tipo de <span className="bg-gradient-to-r from-[#00E676] to-[#FF9800] bg-clip-text text-transparent">Mudanza</span></h2>
+   510→        </div></A>
+   511→        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+   512→          {categories.map((c, i) => (
+   513→            <A key={c.id} delay={i * 100}>
+   514→              <div className="group relative rounded-2xl overflow-hidden border border-white/[0.08] hover:border-white/20 transition-all duration-500 h-full flex flex-col min-h-[420px]">
+   515→                {/* Background image with lighter overlay for visibility */}
+   516→                <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
+   517→                  style={{ backgroundImage: `url('${c.bgImage}')` }} />
+   518→                {/* Lighter gradient overlay so image is visible */}
+   519→                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0e17] via-[#0a0e17]/60 to-[#0a0e17]/30" />
+   520→                <div className="absolute inset-0 bg-[#0a0e17]/20" />
+   521→                {/* Content */}
+   522→                <div className="relative z-10 p-6 md:p-7 flex flex-col h-full justify-end">
+   523→                  <div className="flex items-center gap-3 mb-3">
+   524→                    <div className="w-11 h-11 rounded-xl flex items-center justify-center backdrop-blur-sm" style={{ backgroundColor: `${c.color}25`, border: `1px solid ${c.color}40` }}>
+   525→                      <c.icon className="w-5 h-5" style={{ color: c.color }} />
+   526→                    </div>
+   527→                    <h3 className="text-xl font-bold text-white">{c.label}</h3>
+   528→                  </div>
+   529→                  <p className="text-white/70 text-sm leading-relaxed mb-4">{c.desc}</p>
+   530→                  <div className="space-y-2 mb-4">
+   531→                    {c.included.map((item) => (
+   532→                      <div key={item} className="flex items-start gap-2">
+   533→                        <CheckCircle className="w-4 h-4 mt-0.5 shrink-0" style={{ color: c.color }} />
+   534→                        <span className="text-sm text-white/75">{item}</span>
+   535→                      </div>
+   536→                    ))}
+   537→                  </div>
+   538→                  <div className="mt-auto pt-3 border-t border-white/10">
+   539→                    <div className="flex items-start gap-2">
+   540→                      <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: c.color }} />
+   541→                      <span className="text-xs text-white/50">{c.vehicles} — {c.notes}</span>
+   542→                    </div>
+   543→                  </div>
+   544→                </div>
+   545→              </div>
+   546→            </A>
+   547→          ))}
+   548→        </div>
+   549→      </div>
+   550→    </section>
+   551→  )
+   552→}
+   553→
+   554→/* ═══════════════════════════════════════════════════════════════════════════════
+   555→   4. MOVING FLEET
+   556→   ═══════════════════════════════════════════════════════════════════════════════ */
+   557→function FleetSection() {
+   558→  return (
+   559→    <section id="flota" className="relative py-24 md:py-32">
+   560→      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1320] to-[#0a0e17]" />
+   561→      <div className="absolute top-1/3 left-0 w-[500px] h-[500px] rounded-full bg-[#FF9800]/5 blur-[120px]" />
+   562→      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   563→        <A><div className="text-center mb-16">
+   564→          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FF9800]/10 border border-[#FF9800]/20 mb-4">
+   565→            <Truck className="w-4 h-4 text-[#FF9800]" /><span className="text-sm text-[#FF9800]">Flota de Mudanza</span>
+   566→          </div>
+   567→          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">Vehículos para tu <span className="bg-gradient-to-r from-[#FF9800] to-[#818CF8] bg-clip-text text-transparent">Mudanza</span></h2>
+   568→          <p className="text-white/50 max-w-2xl mx-auto text-lg">Camionetas y furgones de diferentes capacidades para cada necesidad.</p>
+   569→        </div></A>
+   570→        {VEHICLES.map((cat) => (
+   571→          <div key={cat.cat} className="mb-10">
+   572→            <A><h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+   573→              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.color }} />
+   574→              {cat.cat === 'Furgón' ? '🚛 Furgones (Cerrados)' : '🛻 Camionetas (Abiertas)'}
+   575→            </h3></A>
+   576→            <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-${cat.cat === 'Camioneta' ? '5' : '4'} gap-4`}>
+   577→              {cat.items.map((v, i) => (
+   578→                <A key={v.name} delay={i * 80}>
+   579→                  <div className="group p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm hover:border-white/10 transition-all duration-300">
+   580→                    <div className="flex justify-center mb-3 h-20 items-center">
+   581→                      <img src={v.img} alt={v.name} className="max-h-full max-w-full object-contain drop-shadow-[0_0_12px_rgba(255,255,255,0.08)] group-hover:drop-shadow-[0_0_20px_rgba(255,255,255,0.15)] transition-all duration-300 group-hover:scale-105" />
+   582→                    </div>
+   583→                    <h4 className="text-white font-semibold text-sm mb-1">{v.name}</h4>
+   584→                    <div className="flex items-center gap-3 mb-2">
+   585→                      <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ backgroundColor: `${cat.color}15`, color: cat.color }}>{v.cap} m³</span>
+   586→                      <span className="text-xs text-white/40">{v.pax} pasajeros</span>
+   587→                    </div>
+   588→                    <p className="text-xs text-white/40 leading-relaxed">{v.desc}</p>
+   589→                  </div>
+   590→                </A>
+   591→              ))}
+   592→            </div>
+   593→          </div>
+   594→        ))}
+   595→      </div>
+   596→    </section>
+   597→  )
+   598→}
+   599→
+   600→/* ═══════════════════════════════════════════════════════════════════════════════
+   601→   5. MOVING CALCULATOR (6 STEPS)
+   602→   ═══════════════════════════════════════════════════════════════════════════════ */
+   603→
+   604→/* ═══ CALCULATOR SECTION ═══ */
+   605→function CalculatorSection() {
+   606→  const [step, setStep] = useState(1)
+   607→  const [moveType, setMoveType] = useState<MoveType>('local')
+   608→  const [catType, setCatType] = useState<CatType>('casa')
+   609→  const [inventory, setInventory] = useState<Record<string, number>>({})
+   610→  const [activeRoom, setActiveRoom] = useState('recamara')
+   611→
+   612→  // Vehicle selection
+   613→  const [vehicleType, setVehicleType] = useState<'cerrado' | 'abierto'>('cerrado')
+   614→  const [selectedVehicle, setSelectedVehicle] = useState<typeof VEHICLES[0]['items'][0] | null>(null)
+   615→
+   616→  // Two-path flow
+   617→  const [calcPath, setCalcPath] = useState<'A' | 'B' | null>(null) // A=knows vehicle, B=needs help
+   618→  const [mudanzaCategory, setMudanzaCategory] = useState<string | null>(null) // For Path B category selection
+   619→  const [additionalVehicles, setAdditionalVehicles] = useState<typeof VEHICLES[0]['items'][0][]>([])
+   620→
+   621→  // Step 3: Route & Direction
+   622→  const [origin, setOrigin] = useState<LatLng | null>(null)
+   623→  const [destination, setDestination] = useState<LatLng | null>(null)
+   624→  const [intermediateStops, setIntermediateStops] = useState<IntermediateStop[]>([])
+   625→  const [originAddress, setOriginAddress] = useState('')
+   626→  const [destAddress, setDestAddress] = useState('')
+   627→  const [routeDistance, setRouteDistance] = useState<number>(0)
+   628→  const [routeDuration, setRouteDuration] = useState<number>(0)
+   629→  const [routeGeometry, setRouteGeometry] = useState<[number, number][]>([])
+   630→  const [mapSelectionMode, setMapSelectionMode] = useState<'origin' | 'destination' | 'stop'>('origin')
+   631→  const [searchingOrigin, setSearchingOrigin] = useState(false)
+   632→  const [searchingDest, setSearchingDest] = useState(false)
+   633→  const [originResults, setOriginResults] = useState<NominatimResult[]>([])
+   634→  const [destResults, setDestResults] = useState<NominatimResult[]>([])
+   635→  const [isCalculatingRoute, setIsCalculatingRoute] = useState(false)
+   636→
+   637→  // Embalaje
+   638→  const [embalajeType, setEmbalajeType] = useState<'ninguno' | 'completo' | 'solo_embalaje' | 'solo_desembalaje'>('ninguno')
+   639→
+   640→  // Boxes and materials
+   641→  const [boxes, setBoxes] = useState<Record<string, number>>({})
+   642→  const [materials, setMaterials] = useState<Record<string, number>>({})
+   643→
+   644→  // Handling extras
+   645→  const [handlingExtras, setHandlingExtras] = useState<Record<string, number>>({})
+   646→
+   647→  // Accessibility - Origin
+   648→  const [originFloor, setOriginFloor] = useState('baja')
+   649→  const [elevatorOrigin, setElevatorOrigin] = useState(false)
+   650→  const [originCaminata, setOriginCaminata] = useState(0)
+   651→  const [originFachada, setOriginFachada] = useState(0)
+   652→
+   653→  // Accessibility - Destination
+   654→  const [destFloor, setDestFloor] = useState('baja')
+   655→  const [elevatorDest, setElevatorDest] = useState(false)
+   656→  const [destCaminata, setDestCaminata] = useState(0)
+   657→  const [destFachada, setDestFachada] = useState(0)
+   658→
+   659→  // Helpers (shared for carga y descarga)
+   660→  const [helpers, setHelpers] = useState(0)
+   661→
+   662→  // Logistics
+   663→  const [logisticsExtras, setLogisticsExtras] = useState<Record<string, number>>({})
+   664→
+   665→  // Step 5: Insurance, IVA, Payment
+   666→  const [wantsInsurance, setWantsInsurance] = useState(false)
+   667→  const [insuranceAmount, setInsuranceAmount] = useState<number>(5000)
+   668→  const [customInsurance, setCustomInsurance] = useState('')
+   669→  const [includeIva, setIncludeIva] = useState(false)
+   670→  const [razonSocial, setRazonSocial] = useState('')
+   671→  const [nit, setNit] = useState('')
+   672→  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('efectivo')
+   673→
+   674→  // Step 6: Personal data
+   675→  const [fullName, setFullName] = useState('')
+   676→  const [phone, setPhone] = useState('')
+   677→  const [hasWhatsApp, setHasWhatsApp] = useState(true)
+   678→  const [email, setEmail] = useState('')
+   679→  const [isSubmitting, setIsSubmitting] = useState(false)
+   680→  const [submitResult, setSubmitResult] = useState<'success' | 'error' | null>(null)
+   681→
+   682→  // ──── Inventory helpers ────
+   683→  const setQty = (name: string, delta: number) => {
+   684→    setInventory(prev => {
+   685→      const cur = prev[name] || 0
+   686→      const next = Math.max(0, cur + delta)
+   687→      if (next === 0) { const { [name]: _, ...rest } = prev; return rest }
+   688→      return { ...prev, [name]: next }
+   689→    })
+   690→  }
+   691→
+   692→  // ──── Calculations ────
+   693→  const totalVolume = useMemo(() => {
+   694→    let v = 0
+   695→    Object.entries(inventory).forEach(([name, qty]) => {
+   696→      for (const room of Object.values(ROOMS)) {
+   697→        const item = room.items.find(i => i.name === name)
+   698→        if (item) { v += item.vol * qty; break }
+   699→      }
+   700→    })
+   701→    return Math.round(v * 100) / 100
+   702→  }, [inventory])
+   703→
+   704→  // Smart vehicle suggestion based on volume and vehicle type preference
+   705→  const getVehicleSuggestion = (vol: number, vType: 'cerrado' | 'abierto') => {
+   706→    const cat = vType === 'cerrado' ? VEHICLES.find(v => v.cat === 'Furgón')! : VEHICLES.find(v => v.cat === 'Camioneta')!
+   707→    const items = cat.items
+   708→
+   709→    // Find the smallest vehicle that fits
+   710→    for (const vehicle of items) {
+   711→      if (vol <= vehicle.cap) return { vehicle, additional: [] }
+   712→    }
+   713→
+   714→    // Volume exceeds largest vehicle - need additional vehicles
+   715→    const largest = items[items.length - 1]
+   716→    const remaining = vol - largest.cap
+   717→    const additional: typeof items[0][] = []
+   718→
+   719→    // Add more vehicles for remaining volume
+   720→    let rem = remaining
+   721→    while (rem > 0) {
+   722→      let found = false
+   723→      for (const vehicle of items) {
+   724→        if (rem <= vehicle.cap) {
+   725→          additional.push(vehicle)
+   726→          rem = 0
+   727→          found = true
+   728→          break
+   729→        }
+   730→      }
+   731→      if (!found) {
+   732→        additional.push(largest)
+   733→        rem -= largest.cap
+   734→      }
+   735→    }
+   736→
+   737→    return { vehicle: largest, additional }
+   738→  }
+   739→
+   740→  // Legacy compatibility
+   741→  const getRecommendation = (vol: number) => {
+   742→    if (vol <= 0) return { vehicle: '—', detail: 'Selecciona artículos para ver recomendación' }
+   743→    if (vol <= 6) return { vehicle: 'Furgón Pequeño', detail: '6m³ — Ideal para studios' }
+   744→    if (vol <= 12) return { vehicle: 'Furgón Mediano o Camioneta Pequeña', detail: '12m³ — Ideal para 1-2 dormitorios' }
+   745→    if (vol <= 20) return { vehicle: 'Furgón Grande o Camioneta Mediana', detail: '20m³ — Ideal para 2-3 dormitorios' }
+   746→    if (vol <= 30) return { vehicle: 'Furgón Largo o Camioneta Larga', detail: '30m³ — Ideal para casas grandes' }
+   747→    return { vehicle: 'Camioneta Grande + Furgón Largo', detail: '2 vehículos o 2 viajes recomendados' }
+   748→  }
+   749→
+   750→  // Auto-suggest vehicle when in Path B and volume changes
+   751→  useEffect(() => {
+   752→    if (calcPath === 'B' && vehicleType && totalVolume > 0) {
+   753→      const suggestion = getVehicleSuggestion(totalVolume, vehicleType)
+   754→      setSelectedVehicle(suggestion.vehicle)
+   755→      setAdditionalVehicles(suggestion.additional)
+   756→    }
+   757→  }, [totalVolume, calcPath, vehicleType])
+   758→
+   759→  // ──── Calculations ────
+   760→  // Floor cost helpers
+   761→  const getFloorCount = (floor: string) => floor === 'baja' ? 0 : parseInt(floor) || 0
+   762→
+   763→  const originFloorCost = useMemo(() => {
+   764→    if (!selectedVehicle) return 0
+   765→    const floors = getFloorCount(originFloor)
+   766→    if (floors === 0) return 0
+   767→    const pricePerFloor = elevatorOrigin ? selectedVehicle.floorElev : selectedVehicle.floorNoElev
+   768→    return floors * pricePerFloor
+   769→  }, [selectedVehicle, originFloor, elevatorOrigin])
+   770→
+   771→  const destFloorCost = useMemo(() => {
+   772→    if (!selectedVehicle) return 0
+   773→    const floors = getFloorCount(destFloor)
+   774→    if (floors === 0) return 0
+   775→    const pricePerFloor = elevatorDest ? selectedVehicle.floorElev : selectedVehicle.floorNoElev
+   776→    return floors * pricePerFloor
+   777→  }, [selectedVehicle, destFloor, elevatorDest])
+   778→
+   779→  // Embalaje cost
+   780→  const embalajeCost = useMemo(() => {
+   781→    if (embalajeType === 'ninguno') return 0
+   782→    if (embalajeType === 'completo') return Math.round(totalVolume * 45)
+   783→    if (embalajeType === 'solo_embalaje') return Math.round(totalVolume * 30)
+   784→    if (embalajeType === 'solo_desembalaje') return Math.round(totalVolume * 15)
+   785→    return 0
+   786→  }, [embalajeType, totalVolume])
+   787→
+   788→  // Boxes cost
+   789→  const boxesCost = useMemo(() => {
+   790→    let t = 0
+   791→    Object.entries(boxes).forEach(([id, qty]) => {
+   792→      const box = BOX_OPTIONS.find(b => b.id === id)
+   793→      if (box) t += box.price * qty
+   794→    })
+   795→    return t
+   796→  }, [boxes])
+   797→
+   798→  // Materials cost
+   799→  const materialsCost = useMemo(() => {
+   800→    let t = 0
+   801→    Object.entries(materials).forEach(([id, qty]) => {
+   802→      const mat = PACKING_MATERIALS.find(m => m.id === id)
+   803→      if (mat) t += mat.price * qty
+   804→    })
+   805→    return t
+   806→  }, [materials])
+   807→
+   808→  // Handling extras cost
+   809→  const handlingCost = useMemo(() => {
+   810→    let t = 0
+   811→    Object.entries(handlingExtras).forEach(([id, qty]) => {
+   812→      const extra = HANDLING_EXTRAS.find(e => e.id === id)
+   813→      if (extra) t += extra.price * qty
+   814→    })
+   815→    return t
+   816→  }, [handlingExtras])
+   817→
+   818→  // Accessibility extras cost
+   819→  const accessibilityCost = useMemo(() => {
+   820→    const caminataPrice = ACCESSIBILITY_EXTRAS.find(a => a.id === 'distancia_caminata')!.price
+   821→    const fachadaPrice = ACCESSIBILITY_EXTRAS.find(a => a.id === 'elevador_fachada')!.price
+   822→    return (originCaminata * caminataPrice) + (originFachada * fachadaPrice)
+   823→      + (destCaminata * caminataPrice) + (destFachada * fachadaPrice)
+   824→  }, [originCaminata, originFachada, destCaminata, destFachada])
+   825→
+   826→  // Helpers cost
+   827→  const helpersCost = useMemo(() => {
+   828→    if (!selectedVehicle) return helpers * 80
+   829→    return helpers * selectedVehicle.helperPrice
+   830→  }, [helpers, selectedVehicle])
+   831→
+   832→  // Logistics cost
+   833→  const logisticsCost = useMemo(() => {
+   834→    let t = 0
+   835→    Object.entries(logisticsExtras).forEach(([id, qty]) => {
+   836→      const extra = LOGISTICS_EXTRAS.find(e => e.id === id)
+   837→      if (extra) t += extra.price * qty
+   838→    })
+   839→    return t
+   840→  }, [logisticsExtras])
+   841→
+   842→  const extrasTotal = embalajeCost + boxesCost + materialsCost + handlingCost + originFloorCost + destFloorCost + accessibilityCost + helpersCost + logisticsCost
+   843→
+   844→  const basePrice = useMemo(() => {
+   845→    const d = routeDistance > 0 ? routeDistance : 10
+   846→    const bases: Record<MoveType, number> = { local: 200, provincial: 500, nacional: 1000 }
+   847→    const perKm = selectedVehicle ? selectedVehicle.perKm : 10
+   848→    let price = bases[moveType] + perKm * d
+   849→    // Add cost for additional vehicles
+   850→    for (const av of additionalVehicles) {
+   851→      price += av.perKm * d * 0.7 // Additional vehicles at 70% rate
+   852→    }
+   853→    return price
+   854→  }, [moveType, routeDistance, selectedVehicle, additionalVehicles])
+   855→
+   856→  const insuranceCost = useMemo(() => {
+   857→    if (!wantsInsurance) return 0
+   858→    const amount = customInsurance ? parseFloat(customInsurance) || 0 : insuranceAmount
+   859→    return Math.round(amount * 0.02)
+   860→  }, [wantsInsurance, insuranceAmount, customInsurance])
+   861→
+   862→  const subtotal = basePrice + extrasTotal + insuranceCost
+   863→  const ivaAmount = includeIva ? Math.round(subtotal * 0.16) : 0
+   864→  const grandTotal = subtotal + ivaAmount
+   865→
+   866→  const getSelectedItems = () => {
+   867→    const items: { name: string; qty: number; vol: number; emoji: string }[] = []
+   868→    Object.entries(inventory).forEach(([name, qty]) => {
+   869→      for (const room of Object.values(ROOMS)) {
+   870→        const item = room.items.find(i => i.name === name)
+   871→        if (item) { items.push({ name, qty, vol: item.vol * qty, emoji: item.emoji }); break }
+   872→      }
+   873→    })
+   874→    return items
+   875→  }
+   876→
+   877→  // ──── Nominatim search ────
+   878→  const handleOriginSearch = useCallback(async (query: string) => {
+   879→    setOriginAddress(query)
+   880→    if (query.length < 3) { setOriginResults([]); return }
+   881→    const results = await searchAddress(query)
+   882→    setOriginResults(results)
+   883→  }, [])
+   884→
+   885→  const handleDestSearch = useCallback(async (query: string) => {
+   886→    setDestAddress(query)
+   887→    if (query.length < 3) { setDestResults([]); return }
+   888→    const results = await searchAddress(query)
+   889→    setDestResults(results)
+   890→  }, [])
+   891→
+   892→  const selectOrigin = (result: NominatimResult) => {
+   893→    const latlng = { lat: parseFloat(result.lat), lng: parseFloat(result.lon) }
+   894→    setOrigin(latlng)
+   895→    setOriginAddress(result.display_name.split(',').slice(0, 3).join(','))
+   896→    setOriginResults([])
+   897→    setSearchingOrigin(false)
+   898→  }
+   899→
+   900→  const selectDest = (result: NominatimResult) => {
+   901→    const latlng = { lat: parseFloat(result.lat), lng: parseFloat(result.lon) }
+   902→    setDestination(latlng)
+   903→    setDestAddress(result.display_name.split(',').slice(0, 3).join(','))
+   904→    setDestResults([])
+   905→    setSearchingDest(false)
+   906→  }
+   907→
+   908→  // ──── Route calculation ────
+   909→  const handleCalculateRoute = useCallback(async () => {
+   910→    if (!origin || !destination) return
+   911→    setIsCalculatingRoute(true)
+   912→    const stops = intermediateStops.map(s => s.latlng)
+   913→    const result = await calculateRoute(origin, destination, stops)
+   914→    if (result) {
+   915→      setRouteDistance(Math.round(result.distance * 10) / 10)
+   916→      setRouteDuration(Math.round(result.duration))
+   917→      setRouteGeometry(result.geometry)
+   918→    }
+   919→    setIsCalculatingRoute(false)
+   920→  }, [origin, destination, intermediateStops])
+   921→
+   922→  // Auto-calculate route when origin, destination, or stops change
+   923→  useEffect(() => {
+   924→    if (origin && destination) {
+   925→      handleCalculateRoute()
+   926→    }
+   927→  }, [origin, destination, intermediateStops, handleCalculateRoute])
+   928→
+   929→  // ──── Map click handler ────
+   930→  const handleMapClick = useCallback((latlng: LatLng) => {
+   931→    if (mapSelectionMode === 'origin') {
+   932→      setOrigin(latlng)
+   933→      setOriginAddress(`${latlng.lat.toFixed(5)}, ${latlng.lng.toFixed(5)}`)
+   934→    } else if (mapSelectionMode === 'destination') {
+   935→      setDestination(latlng)
+   936→      setDestAddress(`${latlng.lat.toFixed(5)}, ${latlng.lng.toFixed(5)}`)
+   937→    } else if (mapSelectionMode === 'stop') {
+   938→      const newStop: IntermediateStop = {
+   939→        id: `stop-${Date.now()}`,
+   940→        latlng,
+   941→        address: `${latlng.lat.toFixed(5)}, ${latlng.lng.toFixed(5)}`,
+   942→      }
+   943→      setIntermediateStops(prev => [...prev, newStop])
+   944→    }
+   945→  }, [mapSelectionMode])
+   946→
+   947→  const removeStop = (id: string) => {
+   948→    setIntermediateStops(prev => prev.filter(s => s.id !== id))
+   949→  }
+   950→
+   951→  // ──── Form submission ────
+   952→  const buildSummaryText = () => {
+   953→    const items = getSelectedItems().map(i => `${i.qty}x ${i.name}`).join(', ')
+   954→    const vehicleName = selectedVehicle ? selectedVehicle.name : getRecommendation(totalVolume).vehicle
+   955→    const embalajeLabel = embalajeType === 'completo' ? 'Completo (Bs 45/m³)' : embalajeType === 'solo_embalaje' ? 'Solo Embalaje (Bs 30/m³)' : embalajeType === 'solo_desembalaje' ? 'Solo Desembalaje (Bs 15/m³)' : 'Ninguno'
+   956→    const catLabel = MUDANZA_CATEGORIES.find(c => c.id === mudanzaCategory)?.name || catType
+   957→
+   958→    let text = `COTIZACIÓN DE MUDANZA\n`
+   959→    text += `═══════════════════════\n`
+   960→    text += `Ruta: ${calcPath === 'A' ? 'A (Selección directa)' : 'B (Asistencia guiada)'}\n`
+   961→    text += `Tipo: ${moveType.toUpperCase()}\n`
+   962→    text += `Categoría: ${catLabel.toUpperCase()}\n`
+   963→    text += `Vehículo: ${vehicleName}\n`
+   964→    if (additionalVehicles.length > 0) {
+   965→      text += `Vehículos adicionales: ${additionalVehicles.map(av => av.name).join(', ')}\n`
+   966→    }
+   967→    text += `Capacidad total: ${selectedVehicle ? selectedVehicle.cap : 0}${additionalVehicles.length > 0 ? ` + ${additionalVehicles.reduce((s, av) => s + av.cap, 0)}` : ''} m³\n`
+   968→    text += `Volumen: ${totalVolume} m³\n`
+   969→    text += `Distancia: ${routeDistance > 0 ? routeDistance : '~10'} km\n`
+   970→    if (routeDuration > 0) text += `Duración estimada: ${routeDuration} min\n`
+   971→    text += `\nORIGEN: ${originAddress || 'No especificado'}\n`
+   972→    text += `  Piso: ${originFloor === 'baja' ? 'Planta baja' : `Piso ${originFloor}`}${elevatorOrigin ? ' (con elevador)' : ' (sin elevador)'}\n`
+   973→    if (originFloorCost > 0) text += `  Costo piso: Bs ${originFloorCost}\n`
+   974→    if (originCaminata > 0) text += `  Distancia caminata: ${originCaminata} x 10m\n`
+   975→    if (originFachada > 0) text += `  Elevador fachada: ${originFachada} hr\n`
+   976→    text += `\nDESTINO: ${destAddress || 'No especificado'}\n`
+   977→    text += `  Piso: ${destFloor === 'baja' ? 'Planta baja' : `Piso ${destFloor}`}${elevatorDest ? ' (con elevador)' : ' (sin elevador)'}\n`
+   978→    if (destFloorCost > 0) text += `  Costo piso: Bs ${destFloorCost}\n`
+   979→    if (destCaminata > 0) text += `  Distancia caminata: ${destCaminata} x 10m\n`
+   980→    if (destFachada > 0) text += `  Elevador fachada: ${destFachada} hr\n`
+   981→    if (intermediateStops.length > 0) {
+   982→      text += `\nPARADAS: ${intermediateStops.map(s => s.address).join(' → ')}\n`
+   983→    }
+   984→    text += `\nEMBALAJE: ${embalajeLabel}\n`
+   985→    if (embalajeCost > 0) text += `  Costo embalaje: Bs ${embalajeCost}\n`
+   986→    if (Object.keys(boxes).length > 0) {
+   987→      text += `CAJAS: ${Object.entries(boxes).map(([id, q]) => { const b = BOX_OPTIONS.find(x => x.id === id); return b ? `${q}x ${b.name}` : '' }).join(', ')}\n`
+   988→    }
+   989→    if (Object.keys(materials).length > 0) {
+   990→      text += `MATERIALES: ${Object.entries(materials).map(([id, q]) => { const m = PACKING_MATERIALS.find(x => x.id === id); return m ? `${q}x ${m.name}` : '' }).join(', ')}\n`
+   991→    }
+   992→    if (Object.keys(handlingExtras).length > 0) {
+   993→      text += `MANIPULACIÓN: ${Object.entries(handlingExtras).map(([id, q]) => { const h = HANDLING_EXTRAS.find(x => x.id === id); return h ? `${q}x ${h.name}` : '' }).join(', ')}\n`
+   994→    }
+   995→    if (helpers > 0) text += `AYUDANTES: ${helpers} (Bs ${selectedVehicle?.helperPrice || 80} c/u = Bs ${helpersCost})\n`
+   996→    if (Object.keys(logisticsExtras).length > 0) {
+   997→      text += `LOGÍSTICA: ${Object.entries(logisticsExtras).map(([id, q]) => { const l = LOGISTICS_EXTRAS.find(x => x.id === id); return l ? `${q}x ${l.name}` : '' }).join(', ')}\n`
+   998→    }
+   999→    if (wantsInsurance) text += `\nSeguro: Bs ${customInsurance || insuranceAmount} (costo: Bs ${insuranceCost})\n`
+  1000→    text += `\nMETODO PAGO: ${paymentMethod}\n`
+  1001→    if (includeIva) text += `IVA 16%: Bs ${ivaAmount}\n`
+  1002→    if (includeIva && razonSocial) text += `Razón Social: ${razonSocial}\n`
+  1003→    if (includeIva && nit) text += `NIT: ${nit}\n`
+  1004→    text += `\nTOTAL: Bs ${grandTotal.toLocaleString()}\n`
+  1005→    text += `\nCLIENTE:\n`
+  1006→    text += `Nombre: ${fullName}\n`
+  1007→    text += `Teléfono: ${phone}${hasWhatsApp ? ' (WhatsApp)' : ''}\n`
+  1008→    text += `Email: ${email}\n`
+  1009→    text += `\nArtículos: ${items || 'Ninguno seleccionado'}`
+  1010→
+  1011→    return text
+  1012→  }
+  1013→
+  1014→  const buildWhatsAppMsg = () => {
+  1015→    return encodeURIComponent(buildSummaryText())
+  1016→  }
+  1017→
+  1018→  const handleSubmit = async () => {
+  1019→    if (!fullName || !phone || !email) return
+  1020→    setIsSubmitting(true)
+  1021→    try {
+  1022→      const res = await fetch('/api/mudanza/submit', {
+  1023→        method: 'POST',
+  1024→        headers: { 'Content-Type': 'application/json' },
+  1025→        body: JSON.stringify({
+  1026→          moveType, catType, totalVolume, routeDistance, routeDuration,
+  1027→          originAddress, destAddress, intermediateStops,
+  1028→          vehicleType, selectedVehicle: selectedVehicle ? { name: selectedVehicle.name, cap: selectedVehicle.cap, perKm: selectedVehicle.perKm, helperPrice: selectedVehicle.helperPrice, floorElev: selectedVehicle.floorElev, floorNoElev: selectedVehicle.floorNoElev } : null,
+  1029→          calcPath, mudanzaCategory, additionalVehicles: additionalVehicles.map(av => ({ name: av.name, cap: av.cap, perKm: av.perKm })),
+  1030→          embalajeType, embalajeCost, boxes, boxesCost, materials, materialsCost,
+  1031→          handlingExtras, handlingCost,
+  1032→          originFloor, elevatorOrigin, originFloorCost, originCaminata, originFachada,
+  1033→          destFloor, elevatorDest, destFloorCost, destCaminata, destFachada,
+  1034→          accessibilityCost,
+  1035→          helpers, helpersCost,
+  1036→          logisticsExtras, logisticsCost,
+  1037→          wantsInsurance, insuranceAmount: customInsurance || insuranceAmount, insuranceCost,
+  1038→          includeIva, ivaAmount, razonSocial, nit, paymentMethod,
+  1039→          basePrice, extrasTotal, subtotal, grandTotal,
+  1040→          fullName, phone, hasWhatsApp, email,
+  1041→          items: getSelectedItems(),
+  1042→          vehicleRecommendation: selectedVehicle ? selectedVehicle.name : getRecommendation(totalVolume).vehicle,
+  1043→        }),
+  1044→      })
+  1045→      if (res.ok) {
+  1046→        setSubmitResult('success')
+  1047→      } else {
+  1048→        setSubmitResult('error')
+  1049→      }
+  1050→    } catch {
+  1051→      setSubmitResult('error')
+  1052→    }
+  1053→    setIsSubmitting(false)
+  1054→  }
+  1055→
+  1056→  // ──── Steps config (dynamic based on path) ────
+  1057→  const steps = calcPath === 'A'
+  1058→    ? [
+  1059→        { num: 1, label: 'Vehículo' },
+  1060→        { num: 2, label: 'Ruta' },
+  1061→        { num: 3, label: 'Extras' },
+  1062→        { num: 4, label: 'Seguro' },
+  1063→        { num: 5, label: 'Envío' },
+  1064→      ]
+  1065→    : calcPath === 'B'
+  1066→    ? [
+  1067→        { num: 1, label: 'Categoría' },
+  1068→        { num: 2, label: 'Inventario' },
+  1069→        { num: 3, label: 'Ruta' },
+  1070→        { num: 4, label: 'Extras' },
+  1071→        { num: 5, label: 'Seguro' },
+  1072→        { num: 6, label: 'Envío' },
+  1073→      ]
+  1074→    : [
+  1075→        { num: 1, label: 'Inicio' },
+  1076→      ]
+  1077→
+  1078→  const inputClass = 'w-full bg-white/[0.04] border border-white/[0.08] text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#00E676]/40 transition-all'
+  1079→
+  1080→  return (
+  1081→    <section id="calculadora" className="relative py-24 md:py-32">
+  1082→      {/* Background image */}
+  1083→      <div className="absolute inset-0 bg-[url('/mudanza-calculator.webp')] bg-cover bg-center opacity-[0.15]" />
+  1084→      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17]/95 via-[#0d1320]/90 to-[#0a0e17]/95" />
+  1085→
+  1086→      <div className="absolute top-1/2 left-1/3 w-[600px] h-[600px] rounded-full bg-[#00E676]/5 blur-[150px]" />
+  1087→      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  1088→        <A><div className="text-center mb-12">
+  1089→          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00E676]/10 border border-[#00E676]/20 mb-4">
+  1090→            <Calculator className="w-4 h-4 text-[#00E676]" /><span className="text-sm text-[#00E676] font-medium">Calculadora de Mudanza</span>
+  1091→          </div>
+  1092→          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">Calcula tu <span className="bg-gradient-to-r from-[#00E676] via-[#0077BD] to-[#FF9800] bg-clip-text text-transparent">Mudanza</span></h2>
+  1093→          <p className="text-white/50 max-w-2xl mx-auto text-lg">Selecciona tus artículos, define tu ruta, elige extras y obtén una cotización estimada al instante.</p>
+  1094→        </div></A>
+  1095→
+  1096→        {/* Step indicator */}
+  1097→        <div className="flex items-center justify-center gap-1 sm:gap-2 mb-10 overflow-x-auto pb-2">
+  1098→          {steps.map((s, i) => (
+  1099→            <div key={s.num} className="flex items-center shrink-0">
+  1100→              <button onClick={() => s.num < step && setStep(s.num)}
+  1101→                className={`flex items-center gap-1.5 px-2.5 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all duration-300 ${step === s.num ? 'bg-[#00E676] text-black shadow-[0_0_20px_rgba(0,230,118,0.3)]' : step > s.num ? 'bg-[#00E676]/20 text-[#00E676] cursor-pointer' : 'bg-white/[0.05] text-white/40'}`}>
+  1102→                <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-bold" style={{ backgroundColor: step >= s.num ? 'rgba(0,230,118,0.2)' : 'rgba(255,255,255,0.05)' }}>{step > s.num ? '✓' : s.num}</span>
+  1103→                <span className="hidden md:inline">{s.label}</span>
+  1104→              </button>
+  1105→              {i < steps.length - 1 && <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 text-white/20 mx-0.5 sm:mx-1" />}
+  1106→            </div>
+  1107→          ))}
+  1108→        </div>
+  1109→
+  1110→        {/* Volume & Distance badges */}
+  1111→        <div className="flex flex-wrap justify-center gap-3 mb-8">
+  1112→          <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-white/[0.04] border border-[#00E676]/20">
+  1113→            <Box className="w-4 h-4 text-[#00E676]" />
+  1114→            <span className="text-sm text-white/60">Volumen:</span>
+  1115→            <span className="text-lg font-bold text-[#00E676]">{totalVolume} m³</span>
+  1116→          </div>
+  1117→          {routeDistance > 0 && (
+  1118→            <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-white/[0.04] border border-[#0077BD]/20">
+  1119→              <Navigation className="w-4 h-4 text-[#0077BD]" />
+  1120→              <span className="text-sm text-white/60">Distancia:</span>
+  1121→              <span className="text-lg font-bold text-[#0077BD]">{routeDistance} km</span>
+  1122→            </div>
+  1123→          )}
+  1124→          {calcPath === 'B' && totalVolume > 0 && selectedVehicle && (
+  1125→            <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-white/[0.04] border border-[#818CF8]/20">
+  1126→              <Truck className="w-4 h-4 text-[#818CF8]" />
+  1127→              <span className="text-sm text-white/60">Sugerido:</span>
+  1128→              <span className="text-lg font-bold text-[#818CF8]">{selectedVehicle.name}</span>
+  1129→              {additionalVehicles.length > 0 && (
+  1130→                <span className="text-sm text-[#FF9800]">+ {additionalVehicles.length} vehículo{additionalVehicles.length > 1 ? 's' : ''} adicional{additionalVehicles.length > 1 ? 'es' : ''}</span>
+  1131→              )}
+  1132→            </div>
+  1133→          )}
+  1134→        </div>
+  1135→
+  1136→        {/* ═══════════════ Step 1: Path Selection / Vehicle / Category ═══════════════ */}
+  1137→        {step === 1 && calcPath === null && (
+  1138→          <div className="max-w-4xl mx-auto">
+  1139→            <h3 className="text-xl font-bold text-white mb-2 text-center">¿Cómo deseas cotizar tu mudanza?</h3>
+  1140→            <p className="text-sm text-white/40 text-center mb-8">Elige la opción que mejor se adapte a ti</p>
+  1141→
+  1142→            {/* Two-path selection */}
+  1143→            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+  1144→              <button onClick={() => { setCalcPath('A') }}
+  1145→                className="group p-8 rounded-2xl text-left transition-all duration-300 bg-white/[0.03] border border-white/[0.06] hover:border-[#00E676]/40 hover:bg-white/[0.05]">
+  1146→                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 bg-[#00E676]/10 group-hover:bg-[#00E676]/20 transition-all">
+  1147→                  <Truck className="w-7 h-7 text-[#00E676]" />
+  1148→                </div>
+  1149→                <h4 className="text-lg font-bold text-white mb-2">🚛 Ya sé qué vehículo necesito</h4>
+  1150→                <p className="text-sm text-white/50 leading-relaxed mb-3">Selecciona tu camión o furgón directamente y cotiza sin inventario detallado.</p>
+  1151→                <span className="text-xs text-[#00E676] font-semibold">Ruta A — Selección directa →</span>
+  1152→              </button>
+  1153→              <button onClick={() => { setCalcPath('B') }}
+  1154→                className="group p-8 rounded-2xl text-left transition-all duration-300 bg-white/[0.03] border border-white/[0.06] hover:border-[#818CF8]/40 hover:bg-white/[0.05]">
+  1155→                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 bg-[#818CF8]/10 group-hover:bg-[#818CF8]/20 transition-all">
+  1156→                  <ClipboardList className="w-7 h-7 text-[#818CF8]" />
+  1157→                </div>
+  1158→                <h4 className="text-lg font-bold text-white mb-2">📋 Necesito ayuda para elegir</h4>
+  1159→                <p className="text-sm text-white/50 leading-relaxed mb-3">Te guiamos según el tamaño de tu mudanza y te sugerimos el vehículo ideal.</p>
+  1160→                <span className="text-xs text-[#818CF8] font-semibold">Ruta B — Asistencia guiada →</span>
+  1161→              </button>
+  1162→            </div>
+  1163→
+  1164→            {/* Move type selection */}
+  1165→            <h3 className="text-lg font-bold text-white mb-2 text-center">Tipo de Mudanza</h3>
+  1166→            <p className="text-sm text-white/40 text-center mb-4">Selecciona la distancia de tu traslado</p>
+  1167→            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+  1168→              {([['local', 'Local', MapPin, '#00E676'], ['provincial', 'Provincial', Route, '#0077BD'], ['nacional', 'Nacional', Globe, '#FF9800']] as const).map(([id, label, Icon, color]) => (
+  1169→                <button key={id} onClick={() => setMoveType(id)}
+  1170→                  className={`p-5 rounded-2xl text-left transition-all duration-300 ${moveType === id ? 'bg-white/[0.06] border-2' : 'bg-white/[0.03] border border-white/[0.06] hover:border-white/10'}`}
+  1171→                  style={moveType === id ? { borderColor: `${color}60` } : {}}>
+  1172→                  <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ backgroundColor: `${color}15` }}>
+  1173→                    <Icon className="w-5 h-5" style={{ color }} />
+  1174→                  </div>
+  1175→                  <h4 className="text-base font-bold text-white mb-1">Mudanza {label}</h4>
+  1176→                  <p className="text-xs text-white/40">{id === 'local' ? 'Misma ciudad' : id === 'provincial' ? 'Mismo departamento' : 'Todo Bolivia'}</p>
+  1177→                </button>
+  1178→              ))}
+  1179→            </div>
+  1180→
+  1181→            {/* Category selection */}
+  1182→            <h3 className="text-lg font-bold text-white mb-2 text-center">¿Qué mudas?</h3>
+  1183→            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+  1184→              {([['casa', 'Casa', Home, '#00E676'], ['oficina', 'Oficina', Building2, '#0077BD'], ['especial', 'Especial', Shield, '#FF9800']] as const).map(([id, label, Icon, color]) => (
+  1185→                <button key={id} onClick={() => setCatType(id)}
+  1186→                  className={`p-4 rounded-2xl text-left transition-all duration-300 ${catType === id ? 'bg-white/[0.06] border-2' : 'bg-white/[0.03] border border-white/[0.06] hover:border-white/10'}`}
+  1187→                  style={catType === id ? { borderColor: `${color}60` } : {}}>
+  1188→                  <div className="flex items-center gap-3">
+  1189→                    <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${color}15` }}>
+  1190→                      <Icon className="w-4 h-4" style={{ color }} />
+  1191→                    </div>
+  1192→                    <span className="text-white font-semibold text-sm">{label}</span>
+  1193→                  </div>
+  1194→                </button>
+  1195→              ))}
+  1196→            </div>
+  1197→          </div>
+  1198→        )}
+  1199→
+  1200→        {/* ═══════════════ Step 1 (Path A): Vehicle Selection ═══════════════ */}
+  1201→        {step === 1 && calcPath === 'A' && (
+  1202→          <div className="max-w-4xl mx-auto">
+  1203→            <div className="flex items-center gap-2 mb-6">
+  1204→              <button onClick={() => { setCalcPath(null); setSelectedVehicle(null) }}
+  1205→                className="text-xs text-white/40 hover:text-white/60 transition-colors flex items-center gap-1">
+  1206→                ← Cambiar ruta
+  1207→              </button>
+  1208→              <span className="text-xs px-2 py-0.5 rounded-full bg-[#00E676]/10 text-[#00E676] font-semibold">Ruta A</span>
+  1209→            </div>
+  1210→
+  1211→            {/* Vehicle type selection */}
+  1212→            <h3 className="text-xl font-bold text-white mb-2 text-center">¿Vehículo cerrado o abierto?</h3>
+  1213→            <p className="text-sm text-white/40 text-center mb-6">Los furgones protegen del clima, las camionetas tienen caja abierta</p>
+  1214→            <div className="grid grid-cols-2 gap-4 mb-6">
+  1215→              <button onClick={() => { setVehicleType('cerrado'); setSelectedVehicle(null) }}
+  1216→                className={`p-5 rounded-2xl text-center transition-all duration-300 ${vehicleType === 'cerrado' ? 'bg-[#818CF8]/10 border-2 border-[#818CF8]/50' : 'bg-white/[0.03] border border-white/[0.06] hover:border-white/10'}`}>
+  1217→                <div className="flex justify-center mb-2 h-16 items-center">
+  1218→                  <img src="/vehicles/7-FURGON/mediano.png" alt="Furgón" className="max-h-full max-w-[80px] object-contain" />
+  1219→                </div>
+  1220→                <div className="text-white font-semibold mb-1">Furgón (Cerrado)</div>
+  1221→                <div className="text-xs text-white/40">Protección completa del clima</div>
+  1222→              </button>
+  1223→              <button onClick={() => { setVehicleType('abierto'); setSelectedVehicle(null) }}
+  1224→                className={`p-5 rounded-2xl text-center transition-all duration-300 ${vehicleType === 'abierto' ? 'bg-[#FB923C]/10 border-2 border-[#FB923C]/50' : 'bg-white/[0.03] border border-white/[0.06] hover:border-white/10'}`}>
+  1225→                <div className="flex justify-center mb-2 h-16 items-center">
+  1226→                  <img src="/vehicles/6-CAMIONETA/mediana.png" alt="Camioneta" className="max-h-full max-w-[80px] object-contain" />
+  1227→                </div>
+  1228→                <div className="text-white font-semibold mb-1">Camioneta (Abierto)</div>
+  1229→                <div className="text-xs text-white/40">Caja abierta, ideal para cargas resistentes</div>
+  1230→              </button>
+  1231→            </div>
+  1232→
+  1233→            {/* Vehicle options */}
+  1234→            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
+  1235→              {(vehicleType === 'cerrado' ? VEHICLES.find(v => v.cat === 'Furgón')! : VEHICLES.find(v => v.cat === 'Camioneta')!).items.map((v) => {
+  1236→                const isSelected = selectedVehicle?.name === v.name
+  1237→                const catColor = vehicleType === 'cerrado' ? '#818CF8' : '#FB923C'
+  1238→                return (
+  1239→                  <button key={v.name} onClick={() => { setSelectedVehicle(v); setAdditionalVehicles([]) }}
+  1240→                    className={`p-4 rounded-xl text-left transition-all duration-200 ${isSelected ? `border-2` : 'bg-white/[0.02] border border-white/[0.06] hover:border-white/10'}`}
+  1241→                    style={isSelected ? { backgroundColor: `${catColor}08`, borderColor: `${catColor}50` } : {}}>
+  1242→                    <div className="flex items-center gap-4">
+  1243→                      <div className="w-20 h-14 shrink-0 flex items-center justify-center">
+  1244→                        <img src={v.img} alt={v.name} className="max-h-full max-w-full object-contain" />
+  1245→                      </div>
+  1246→                      <div className="flex-1 min-w-0">
+  1247→                        <div className="flex items-center justify-between mb-1">
+  1248→                          <span className="text-white font-semibold text-sm">{v.name}</span>
+  1249→                          <span className="text-xs px-2 py-0.5 rounded-full font-semibold shrink-0" style={{ backgroundColor: `${catColor}15`, color: catColor }}>{v.cap} m³</span>
+  1250→                        </div>
+  1251→                        <p className="text-xs text-white/40 mb-1">{v.desc}</p>
+  1252→                        <div className="flex items-center gap-3 text-xs text-white/30">
+  1253→                          <span>{v.pax} pax</span>
+  1254→                          <span>Bs {v.perKm}/km</span>
+  1255→                          <span>Ayud. Bs {v.helperPrice}</span>
+  1256→                        </div>
+  1257→                      </div>
+  1258→                    </div>
+  1259→                  </button>
+  1260→                )
+  1261→              })}
+  1262→            </div>
+  1263→            <div className="flex justify-end">
+  1264→              <button onClick={() => setStep(2)} disabled={!selectedVehicle}
+  1265→                className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)] disabled:opacity-40 disabled:cursor-not-allowed">
+  1266→                Siguiente: Ruta →
+  1267→              </button>
+  1268→            </div>
+  1269→          </div>
+  1270→        )}
+  1271→
+  1272→        {/* ═══════════════ Step 1 (Path B): Category + Vehicle Type ═══════════════ */}
+  1273→        {step === 1 && calcPath === 'B' && (
+  1274→          <div className="max-w-4xl mx-auto">
+  1275→            <div className="flex items-center gap-2 mb-6">
+  1276→              <button onClick={() => { setCalcPath(null); setSelectedVehicle(null); setMudanzaCategory(null); setAdditionalVehicles([]) }}
+  1277→                className="text-xs text-white/40 hover:text-white/60 transition-colors flex items-center gap-1">
+  1278→                ← Cambiar ruta
+  1279→              </button>
+  1280→              <span className="text-xs px-2 py-0.5 rounded-full bg-[#818CF8]/10 text-[#818CF8] font-semibold">Ruta B — Asistencia</span>
+  1281→            </div>
+  1282→
+  1283→            {/* Vehicle type selection */}
+  1284→            <h3 className="text-xl font-bold text-white mb-2 text-center">¿Vehículo cerrado o abierto?</h3>
+  1285→            <p className="text-sm text-white/40 text-center mb-6">Los furgones protegen del clima, las camionetas tienen caja abierta</p>
+  1286→            <div className="grid grid-cols-2 gap-4 mb-8">
+  1287→              <button onClick={() => { setVehicleType('cerrado'); setSelectedVehicle(null); setMudanzaCategory(null) }}
+  1288→                className={`p-5 rounded-2xl text-center transition-all duration-300 ${vehicleType === 'cerrado' ? 'bg-[#818CF8]/10 border-2 border-[#818CF8]/50' : 'bg-white/[0.03] border border-white/[0.06] hover:border-white/10'}`}>
+  1289→                <div className="flex justify-center mb-2 h-16 items-center">
+  1290→                  <img src="/vehicles/7-FURGON/mediano.png" alt="Furgón" className="max-h-full max-w-[80px] object-contain" />
+  1291→                </div>
+  1292→                <div className="text-white font-semibold mb-1">Furgón (Cerrado)</div>
+  1293→                <div className="text-xs text-white/40">Protección completa del clima</div>
+  1294→              </button>
+  1295→              <button onClick={() => { setVehicleType('abierto'); setSelectedVehicle(null); setMudanzaCategory(null) }}
+  1296→                className={`p-5 rounded-2xl text-center transition-all duration-300 ${vehicleType === 'abierto' ? 'bg-[#FB923C]/10 border-2 border-[#FB923C]/50' : 'bg-white/[0.03] border border-white/[0.06] hover:border-white/10'}`}>
+  1297→                <div className="flex justify-center mb-2 h-16 items-center">
+  1298→                  <img src="/vehicles/6-CAMIONETA/mediana.png" alt="Camioneta" className="max-h-full max-w-[80px] object-contain" />
+  1299→                </div>
+  1300→                <div className="text-white font-semibold mb-1">Camioneta (Abierto)</div>
+  1301→                <div className="text-xs text-white/40">Caja abierta, ideal para cargas resistentes</div>
+  1302→              </button>
+  1303→            </div>
+  1304→
+  1305→            {/* Mudanza size categories */}
+  1306→            <h3 className="text-xl font-bold text-white mb-2 text-center">¿Qué tamaño es tu mudanza?</h3>
+  1307→            <p className="text-sm text-white/40 text-center mb-6">Selecciona la categoría que mejor describe tu mudanza</p>
+  1308→            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+  1309→              {MUDANZA_CATEGORIES.map((cat) => {
+  1310→                const isSelected = mudanzaCategory === cat.id
+  1311→                const suggestedName = cat.suggestedVehicle[vehicleType]
+  1312→                const vehicleList = vehicleType === 'cerrado' ? VEHICLES.find(v => v.cat === 'Furgón')! : VEHICLES.find(v => v.cat === 'Camioneta')!
+  1313→                const suggestedVehicle = vehicleList.items.find(v => v.name === suggestedName)
+  1314→                return (
+  1315→                  <button key={cat.id} onClick={() => {
+  1316→                    setMudanzaCategory(cat.id)
+  1317→                    // Auto-suggest vehicle based on category
+  1318→                    if (suggestedVehicle) { setSelectedVehicle(suggestedVehicle); setAdditionalVehicles([]) }
+  1319→                  }}
+  1320→                    className={`p-5 rounded-2xl text-left transition-all duration-300 ${isSelected ? 'border-2' : 'bg-white/[0.03] border border-white/[0.06] hover:border-white/10'}`}
+  1321→                    style={isSelected ? { backgroundColor: `${cat.color}08`, borderColor: `${cat.color}50` } : {}}>
+  1322→                    <div className="flex items-center gap-3 mb-3">
+  1323→                      <div className="w-16 h-12 shrink-0 flex items-center justify-center">
+  1324→                        {suggestedVehicle ? (
+  1325→                          <img src={suggestedVehicle.img} alt={suggestedName} className="max-h-full max-w-full object-contain" />
+  1326→                        ) : (
+  1327→                          <span className="text-2xl">{cat.emoji}</span>
+  1328→                        )}
+  1329→                      </div>
+  1330→                      <div>
+  1331→                        <h4 className="text-white font-bold text-sm">{cat.name}</h4>
+  1332→                        <span className="text-xs text-white/40">{cat.subtitle}</span>
+  1333→                      </div>
+  1334→                    </div>
+  1335→                    <p className="text-xs text-white/50 leading-relaxed mb-3">{cat.desc}</p>
+  1336→                    <div className="flex items-center gap-2 flex-wrap">
+  1337→                      <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ backgroundColor: `${cat.color}15`, color: cat.color }}>Hasta {cat.maxVolume} m³</span>
+  1338→                      <span className="text-xs text-white/30">→ {suggestedName}</span>
+  1339→                    </div>
+  1340→                  </button>
+  1341→                )
+  1342→              })}
+  1343→            </div>
+  1344→
+  1345→            {mudanzaCategory && (
+  1346→              <div className="p-4 rounded-xl bg-[#818CF8]/5 border border-[#818CF8]/15 mb-6">
+  1347→                <div className="flex items-center gap-3">
+  1348→                  <div className="w-20 h-14 shrink-0 flex items-center justify-center">
+  1349→                    {selectedVehicle ? (
+  1350→                      <img src={selectedVehicle.img} alt={selectedVehicle.name} className="max-h-full max-w-full object-contain" />
+  1351→                    ) : (
+  1352→                      <Truck className="w-8 h-8 text-[#818CF8]/40" />
+  1353→                    )}
+  1354→                  </div>
+  1355→                  <div className="flex-1">
+  1356→                    <div className="flex items-center gap-2 mb-1">
+  1357→                      <Sparkles className="w-4 h-4 text-[#818CF8]" />
+  1358→                      <span className="text-sm font-semibold text-[#818CF8]">Vehículo sugerido</span>
+  1359→                    </div>
+  1360→                    <p className="text-sm text-white/60">
+  1361→                      {selectedVehicle ? (
+  1362→                        <>
+  1363→                          <span className="text-white font-semibold">{selectedVehicle.name}</span> ({selectedVehicle.cap} m³)
+  1364→                          {additionalVehicles.length > 0 && (
+  1365→                            <span className="text-[#FF9800]"> + {additionalVehicles.length} vehículo{additionalVehicles.length > 1 ? 's' : ''} adicional{additionalVehicles.length > 1 ? 'es' : ''}</span>
+  1366→                          )}
+  1367→                        </>
+  1368→                      ) : 'Selecciona una categoría para ver la sugerencia'}
+  1369→                    </p>
+  1370→                    <p className="text-xs text-white/30 mt-1">También puedes ajustar tu selección en el paso de inventario</p>
+  1371→                  </div>
+  1372→                </div>
+  1373→              </div>
+  1374→            )}
+  1375→
+  1376→            <div className="flex justify-end">
+  1377→              <button onClick={() => setStep(2)} disabled={!mudanzaCategory || !selectedVehicle}
+  1378→                className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)] disabled:opacity-40 disabled:cursor-not-allowed">
+  1379→                Siguiente: Inventario →
+  1380→              </button>
+  1381→            </div>
+  1382→          </div>
+  1383→        )}
+  1384→
+  1385→        {/* ═══════════════ Step 2: Inventario (Path B only) ═══════════════ */}
+  1386→        {step === 2 && calcPath === 'B' && (
+  1387→          <div className="max-w-5xl mx-auto">
+  1388→            <h3 className="text-xl font-bold text-white mb-2 text-center">Inventario de Artículos</h3>
+  1389→            <p className="text-sm text-white/40 text-center mb-6">Selecciona la cantidad de cada artículo por ambiente</p>
+  1390→
+  1391→            {/* Live vehicle suggestion card for Path B */}
+  1392→            {totalVolume > 0 && selectedVehicle && (
+  1393→              <div className="mb-6 p-4 rounded-2xl bg-[#818CF8]/5 border border-[#818CF8]/15">
+  1394→                <div className="flex items-center justify-between flex-wrap gap-3">
+  1395→                  <div className="flex items-center gap-3">
+  1396→                    <div className="w-20 h-14 shrink-0 flex items-center justify-center">
+  1397→                      <img src={selectedVehicle.img} alt={selectedVehicle.name} className="max-h-full max-w-full object-contain" />
+  1398→                    </div>
+  1399→                    <div>
+  1400→                      <div className="flex items-center gap-2">
+  1401→                        <span className="text-sm font-semibold text-[#818CF8]">Vehículo sugerido</span>
+  1402→                        <Sparkles className="w-3.5 h-3.5 text-[#818CF8]" />
+  1403→                      </div>
+  1404→                      <p className="text-white font-semibold text-sm">{selectedVehicle.name} ({selectedVehicle.cap} m³)</p>
+  1405→                    </div>
+  1406→                  </div>
+  1407→                  <div className="flex items-center gap-4">
+  1408→                    <div className="text-center">
+  1409→                      <div className="text-lg font-bold text-[#00E676]">{totalVolume}</div>
+  1410→                      <div className="text-xs text-white/30">m³ total</div>
+  1411→                    </div>
+  1412→                    <div className="text-center">
+  1413→                      <div className="text-lg font-bold text-white">{selectedVehicle.cap}</div>
+  1414→                      <div className="text-xs text-white/30">m³ capacidad</div>
+  1415→                    </div>
+  1416→                    {totalVolume > selectedVehicle.cap && (
+  1417→                      <div className="text-center">
+  1418→                        <div className="text-lg font-bold text-[#FF9800]">{additionalVehicles.length + 1}</div>
+  1419→                        <div className="text-xs text-white/30">vehículos</div>
+  1420→                      </div>
+  1421→                    )}
+  1422→                  </div>
+  1423→                </div>
+  1424→                {additionalVehicles.length > 0 && (
+  1425→                  <div className="mt-3 pt-3 border-t border-[#818CF8]/10">
+  1426→                    <div className="flex items-center gap-3">
+  1427→                      {additionalVehicles.map((av, i) => (
+  1428→                        <div key={i} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.03]">
+  1429→                          <img src={av.img} alt={av.name} className="h-8 object-contain" />
+  1430→                          <span className="text-xs text-white/60">{av.name} ({av.cap} m³)</span>
+  1431→                        </div>
+  1432→                      ))}
+  1433→                    </div>
+  1434→                    <p className="text-xs text-white/50 mt-2">
+  1435→                      <span className="text-[#FF9800] font-semibold">+ {additionalVehicles.length} vehículo{additionalVehicles.length > 1 ? 's' : ''} adicional{additionalVehicles.length > 1 ? 'es' : ''}</span>
+  1436→                    </p>
+  1437→                  </div>
+  1438→                )}
+  1439→                {totalVolume > selectedVehicle.cap && (
+  1440→                  <div className="mt-3 p-2.5 rounded-lg bg-[#FF9800]/10 border border-[#FF9800]/20">
+  1441→                    <p className="text-xs text-[#FF9800]">
+  1442→                      ⚠️ Tu volumen ({totalVolume} m³) excede la capacidad máxima de un solo vehículo. Se recomienda {additionalVehicles.length + 1} vehículos.
+  1443→                    </p>
+  1444→                  </div>
+  1445→                )}
+  1446→              </div>
+  1447→            )}
+  1448→
+  1449→            <div className="flex flex-wrap justify-center gap-2 mb-6">
+  1450→              {ROOM_KEYS.map((key) => (
+  1451→                <button key={key} onClick={() => setActiveRoom(key)}
+  1452→                  className={`px-4 py-2 rounded-full text-xs font-semibold transition-all ${activeRoom === key ? 'bg-[#00E676] text-black' : 'bg-white/[0.05] text-white/50 hover:text-white/70'}`}>
+  1453→                  {ROOMS[key].label}
+  1454→                </button>
+  1455→              ))}
+  1456→            </div>
+  1457→            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-8 max-h-[480px] overflow-y-auto pr-2 custom-scroll">
+  1458→              {ROOMS[activeRoom].items.map((item) => {
+  1459→                const qty = inventory[item.name] || 0
+  1460→                return (
+  1461→                  <div key={item.name} className={`flex items-center justify-between p-3 rounded-xl border transition-all duration-200 ${qty > 0 ? 'bg-[#00E676]/5 border-[#00E676]/20' : 'bg-white/[0.02] border-white/[0.06] hover:border-white/10'}`}>
+  1462→                    <div className="flex items-center gap-3 min-w-0">
+  1463→                      <span className="text-lg shrink-0">{item.emoji}</span>
+  1464→                      <div className="min-w-0">
+  1465→                        <div className="text-sm text-white font-medium truncate">{item.name}</div>
+  1466→                        <div className="text-xs text-white/30">{item.vol} m³</div>
+  1467→                      </div>
+  1468→                    </div>
+  1469→                    <div className="flex items-center gap-2 shrink-0">
+  1470→                      <button onClick={() => setQty(item.name, -1)} className="w-7 h-7 rounded-lg bg-white/[0.06] flex items-center justify-center text-white/60 hover:bg-white/10 transition-all">
+  1471→                        <Minus className="w-3 h-3" />
+  1472→                      </button>
+  1473→                      <span className="w-6 text-center text-sm font-semibold text-white">{qty}</span>
+  1474→                      <button onClick={() => setQty(item.name, 1)} className="w-7 h-7 rounded-lg bg-[#00E676]/20 flex items-center justify-center text-[#00E676] hover:bg-[#00E676]/30 transition-all">
+  1475→                        <Plus className="w-3 h-3" />
+  1476→                      </button>
+  1477→                    </div>
+  1478→                  </div>
+  1479→                )
+  1480→              })}
+  1481→            </div>
+  1482→            <div className="flex justify-between">
+  1483→              <button onClick={() => setStep(1)} className="px-6 py-3 rounded-full text-sm font-semibold text-white/60 border border-white/[0.1] hover:border-white/20 transition-all">← Atrás</button>
+  1484→              <button onClick={() => setStep(3)} className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)]">
+  1485→                Siguiente: Ruta →
+  1486→              </button>
+  1487→            </div>
+  1488→          </div>
+  1489→        )}
+  1490→
+  1491→        {/* ═══════════════ Step: Ruta y Dirección (MAP) ═══════════════ */}
+  1492→        {step === (calcPath === 'A' ? 2 : 3) && calcPath && (
+  1493→          <div className="max-w-7xl mx-auto">
+  1494→            <h3 className="text-xl font-bold text-white mb-2 text-center">Ruta y Dirección</h3>
+  1495→            <p className="text-sm text-white/40 text-center mb-6">Define origen, destino y paradas intermedias en el mapa</p>
+  1496→
+  1497→            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+  1498→              {/* Left: Form fields */}
+  1499→              <div className="space-y-4">
+  1500→                {/* Map selection mode indicator */}
+  1501→                <div className="p-4 rounded-2xl bg-white/[0.03] border border-[#00E676]/15">
+  1502→                  <div className="flex items-center gap-2 mb-3">
+  1503→                    <Navigation className="w-4 h-4 text-[#00E676]" />
+  1504→                    <span className="text-sm font-semibold text-[#00E676]">Modo de selección en mapa</span>
+  1505→                  </div>
+  1506→                  <div className="flex gap-2">
+  1507→                    <button onClick={() => setMapSelectionMode('origin')}
+  1508→                      className={`flex-1 px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${mapSelectionMode === 'origin' ? 'bg-[#00E676] text-black' : 'bg-white/[0.04] text-white/50 border border-white/[0.08]'}`}>
+  1509→                      <Flag className="w-3 h-3" /> Origen
+  1510→                    </button>
+  1511→                    <button onClick={() => setMapSelectionMode('destination')}
+  1512→                      className={`flex-1 px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${mapSelectionMode === 'destination' ? 'bg-red-500 text-white' : 'bg-white/[0.04] text-white/50 border border-white/[0.08]'}`}>
+  1513→                      <Flag className="w-3 h-3" /> Destino
+  1514→                    </button>
+  1515→                    <button onClick={() => setMapSelectionMode('stop')}
+  1516→                      className={`flex-1 px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${mapSelectionMode === 'stop' ? 'bg-[#4FC3F7] text-black' : 'bg-white/[0.04] text-white/50 border border-white/[0.08]'}`}>
+  1517→                      <Plus className="w-3 h-3" /> Parada
+  1518→                    </button>
+  1519→                  </div>
+  1520→                </div>
+  1521→
+  1522→                {/* Origin search */}
+  1523→                <div className="relative">
+  1524→                  <label className="text-xs text-white/40 block mb-1.5">
+  1525→                    <Flag className="w-3 h-3 inline mr-1 text-[#00E676]" /> Dirección de Origen
+  1526→                  </label>
+  1527→                  <div className="relative">
+  1528→                    <input type="text" value={originAddress}
+  1529→                      onChange={(e) => handleOriginSearch(e.target.value)}
+  1530→                      onFocus={() => { setSearchingOrigin(true); setMapSelectionMode('origin') }}
+  1531→                      onBlur={() => setTimeout(() => setSearchingOrigin(false), 200)}
+  1532→                      className={inputClass + ' pr-10'}
+  1533→                      placeholder="Buscar dirección de origen..." />
+  1534→                    <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+  1535→                  </div>
+  1536→                  {searchingOrigin && originResults.length > 0 && (
+  1537→                    <div className="absolute z-30 w-full mt-1 rounded-xl bg-[#0a0e17] border border-white/[0.1] max-h-48 overflow-y-auto custom-scroll shadow-2xl">
+  1538→                      {originResults.map((r, i) => (
+  1539→                        <button key={i} onClick={() => selectOrigin(r)}
+  1540→                          className="w-full text-left px-4 py-3 text-sm text-white/70 hover:bg-white/[0.06] border-b border-white/[0.04] last:border-b-0 transition-all">
+  1541→                          {r.display_name}
+  1542→                        </button>
+  1543→                      ))}
+  1544→                    </div>
+  1545→                  )}
+  1546→                </div>
+  1547→
+  1548→                {/* Destination search */}
+  1549→                <div className="relative">
+  1550→                  <label className="text-xs text-white/40 block mb-1.5">
+  1551→                    <Flag className="w-3 h-3 inline mr-1 text-red-400" /> Dirección de Destino
+  1552→                  </label>
+  1553→                  <div className="relative">
+  1554→                    <input type="text" value={destAddress}
+  1555→                      onChange={(e) => handleDestSearch(e.target.value)}
+  1556→                      onFocus={() => { setSearchingDest(true); setMapSelectionMode('destination') }}
+  1557→                      onBlur={() => setTimeout(() => setSearchingDest(false), 200)}
+  1558→                      className={inputClass + ' pr-10'}
+  1559→                      placeholder="Buscar dirección de destino..." />
+  1560→                    <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+  1561→                  </div>
+  1562→                  {searchingDest && destResults.length > 0 && (
+  1563→                    <div className="absolute z-30 w-full mt-1 rounded-xl bg-[#0a0e17] border border-white/[0.1] max-h-48 overflow-y-auto custom-scroll shadow-2xl">
+  1564→                      {destResults.map((r, i) => (
+  1565→                        <button key={i} onClick={() => selectDest(r)}
+  1566→                          className="w-full text-left px-4 py-3 text-sm text-white/70 hover:bg-white/[0.06] border-b border-white/[0.04] last:border-b-0 transition-all">
+  1567→                          {r.display_name}
+  1568→                        </button>
+  1569→                      ))}
+  1570→                    </div>
+  1571→                  )}
+  1572→                </div>
+  1573→
+  1574→                {/* Intermediate stops */}
+  1575→                <div className="space-y-2">
+  1576→                  <div className="flex items-center justify-between">
+  1577→                    <label className="text-xs text-white/40">
+  1578→                      <Flag className="w-3 h-3 inline mr-1 text-[#4FC3F7]" /> Paradas Intermedias
+  1579→                    </label>
+  1580→                    <button onClick={() => setMapSelectionMode('stop')}
+  1581→                      className="text-xs text-[#4FC3F7] hover:text-[#4FC3F7]/80 transition-colors flex items-center gap-1">
+  1582→                      <Plus className="w-3 h-3" /> Agregar
+  1583→                    </button>
+  1584→                  </div>
+  1585→                  {intermediateStops.map((stop) => (
+  1586→                    <div key={stop.id} className="flex items-center gap-2 p-2.5 rounded-xl bg-[#4FC3F7]/5 border border-[#4FC3F7]/20">
+  1587→                      <Flag className="w-3.5 h-3.5 text-[#4FC3F7] shrink-0" />
+  1588→                      <span className="text-sm text-white/60 flex-1 truncate">{stop.address}</span>
+  1589→                      <button onClick={() => removeStop(stop.id)} className="shrink-0 text-white/30 hover:text-red-400 transition-colors">
+  1590→                        <X className="w-4 h-4" />
+  1591→                      </button>
+  1592→                    </div>
+  1593→                  ))}
+  1594→                  {intermediateStops.length === 0 && (
+  1595→                    <p className="text-xs text-white/20 text-center py-2">No hay paradas intermedias</p>
+  1596→                  )}
+  1597→                </div>
+  1598→
+  1599→                {/* Route info */}
+  1600→                {routeDistance > 0 && (
+  1601→                  <div className="p-4 rounded-2xl bg-[#0077BD]/10 border border-[#0077BD]/20">
+  1602→                    <div className="flex items-center gap-2 mb-2">
+  1603→                      <Route className="w-4 h-4 text-[#0077BD]" />
+  1604→                      <span className="text-sm font-semibold text-[#0077BD]">Ruta Calculada</span>
+  1605→                    </div>
+  1606→                    <div className="grid grid-cols-2 gap-3 text-sm">
+  1607→                      <div>
+  1608→                        <span className="text-white/40">Distancia</span>
+  1609→                        <div className="text-white font-bold">{routeDistance} km</div>
+  1610→                      </div>
+  1611→                      <div>
+  1612→                        <span className="text-white/40">Duración est.</span>
+  1613→                        <div className="text-white font-bold">{routeDuration} min</div>
+  1614→                      </div>
+  1615→                    </div>
+  1616→                  </div>
+  1617→                )}
+  1618→
+  1619→                {isCalculatingRoute && (
+  1620→                  <div className="flex items-center gap-2 text-sm text-[#0077BD]">
+  1621→                    <Loader2 className="w-4 h-4 animate-spin" /> Calculando ruta...
+  1622→                  </div>
+  1623→                )}
+  1624→              </div>
+  1625→
+  1626→              {/* Right: Map */}
+  1627→              <div className="relative rounded-2xl overflow-hidden border border-white/[0.08]" style={{ height: '400px' }}>
+  1628→                <MudanzaMap
+  1629→                  origin={origin}
+  1630→                  destination={destination}
+  1631→                  intermediateStops={intermediateStops}
+  1632→                  originAddress={originAddress}
+  1633→                  destAddress={destAddress}
+  1634→                  routeGeometry={routeGeometry}
+  1635→                  mapSelectionMode={mapSelectionMode}
+  1636→                  onMapClick={handleMapClick}
+  1637→                />
+  1638→              </div>
+  1639→            </div>
+  1640→
+  1641→            <div className="flex justify-between">
+  1642→              <button onClick={() => setStep(calcPath === 'A' ? 1 : 2)} className="px-6 py-3 rounded-full text-sm font-semibold text-white/60 border border-white/[0.1] hover:border-white/20 transition-all">← Atrás</button>
+  1643→              <button onClick={() => setStep(calcPath === 'A' ? 3 : 4)} className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)]">
+  1644→                Siguiente: Extras y Servicios →
+  1645→              </button>
+  1646→            </div>
+  1647→          </div>
+  1648→        )}
+  1649→
+  1650→        {/* ═══════════════ Step: Extras y Servicios ═══════════════ */}
+  1651→        {step === (calcPath === 'A' ? 3 : 4) && calcPath && (
+  1652→          <div className="max-w-4xl mx-auto max-h-[80vh] overflow-y-auto custom-scroll pr-1">
+  1653→            <h3 className="text-xl font-bold text-white mb-2 text-center">Extras y Servicios</h3>
+  1654→            <p className="text-sm text-white/40 text-center mb-8">Personaliza tu mudanza con servicios adicionales</p>
+  1655→
+  1656→            {/* Section A: Embalaje y Cajas */}
+  1657→            <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] mb-4">
+  1658→              <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
+  1659→                <span className="text-lg">📦</span> Embalaje y Cajas
+  1660→              </h4>
+  1661→
+  1662→              {/* Embalaje type */}
+  1663→              <div className="mb-5">
+  1664→                <label className="text-xs text-white/40 block mb-2">Servicio de Embalaje</label>
+  1665→                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+  1666→                  {([['ninguno', 'Ninguno', '#666'], ['completo', 'Completo (Bs 45/m³)', '#00E676'], ['solo_embalaje', 'Solo Embalaje (Bs 30/m³)', '#0077BD'], ['solo_desembalaje', 'Solo Desembalaje (Bs 15/m³)', '#FF9800']] as const).map(([id, label, color]) => (
+  1667→                    <button key={id} onClick={() => setEmbalajeType(id as typeof embalajeType)}
+  1668→                      className={`p-3 rounded-xl text-xs font-semibold transition-all text-center ${embalajeType === id ? `border-2` : 'bg-white/[0.03] border border-white/[0.06] hover:border-white/10 text-white/50'}`}
+  1669→                      style={embalajeType === id ? { backgroundColor: `${color}10`, borderColor: `${color}50`, color } : {}}>
+  1670→                      {label}
+  1671→                    </button>
+  1672→                  ))}
+  1673→                </div>
+  1674→                {embalajeType !== 'ninguno' && totalVolume > 0 && (
+  1675→                  <div className="mt-2 p-3 rounded-xl bg-white/[0.02] border border-white/[0.06] text-xs text-white/50">
+  1676→                    {embalajeType === 'completo' && (
+  1677→                      <span>Embalaje (Bs 30/m³) + Desembalaje (Bs 15/m³) = Bs 45/m³ × {totalVolume}m³ = <span className="text-[#00E676] font-bold">Bs {embalajeCost}</span></span>
+  1678→                    )}
+  1679→                    {embalajeType === 'solo_embalaje' && (
+  1680→                      <span>Bs 30/m³ × {totalVolume}m³ = <span className="text-[#0077BD] font-bold">Bs {embalajeCost}</span></span>
+  1681→                    )}
+  1682→                    {embalajeType === 'solo_desembalaje' && (
+  1683→                      <span>Bs 15/m³ × {totalVolume}m³ = <span className="text-[#FF9800] font-bold">Bs {embalajeCost}</span></span>
+  1684→                    )}
+  1685→                  </div>
+  1686→                )}
+  1687→              </div>
+  1688→
+  1689→              {/* Box purchase */}
+  1690→              <div className="mb-4">
+  1691→                <label className="text-xs text-white/40 block mb-2">Compra de Cajas</label>
+  1692→                <div className="space-y-2">
+  1693→                  {BOX_OPTIONS.map((box) => {
+  1694→                    const qty = boxes[box.id] || 0
+  1695→                    return (
+  1696→                      <div key={box.id} className={`flex items-center justify-between p-3 rounded-xl transition-all ${qty > 0 ? 'bg-[#00E676]/5 border border-[#00E676]/15' : 'bg-white/[0.02] border border-white/[0.04]'}`}>
+  1697→                        <div className="flex items-center gap-2">
+  1698→                          <span className="text-sm">{box.emoji}</span>
+  1699→                          <div>
+  1700→                            <div className="text-xs text-white/70">{box.name}</div>
+  1701→                            <div className="text-xs text-white/30">Bs {box.price} c/u</div>
+  1702→                          </div>
+  1703→                        </div>
+  1704→                        <div className="flex items-center gap-2">
+  1705→                          <button onClick={() => setBoxes(prev => { const n = Math.max(0, (prev[box.id] || 0) - 1); if (n === 0) { const { [box.id]: _, ...rest } = prev; return rest }; return { ...prev, [box.id]: n } })}
+  1706→                            className="w-7 h-7 rounded-lg bg-white/[0.06] flex items-center justify-center text-white/60 hover:bg-white/10 transition-all">
+  1707→                            <Minus className="w-3 h-3" />
+  1708→                          </button>
+  1709→                          <span className="w-6 text-center text-sm font-semibold text-white">{qty}</span>
+  1710→                          <button onClick={() => setBoxes(prev => ({ ...prev, [box.id]: (prev[box.id] || 0) + 1 }))}
+  1711→                            className="w-7 h-7 rounded-lg bg-[#00E676]/20 flex items-center justify-center text-[#00E676] hover:bg-[#00E676]/30 transition-all">
+  1712→                            <Plus className="w-3 h-3" />
+  1713→                          </button>
+  1714→                        </div>
+  1715→                      </div>
+  1716→                    )
+  1717→                  })}
+  1718→                </div>
+  1719→              </div>
+  1720→
+  1721→              {/* Packing materials */}
+  1722→              <div>
+  1723→                <label className="text-xs text-white/40 block mb-2">Materiales de Embalaje</label>
+  1724→                <div className="space-y-2">
+  1725→                  {PACKING_MATERIALS.map((mat) => {
+  1726→                    const qty = materials[mat.id] || 0
+  1727→                    return (
+  1728→                      <div key={mat.id} className={`flex items-center justify-between p-3 rounded-xl transition-all ${qty > 0 ? 'bg-[#0077BD]/5 border border-[#0077BD]/15' : 'bg-white/[0.02] border border-white/[0.04]'}`}>
+  1729→                        <div className="flex items-center gap-2">
+  1730→                          <span className="text-sm">{mat.emoji}</span>
+  1731→                          <div>
+  1732→                            <div className="text-xs text-white/70">{mat.name}</div>
+  1733→                            <div className="text-xs text-white/30">Bs {mat.price} c/u</div>
+  1734→                          </div>
+  1735→                        </div>
+  1736→                        <div className="flex items-center gap-2">
+  1737→                          <button onClick={() => setMaterials(prev => { const n = Math.max(0, (prev[mat.id] || 0) - 1); if (n === 0) { const { [mat.id]: _, ...rest } = prev; return rest }; return { ...prev, [mat.id]: n } })}
+  1738→                            className="w-7 h-7 rounded-lg bg-white/[0.06] flex items-center justify-center text-white/60 hover:bg-white/10 transition-all">
+  1739→                            <Minus className="w-3 h-3" />
+  1740→                          </button>
+  1741→                          <span className="w-6 text-center text-sm font-semibold text-white">{qty}</span>
+  1742→                          <button onClick={() => setMaterials(prev => ({ ...prev, [mat.id]: (prev[mat.id] || 0) + 1 }))}
+  1743→                            className="w-7 h-7 rounded-lg bg-[#0077BD]/20 flex items-center justify-center text-[#0077BD] hover:bg-[#0077BD]/30 transition-all">
+  1744→                            <Plus className="w-3 h-3" />
+  1745→                          </button>
+  1746→                        </div>
+  1747→                      </div>
+  1748→                    )
+  1749→                  })}
+  1750→                </div>
+  1751→              </div>
+  1752→            </div>
+  1753→
+  1754→            {/* Section B: Manipulación de Objetos */}
+  1755→            <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] mb-4">
+  1756→              <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
+  1757→                <span className="text-lg">🔧</span> Manipulación de Objetos
+  1758→              </h4>
+  1759→              <div className="space-y-3">
+  1760→                {HANDLING_EXTRAS.map((extra) => {
+  1761→                  const qty = handlingExtras[extra.id] || 0
+  1762→                  return (
+  1763→                    <div key={extra.id} className={`p-4 rounded-xl transition-all ${qty > 0 ? 'bg-[#FF9800]/5 border border-[#FF9800]/15' : 'bg-white/[0.02] border border-white/[0.06]'}`}>
+  1764→                      <div className="flex items-center justify-between mb-1">
+  1765→                        <div className="flex items-center gap-2">
+  1766→                          <span className="text-sm">{extra.emoji}</span>
+  1767→                          <div>
+  1768→                            <div className="text-sm text-white font-medium">{extra.name}</div>
+  1769→                            <div className="text-xs text-white/30">{extra.desc}</div>
+  1770→                          </div>
+  1771→                        </div>
+  1772→                        <div className="flex items-center gap-2 shrink-0 ml-3">
+  1773→                          <button onClick={() => setHandlingExtras(prev => { const n = Math.max(0, (prev[extra.id] || 0) - 1); if (n === 0) { const { [extra.id]: _, ...rest } = prev; return rest }; return { ...prev, [extra.id]: n } })}
+  1774→                            className="w-7 h-7 rounded-lg bg-white/[0.06] flex items-center justify-center text-white/60 hover:bg-white/10 transition-all">
+  1775→                            <Minus className="w-3 h-3" />
+  1776→                          </button>
+  1777→                          <span className="w-6 text-center text-sm font-semibold text-white">{qty}</span>
+  1778→                          <button onClick={() => setHandlingExtras(prev => ({ ...prev, [extra.id]: (prev[extra.id] || 0) + 1 }))}
+  1779→                            className="w-7 h-7 rounded-lg bg-[#FF9800]/20 flex items-center justify-center text-[#FF9800] hover:bg-[#FF9800]/30 transition-all">
+  1780→                            <Plus className="w-3 h-3" />
+  1781→                          </button>
+  1782→                        </div>
+  1783→                      </div>
+  1784→                      <div className="flex items-center justify-between mt-1">
+  1785→                        <span className="text-xs text-white/30">Bs {extra.price}/{extra.unit}</span>
+  1786→                        {qty > 0 && <span className="text-xs text-[#FF9800] font-semibold">Bs {extra.price * qty}</span>}
+  1787→                      </div>
+  1788→                    </div>
+  1789→                  )
+  1790→                })}
+  1791→              </div>
+  1792→            </div>
+  1793→
+  1794→            {/* Section C: Accesibilidad - Origen */}
+  1795→            <div className="p-5 rounded-2xl bg-white/[0.03] border border-[#00E676]/10 mb-4">
+  1796→              <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
+  1797→                <span className="text-lg">🏢</span> Accesibilidad — Origen
+  1798→                <span className="text-xs px-2 py-0.5 rounded-full bg-[#00E676]/10 text-[#00E676] font-semibold">Origen</span>
+  1799→              </h4>
+  1800→              <div className="grid grid-cols-2 gap-4 mb-4">
+  1801→                <div>
+  1802→                  <label className="text-xs text-white/40 block mb-1">Piso de origen</label>
+  1803→                  <select value={originFloor} onChange={e => setOriginFloor(e.target.value)}
+  1804→                    className={inputClass + ' appearance-none'}>
+  1805→                    {['baja', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'].map(f => <option key={f} value={f} className="bg-[#0a0e17]">Planta {f === 'baja' ? 'baja' : f + '°'}</option>)}
+  1806→                  </select>
+  1807→                </div>
+  1808→                <div>
+  1809→                  <label className="text-xs text-white/40 block mb-1">Elevador</label>
+  1810→                  <button onClick={() => setElevatorOrigin(!elevatorOrigin)}
+  1811→                    className={`w-full px-4 py-3 rounded-xl text-sm font-semibold transition-all ${elevatorOrigin ? 'bg-[#00E676] text-black' : 'bg-white/[0.04] text-white/40 border border-white/[0.08]'}`}>
+  1812→                    {elevatorOrigin ? 'Sí' : 'No'}
+  1813→                  </button>
+  1814→                </div>
+  1815→              </div>
+  1816→              {originFloorCost > 0 && (
+  1817→                <div className="p-2 rounded-lg bg-[#00E676]/5 border border-[#00E676]/10 text-xs text-white/50 mb-4">
+  1818→                  Costo piso: {getFloorCount(originFloor)} pisos × Bs {elevatorOrigin ? selectedVehicle?.floorElev : selectedVehicle?.floorNoElev}/piso = <span className="text-[#00E676] font-bold">Bs {originFloorCost}</span>
+  1819→                </div>
+  1820→              )}
+  1821→              {/* Distancia caminata origen */}
+  1822→              <div className="flex items-center justify-between mb-3">
+  1823→                <div className="flex items-center gap-2">
+  1824→                  <span className="text-sm">🚶</span>
+  1825→                  <div>
+  1826→                    <div className="text-xs text-white/70">Distancia de caminata</div>
+  1827→                    <div className="text-xs text-white/30">Bs 20 / 10m</div>
+  1828→                  </div>
+  1829→                </div>
+  1830→                <div className="flex items-center gap-2">
+  1831→                  <button onClick={() => setOriginCaminata(Math.max(0, originCaminata - 1))}
+  1832→                    className="w-7 h-7 rounded-lg bg-white/[0.06] flex items-center justify-center text-white/60 hover:bg-white/10 transition-all">
+  1833→                    <Minus className="w-3 h-3" />
+  1834→                  </button>
+  1835→                  <span className="w-8 text-center text-sm font-semibold text-white">{originCaminata}</span>
+  1836→                  <button onClick={() => setOriginCaminata(originCaminata + 1)}
+  1837→                    className="w-7 h-7 rounded-lg bg-[#00E676]/20 flex items-center justify-center text-[#00E676] hover:bg-[#00E676]/30 transition-all">
+  1838→                    <Plus className="w-3 h-3" />
+  1839→                  </button>
+  1840→                </div>
+  1841→              </div>
+  1842→              {/* Elevador fachada origen */}
+  1843→              <div className="flex items-center justify-between">
+  1844→                <div className="flex items-center gap-2">
+  1845→                  <span className="text-sm">🏗️</span>
+  1846→                  <div>
+  1847→                    <div className="text-xs text-white/70">Elevador por fachada (grúa)</div>
+  1848→                    <div className="text-xs text-white/30">Bs 200 / hr</div>
+  1849→                  </div>
+  1850→                </div>
+  1851→                <div className="flex items-center gap-2">
+  1852→                  <button onClick={() => setOriginFachada(Math.max(0, originFachada - 1))}
+  1853→                    className="w-7 h-7 rounded-lg bg-white/[0.06] flex items-center justify-center text-white/60 hover:bg-white/10 transition-all">
+  1854→                    <Minus className="w-3 h-3" />
+  1855→                  </button>
+  1856→                  <span className="w-8 text-center text-sm font-semibold text-white">{originFachada}</span>
+  1857→                  <button onClick={() => setOriginFachada(originFachada + 1)}
+  1858→                    className="w-7 h-7 rounded-lg bg-[#00E676]/20 flex items-center justify-center text-[#00E676] hover:bg-[#00E676]/30 transition-all">
+  1859→                    <Plus className="w-3 h-3" />
+  1860→                  </button>
+  1861→                </div>
+  1862→              </div>
+  1863→            </div>
+  1864→
+  1865→            {/* Section D: Accesibilidad - Destino */}
+  1866→            <div className="p-5 rounded-2xl bg-white/[0.03] border border-[#0077BD]/10 mb-4">
+  1867→              <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
+  1868→                <span className="text-lg">🏢</span> Accesibilidad — Destino
+  1869→                <span className="text-xs px-2 py-0.5 rounded-full bg-[#0077BD]/10 text-[#0077BD] font-semibold">Destino</span>
+  1870→              </h4>
+  1871→              <div className="grid grid-cols-2 gap-4 mb-4">
+  1872→                <div>
+  1873→                  <label className="text-xs text-white/40 block mb-1">Piso de destino</label>
+  1874→                  <select value={destFloor} onChange={e => setDestFloor(e.target.value)}
+  1875→                    className={inputClass + ' appearance-none'}>
+  1876→                    {['baja', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'].map(f => <option key={f} value={f} className="bg-[#0a0e17]">Planta {f === 'baja' ? 'baja' : f + '°'}</option>)}
+  1877→                  </select>
+  1878→                </div>
+  1879→                <div>
+  1880→                  <label className="text-xs text-white/40 block mb-1">Elevador</label>
+  1881→                  <button onClick={() => setElevatorDest(!elevatorDest)}
+  1882→                    className={`w-full px-4 py-3 rounded-xl text-sm font-semibold transition-all ${elevatorDest ? 'bg-[#0077BD] text-white' : 'bg-white/[0.04] text-white/40 border border-white/[0.08]'}`}>
+  1883→                    {elevatorDest ? 'Sí' : 'No'}
+  1884→                  </button>
+  1885→                </div>
+  1886→              </div>
+  1887→              {destFloorCost > 0 && (
+  1888→                <div className="p-2 rounded-lg bg-[#0077BD]/5 border border-[#0077BD]/10 text-xs text-white/50 mb-4">
+  1889→                  Costo piso: {getFloorCount(destFloor)} pisos × Bs {elevatorDest ? selectedVehicle?.floorElev : selectedVehicle?.floorNoElev}/piso = <span className="text-[#0077BD] font-bold">Bs {destFloorCost}</span>
+  1890→                </div>
+  1891→              )}
+  1892→              {/* Distancia caminata destino */}
+  1893→              <div className="flex items-center justify-between mb-3">
+  1894→                <div className="flex items-center gap-2">
+  1895→                  <span className="text-sm">🚶</span>
+  1896→                  <div>
+  1897→                    <div className="text-xs text-white/70">Distancia de caminata</div>
+  1898→                    <div className="text-xs text-white/30">Bs 20 / 10m</div>
+  1899→                  </div>
+  1900→                </div>
+  1901→                <div className="flex items-center gap-2">
+  1902→                  <button onClick={() => setDestCaminata(Math.max(0, destCaminata - 1))}
+  1903→                    className="w-7 h-7 rounded-lg bg-white/[0.06] flex items-center justify-center text-white/60 hover:bg-white/10 transition-all">
+  1904→                    <Minus className="w-3 h-3" />
+  1905→                  </button>
+  1906→                  <span className="w-8 text-center text-sm font-semibold text-white">{destCaminata}</span>
+  1907→                  <button onClick={() => setDestCaminata(destCaminata + 1)}
+  1908→                    className="w-7 h-7 rounded-lg bg-[#0077BD]/20 flex items-center justify-center text-[#0077BD] hover:bg-[#0077BD]/30 transition-all">
+  1909→                    <Plus className="w-3 h-3" />
+  1910→                  </button>
+  1911→                </div>
+  1912→              </div>
+  1913→              {/* Elevador fachada destino */}
+  1914→              <div className="flex items-center justify-between">
+  1915→                <div className="flex items-center gap-2">
+  1916→                  <span className="text-sm">🏗️</span>
+  1917→                  <div>
+  1918→                    <div className="text-xs text-white/70">Elevador por fachada (grúa)</div>
+  1919→                    <div className="text-xs text-white/30">Bs 200 / hr</div>
+  1920→                  </div>
+  1921→                </div>
+  1922→                <div className="flex items-center gap-2">
+  1923→                  <button onClick={() => setDestFachada(Math.max(0, destFachada - 1))}
+  1924→                    className="w-7 h-7 rounded-lg bg-white/[0.06] flex items-center justify-center text-white/60 hover:bg-white/10 transition-all">
+  1925→                    <Minus className="w-3 h-3" />
+  1926→                  </button>
+  1927→                  <span className="w-8 text-center text-sm font-semibold text-white">{destFachada}</span>
+  1928→                  <button onClick={() => setDestFachada(destFachada + 1)}
+  1929→                    className="w-7 h-7 rounded-lg bg-[#0077BD]/20 flex items-center justify-center text-[#0077BD] hover:bg-[#0077BD]/30 transition-all">
+  1930→                    <Plus className="w-3 h-3" />
+  1931→                  </button>
+  1932→                </div>
+  1933→              </div>
+  1934→            </div>
+  1935→
+  1936→            {/* Section E: Ayudantes */}
+  1937→            <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] mb-4">
+  1938→              <div className="flex items-center justify-between">
+  1939→                <div>
+  1940→                  <h4 className="text-white font-semibold flex items-center gap-2">
+  1941→                    <span className="text-lg">👥</span> Ayudantes (carga y descarga)
+  1942→                  </h4>
+  1943→                  <p className="text-xs text-white/30 mt-1">Bs {selectedVehicle?.helperPrice || 80} c/u</p>
+  1944→                </div>
+  1945→                <div className="flex items-center gap-3">
+  1946→                  <button onClick={() => setHelpers(Math.max(0, helpers - 1))}
+  1947→                    className="w-9 h-9 rounded-xl bg-white/[0.06] flex items-center justify-center text-white/60 hover:bg-white/10 transition-all">
+  1948→                    <Minus className="w-4 h-4" />
+  1949→                  </button>
+  1950→                  <span className="text-xl font-bold text-white w-8 text-center">{helpers}</span>
+  1951→                  <button onClick={() => setHelpers(helpers + 1)}
+  1952→                    className="w-9 h-9 rounded-xl bg-[#818CF8]/20 flex items-center justify-center text-[#818CF8] hover:bg-[#818CF8]/30 transition-all">
+  1953→                    <Plus className="w-4 h-4" />
+  1954→                  </button>
+  1955→                </div>
+  1956→              </div>
+  1957→              {helpers > 0 && (
+  1958→                <div className="mt-2 text-sm text-[#818CF8]">{helpers} × Bs {selectedVehicle?.helperPrice || 80} = Bs {helpersCost}</div>
+  1959→              )}
+  1960→            </div>
+  1961→
+  1962→            {/* Section F: Logística y Seguridad */}
+  1963→            <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] mb-4">
+  1964→              <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
+  1965→                <span className="text-lg">🚚</span> Logística y Seguridad
+  1966→              </h4>
+  1967→              <div className="space-y-3">
+  1968→                {LOGISTICS_EXTRAS.map((extra) => {
+  1969→                  if (extra.id === 'retiro_cajas') {
+  1970→                    const qty = logisticsExtras[extra.id] || 0
+  1971→                    return (
+  1972→                      <div key={extra.id} className={`flex items-center justify-between p-3 rounded-xl transition-all ${qty > 0 ? 'bg-[#818CF8]/5 border border-[#818CF8]/15' : 'bg-white/[0.02] border border-white/[0.06]'}`}>
+  1973→                        <div className="flex items-center gap-2">
+  1974→                          <span className="text-sm">{extra.emoji}</span>
+  1975→                          <div>
+  1976→                            <div className="text-sm text-white font-medium">{extra.name}</div>
+  1977→                            <div className="text-xs text-white/30">{extra.desc} — Bs {extra.price}</div>
+  1978→                          </div>
+  1979→                        </div>
+  1980→                        <button onClick={() => setLogisticsExtras(prev => prev[extra.id] ? (prev[extra.id] ? (() => { const { [extra.id]: _, ...rest } = prev; return rest })() : prev) : { ...prev, [extra.id]: 1 })}
+  1981→                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${qty > 0 ? 'bg-[#818CF8] text-white' : 'bg-white/[0.06] text-white/40 border border-white/[0.08]'}`}>
+  1982→                          {qty > 0 ? 'Incluido' : 'Agregar'}
+  1983→                        </button>
+  1984→                      </div>
+  1985→                    )
+  1986→                  }
+  1987→                  const qty = logisticsExtras[extra.id] || 0
+  1988→                  return (
+  1989→                    <div key={extra.id} className={`flex items-center justify-between p-3 rounded-xl transition-all ${qty > 0 ? 'bg-[#818CF8]/5 border border-[#818CF8]/15' : 'bg-white/[0.02] border border-white/[0.06]'}`}>
+  1990→                      <div className="flex items-center gap-2">
+  1991→                        <span className="text-sm">{extra.emoji}</span>
+  1992→                        <div>
+  1993→                          <div className="text-sm text-white font-medium">{extra.name}</div>
+  1994→                          <div className="text-xs text-white/30">Bs {extra.price}{extra.unit ? `/${extra.unit}` : ''}</div>
+  1995→                        </div>
+  1996→                      </div>
+  1997→                      <div className="flex items-center gap-2">
+  1998→                        <button onClick={() => setLogisticsExtras(prev => { const n = Math.max(0, (prev[extra.id] || 0) - 1); if (n === 0) { const { [extra.id]: _, ...rest } = prev; return rest }; return { ...prev, [extra.id]: n } })}
+  1999→                          className="w-7 h-7 rounded-lg bg-white/[0.06] flex items-center justify-center text-white/60 hover:bg-white/10 transition-all">
+  2000→                          <Minus className="w-3 h-3" />
+
+[showing lines 1-2000 of 2432; use offset=2001 with limit to continue reading]

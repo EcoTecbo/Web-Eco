@@ -1,0 +1,911 @@
+     1→'use client'
+     2→
+     3→import { useEffect, useRef, useState } from 'react'
+     4→import {
+     5→  Package, Bike, Car, Truck, Clock, MapPin, Shield, CheckCircle2,
+     6→  ArrowRight, Phone, Zap, Users, Eye, BadgeCheck, Smartphone,
+     7→  Navigation, Route, Box, Warehouse, Globe, ChevronRight,
+     8→  Sparkles, Send, Headphones, MessageCircle, CreditCard,
+     9→  Timer, BoxIcon, TruckIcon, UserCheck, BarChart3, Radio,
+    10→  MapPinned, PackageCheck, CircleDollarSign, Building2,
+    11→  Mail, FileText, ShoppingBag
+    12→} from 'lucide-react'
+    13→import { Navbar } from '@/components/ecotaxi/navbar'
+    14→import { Footer } from '@/components/ecotaxi/footer'
+    15→
+    16→/* ─────────────────────── scroll-triggered animation hook ──────────────────── */
+    17→function useInView(threshold = 0.1) {
+    18→  const ref = useRef<HTMLDivElement>(null)
+    19→  const [visible, setVisible] = useState(false)
+    20→  useEffect(() => {
+    21→    const el = ref.current
+    22→    if (!el) return
+    23→    const obs = new IntersectionObserver(
+    24→      ([e]) => { if (e.isIntersecting) setVisible(true) },
+    25→      { threshold }
+    26→    )
+    27→    obs.observe(el)
+    28→    return () => obs.disconnect()
+    29→  }, [threshold])
+    30→  return { ref, visible }
+    31→}
+    32→
+    33→/* ─────────────────────── animated section wrapper ─────────────────────────── */
+    34→function AnimatedSection({ children, className = '', delay = 0 }: {
+    35→  children: React.ReactNode; className?: string; delay?: number
+    36→}) {
+    37→  const { ref, visible } = useInView(0.08)
+    38→  return (
+    39→    <div
+    40→      ref={ref}
+    41→      className={`transition-all duration-700 ease-out ${
+    42→        visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+    43→      } ${className}`}
+    44→      style={{ transitionDelay: visible ? `${delay}ms` : '0ms' }}
+    45→    >
+    46→      {children}
+    47→    </div>
+    48→  )
+    49→}
+    50→
+    51→/* ═══════════════════════════════════════════════════════════════════════════════
+    52→   1. HERO SECTION — Delivery & Shipping Theme
+    53→   ═══════════════════════════════════════════════════════════════════════════════ */
+    54→function HeroSection() {
+    55→  return (
+    56→    <section className="relative min-h-[92vh] flex items-center justify-center overflow-hidden">
+    57→      {/* Background with overlay */}
+    58→      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1320] to-[#0a0e17]" />
+    59→
+    60→      {/* Grid pattern */}
+    61→      <div
+    62→        className="absolute inset-0 opacity-[0.03]"
+    63→        style={{
+    64→          backgroundImage: `linear-gradient(rgba(255,152,0,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(255,152,0,0.4) 1px, transparent 1px)`,
+    65→          backgroundSize: '60px 60px',
+    66→        }}
+    67→      />
+    68→
+    69→      {/* Glow orbs */}
+    70→      <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full bg-[#FF9800]/12 blur-[120px] animate-pulse" />
+    71→      <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full bg-[#F44336]/10 blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
+    72→      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full bg-[#FF9800]/6 blur-[100px] animate-pulse" style={{ animationDelay: '2s' }} />
+    73→
+    74→      {/* Decorative icons */}
+    75→      <div className="absolute top-32 right-[8%] md:right-[18%] opacity-[0.07]">
+    76→        <Package className="w-28 h-28 md:w-40 md:h-40 text-[#FF9800]" />
+    77→      </div>
+    78→      <div className="absolute bottom-28 left-[5%] md:left-[12%] opacity-[0.05]">
+    79→        <Bike className="w-20 h-20 md:w-28 md:h-28 text-[#F44336]" />
+    80→      </div>
+    81→
+    82→      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-28 pb-16">
+    83→        {/* Badge */}
+    84→        <AnimatedSection>
+    85→          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FF9800]/10 border border-[#FF9800]/25 mb-8 backdrop-blur-sm">
+    86→            <Package className="w-4 h-4 text-[#FF9800]" />
+    87→            <span className="text-sm text-[#FF9800] font-medium">Envíos y Mensajería</span>
+    88→          </div>
+    89→        </AnimatedSection>
+    90→
+    91→        {/* Title */}
+    92→        <AnimatedSection delay={100}>
+    93→          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6">
+    94→            ¡Lo que quieras,{' '}
+    95→            <span className="bg-gradient-to-r from-[#FF9800] via-[#F44336] to-[#FF9800] bg-clip-text text-transparent">
+    96→              lo llevamos!
+    97→            </span>
+    98→          </h1>
+    99→        </AnimatedSection>
+   100→
+   101→        {/* Subtitle */}
+   102→        <AnimatedSection delay={200}>
+   103→          <p className="text-lg md:text-xl text-white/60 max-w-3xl mx-auto mb-10 leading-relaxed">
+   104→            Solución rápida, confiable y segura para tus envíos, mensajería, compras y delivery.
+   105→            En moto, auto, van o camioneta — nosotros nos encargamos de que llegue a su destino.
+   106→          </p>
+   107→        </AnimatedSection>
+   108→
+   109→        {/* CTA buttons */}
+   110→        <AnimatedSection delay={300}>
+   111→          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-14">
+   112→            <a
+   113→              href="#servicios"
+   114→              className="px-8 py-4 rounded-full text-lg font-semibold text-black bg-[#FF9800] hover:bg-[#FFB74D] transition-all duration-300 shadow-[0_0_30px_rgba(255,152,0,0.3)] hover:shadow-[0_0_50px_rgba(255,152,0,0.5)] hover:scale-105"
+   115→            >
+   116→              Ver Servicios
+   117→            </a>
+   118→            <a
+   119→              href="#contacto"
+   120→              className="px-8 py-4 rounded-full text-lg font-semibold text-[#FF9800] border border-[#FF9800]/30 hover:border-[#FF9800]/60 hover:bg-[#FF9800]/5 transition-all duration-300"
+   121→            >
+   122→              Solicitar Envío
+   123→            </a>
+   124→          </div>
+   125→        </AnimatedSection>
+   126→
+   127→        {/* Stats bar */}
+   128→        <AnimatedSection delay={400}>
+   129→          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
+   130→            {[
+   131→              { value: '4', label: 'Tipos de Vehículo', icon: Bike },
+   132→              { value: '24h', label: 'Disponibilidad', icon: Clock },
+   133→              { value: 'GPS', label: 'Rastreo en Tiempo Real', icon: MapPin },
+   134→              { value: '100%', label: 'Confianza Garantizada', icon: Shield },
+   135→            ].map((stat) => (
+   136→              <div
+   137→                key={stat.label}
+   138→                className="p-4 rounded-2xl bg-white/[0.03] border border-[#FF9800]/10 backdrop-blur-sm hover:border-[#FF9800]/20 transition-all duration-300"
+   139→              >
+   140→                <stat.icon className="w-5 h-5 text-[#FF9800] mx-auto mb-2" />
+   141→                <div className="text-2xl md:text-3xl font-bold text-white">{stat.value}</div>
+   142→                <div className="text-xs text-white/50 mt-1">{stat.label}</div>
+   143→              </div>
+   144→            ))}
+   145→          </div>
+   146→        </AnimatedSection>
+   147→      </div>
+   148→    </section>
+   149→  )
+   150→}
+   151→
+   152→/* ═══════════════════════════════════════════════════════════════════════════════
+   153→   2. VEHICLE TYPES — Moto, Auto, Van, Camioneta
+   154→   ═══════════════════════════════════════════════════════════════════════════════ */
+   155→const vehicleTypes = [
+   156→  {
+   157→    icon: Bike,
+   158→    name: 'Moto',
+   159→    tag: 'MÁS RÁPIDO',
+   160→    desc: 'El envío más ágil y económico de la ciudad. Ideal para paquetes, documentación y objetos que no excedan 30x30x20 cms y 7 kg de peso. Nuestro motoquero más cercano es asignado en segundos, llegando a tu ubicación en el menor tiempo posible.',
+   161→    features: ['Caja de moto (30x30x20 cms)', 'Hasta 7 kg de peso', 'Asignación inmediata', 'Sin tarifas ocultas ni extras'],
+   162→    color: '#FF9800',
+   163→    accent: '#F44336',
+   164→  },
+   165→  {
+   166→    icon: Car,
+   167→    name: 'Auto',
+   168→    tag: 'VERSÁTIL',
+   169→    desc: 'Para envíos que requieren mayor espacio y protección. Paquetes medianos, compras, documentos importantes o cualquier elemento que necesite un traslado seguro bajo techo. Un vehículo cómodo y confiable para tus entregas urbanas.',
+   170→    features: ['Mayor espacio de carga', 'Protección contra clima', 'Ideal para compras y delivery', 'Hasta 4 destinos por viaje'],
+   171→    color: '#2196F3',
+   172→    accent: '#1565C0',
+   173→  },
+   174→  {
+   175→    icon: Truck,
+   176→    name: 'Van',
+   177→    tag: 'CAPACIDAD',
+   178→    desc: 'Cuando necesitas mover volúmenes importantes de mercadería, paquetería masiva o entregas comerciales de mayor escala. Nuestra van ofrece la combinación perfecta de espacio y agilidad para tus envíos de mediano volumen.',
+   179→    features: ['Gran capacidad de carga', 'Paquetería masiva', 'Entregas comerciales', 'Múltiples paradas por ruta'],
+   180→    color: '#00E676',
+   181→    accent: '#00C853',
+   182→  },
+   183→  {
+   184→    icon: Truck,
+   185→    name: 'Camioneta',
+   186→    tag: 'ROBUSTO',
+   187→    desc: 'Para envíos de gran volumen, mudanzas parciales, mobiliario, electrodomésticos o cualquier carga que exija un vehículo de mayor capacidad y resistencia. Tu envío grande también llega seguro y a tiempo con Ecotaxi.',
+   188→    features: ['Carga pesada y voluminosa', 'Mudanzas parciales', 'Electrodomésticos y mobiliario', 'Servicio con ayudante disponible'],
+   189→    color: '#8B5CF6',
+   190→    accent: '#6D28D9',
+   191→  },
+   192→]
+   193→
+   194→function VehicleSection() {
+   195→  const [activeVehicle, setActiveVehicle] = useState<string | null>(null)
+   196→
+   197→  return (
+   198→    <section id="vehiculos" className="relative py-24 md:py-32">
+   199→      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1320] to-[#0a0e17]" />
+   200→      <div className="absolute top-1/2 left-1/3 w-[600px] h-[600px] rounded-full bg-[#FF9800]/5 blur-[150px]" />
+   201→
+   202→      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   203→        <AnimatedSection>
+   204→          <div className="text-center mb-16">
+   205→            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FF9800]/10 border border-[#FF9800]/20 mb-4">
+   206→              <Truck className="w-4 h-4 text-[#FF9800]" />
+   207→              <span className="text-sm text-[#FF9800]">Flota de Envíos</span>
+   208→            </div>
+   209→            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+   210→              Elige tu{' '}
+   211→              <span className="bg-gradient-to-r from-[#FF9800] to-[#F44336] bg-clip-text text-transparent">
+   212→                Vehículo
+   213→              </span>
+   214→            </h2>
+   215→            <p className="text-white/50 max-w-3xl mx-auto text-lg">
+   216→              Desde una moto ágil hasta una camioneta robusta, tenemos el vehículo perfecto para cada tipo de envío.
+   217→              Haz click para ver más detalles.
+   218→            </p>
+   219→          </div>
+   220→        </AnimatedSection>
+   221→
+   222→        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+   223→          {vehicleTypes.map((vehicle, i) => {
+   224→            const isActive = activeVehicle === vehicle.name
+   225→            return (
+   226→              <AnimatedSection key={vehicle.name} delay={i * 100}>
+   227→                <div
+   228→                  onClick={() => setActiveVehicle(isActive ? null : vehicle.name)}
+   229→                  className={`group relative p-6 rounded-2xl bg-white/[0.03] border backdrop-blur-sm cursor-pointer transition-all duration-500 overflow-hidden ${
+   230→                    isActive ? 'bg-white/[0.06]' : 'hover:border-white/10'
+   231→                  }`}
+   232→                  style={{
+   233→                    borderColor: isActive ? `${vehicle.color}40` : undefined,
+   234→                  }}
+   235→                >
+   236→                  {/* Hover glow */}
+   237→                  <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+   238→                    style={{ boxShadow: `0 0 30px ${vehicle.color}08` }}
+   239→                  />
+   240→
+   241→                  {/* Tag */}
+   242→                  <div className="absolute top-4 right-4">
+   243→                    <span className="px-2 py-1 rounded-full text-[10px] font-bold bg-white/[0.05] text-white/40 border border-white/[0.08]">
+   244→                      {vehicle.tag}
+   245→                    </span>
+   246→                  </div>
+   247→
+   248→                  <div className="relative z-10">
+   249→                    <div className="flex items-start gap-4 mb-4">
+   250→                      <div className="w-14 h-14 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${vehicle.color}12` }}>
+   251→                        <vehicle.icon className="w-7 h-7" style={{ color: vehicle.color }} />
+   252→                      </div>
+   253→                      <div className="pt-1">
+   254→                        <h3 className="text-lg font-semibold text-white">{vehicle.name}</h3>
+   255→                      </div>
+   256→                    </div>
+   257→
+   258→                    <p className="text-sm text-white/45 leading-relaxed mb-4">{vehicle.desc}</p>
+   259→
+   260→                    {/* Features list */}
+   261→                    <div className={`space-y-2 transition-all duration-500 overflow-hidden ${
+   262→                      isActive ? 'max-h-60 opacity-100' : 'max-h-0 opacity-0'
+   263→                    }`}>
+   264→                      <div className="pt-3 border-t border-white/[0.06]">
+   265→                        {vehicle.features.map((feature) => (
+   266→                          <div key={feature} className="flex items-start gap-2 mb-2">
+   267→                            <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0" style={{ color: vehicle.color }} />
+   268→                            <span className="text-sm text-white/55">{feature}</span>
+   269→                          </div>
+   270→                        ))}
+   271→                      </div>
+   272→                    </div>
+   273→
+   274→                    {!isActive && (
+   275→                      <p className="text-xs text-white/20 mt-3 flex items-center gap-1">
+   276→                        <ChevronRight className="w-3 h-3" />
+   277→                        Click para más detalles
+   278→                      </p>
+   279→                    )}
+   280→                  </div>
+   281→                </div>
+   282→              </AnimatedSection>
+   283→            )
+   284→          })}
+   285→        </div>
+   286→      </div>
+   287→    </section>
+   288→  )
+   289→}
+   290→
+   291→/* ═══════════════════════════════════════════════════════════════════════════════
+   292→   3. MOTO SERVICE — Express + Dedicated (from PDF)
+   293→   ═══════════════════════════════════════════════════════════════════════════════ */
+   294→function MotoServiceSection() {
+   295→  return (
+   296→    <section id="servicios" className="relative py-24 md:py-32">
+   297→      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#1a0f05] to-[#0a0e17]" />
+   298→      <div className="absolute top-1/2 right-0 w-[600px] h-[600px] rounded-full bg-[#FF9800]/5 blur-[150px]" />
+   299→      <div className="absolute bottom-1/3 left-0 w-[400px] h-[400px] rounded-full bg-[#F44336]/5 blur-[120px]" />
+   300→
+   301→      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   302→        <AnimatedSection>
+   303→          <div className="text-center mb-16">
+   304→            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FF9800]/10 border border-[#FF9800]/20 mb-4">
+   305→              <Bike className="w-4 h-4 text-[#FF9800]" />
+   306→              <span className="text-sm text-[#FF9800]">Envíos en Moto</span>
+   307→            </div>
+   308→            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+   309→              Moto{' '}
+   310→              <span className="bg-gradient-to-r from-[#FF9800] to-[#F44336] bg-clip-text text-transparent">
+   311→                Envíos
+   312→              </span>
+   313→            </h2>
+   314→            <p className="text-white/50 max-w-3xl mx-auto text-lg">
+   315→              Solución rápida, confiable y segura. Realiza tus envíos de paquetes, documentación o cualquier
+   316→              objeto que entre en la caja de la moto. Buscamos en el radio más cercano el motoquero disponible.
+   317→            </p>
+   318→          </div>
+   319→        </AnimatedSection>
+   320→
+   321→        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+   322→          {/* EXPRESS */}
+   323→          <AnimatedSection delay={100}>
+   324→            <div className="relative rounded-2xl overflow-hidden bg-white/[0.03] border border-[#FF9800]/15 backdrop-blur-sm h-full">
+   325→              <div className="p-6 md:p-8">
+   326→                <div className="flex items-center gap-4 mb-6">
+   327→                  <div className="w-16 h-16 rounded-2xl bg-[#FF9800]/10 flex items-center justify-center">
+   328→                    <Zap className="w-8 h-8 text-[#FF9800]" />
+   329→                  </div>
+   330→                  <div>
+   331→                    <h3 className="text-2xl font-bold text-white">Envío Express</h3>
+   332→                    <p className="text-sm text-[#FF9800]">Inmediato, un click de distancia</p>
+   333→                  </div>
+   334→                </div>
+   335→
+   336→                <p className="text-white/50 leading-relaxed mb-6">
+   337→                  Un motoquero a un click de distancia que realiza tus entregas de forma inmediata en cualquier
+   338→                  momento del día. Se pueden aplicar las tarifas estándar o según lo acordado con tu compañía.
+   339→                  El servicio está sujeto a disponibilidad en el momento que lo requieras.
+   340→                </p>
+   341→
+   342→                <div className="space-y-3 mb-6">
+   343→                  {[
+   344→                    { icon: Clock, text: 'Entrega inmediata en cualquier momento del día' },
+   345→                    { icon: MapPin, text: 'Buscamos el motoquero más cercano en tu zona' },
+   346→                    { icon: CircleDollarSign, text: 'Conoce al momento costo, tiempo de recogida y entrega' },
+   347→                    { icon: Shield, text: 'Sin tarifas ocultas ni extras' },
+   348→                    { icon: Smartphone, text: 'Solicita desde la app, WhatsApp o llamada' },
+   349→                    { icon: Eye, text: 'Seguimiento en tiempo real de tu envío' },
+   350→                  ].map((item) => (
+   351→                    <div key={item.text} className="flex items-start gap-3">
+   352→                      <item.icon className="w-4 h-4 text-[#FF9800] mt-0.5 shrink-0" />
+   353→                      <span className="text-sm text-white/55">{item.text}</span>
+   354→                    </div>
+   355→                  ))}
+   356→                </div>
+   357→
+   358→                <div className="p-4 rounded-xl bg-[#FF9800]/5 border border-[#FF9800]/10">
+   359→                  <div className="flex items-center gap-2 mb-2">
+   360→                    <BadgeCheck className="w-4 h-4 text-[#FF9800]" />
+   361→                    <span className="text-xs font-bold text-[#FF9800] uppercase tracking-wider">Mejor Tarifa Garantizada</span>
+   362→                  </div>
+   363→                  <p className="text-xs text-white/40 leading-relaxed">
+   364→                    Sin tarifas ocultas ni costos adicionales. Conoces el precio antes de confirmar
+   365→                    tu envío y pagas solo lo acordado.
+   366→                  </p>
+   367→                </div>
+   368→              </div>
+   369→            </div>
+   370→          </AnimatedSection>
+   371→
+   372→          {/* DEDICADOS */}
+   373→          <AnimatedSection delay={200}>
+   374→            <div className="relative rounded-2xl overflow-hidden bg-white/[0.04] border-2 border-[#F44336]/20 backdrop-blur-sm h-full shadow-[0_0_40px_rgba(244,67,54,0.08)]">
+   375→              <div className="absolute top-4 right-4">
+   376→                <span className="px-3 py-1 rounded-full text-[10px] font-bold text-[#F44336] bg-[#F44336]/10 border border-[#F44336]/20">
+   377→                  EMPRESAS
+   378→                </span>
+   379→              </div>
+   380→              <div className="p-6 md:p-8">
+   381→                <div className="flex items-center gap-4 mb-6">
+   382→                  <div className="w-16 h-16 rounded-2xl bg-[#F44336]/10 flex items-center justify-center">
+   383→                    <Building2 className="w-8 h-8 text-[#F44336]" />
+   384→                  </div>
+   385→                  <div>
+   386→                    <h3 className="text-2xl font-bold text-white">Envíos Dedicados</h3>
+   387→                    <p className="text-sm text-[#F44336]">Repartidor personalizado para tu empresa</p>
+   388→                  </div>
+   389→                </div>
+   390→
+   391→                <p className="text-white/50 leading-relaxed mb-6">
+   392→                  Servicio destinado a proporcionar recurso humano altamente calificado para la
+   393→                  distribución de mensajería de tu empresa. Seleccionamos y capacitamos al mejor
+   394→                  mensajero para tu organización. Con la externalización de este servicio, el cliente
+   395→                  incorporará tecnología de punta para el control de la correspondencia interna y externa
+   396→                  y, además, reducirá los costos asociados al área de mensajería.
+   397→                </p>
+   398→
+   399→                <div className="space-y-3 mb-6">
+   400→                  {[
+   401→                    { icon: UserCheck, text: 'Mensajero seleccionado y capacitado para tu empresa' },
+   402→                    { icon: BarChart3, text: 'Tecnología de punta para control de correspondencia' },
+   403→                    { icon: CircleDollarSign, text: 'Reduce costos asociados al área de mensajería' },
+   404→                    { icon: Clock, text: 'Disponible por Rutas, Horas, Días o Mes' },
+   405→                    { icon: Navigation, text: 'Control total de correspondencia interna y externa' },
+   406→                    { icon: Building2, text: 'Como si fuese tu empleado, con tecnología superior' },
+   407→                  ].map((item) => (
+   408→                    <div key={item.text} className="flex items-start gap-3">
+   409→                      <item.icon className="w-4 h-4 text-[#F44336] mt-0.5 shrink-0" />
+   410→                      <span className="text-sm text-white/55">{item.text}</span>
+   411→                    </div>
+   412→                  ))}
+   413→                </div>
+   414→
+   415→                <div className="p-4 rounded-xl bg-[#F44336]/5 border border-[#F44336]/10">
+   416→                  <div className="flex items-center gap-2 mb-2">
+   417→                    <Sparkles className="w-4 h-4 text-[#F44336]" />
+   418→                    <span className="text-xs font-bold text-[#F44336] uppercase tracking-wider">Planes Flexibles</span>
+   419→                  </div>
+   420→                  <p className="text-xs text-white/40 leading-relaxed">
+   421→                    Puedes contratar este servicio por Rutas, Por Horas, Por Días o por Mes, según tus
+   422→                    necesidades de envíos. Un repartidor dedicado exclusivamente a tu empresa, como si
+   423→                    fuese tu propio empleado.
+   424→                  </p>
+   425→                </div>
+   426→              </div>
+   427→            </div>
+   428→          </AnimatedSection>
+   429→        </div>
+   430→      </div>
+   431→    </section>
+   432→  )
+   433→}
+   434→
+   435→/* ═══════════════════════════════════════════════════════════════════════════════
+   436→   4. WIALON TECHNOLOGY SECTION
+   437→   ═══════════════════════════════════════════════════════════════════════════════ */
+   438→const techFeatures = [
+   439→  {
+   440→    icon: MapPinned,
+   441→    title: 'Rastreo GPS en Tiempo Real',
+   442→    desc: 'Monitoreo continuo de cada unidad de envío con geolocalización precisa. Sabes exactamente dónde está tu paquete en cada momento, con actualizaciones en tiempo real que garantizan transparencia total durante todo el recorrido de entrega.',
+   443→    color: '#FF9800',
+   444→  },
+   445→  {
+   446→    icon: Route,
+   447→    title: 'Optimización de Rutas',
+   448→    desc: 'Algoritmos inteligentes que calculan la ruta más eficiente para cada entrega, reduciendo tiempos de tránsito y consumo de combustible. Tu paquete llega más rápido mientras minimizamos el impacto ambiental de cada viaje.',
+   449→    color: '#2196F3',
+   450→  },
+   451→  {
+   452→    icon: BarChart3,
+   453→    title: 'Gestión de Flota Inteligente',
+   454→    desc: 'Panel de control completo para empresas que necesitan visibilidad sobre toda su operación de envíos. Reportes detallados, métricas de rendimiento, control de tiempos y análisis de eficiencia para tomar decisiones informadas.',
+   455→    color: '#00E676',
+   456→  },
+   457→  {
+   458→    icon: Radio,
+   459→    title: 'Comunicación Bidireccional',
+   460→    desc: 'Contacto directo entre el operador de logística y el mensajero en ruta. Instrucciones en tiempo real, actualizaciones de estatus y coordinación inmediata ante cualquier eventualidad que surja durante la entrega.',
+   461→    color: '#8B5CF6',
+   462→  },
+   463→  {
+   464→    icon: PackageCheck,
+   465→    title: 'Confirmación de Entrega',
+   466→    desc: 'Evidencia digital de cada entrega realizada con registro de fecha, hora, ubicación y firma del destinatario. Tienes la trazabilidad completa de cada envío para el control y la tranquilidad de tu empresa.',
+   467→    color: '#F44336',
+   468→  },
+   469→  {
+   470→    icon: Smartphone,
+   471→    title: 'App para Mensajeros',
+   472→    desc: 'Aplicación móvil dedicada para los mensajeros con navegación integrada, gestión de entregas pendientes, registro de novedades y comunicación directa con la central. Todo lo que el repartidor necesita en su bolsillo.',
+   473→    color: '#00BCD4',
+   474→  },
+   475→]
+   476→
+   477→function TechnologySection() {
+   478→  return (
+   479→    <section id="tecnologia" className="relative py-24 md:py-32">
+   480→      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1320] to-[#0a0e17]" />
+   481→      <div
+   482→        className="absolute inset-0 opacity-[0.02]"
+   483→        style={{
+   484→          backgroundImage: `radial-gradient(circle, rgba(255,152,0,0.3) 1px, transparent 1px)`,
+   485→          backgroundSize: '30px 30px',
+   486→        }}
+   487→      />
+   488→      <div className="absolute top-1/3 right-0 w-[500px] h-[500px] rounded-full bg-[#2196F3]/5 blur-[120px]" />
+   489→
+   490→      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   491→        <AnimatedSection>
+   492→          <div className="text-center mb-16">
+   493→            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#2196F3]/10 border border-[#2196F3]/20 mb-4">
+   494→              <Globe className="w-4 h-4 text-[#2196F3]" />
+   495→              <span className="text-sm text-[#2196F3]">Tecnología Wialon</span>
+   496→            </div>
+   497→            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+   498→              Tecnología para una{' '}
+   499→              <span className="bg-gradient-to-r from-[#2196F3] via-[#FF9800] to-[#2196F3] bg-clip-text text-transparent">
+   500→                Mejor Gestión
+   501→              </span>
+   502→            </h2>
+   503→            <p className="text-white/50 max-w-3xl mx-auto text-lg">
+   504→              Utilizamos la plataforma Wialon de última generación para la gestión de flotas de entrega,
+   505→              brindando visibilidad total, control y eficiencia en cada envío que realizamos.
+   506→            </p>
+   507→          </div>
+   508→        </AnimatedSection>
+   509→
+   510→        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+   511→          {techFeatures.map((feature, i) => (
+   512→            <AnimatedSection key={feature.title} delay={i * 100}>
+   513→              <div className="group relative p-6 md:p-7 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm hover:border-white/10 transition-all duration-500 h-full">
+   514→                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/0 to-white/0 group-hover:from-white/[0.02] transition-all duration-500" />
+   515→                <div className="relative z-10">
+   516→                  <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300" style={{ backgroundColor: `${feature.color}12` }}>
+   517→                    <feature.icon className="w-6 h-6" style={{ color: feature.color }} />
+   518→                  </div>
+   519→                  <h3 className="text-lg font-semibold text-white mb-2">{feature.title}</h3>
+   520→                  <p className="text-sm text-white/45 leading-relaxed">{feature.desc}</p>
+   521→                </div>
+   522→              </div>
+   523→            </AnimatedSection>
+   524→          ))}
+   525→        </div>
+   526→
+   527→        {/* Wialon reference */}
+   528→        <AnimatedSection delay={300}>
+   529→          <div className="mt-12 max-w-3xl mx-auto p-6 rounded-2xl bg-[#2196F3]/5 border border-[#2196F3]/10">
+   530→            <div className="flex items-center gap-3 mb-4">
+   531→              <div className="w-10 h-10 rounded-xl bg-[#2196F3]/10 flex items-center justify-center">
+   532→                <Globe className="w-5 h-5 text-[#2196F3]" />
+   533→              </div>
+   534→              <div>
+   535→                <h4 className="text-white font-semibold">Potenciado por Wialon</h4>
+   536→                <p className="text-xs text-white/40">Líder mundial en gestión de flotas</p>
+   537→              </div>
+   538→            </div>
+   539→            <p className="text-sm text-white/50 leading-relaxed">
+   540→              Nuestra operación de envíos está respaldada por la tecnología de Wialon, la plataforma líder
+   541→              a nivel mundial en delivery fleet management. Esto nos permite ofrecer un servicio de envíos
+   542→              con nivel de trazabilidad y control comparable al de las empresas logísticas más avanzadas del mundo.
+   543→            </p>
+   544→            <a
+   545→              href="https://wialon.com/es/delivery-fleet-management"
+   546→              target="_blank"
+   547→              rel="noopener noreferrer"
+   548→              className="inline-flex items-center gap-2 mt-4 text-sm font-medium text-[#2196F3] hover:text-[#64B5F6] transition-colors"
+   549→            >
+   550→              Conocer más sobre Wialon
+   551→              <ArrowRight className="w-4 h-4" />
+   552→            </a>
+   553→          </div>
+   554→        </AnimatedSection>
+   555→      </div>
+   556→    </section>
+   557→  )
+   558→}
+   559→
+   560→/* ═══════════════════════════════════════════════════════════════════════════════
+   561→   5. SERVICE TYPES — Mensajería, Compras, Delivery
+   562→   ═══════════════════════════════════════════════════════════════════════════════ */
+   563→const serviceTypes = [
+   564→  {
+   565→    icon: Mail,
+   566→    title: 'Mensajería',
+   567→    desc: 'Envío de documentación, correspondencia, paquetes y encomiendas de todo tipo. Traslado seguro de documentos confidenciales, contratos, facturas y comunicaciones importantes entre oficinas, sucursales o clientes. Servicio express o programado según tu necesidad.',
+   568→    color: '#FF9800',
+   569→  },
+   570→  {
+   571→    icon: ShoppingBag,
+   572→    title: 'Compras',
+   573→    desc: '¿No tienes tiempo para ir de compras? Nosotros lo hacemos por ti. Compra de medicamentos, víveres, artículos de oficina, regalos o cualquier producto que necesites. Tu repartidor acude al establecimiento, realiza la compra y te la entrega en la puerta de tu casa u oficina.',
+   574→    color: '#2196F3',
+   575→  },
+   576→  {
+   577→    icon: Package,
+   578→    title: 'Delivery',
+   579→    desc: 'Servicio de entrega a domicilio para restaurantes, farmacias, tiendas y cualquier negocio que necesite llevar sus productos a los clientes. Punto de recogida a punto de entrega, con seguimiento en tiempo real y confirmación de entrega para la tranquilidad de ambas partes.',
+   580→    color: '#00E676',
+   581→  },
+   582→  {
+   583→    icon: FileText,
+   584→    title: 'Trámites y Diligencias',
+   585→    desc: 'Realizamos trámites bancarios, pagos de servicios, recolección de documentos, filings y cualquier diligencia que requiera desplazamiento. Un repartidor dedicado se encarga de tus gestiones mientras tú te enfocas en lo que realmente importa para tu negocio.',
+   586→    color: '#8B5CF6',
+   587→  },
+   588→  {
+   589→    icon: Box,
+   590→    title: 'Paquetería Empresarial',
+   591→    desc: 'Servicio de distribución masiva de paquetes para empresas. Múltiples entregas programadas en rutas optimizadas, con confirmación individual de cada entrega. Ideal para e-commerce, catálogos, promociones y envíos recurrentes a clientes o sucursales.',
+   592→    color: '#F44336',
+   593→  },
+   594→  {
+   595→    icon: Warehouse,
+   596→    title: 'Logística de Última Milla',
+   597→    desc: 'Gestión completa de la última milla para tu negocio. Desde la recepción de mercadería en tu almacén hasta la entrega final al cliente, coordinamos toda la cadena de entrega con la eficiencia y la tecnología que tu operación comercial requiere.',
+   598→    color: '#00BCD4',
+   599→  },
+   600→]
+   601→
+   602→function ServiceTypesSection() {
+   603→  return (
+   604→    <section id="tipos" className="relative py-24 md:py-32">
+   605→      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1320] to-[#0a0e17]" />
+   606→      <div className="absolute bottom-1/3 left-1/4 w-[500px] h-[500px] rounded-full bg-[#FF9800]/5 blur-[120px]" />
+   607→
+   608→      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   609→        <AnimatedSection>
+   610→          <div className="text-center mb-16">
+   611→            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00E676]/10 border border-[#00E676]/20 mb-4">
+   612→              <Send className="w-4 h-4 text-[#00E676]" />
+   613→              <span className="text-sm text-[#00E676]">Tipos de Servicio</span>
+   614→            </div>
+   615→            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+   616→              Envíos, Mensajería,{' '}
+   617→              <span className="bg-gradient-to-r from-[#FF9800] to-[#00E676] bg-clip-text text-transparent">
+   618→                Compras y Delivery
+   619→              </span>
+   620→            </h2>
+   621→            <p className="text-white/50 max-w-3xl mx-auto text-lg">
+   622→              Sea lo que sea que necesites enviar, recibir o gestionar, tenemos el servicio adecuado para ti.
+   623→              Desde un documento urgente hasta la logística completa de tu negocio.
+   624→            </p>
+   625→          </div>
+   626→        </AnimatedSection>
+   627→
+   628→        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+   629→          {serviceTypes.map((service, i) => (
+   630→            <AnimatedSection key={service.title} delay={i * 100}>
+   631→              <div className="group relative p-6 md:p-7 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm hover:border-white/10 transition-all duration-500 h-full">
+   632→                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/0 to-white/0 group-hover:from-white/[0.02] transition-all duration-500" />
+   633→                <div className="relative z-10">
+   634→                  <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300" style={{ backgroundColor: `${service.color}12` }}>
+   635→                    <service.icon className="w-6 h-6" style={{ color: service.color }} />
+   636→                  </div>
+   637→                  <h3 className="text-lg font-semibold text-white mb-2">{service.title}</h3>
+   638→                  <p className="text-sm text-white/45 leading-relaxed">{service.desc}</p>
+   639→                </div>
+   640→              </div>
+   641→            </AnimatedSection>
+   642→          ))}
+   643→        </div>
+   644→      </div>
+   645→    </section>
+   646→  )
+   647→}
+   648→
+   649→/* ═══════════════════════════════════════════════════════════════════════════════
+   650→   6. HOW IT WORKS SECTION
+   651→   ═══════════════════════════════════════════════════════════════════════════════ */
+   652→const howItWorksSteps = [
+   653→  {
+   654→    step: 1,
+   655→    icon: Smartphone,
+   656→    title: 'Solicita tu Envío',
+   657→    desc: 'Llámanos, escríbenos por WhatsApp o usa nuestra app. Indica el punto de recogida, destino, tipo de paquete y vehículo preferido. En segundos verificamos disponibilidad y te confirmamos el servicio.',
+   658→    color: '#FF9800',
+   659→  },
+   660→  {
+   661→    step: 2,
+   662→    icon: MapPin,
+   663→    title: 'Asignación Inmediata',
+   664→    desc: 'Buscamos en el radio más cercano el mensajero disponible. Recibirás los datos del repartidor y el vehículo asignado, junto con el costo estimado, tiempo de recogida y entrega estimados.',
+   665→    color: '#2196F3',
+   666→  },
+   667→  {
+   668→    step: 3,
+   669→    icon: PackageCheck,
+   670→    title: 'Recogida y Traslado',
+   671→    desc: 'El mensajero recoge tu paquete en la ubicación indicada. Desde ese momento, puedes rastrear en tiempo real el avance de tu envío con nuestra tecnología GPS Wialon. Sin sorpresas, sin preocupaciones.',
+   672→    color: '#00E676',
+   673→  },
+   674→  {
+   675→    step: 4,
+   676→    icon: CheckCircle2,
+   677→    title: 'Entrega Confirmada',
+   678→    desc: 'Tu paquete llega a su destino. Recibes confirmación de entrega con hora, ubicación y evidencia digital. El remitente y destinatario tienen visibilidad completa del proceso de principio a fin.',
+   679→    color: '#8B5CF6',
+   680→  },
+   681→]
+   682→
+   683→function HowItWorksSection() {
+   684→  return (
+   685→    <section id="como-funciona" className="relative py-24 md:py-32">
+   686→      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1320] to-[#0a0e17]" />
+   687→      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] rounded-full bg-[#FF9800]/5 blur-[180px]" />
+   688→
+   689→      <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+   690→        <AnimatedSection>
+   691→          <div className="text-center mb-16">
+   692→            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#8B5CF6]/10 border border-[#8B5CF6]/20 mb-4">
+   693→              <Route className="w-4 h-4 text-[#8B5CF6]" />
+   694→              <span className="text-sm text-[#8B5CF6]">Así Funciona</span>
+   695→            </div>
+   696→            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+   697→              Envía en{' '}
+   698→              <span className="bg-gradient-to-r from-[#FF9800] to-[#8B5CF6] bg-clip-text text-transparent">
+   699→                4 Pasos
+   700→              </span>
+   701→            </h2>
+   702→            <p className="text-white/50 max-w-2xl mx-auto text-lg">
+   703→              Solicitar un envío nunca fue tan fácil. En minutos tienes tu paquete en camino con seguimiento en tiempo real.
+   704→            </p>
+   705→          </div>
+   706→        </AnimatedSection>
+   707→
+   708→        {/* Steps */}
+   709→        <div className="relative">
+   710→          {/* Vertical connector line */}
+   711→          <div className="absolute left-6 md:left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-[#FF9800] via-[#2196F3] to-[#8B5CF6] md:-translate-x-px" />
+   712→
+   713→          {howItWorksSteps.map((step, i) => (
+   714→            <AnimatedSection key={step.step} delay={i * 150}>
+   715→              <div className={`relative flex items-start mb-10 last:mb-0 ${
+   716→                i % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
+   717→              }`}>
+   718→                {/* Dot */}
+   719→                <div className="absolute left-6 md:left-1/2 -translate-x-1/2 w-4 h-4 rounded-full z-10"
+   720→                  style={{ backgroundColor: step.color, boxShadow: `0 0 20px ${step.color}50` }}
+   721→                />
+   722→                {/* Content */}
+   723→                <div className={`ml-14 md:ml-0 md:w-[calc(50%-2rem)] ${i % 2 === 0 ? 'md:pr-8 md:text-right' : 'md:pl-8'}`}>
+   724→                  <div className="group p-6 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm hover:border-white/10 transition-all duration-300">
+   725→                    <div className={`flex items-center gap-3 mb-3 ${i % 2 === 0 ? 'md:justify-end' : ''}`}>
+   726→                      <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${step.color}15` }}>
+   727→                        <step.icon className="w-5 h-5" style={{ color: step.color }} />
+   728→                      </div>
+   729→                      <span className="text-xs font-bold uppercase tracking-wider" style={{ color: step.color }}>Paso {step.step}</span>
+   730→                    </div>
+   731→                    <h3 className="text-white font-semibold text-lg mb-2">{step.title}</h3>
+   732→                    <p className="text-sm text-white/50 leading-relaxed">{step.desc}</p>
+   733→                  </div>
+   734→                </div>
+   735→              </div>
+   736→            </AnimatedSection>
+   737→          ))}
+   738→        </div>
+   739→      </div>
+   740→    </section>
+   741→  )
+   742→}
+   743→
+   744→/* ═══════════════════════════════════════════════════════════════════════════════
+   745→   7. CHAUFFEUR POR HORA — From PDF
+   746→   ═══════════════════════════════════════════════════════════════════════════════ */
+   747→function ChauffeurHourSection() {
+   748→  return (
+   749→    <section id="chofer-hora" className="relative py-24 md:py-32">
+   750→      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1320] to-[#0a0e17]" />
+   751→      <div className="absolute top-1/3 left-0 w-[500px] h-[500px] rounded-full bg-[#00E676]/5 blur-[120px]" />
+   752→
+   753→      <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+   754→        <AnimatedSection>
+   755→          <div className="relative p-8 md:p-12 rounded-3xl bg-white/[0.03] border border-[#00E676]/10 overflow-hidden">
+   756→            {/* Background glow */}
+   757→            <div className="absolute top-0 right-0 w-[300px] h-[300px] rounded-full bg-[#00E676]/5 blur-[100px]" />
+   758→
+   759→            <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+   760→              <div>
+   761→                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00E676]/10 border border-[#00E676]/20 mb-6">
+   762→                  <Clock className="w-4 h-4 text-[#00E676]" />
+   763→                  <span className="text-sm text-[#00E676]">Servicio por Hora</span>
+   764→                </div>
+   765→                <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+   766→                  ¿Necesitas un{' '}
+   767→                  <span className="bg-gradient-to-r from-[#00E676] to-[#0077BD] bg-clip-text text-transparent">
+   768→                    chófer
+   769→                  </span>{' '}
+   770→                  para diligencias?
+   771→                </h2>
+   772→                <p className="text-white/50 leading-relaxed mb-6">
+   773→                  Contrata un chófer por hora para múltiples tareas y diligencias. Ya sea que necesites
+   774→                  realizar varias entregas, recolectar documentos, hacer compras o cualquier gestión que
+   775→                  requiera desplazamiento, nuestro conductor se queda a tu disposición durante el tiempo
+   776→                  que lo necesites.
+   777→                </p>
+   778→                <div className="space-y-3">
+   779→                  {[
+   780→                    { icon: Timer, text: 'Contratación por hora, medio día o día completo' },
+   781→                    { icon: Navigation, text: 'Múltiples paradas y destinos sin costo extra' },
+   782→                    { icon: Shield, text: 'Conductor confiable con vehículo monitoreado' },
+   783→                    { icon: CreditCard, text: 'Tarifa plana por hora, sin sorpresas' },
+   784→                  ].map((item) => (
+   785→                    <div key={item.text} className="flex items-start gap-3">
+   786→                      <item.icon className="w-4 h-4 text-[#00E676] mt-0.5 shrink-0" />
+   787→                      <span className="text-sm text-white/55">{item.text}</span>
+   788→                    </div>
+   789→                  ))}
+   790→                </div>
+   791→              </div>
+   792→
+   793→              <div className="p-6 rounded-2xl bg-[#00E676]/5 border border-[#00E676]/10">
+   794→                <div className="text-center mb-6">
+   795→                  <div className="w-20 h-20 rounded-2xl bg-[#00E676]/10 flex items-center justify-center mx-auto mb-4">
+   796→                    <Clock className="w-10 h-10 text-[#00E676]" />
+   797→                  </div>
+   798→                  <h3 className="text-2xl font-bold text-white mb-2">Chófer por Hora</h3>
+   799→                  <p className="text-sm text-[#00E676]">Para múltiples tareas y diligencias</p>
+   800→                </div>
+   801→                <a
+   802→                  href="#contacto"
+   803→                  className="block w-full text-center px-8 py-4 rounded-xl text-lg font-bold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_30px_rgba(0,230,118,0.3)] hover:shadow-[0_0_50px_rgba(0,230,118,0.5)] hover:scale-105"
+   804→                >
+   805→                  Contratar Chófer
+   806→                  <ArrowRight className="w-5 h-5 inline ml-2" />
+   807→                </a>
+   808→              </div>
+   809→            </div>
+   810→          </div>
+   811→        </AnimatedSection>
+   812→      </div>
+   813→    </section>
+   814→  )
+   815→}
+   816→
+   817→/* ═══════════════════════════════════════════════════════════════════════════════
+   818→   8. CTA SECTION
+   819→   ═══════════════════════════════════════════════════════════════════════════════ */
+   820→function CTASection() {
+   821→  return (
+   822→    <section id="contacto" className="relative py-24 md:py-32">
+   823→      <div className="absolute inset-0 bg-gradient-to-br from-[#0a0e17] via-[#1a0f05] to-[#0a0e17]" />
+   824→      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] rounded-full bg-[#FF9800]/8 blur-[180px]" />
+   825→
+   826→      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+   827→        <AnimatedSection>
+   828→          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FF9800]/10 border border-[#FF9800]/20 mb-8">
+   829→            <Send className="w-4 h-4 text-[#FF9800]" />
+   830→            <span className="text-sm text-[#FF9800]">Envía Ahora</span>
+   831→          </div>
+   832→
+   833→          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
+   834→            ¿Listo para{' '}
+   835→            <span className="bg-gradient-to-r from-[#FF9800] to-[#F44336] bg-clip-text text-transparent">
+   836→              enviar
+   837→            </span>
+   838→            ?
+   839→          </h2>
+   840→
+   841→          <p className="text-white/55 text-lg leading-relaxed mb-10 max-w-2xl mx-auto">
+   842→            Solicita tu envío ahora y ten la tranquilidad de saber exactamente dónde está tu paquete en
+   843→            cada momento. Con tecnología Wialon, choferes capacitados y la confianza de Ecotaxi Bolivia.
+   844→          </p>
+   845→
+   846→          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
+   847→            <a
+   848→              href="https://wa.me/59173662803"
+   849→              target="_blank"
+   850→              rel="noopener noreferrer"
+   851→              className="px-8 py-4 rounded-full text-lg font-semibold text-black bg-[#FF9800] hover:bg-[#FFB74D] transition-all duration-300 shadow-[0_0_40px_rgba(255,152,0,0.3)] hover:shadow-[0_0_60px_rgba(255,152,0,0.5)] hover:scale-105"
+   852→            >
+   853→              Solicitar por WhatsApp
+   854→            </a>
+   855→            <a
+   856→              href="tel:+59133296885"
+   857→              className="px-8 py-4 rounded-full text-lg font-semibold text-[#FF9800] border border-[#FF9800]/30 hover:border-[#FF9800]/60 hover:bg-[#FF9800]/5 transition-all duration-300"
+   858→            >
+   859→              <Phone className="w-5 h-5 inline mr-2" />
+   860→              Llamar Ahora
+   861→            </a>
+   862→          </div>
+   863→
+   864→          {/* Quick contact cards */}
+   865→          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+   866→            {[
+   867→              { icon: Phone, label: 'Call Center', value: '(+591) 3 3296885', color: '#0077BD' },
+   868→              { icon: MessageCircle, label: 'WhatsApp', value: '+591 73662803', color: '#25D366' },
+   869→              { icon: Smartphone, label: 'App Móvil', value: 'Descarga la APP', color: '#00E676' },
+   870→              { icon: Headphones, label: 'Línea Gratuita', value: '800-240-002', color: '#8B5CF6' },
+   871→            ].map((channel) => (
+   872→              <div
+   873→                key={channel.label}
+   874→                className="p-4 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm hover:border-white/10 transition-all duration-300 cursor-pointer"
+   875→              >
+   876→                <div className="w-10 h-10 rounded-xl mx-auto mb-3 flex items-center justify-center" style={{ background: `${channel.color}15` }}>
+   877→                  <channel.icon className="w-5 h-5" style={{ color: channel.color }} />
+   878→                </div>
+   879→                <p className="text-sm font-medium text-white/80">{channel.label}</p>
+   880→                <p className="text-xs text-white/40 mt-1">{channel.value}</p>
+   881→              </div>
+   882→            ))}
+   883→          </div>
+   884→        </AnimatedSection>
+   885→      </div>
+   886→    </section>
+   887→  )
+   888→}
+   889→
+   890→/* ═══════════════════════════════════════════════════════════════════════════════
+   891→   MAIN PAGE EXPORT
+   892→   ═══════════════════════════════════════════════════════════════════════════════ */
+   893→export default function EnviosPage() {
+   894→  return (
+   895→    <div className="min-h-screen flex flex-col bg-[#0a0e17]">
+   896→      <Navbar />
+   897→      <main className="flex-1">
+   898→        <HeroSection />
+   899→        <VehicleSection />
+   900→        <MotoServiceSection />
+   901→        <TechnologySection />
+   902→        <ServiceTypesSection />
+   903→        <HowItWorksSection />
+   904→        <ChauffeurHourSection />
+   905→        <CTASection />
+   906→      </main>
+   907→      <Footer />
+   908→    </div>
+   909→  )
+   910→}
+   911→

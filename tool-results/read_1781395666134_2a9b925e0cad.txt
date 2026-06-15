@@ -1,0 +1,780 @@
+     1→'use client'
+     2→
+     3→import { useEffect, useRef, useState } from 'react'
+     4→import anime from 'animejs'
+     5→import {
+     6→  Plane, Shield, MapPin, Clock, Users, CreditCard,
+     7→  Luggage, Phone, ChevronDown, ArrowRight, Star,
+     8→  Eye, Wifi, Droplets, BadgeCheck, CheckCircle2,
+     9→  Building2, Globe, Heart, UserCheck, Navigation,
+    10→  AlertCircle, Calendar, User
+    11→} from 'lucide-react'
+    12→import { Navbar } from '@/components/ecotaxi/navbar'
+    13→import { Footer } from '@/components/ecotaxi/footer'
+    14→
+    15→interface Airport {
+    16→  department: string
+    17→  name: string
+    18→  iata: string
+    19→  desc: string
+    20→  color: string
+    21→}
+    22→
+    23→const airports: Airport[] = [
+    24→  { department: 'lapaz', name: 'Aeropuerto Internacional El Alto', iata: 'LPB', desc: 'Principal hub internacional de Bolivia, ubicado a 4,061 msnm en La Paz. Conexiones con vuelos internacionales y nacionales.', color: '#0077BD' },
+    25→  { department: 'santacruz', name: 'Aeropuerto Internacional Viru Viru', iata: 'VVI', desc: 'El aeropuerto más grande de Bolivia. Principal puerta de entrada al oriente boliviano con vuelos internacionales directos.', color: '#00E676' },
+    26→  { department: 'cochabamba', name: 'Aeropuerto Internacional Jorge Wilstermann', iata: 'CBB', desc: 'Hub nacional de conexiones. Ubicado en el corazón de Bolivia, conecta con todas las ciudades principales del país.', color: '#FF9800' },
+    27→  { department: 'tarija', name: 'Aeropuerto Capitán Oriel Lea Plaza', iata: 'TJA', desc: 'Puerta de entrada al sur de Bolivia y la región vinícola. Vuelos nacionales regulares.', color: '#8B5CF6' },
+    28→  { department: 'sucre', name: 'Aeropuerto Alcantarí', iata: 'SRE', desc: 'Aeropuerto de la capital constitucional de Bolivia. Conexiones con las principales ciudades.', color: '#E91E63' },
+    29→  { department: 'oruro', name: 'Aeropuerto Juan Mendoza', iata: 'ORU', desc: 'Aeropuerto de la capital folklórica de Bolivia. Servicio de vuelos nacionales.', color: '#00BCD4' },
+    30→  { department: 'potosi', name: 'Aeropuerto Capitán Nicolás Rojas', iata: 'POI', desc: 'Puerta de entrada a Potosí y el Salar de Uyuni. Vuelos nacionales.', color: '#9C27B0' },
+    31→  { department: 'beni', name: 'Aeropuerto Teniente Jorge Henrich Arauz', iata: 'TDD', desc: 'Aeropuerto de Trinidad, puerta de entrada a la Amazonía boliviana.', color: '#4CAF50' },
+    32→  { department: 'pando', name: 'Aeropuerto Aníbal Arab', iata: 'CIJ', desc: 'Aeropuerto de Cobija, en la región amazónica norte de Bolivia.', color: '#FF5722' },
+    33→]
+    34→
+    35→const securityFeatures = [
+    36→  { icon: BadgeCheck, title: 'Conductor Identificado', desc: 'Todos nuestros conductores portan identificación visible y uniforme corporativo.' },
+    37→  { icon: UserCheck, title: 'Cartel de Bienvenida', desc: 'Su nombre en un cartel personalizado para una recogida sin complicaciones.' },
+    38→  { icon: Navigation, title: 'Seguimiento de Vuelo', desc: 'Monitoreamos su vuelo en tiempo real para ajustar la hora de recogida.' },
+    39→  { icon: Clock, title: 'Disponibilidad 24/7', desc: 'Servicio de recogida en aeropuerto las 24 horas, los 7 días de la semana.' },
+    40→  { icon: Eye, title: 'Vehículos Monitoreados', desc: 'GPS en todas las unidades para rastreo y seguridad en tiempo real.' },
+    41→  { icon: Shield, title: 'Protocolos de Emergencia', desc: 'Procedimientos de seguridad y atención en caso de cualquier eventualidad.' },
+    42→]
+    43→
+    44→const airportVehicles = [
+    45→  { name: 'Sedan Confort', passengers: 4, ac: true, luggage: '2 grandes, 2 pequeños', desc: 'Vehículo confortable con aire acondicionado para traslados individuales o familiares.', color: '#0077BD' },
+    46→  { name: 'SUV', passengers: 4, ac: true, luggage: '3 grandes, 3 pequeños', desc: 'Amplio espacio para equipaje, ideal para viajes con carga adicional.', color: '#00E676' },
+    47→  { name: 'Van VIP', passengers: 8, ac: true, luggage: '6 grandes, 4 pequeños', desc: 'Para grupos y delegaciones empresariales con máximo confort.', color: '#FF9800' },
+    48→  { name: 'MiniBus', passengers: 12, ac: true, luggage: 'Equipaje grupal amplio', desc: 'Solución para grupos grandes, tours y eventos corporativos.', color: '#8B5CF6' },
+    49→  { name: 'Sedan VIP', passengers: 4, ac: true, luggage: '2 grandes, 2 pequeños', desc: 'Servicio ejecutivo premium con conductor profesional y total discreción.', color: '#E91E63' },
+    50→]
+    51→
+    52→const scheduledIncludes = [
+    53→  { icon: UserCheck, title: 'Cartel de Bienvenida', desc: 'Con su nombre impreso para una identificación inmediata a su llegada.' },
+    54→  { icon: Navigation, title: 'Seguimiento de Vuelo', desc: 'Monitoreo en tiempo real para ajustar la hora si hay retrasos.' },
+    55→  { icon: Clock, title: 'Espera sin Cargo', desc: 'Sin costo adicional por retrasos de vuelo. Le esperamos el tiempo necesario.' },
+    56→  { icon: Luggage, title: 'Asistencia con Equipaje', desc: 'Nuestro conductor le ayuda con sus maletas y equipaje.' },
+    57→  { icon: Droplets, title: 'Agua y WiFi', desc: 'Botella de agua cortesía y conexión WiFi en el vehículo.' },
+    58→]
+    59→
+    60→// Simplified SVG paths for Bolivia departments
+    61→const departmentPaths: Record<string, string> = {
+    62→  pando: 'M80,20 L120,15 L140,30 L130,60 L100,65 L70,50 Z',
+    63→  beni: 'M60,65 L130,60 L160,80 L170,130 L130,150 L80,140 L50,110 Z',
+    64→  lapaz: 'M30,50 L70,50 L80,70 L70,100 L40,95 L20,70 Z',
+    65→  cochabamba: 'M40,95 L70,100 L100,110 L110,150 L80,160 L50,140 L30,120 Z',
+    66→  santacruz: 'M100,110 L170,80 L220,90 L240,140 L220,190 L170,200 L110,170 L100,150 Z',
+    67→  oruro: 'M20,70 L40,95 L50,140 L30,120 L10,100 Z',
+    68→  potosi: 'M30,120 L50,140 L80,160 L90,200 L60,220 L30,190 L15,150 Z',
+    69→  sucre: 'M80,160 L110,170 L130,180 L120,210 L90,220 L70,210 Z',
+    70→  tarija: 'M60,220 L90,220 L100,250 L80,270 L50,260 L40,240 Z',
+    71→}
+    72→
+    73→export default function AeropuertoPage() {
+    74→  const planeRef = useRef<SVGSVGElement>(null)
+    75→  const driverRef = useRef<HTMLDivElement>(null)
+    76→  const [selectedDept, setSelectedDept] = useState<string>('santacruz')
+    77→  const [formSubmitted, setFormSubmitted] = useState(false)
+    78→  const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set())
+    79→
+    80→  // Anime.js hero animations
+    81→  useEffect(() => {
+    82→    // Plane landing animation
+    83→    if (planeRef.current) {
+    84→      anime({
+    85→        targets: planeRef.current,
+    86→        translateX: [400, 0],
+    87→        translateY: [-200, 0],
+    88→        scale: [1.5, 1],
+    89→        rotate: [-15, -5],
+    90→        opacity: [0, 1],
+    91→        duration: 2000,
+    92→        easing: 'easeOutCubic',
+    93→      })
+    94→    }
+    95→
+    96→    // Driver with sign animation
+    97→    if (driverRef.current) {
+    98→      anime({
+    99→        targets: driverRef.current,
+   100→        translateX: [-100, 0],
+   101→        opacity: [0, 1],
+   102→        scale: [0.8, 1],
+   103→        duration: 1500,
+   104→        delay: 800,
+   105→        easing: 'easeOutBack',
+   106→      })
+   107→    }
+   108→  }, [])
+   109→
+   110→  // Scroll observer
+   111→  useEffect(() => {
+   112→    const sections = ['security', 'map', 'tracking', 'reservation', 'trust', 'vehicles', 'scheduled']
+   113→    const observer = new IntersectionObserver(
+   114→      (entries) => {
+   115→        entries.forEach(entry => {
+   116→          if (entry.isIntersecting) {
+   117→            setVisibleSections(prev => new Set(prev).add(entry.target.id))
+   118→          }
+   119→        })
+   120→      },
+   121→      { threshold: 0.1 }
+   122→    )
+   123→    sections.forEach(id => {
+   124→      const el = document.getElementById(id)
+   125→      if (el) observer.observe(el)
+   126→    })
+   127→    return () => observer.disconnect()
+   128→  }, [])
+   129→
+   130→  const selectedAirport = airports.find(a => a.department === selectedDept)
+   131→
+   132→  return (
+   133→    <div className="min-h-screen flex flex-col bg-[#0a0e17]">
+   134→      <Navbar />
+   135→      <main className="flex-1">
+   136→        {/* Hero with anime.js */}
+   137→        <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden pt-20">
+   138→          <div className="absolute inset-0 z-0">
+   139→            <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17]/50 via-[#0a0e17]/80 to-[#0a0e17]" />
+   140→            <div className="absolute top-1/3 left-1/4 w-[600px] h-[600px] rounded-full bg-[#0077BD]/15 blur-[120px] animate-pulse" />
+   141→            <div className="absolute bottom-1/3 right-1/4 w-[500px] h-[500px] rounded-full bg-[#00E676]/10 blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
+   142→            <div
+   143→              className="absolute inset-0 opacity-[0.03]"
+   144→              style={{
+   145→                backgroundImage: `linear-gradient(rgba(0,119,189,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(0,119,189,0.3) 1px, transparent 1px)`,
+   146→                backgroundSize: '60px 60px',
+   147→              }}
+   148→            />
+   149→          </div>
+   150→
+   151→          {/* Animated Plane SVG */}
+   152→          <svg ref={planeRef} className="absolute top-16 right-[10%] w-32 h-32 md:w-48 md:h-48 opacity-0" viewBox="0 0 100 100" fill="none">
+   153→            <path d="M90 50L70 45L55 20L50 15L45 20L42 40L25 48L15 45L10 50L30 58L35 70L28 78L38 74L42 68L55 62L58 80L53 85L60 82L65 70L85 58L90 55Z" fill="url(#planeGrad)" stroke="rgba(0,230,118,0.5)" strokeWidth="0.5"/>
+   154→            <defs>
+   155→              <linearGradient id="planeGrad" x1="0" y1="0" x2="100" y2="100">
+   156→                <stop offset="0%" stopColor="#0077BD" />
+   157→                <stop offset="100%" stopColor="#00E676" />
+   158→              </linearGradient>
+   159→            </defs>
+   160→            {/* Trail effect */}
+   161→            <circle cx="10" cy="50" r="2" fill="#00E676" opacity="0.4">
+   162→              <animate attributeName="opacity" values="0.4;0;0.4" dur="2s" repeatCount="indefinite" />
+   163→            </circle>
+   164→            <circle cx="5" cy="48" r="1.5" fill="#0077BD" opacity="0.3">
+   165→              <animate attributeName="opacity" values="0.3;0;0.3" dur="2s" repeatCount="indefinite" begin="0.5s" />
+   166→            </circle>
+   167→          </svg>
+   168→
+   169→          {/* Animated Driver with Sign */}
+   170→          <div ref={driverRef} className="absolute bottom-24 left-[5%] md:left-[10%] opacity-0">
+   171→            <div className="relative">
+   172→              <svg width="80" height="120" viewBox="0 0 80 120" fill="none" className="md:w-[100px] md:h-[150px]">
+   173→                {/* Body */}
+   174→                <rect x="25" y="50" width="30" height="45" rx="5" fill="#0077BD" />
+   175→                {/* Head */}
+   176→                <circle cx="40" cy="35" r="15" fill="#0077BD" opacity="0.8" />
+   177→                {/* Cap */}
+   178→                <path d="M25 30 L55 30 L50 25 L30 25 Z" fill="#00E676" />
+   179→                {/* Sign */}
+   180→                <rect x="55" y="20" width="45" height="30" rx="3" fill="white" stroke="#00E676" strokeWidth="2" />
+   181→                <text x="77" y="38" textAnchor="middle" fill="#0077BD" fontSize="7" fontWeight="bold">SU NOMBRE</text>
+   182→                {/* Arm holding sign */}
+   183→                <line x1="55" y1="55" x2="70" y2="35" stroke="#0077BD" strokeWidth="4" strokeLinecap="round" />
+   184→                {/* Legs */}
+   185→                <line x1="33" y1="95" x2="30" y2="115" stroke="#0077BD" strokeWidth="4" strokeLinecap="round" />
+   186→                <line x1="47" y1="95" x2="50" y2="115" stroke="#0077BD" strokeWidth="4" strokeLinecap="round" />
+   187→              </svg>
+   188→              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-[10px] text-[#00E676]/60 whitespace-nowrap">Chofer esperando</div>
+   189→            </div>
+   190→          </div>
+   191→
+   192→          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+   193→            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00E676]/10 border border-[#00E676]/20 mb-8 animate-fade-in backdrop-blur-sm">
+   194→              <Plane className="w-4 h-4 text-[#00E676]" />
+   195→              <span className="text-sm text-[#00E676]">Traslado Aeropuerto</span>
+   196→            </div>
+   197→            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6 animate-fade-in-up">
+   198→              Recogida en{' '}
+   199→              <span className="bg-gradient-to-r from-[#00E676] via-[#0077BD] to-[#00E676] bg-clip-text text-transparent">
+   200→                Aeropuerto
+   201→              </span>
+   202→            </h1>
+   203→            <p className="text-lg md:text-xl text-white/60 max-w-3xl mx-auto mb-8 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+   204→              Seguridad garantizada en cada recogida. Los mejores hoteles, agencias de viajes y extranjeros confían en nuestro servicio de traslado en los principales aeropuertos de Bolivia.
+   205→            </p>
+   206→            <div className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-[#0077BD]/10 border border-[#0077BD]/20 mb-8 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+   207→              <Shield className="w-5 h-5 text-[#0077BD]" />
+   208→              <span className="text-sm font-medium text-[#0077BD]">Seguridad Garantizada en Cada Recogida</span>
+   209→            </div>
+   210→            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+   211→              <a href="#reservation" className="px-8 py-4 rounded-full text-lg font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_30px_rgba(0,230,118,0.3)] hover:shadow-[0_0_50px_rgba(0,230,118,0.5)] hover:scale-105">
+   212→                Reservar Traslado
+   213→              </a>
+   214→              <a href="#map" className="px-8 py-4 rounded-full text-lg font-semibold text-white border border-white/20 hover:border-[#00E676]/50 hover:bg-white/5 transition-all duration-300">
+   215→                Ver Aeropuertos
+   216→              </a>
+   217→            </div>
+   218→          </div>
+   219→        </section>
+   220→
+   221→        {/* Security Features */}
+   222→        <section id="security" className="relative py-24 md:py-32">
+   223→          <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1320] to-[#0a0e17]" />
+   224→          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   225→            <div className="text-center mb-16">
+   226→              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#0077BD]/10 border border-[#0077BD]/20 mb-4">
+   227→                <Shield className="w-4 h-4 text-[#0077BD]" />
+   228→                <span className="text-sm text-[#0077BD]">Seguridad Total</span>
+   229→              </div>
+   230→              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+   231→                Seguridad en la{' '}
+   232→                <span className="bg-gradient-to-r from-[#0077BD] to-[#00E676] bg-clip-text text-transparent">
+   233→                  Recogida
+   234→                </span>
+   235→              </h2>
+   236→              <p className="text-white/50 max-w-2xl mx-auto">
+   237→                Tu seguridad es nuestra prioridad. Cada recogida en aeropuerto cuenta con protocolos estrictos de seguridad y atención profesional.
+   238→              </p>
+   239→            </div>
+   240→            <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 transition-all duration-1000 ${
+   241→              visibleSections.has('security') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+   242→            }`}>
+   243→              {securityFeatures.map((feature, i) => (
+   244→                <div
+   245→                  key={feature.title}
+   246→                  className="group relative p-6 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm hover:border-[#0077BD]/20 transition-all duration-500"
+   247→                  style={{ transitionDelay: `${i * 80}ms` }}
+   248→                >
+   249→                  <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+   250→                    style={{ boxShadow: '0 0 30px rgba(0,119,189,0.1)' }}
+   251→                  />
+   252→                  <div className="relative z-10">
+   253→                    <div className="w-12 h-12 rounded-xl bg-[#0077BD]/10 flex items-center justify-center mb-4">
+   254→                      <feature.icon className="w-6 h-6 text-[#0077BD]" />
+   255→                    </div>
+   256→                    <h3 className="text-lg font-semibold text-white mb-2">{feature.title}</h3>
+   257→                    <p className="text-sm text-white/50 leading-relaxed">{feature.desc}</p>
+   258→                  </div>
+   259→                </div>
+   260→              ))}
+   261→            </div>
+   262→          </div>
+   263→        </section>
+   264→
+   265→        {/* Interactive Bolivia Map */}
+   266→        <section id="map" className="relative py-24 md:py-32">
+   267→          <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0f1628] to-[#0a0e17]" />
+   268→          <div className="absolute top-1/3 right-0 w-[400px] h-[400px] rounded-full bg-[#0077BD]/10 blur-[100px]" />
+   269→          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   270→            <div className="text-center mb-16">
+   271→              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00E676]/10 border border-[#00E676]/20 mb-4">
+   272→                <MapPin className="w-4 h-4 text-[#00E676]" />
+   273→                <span className="text-sm text-[#00E676]">Cobertura Nacional</span>
+   274→              </div>
+   275→              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+   276→                Aeropuertos de{' '}
+   277→                <span className="bg-gradient-to-r from-[#00E676] to-[#0077BD] bg-clip-text text-transparent">
+   278→                  Bolivia
+   279→                </span>
+   280→              </h2>
+   281→              <p className="text-white/50 max-w-2xl mx-auto">
+   282→                Haz click en cada departamento para ver la información del aeropuerto y tarifas de traslado.
+   283→              </p>
+   284→            </div>
+   285→
+   286→            <div className={`grid grid-cols-1 lg:grid-cols-5 gap-8 items-start transition-all duration-1000 ${
+   287→              visibleSections.has('map') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+   288→            }`}>
+   289→              {/* SVG Map */}
+   290→              <div className="lg:col-span-3">
+   291→                <div className="relative p-6 md:p-8 rounded-3xl bg-white/[0.03] border border-white/[0.06]">
+   292→                  <svg viewBox="0 0 260 290" className="w-full max-w-md mx-auto">
+   293→                    {/* Background */}
+   294→                    <rect width="260" height="290" fill="transparent" />
+   295→
+   296→                    {/* Department regions - clickable */}
+   297→                    {Object.entries(departmentPaths).map(([dept, path]) => {
+   298→                      const isSelected = selectedDept === dept
+   299→                      const airport = airports.find(a => a.department === dept)
+   300→                      const deptColor = airport?.color || '#0077BD'
+   301→                      return (
+   302→                        <g key={dept}>
+   303→                          <path
+   304→                            d={path}
+   305→                            fill={isSelected ? `${deptColor}30` : 'rgba(255,255,255,0.03)'}
+   306→                            stroke={isSelected ? deptColor : 'rgba(255,255,255,0.1)'}
+   307→                            strokeWidth={isSelected ? 2 : 1}
+   308→                            className="cursor-pointer transition-all duration-300"
+   309→                            onClick={() => setSelectedDept(dept)}
+   310→                            style={{ filter: isSelected ? `drop-shadow(0 0 8px ${deptColor}50)` : 'none' }}
+   311→                          />
+   312→                          {/* Airport icon dot */}
+   313→                          {airport && (
+   314→                            <circle
+   315→                              cx={path.match(/L(\d+),(\d+)/)?.[1] ? Number(path.match(/L(\d+),(\d+)/)![1]) + 10 : 100}
+   316→                              cy={path.match(/L(\d+),(\d+)/)?.[2] ? Number(path.match(/L(\d+),(\d+)/)![2]) - 5 : 80}
+   317→                              r={isSelected ? 6 : 4}
+   318→                              fill={isSelected ? deptColor : 'rgba(255,255,255,0.3)'}
+   319→                              className="cursor-pointer transition-all duration-300"
+   320→                              onClick={() => setSelectedDept(dept)}
+   321→                              style={isSelected ? { filter: `drop-shadow(0 0 6px ${deptColor})` } : {}}
+   322→                            />
+   323→                          )}
+   324→                          {/* Department label */}
+   325→                          <text
+   326→                            x={path.match(/L(\d+),(\d+)/)?.[1] ? Number(path.match(/L(\d+),(\d+)/)![1]) - 5 : 90}
+   327→                            y={path.match(/L(\d+),(\d+)/)?.[2] ? Number(path.match(/L(\d+),(\d+)/)![2]) + 25 : 105}
+   328→                            fill={isSelected ? 'white' : 'rgba(255,255,255,0.3)'}
+   329→                            fontSize="9"
+   330→                            fontWeight={isSelected ? 'bold' : 'normal'}
+   331→                            className="cursor-pointer select-none"
+   332→                            onClick={() => setSelectedDept(dept)}
+   333→                          >
+   334→                            {dept === 'lapaz' ? 'La Paz' : dept === 'santacruz' ? 'Sta. Cruz' : dept.charAt(0).toUpperCase() + dept.slice(1)}
+   335→                          </text>
+   336→                        </g>
+   337→                      )
+   338→                    })}
+   339→                  </svg>
+   340→                </div>
+   341→              </div>
+   342→
+   343→              {/* Airport Info Panel */}
+   344→              <div className="lg:col-span-2">
+   345→                {selectedAirport && (
+   346→                  <div className="p-6 md:p-8 rounded-3xl bg-white/[0.03] border backdrop-blur-sm transition-all duration-500"
+   347→                    style={{ borderColor: `${selectedAirport.color}30` }}
+   348→                  >
+   349→                    <div className="flex items-center gap-3 mb-4">
+   350→                      <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: `${selectedAirport.color}15` }}>
+   351→                        <Plane className="w-6 h-6" style={{ color: selectedAirport.color }} />
+   352→                      </div>
+   353→                      <div>
+   354→                        <span className="text-2xl font-bold" style={{ color: selectedAirport.color }}>{selectedAirport.iata}</span>
+   355→                        <p className="text-xs text-white/40">{selectedAirport.department.charAt(0).toUpperCase() + selectedAirport.department.slice(1)}</p>
+   356→                      </div>
+   357→                    </div>
+   358→                    <h3 className="text-xl font-semibold text-white mb-3">{selectedAirport.name}</h3>
+   359→                    <p className="text-sm text-white/50 leading-relaxed mb-6">{selectedAirport.desc}</p>
+   360→                    <div className="space-y-3 mb-6">
+   361→                      <div className="flex items-center gap-2 text-sm text-white/40">
+   362→                        <MapPin className="w-4 h-4" />
+   363→                        <span>Traslado disponible desde/hacia este aeropuerto</span>
+   364→                      </div>
+   365→                      <div className="flex items-center gap-2 text-sm text-white/40">
+   366→                        <Clock className="w-4 h-4" />
+   367→                        <span>Servicio 24/7 - Reserve con anticipación</span>
+   368→                      </div>
+   369→                      <div className="flex items-center gap-2 text-sm text-white/40">
+   370→                        <Navigation className="w-4 h-4" />
+   371→                        <span>Seguimiento de vuelo incluido</span>
+   372→                      </div>
+   373→                    </div>
+   374→                    <a
+   375→                      href="#reservation"
+   376→                      className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold text-black transition-all duration-300 shadow-[0_0_15px_rgba(0,230,118,0.2)] hover:shadow-[0_0_25px_rgba(0,230,118,0.4)]"
+   377→                      style={{ backgroundColor: selectedAirport.color }}
+   378→                    >
+   379→                      Cotizar Traslado
+   380→                      <ArrowRight className="w-4 h-4" />
+   381→                    </a>
+   382→                  </div>
+   383→                )}
+   384→
+   385→                {/* Quick airport list */}
+   386→                <div className="mt-4 grid grid-cols-3 gap-2">
+   387→                  {airports.map((apt) => (
+   388→                    <button
+   389→                      key={apt.department}
+   390→                      onClick={() => setSelectedDept(apt.department)}
+   391→                      className={`p-2 rounded-lg text-center transition-all duration-300 text-xs ${
+   392→                        selectedDept === apt.department
+   393→                          ? 'bg-white/[0.08] text-white font-semibold'
+   394→                          : 'bg-white/[0.02] text-white/40 hover:bg-white/[0.05] hover:text-white/60'
+   395→                      }`}
+   396→                    >
+   397→                      <span className="block font-bold" style={{ color: selectedDept === apt.department ? apt.color : undefined }}>{apt.iata}</span>
+   398→                      <span className="block text-[10px] mt-0.5">{apt.department.charAt(0).toUpperCase() + apt.department.slice(1)}</span>
+   399→                    </button>
+   400→                  ))}
+   401→                </div>
+   402→              </div>
+   403→            </div>
+   404→          </div>
+   405→        </section>
+   406→
+   407→        {/* Flight Tracking */}
+   408→        <section id="tracking" className="relative py-24 md:py-32">
+   409→          <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#071a10] to-[#0a0e17]" />
+   410→          <div className="absolute top-1/2 left-1/4 w-[400px] h-[400px] rounded-full bg-[#00E676]/5 blur-[100px]" />
+   411→          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   412→            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+   413→              <div className={`transition-all duration-1000 ${
+   414→                visibleSections.has('tracking') ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'
+   415→              }`}>
+   416→                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00E676]/10 border border-[#00E676]/20 mb-6">
+   417→                  <Navigation className="w-4 h-4 text-[#00E676]" />
+   418→                  <span className="text-sm text-[#00E676]">Seguimiento en Tiempo Real</span>
+   419→                </div>
+   420→                <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+   421→                  Monitoreo de{' '}
+   422→                  <span className="bg-gradient-to-r from-[#00E676] to-[#0077BD] bg-clip-text text-transparent">
+   423→                    Vuelo
+   424→                  </span>
+   425→                </h2>
+   426→                <p className="text-white/60 leading-relaxed mb-6">
+   427→                  Con nuestro sistema de seguimiento de vuelos en tiempo real, tu conductor estará siempre informado sobre el estado de tu vuelo. Si tu vuelo se retrasa, nosotros ajustamos automáticamente la hora de recogida sin costo adicional.
+   428→                </p>
+   429→                <div className="space-y-4">
+   430→                  {[
+   431→                    { icon: Eye, text: 'Monitoreo de vuelo en tiempo real' },
+   432→                    { icon: Clock, text: 'Ajuste automático de hora de recogida' },
+   433→                    { icon: CheckCircle2, text: 'Sin cargo adicional por retrasos de vuelo' },
+   434→                    { icon: Heart, text: 'Tranquilidad total garantizada' },
+   435→                  ].map((item) => (
+   436→                    <div key={item.text} className="flex items-center gap-3">
+   437→                      <item.icon className="w-5 h-5 text-[#00E676] shrink-0" />
+   438→                      <span className="text-white/60 text-sm">{item.text}</span>
+   439→                    </div>
+   440→                  ))}
+   441→                </div>
+   442→              </div>
+   443→              <div className={`transition-all duration-1000 ${
+   444→                visibleSections.has('tracking') ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12'
+   445→              }`}>
+   446→                <div className="relative p-8 rounded-3xl bg-white/[0.03] border border-[#00E676]/10">
+   447→                  <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-[#00E676]/5 to-[#0077BD]/5 blur-[20px]" />
+   448→                  <div className="relative z-10">
+   449→                    <div className="flex items-center gap-3 mb-6">
+   450→                      <div className="w-3 h-3 rounded-full bg-[#00E676] animate-pulse" />
+   451→                      <span className="text-sm text-[#00E676] font-medium">Vuelo en Monitoreo</span>
+   452→                    </div>
+   453→                    <div className="space-y-4">
+   454→                      <div className="flex justify-between items-center">
+   455→                        <span className="text-white/40 text-sm">Vuelo</span>
+   456→                        <span className="text-white font-semibold">OB 123</span>
+   457→                      </div>
+   458→                      <div className="flex justify-between items-center">
+   459→                        <span className="text-white/40 text-sm">Origen</span>
+   460→                        <span className="text-white font-semibold">MIA - Miami</span>
+   461→                      </div>
+   462→                      <div className="flex justify-between items-center">
+   463→                        <span className="text-white/40 text-sm">Destino</span>
+   464→                        <span className="text-white font-semibold">VVI - Santa Cruz</span>
+   465→                      </div>
+   466→                      <div className="flex justify-between items-center">
+   467→                        <span className="text-white/40 text-sm">Estado</span>
+   468→                        <span className="text-[#00E676] font-semibold">En vuelo - A tiempo</span>
+   469→                      </div>
+   470→                      <div className="flex justify-between items-center">
+   471→                        <span className="text-white/40 text-sm">Llegada estimada</span>
+   472→                        <span className="text-white font-semibold">14:30 local</span>
+   473→                      </div>
+   474→                      <div className="flex justify-between items-center">
+   475→                        <span className="text-white/40 text-sm">Conductor asignado</span>
+   476→                        <span className="text-[#0077BD] font-semibold">Carlos M. - En camino</span>
+   477→                      </div>
+   478→                    </div>
+   479→                  </div>
+   480→                </div>
+   481→              </div>
+   482→            </div>
+   483→          </div>
+   484→        </section>
+   485→
+   486→        {/* Reservation Form */}
+   487→        <section id="reservation" className="relative py-24 md:py-32">
+   488→          <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1320] to-[#0a0e17]" />
+   489→          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-[#0077BD]/10 blur-[150px]" />
+   490→          <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+   491→            <div className="text-center mb-16">
+   492→              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#0077BD]/10 border border-[#0077BD]/20 mb-4">
+   493→                <Calendar className="w-4 h-4 text-[#0077BD]" />
+   494→                <span className="text-sm text-[#0077BD]">Reserva tu Traslado</span>
+   495→              </div>
+   496→              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+   497→                Reservar{' '}
+   498→                <span className="bg-gradient-to-r from-[#0077BD] to-[#00E676] bg-clip-text text-transparent">
+   499→                  Traslado Aeropuerto
+   500→                </span>
+   501→              </h2>
+   502→              <p className="text-white/50 max-w-2xl mx-auto">
+   503→                Para clientes y agencias de viajes. Reserve su recogida desde cualquier lugar del mundo con pago seguro en línea.
+   504→              </p>
+   505→            </div>
+   506→
+   507→            <div className={`transition-all duration-1000 ${
+   508→              visibleSections.has('reservation') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+   509→            }`}>
+   510→              <div className="p-6 md:p-10 rounded-3xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm">
+   511→                {formSubmitted ? (
+   512→                  <div className="text-center py-12">
+   513→                    <CheckCircle2 className="w-16 h-16 text-[#00E676] mx-auto mb-4" />
+   514→                    <h3 className="text-2xl font-bold text-white mb-2">Reserva Recibida</h3>
+   515→                    <p className="text-white/50">Nos comunicaremos con usted en las próximas horas para confirmar su traslado.</p>
+   516→                  </div>
+   517→                ) : (
+   518→                  <form onSubmit={(e) => { e.preventDefault(); setFormSubmitted(true) }} className="space-y-6">
+   519→                    <div className="flex items-center gap-2 mb-4">
+   520→                      <CreditCard className="w-5 h-5 text-[#00E676]" />
+   521→                      <span className="text-sm text-[#00E676]">Pago seguro con tarjeta</span>
+   522→                    </div>
+   523→                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+   524→                      <div>
+   525→                        <label className="block text-sm text-white/40 mb-2">Nombre completo *</label>
+   526→                        <input type="text" required className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white placeholder-white/20 focus:border-[#00E676]/30 focus:outline-none transition-colors" placeholder="Juan Pérez" />
+   527→                      </div>
+   528→                      <div>
+   529→                        <label className="block text-sm text-white/40 mb-2">Email *</label>
+   530→                        <input type="email" required className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white placeholder-white/20 focus:border-[#00E676]/30 focus:outline-none transition-colors" placeholder="juan@empresa.com" />
+   531→                      </div>
+   532→                      <div>
+   533→                        <label className="block text-sm text-white/40 mb-2">Teléfono *</label>
+   534→                        <input type="tel" required className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white placeholder-white/20 focus:border-[#00E676]/30 focus:outline-none transition-colors" placeholder="+591 70000000" />
+   535→                      </div>
+   536→                      <div>
+   537→                        <label className="block text-sm text-white/40 mb-2">Aerolínea</label>
+   538→                        <input type="text" className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white placeholder-white/20 focus:border-[#00E676]/30 focus:outline-none transition-colors" placeholder="BoA, EcoJet, Amaszonas..." />
+   539→                      </div>
+   540→                      <div>
+   541→                        <label className="block text-sm text-white/40 mb-2">Número de vuelo *</label>
+   542→                        <input type="text" required className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white placeholder-white/20 focus:border-[#00E676]/30 focus:outline-none transition-colors" placeholder="OB 123" />
+   543→                      </div>
+   544→                      <div>
+   545→                        <label className="block text-sm text-white/40 mb-2">Aeropuerto de origen</label>
+   546→                        <input type="text" className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white placeholder-white/20 focus:border-[#00E676]/30 focus:outline-none transition-colors" placeholder="Ciudad de origen" />
+   547→                      </div>
+   548→                      <div>
+   549→                        <label className="block text-sm text-white/40 mb-2">Fecha de llegada *</label>
+   550→                        <input type="date" required className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white placeholder-white/20 focus:border-[#00E676]/30 focus:outline-none transition-colors" />
+   551→                      </div>
+   552→                      <div>
+   553→                        <label className="block text-sm text-white/40 mb-2">Hora estimada</label>
+   554→                        <input type="time" className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white placeholder-white/20 focus:border-[#00E676]/30 focus:outline-none transition-colors" />
+   555→                      </div>
+   556→                      <div>
+   557→                        <label className="block text-sm text-white/40 mb-2">Aeropuerto de destino *</label>
+   558→                        <select required className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white focus:border-[#00E676]/30 focus:outline-none transition-colors">
+   559→                          <option value="" className="bg-[#0a0e17]">Seleccionar aeropuerto</option>
+   560→                          {airports.map(apt => (
+   561→                            <option key={apt.iata} value={apt.iata} className="bg-[#0a0e17]">{apt.iata} - {apt.name}</option>
+   562→                          ))}
+   563→                        </select>
+   564→                      </div>
+   565→                      <div>
+   566→                        <label className="block text-sm text-white/40 mb-2">Destino (hotel/dirección)</label>
+   567→                        <input type="text" className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white placeholder-white/20 focus:border-[#00E676]/30 focus:outline-none transition-colors" placeholder="Hotel Las Americas, Santa Cruz" />
+   568→                      </div>
+   569→                      <div>
+   570→                        <label className="block text-sm text-white/40 mb-2">Tipo de vehículo</label>
+   571→                        <select className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white focus:border-[#00E676]/30 focus:outline-none transition-colors">
+   572→                          <option value="sedan" className="bg-[#0a0e17]">Sedan Confort</option>
+   573→                          <option value="suv" className="bg-[#0a0e17]">SUV</option>
+   574→                          <option value="van" className="bg-[#0a0e17]">Van VIP</option>
+   575→                          <option value="minibus" className="bg-[#0a0e17]">MiniBus</option>
+   576→                          <option value="vip" className="bg-[#0a0e17]">Sedan VIP</option>
+   577→                        </select>
+   578→                      </div>
+   579→                      <div>
+   580→                        <label className="block text-sm text-white/40 mb-2">Número de pasajeros</label>
+   581→                        <input type="number" min="1" max="12" defaultValue="1" className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white placeholder-white/20 focus:border-[#00E676]/30 focus:outline-none transition-colors" />
+   582→                      </div>
+   583→                    </div>
+   584→                    <div className="flex items-center gap-3">
+   585→                      <input type="checkbox" id="sign" defaultChecked className="w-4 h-4 rounded accent-[#00E676]" />
+   586→                      <label htmlFor="sign" className="text-sm text-white/60">Necesito cartel de bienvenida con mi nombre</label>
+   587→                    </div>
+   588→                    <div>
+   589→                      <label className="block text-sm text-white/40 mb-2">Notas especiales</label>
+   590→                      <textarea rows={3} className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white placeholder-white/20 focus:border-[#00E676]/30 focus:outline-none transition-colors resize-none" placeholder="Equipaje adicional, silla de bebé, etc." />
+   591→                    </div>
+   592→                    <button type="submit" className="w-full px-8 py-4 rounded-full text-lg font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_30px_rgba(0,230,118,0.3)] hover:shadow-[0_0_50px_rgba(0,230,118,0.5)]">
+   593→                      Reservar Traslado con Pago Seguro
+   594→                    </button>
+   595→                    <p className="text-center text-white/30 text-xs">
+   596→                      Pago seguro con tarjeta de crédito/débito. Confirmación inmediata por email.
+   597→                    </p>
+   598→                  </form>
+   599→                )}
+   600→              </div>
+   601→            </div>
+   602→          </div>
+   603→        </section>
+   604→
+   605→        {/* Trust Section */}
+   606→        <section id="trust" className="relative py-24 md:py-32">
+   607→          <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0f1628] to-[#0a0e17]" />
+   608→          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   609→            <div className="text-center mb-16">
+   610→              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FF9800]/10 border border-[#FF9800]/20 mb-4">
+   611→                <Star className="w-4 h-4 text-[#FF9800]" />
+   612→                <span className="text-sm text-[#FF9800]">Confianza Internacional</span>
+   613→              </div>
+   614→              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+   615→                Quienes{' '}
+   616→                <span className="bg-gradient-to-r from-[#FF9800] to-[#00E676] bg-clip-text text-transparent">
+   617→                  Confían
+   618→                </span>
+   619→              </h2>
+   620→              <p className="text-white/50 max-w-2xl mx-auto">
+   621→                Las mejores hoteles, agencias de viajes y extranjeros confían en nuestro servicio de recogida en los principales aeropuertos de Bolivia.
+   622→              </p>
+   623→            </div>
+   624→
+   625→            <div className={`grid grid-cols-2 md:grid-cols-4 gap-6 mb-12 transition-all duration-1000 ${
+   626→              visibleSections.has('trust') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+   627→            }`}>
+   628→              {[
+   629→                { icon: Building2, title: 'Hoteles 5 Estrellas', desc: 'Reconocimiento de la industria hotelera por nuestro servicio puntual y profesional.', color: '#FF9800' },
+   630→                { icon: Globe, title: 'Agencias de Viaje', desc: 'Agencias internacionales confían en Ecotaxi para sus clientes en Bolivia.', color: '#0077BD' },
+   631→                { icon: Briefcase2Icon, title: 'Travel Managers', desc: 'Gerentes de viajes corporativos que gestionan traslados para ejecutivos.', color: '#8B5CF6' },
+   632→                { icon: User, title: 'Turistas Extranjeros', desc: 'Miles de viajeros internacionales nos eligen cada año por seguridad y confianza.', color: '#00E676' },
+   633→              ].map((item, i) => (
+   634→                <div key={item.title} className="group p-6 rounded-2xl bg-white/[0.03] border border-white/[0.06] text-center hover:border-white/10 transition-all duration-500"
+   635→                  style={{ transitionDelay: `${i * 80}ms` }}>
+   636→                  <div className="w-14 h-14 rounded-2xl mx-auto mb-4 flex items-center justify-center" style={{ background: `${item.color}15` }}>
+   637→                    <item.icon className="w-7 h-7" style={{ color: item.color }} />
+   638→                  </div>
+   639→                  <h3 className="text-white font-semibold mb-2">{item.title}</h3>
+   640→                  <p className="text-xs text-white/40 leading-relaxed">{item.desc}</p>
+   641→                </div>
+   642→              ))}
+   643→            </div>
+   644→
+   645→            {/* Stats */}
+   646→            <div className={`grid grid-cols-3 gap-4 max-w-2xl mx-auto transition-all duration-1000 ${
+   647→              visibleSections.has('trust') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+   648→            }`} style={{ transitionDelay: '200ms' }}>
+   649→              {[
+   650→                { value: '50,000+', label: 'Traslados aeropuerto', color: '#0077BD' },
+   651→                { value: '98%', label: 'Satisfacción', color: '#00E676' },
+   652→                { value: '200+', label: 'Empresas confían', color: '#FF9800' },
+   653→              ].map((stat) => (
+   654→                <div key={stat.label} className="p-6 rounded-2xl bg-white/[0.03] border border-white/[0.06] text-center">
+   655→                  <div className="text-3xl md:text-4xl font-bold" style={{ color: stat.color }}>{stat.value}</div>
+   656→                  <p className="text-xs text-white/40 mt-1">{stat.label}</p>
+   657→                </div>
+   658→              ))}
+   659→            </div>
+   660→          </div>
+   661→        </section>
+   662→
+   663→        {/* Exclusive Airport Vehicles */}
+   664→        <section id="vehicles" className="relative py-24 md:py-32">
+   665→          <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1320] to-[#0a0e17]" />
+   666→          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   667→            <div className="text-center mb-16">
+   668→              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#0077BD]/10 border border-[#0077BD]/20 mb-4">
+   669→                <Plane className="w-4 h-4 text-[#0077BD]" />
+   670→                <span className="text-sm text-[#0077BD]">Vehículos Exclusivos</span>
+   671→              </div>
+   672→              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+   673→                Flota para{' '}
+   674→                <span className="bg-gradient-to-r from-[#0077BD] to-[#00E676] bg-clip-text text-transparent">
+   675→                  Aeropuerto
+   676→                </span>
+   677→              </h2>
+   678→              <p className="text-white/50 max-w-2xl mx-auto">
+   679→                Vehículos exclusivos disponibles para traslados al aeropuerto con la máxima comodidad y seguridad.
+   680→              </p>
+   681→            </div>
+   682→            <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 transition-all duration-1000 ${
+   683→              visibleSections.has('vehicles') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+   684→            }`}>
+   685→              {airportVehicles.map((vehicle, i) => (
+   686→                <div
+   687→                  key={vehicle.name}
+   688→                  className="group relative p-6 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm hover:border-white/10 transition-all duration-500"
+   689→                  style={{ transitionDelay: `${i * 80}ms` }}
+   690→                >
+   691→                  <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+   692→                    style={{ boxShadow: `0 0 30px ${vehicle.color}15` }}
+   693→                  />
+   694→                  <div className="relative z-10">
+   695→                    <div className="w-12 h-12 rounded-xl mb-4 flex items-center justify-center" style={{ background: `${vehicle.color}15` }}>
+   696→                      <Luggage className="w-6 h-6" style={{ color: vehicle.color }} />
+   697→                    </div>
+   698→                    <h3 className="text-white font-semibold mb-1">{vehicle.name}</h3>
+   699→                    <div className="flex items-center gap-3 text-xs text-white/30 mb-3">
+   700→                      <div className="flex items-center gap-1">
+   701→                        <Users className="w-3 h-3" />
+   702→                        <span>{vehicle.passengers}</span>
+   703→                      </div>
+   704→                      <div className="flex items-center gap-1">
+   705→                        <span>{vehicle.ac ? 'A/C' : ''}</span>
+   706→                      </div>
+   707→                    </div>
+   708→                    <p className="text-xs text-white/40 mb-3">{vehicle.luggage}</p>
+   709→                    <p className="text-xs text-white/30 leading-relaxed">{vehicle.desc}</p>
+   710→                  </div>
+   711→                </div>
+   712→              ))}
+   713→            </div>
+   714→          </div>
+   715→        </section>
+   716→
+   717→        {/* Scheduled Reservations */}
+   718→        <section id="scheduled" className="relative py-24 md:py-32">
+   719→          <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#071a10] to-[#0a0e17]" />
+   720→          <div className="absolute top-1/2 right-0 w-[500px] h-[500px] rounded-full bg-[#00E676]/5 blur-[120px]" />
+   721→          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   722→            <div className="text-center mb-16">
+   723→              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00E676]/10 border border-[#00E676]/20 mb-4">
+   724→                <Calendar className="w-4 h-4 text-[#00E676]" />
+   725→                <span className="text-sm text-[#00E676]">Reservas Programadas</span>
+   726→              </div>
+   727→              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+   728→                Todo{' '}
+   729→                <span className="bg-gradient-to-r from-[#00E676] to-[#0077BD] bg-clip-text text-transparent">
+   730→                  Incluido
+   731→                </span>
+   732→              </h2>
+   733→              <p className="text-white/50 max-w-2xl mx-auto">
+   734→                Cada reserva programada de aeropuerto incluye estos servicios sin costo adicional.
+   735→              </p>
+   736→            </div>
+   737→            <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 transition-all duration-1000 ${
+   738→              visibleSections.has('scheduled') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+   739→            }`}>
+   740→              {scheduledIncludes.map((item, i) => (
+   741→                <div key={item.title} className="group relative p-6 rounded-2xl bg-white/[0.03] border border-[#00E676]/10 text-center hover:border-[#00E676]/20 transition-all duration-500"
+   742→                  style={{ transitionDelay: `${i * 80}ms` }}>
+   743→                  <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+   744→                    style={{ boxShadow: '0 0 30px rgba(0,230,118,0.1)' }}
+   745→                  />
+   746→                  <div className="relative z-10">
+   747→                    <div className="w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center bg-[#00E676]/10">
+   748→                      <item.icon className="w-6 h-6 text-[#00E676]" />
+   749→                    </div>
+   750→                    <h3 className="text-white font-semibold text-sm mb-2">{item.title}</h3>
+   751→                    <p className="text-xs text-white/40 leading-relaxed">{item.desc}</p>
+   752→                  </div>
+   753→                </div>
+   754→              ))}
+   755→            </div>
+   756→            <div className="text-center mt-12">
+   757→              <a href="#reservation" className="inline-flex items-center gap-2 px-8 py-4 rounded-full text-lg font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_30px_rgba(0,230,118,0.3)] hover:shadow-[0_0_50px_rgba(0,230,118,0.5)] hover:scale-105">
+   758→                Reservar Ahora
+   759→                <ArrowRight className="w-5 h-5" />
+   760→              </a>
+   761→            </div>
+   762→          </div>
+   763→        </section>
+   764→      </main>
+   765→      <Footer />
+   766→    </div>
+   767→  )
+   768→}
+   769→
+   770→// Simple briefcase icon to avoid import issues
+   771→function Briefcase2Icon({ className }: { className?: string }) {
+   772→  return (
+   773→    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+   774→      <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+   775→      <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
+   776→      <line x1="12" y1="12" x2="12" y2="12.01" />
+   777→    </svg>
+   778→  )
+   779→}
+   780→

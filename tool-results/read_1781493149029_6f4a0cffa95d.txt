@@ -1,0 +1,2002 @@
+     1→'use client'
+     2→
+     3→import { useEffect, useRef, useState, useMemo, useCallback } from 'react'
+     4→import dynamic from 'next/dynamic'
+     5→import anime from 'animejs'
+     6→import {
+     7→  MapPin, Route, Globe, Home, Building2, Shield, Truck, Package,
+     8→  CheckCircle, Calculator, ClipboardList, ChevronRight, Minus, Plus,
+     9→  ArrowRight, Phone, Sparkles, Box, Sofa, Bed, Tv, Refrigerator,
+    10→  ChefHat, Bath, Printer, Piano, Dumbbell, Bike as BikeIcon, CircleDollarSign,
+    11→  MessageCircle, Clock, Users, Star, AlertCircle, Mail, CreditCard,
+    12→  Search, Navigation, Flag, X, Send, Loader2, ChevronDown
+    13→} from 'lucide-react'
+    14→import { Navbar } from '@/components/ecotaxi/navbar'
+    15→import { Footer } from '@/components/ecotaxi/footer'
+    16→import { SchemaOrg } from '@/components/ecotaxi/schema-org'
+    17→
+    18→// Dynamic import for map component (avoids SSR issues with leaflet)
+    19→const MudanzaMap = dynamic(() => import('@/components/mudanza-map'), { ssr: false })
+    20→
+    21→/* Nominatim search */
+    22→async function searchAddress(query: string): Promise<NominatimResult[]> {
+    23→  if (!query || query.length < 3) return []
+    24→  try {
+    25→    const res = await fetch(
+    26→      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=bo&limit=5`,
+    27→      { headers: { 'Accept-Language': 'es' } }
+    28→    )
+    29→    if (!res.ok) return []
+    30→    return await res.json()
+    31→  } catch {
+    32→    return []
+    33→  }
+    34→}
+    35→
+    36→/* OSRM route calculation */
+    37→async function calculateRoute(
+    38→  origin: LatLng,
+    39→  destination: LatLng,
+    40→  stops: LatLng[]
+    41→): Promise<{ distance: number; duration: number; geometry: [number, number][] } | null> {
+    42→  const coords = [origin, ...stops, destination]
+    43→    .map(c => `${c.lng},${c.lat}`)
+    44→    .join(';')
+    45→  try {
+    46→    const res = await fetch(
+    47→      `https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&steps=true`
+    48→    )
+    49→    if (!res.ok) return null
+    50→    const data = await res.json()
+    51→    if (!data.routes || data.routes.length === 0) return null
+    52→    const route = data.routes[0]
+    53→    const geometry: [number, number][] = []
+    54→    if (route.geometry) {
+    55→      if (typeof route.geometry === 'string') {
+    56→        // Decode polyline
+    57→        let index = 0
+    58→        let lat = 0
+    59→        let lng = 0
+    60→        while (index < (route.geometry as string).length) {
+    61→          let byte: number
+    62→          let shift = 0
+    63→          let result = 0
+    64→          do {
+    65→            byte = (route.geometry as string).charCodeAt(index++) - 63
+    66→            result |= (byte & 0x1f) << shift
+    67→            shift += 5
+    68→          } while (byte >= 0x20)
+    69→          const dlat = ((result & 1) !== 0 ? ~(result >> 1) : (result >> 1))
+    70→          lat += dlat
+    71→          shift = 0
+    72→          result = 0
+    73→          do {
+    74→            byte = (route.geometry as string).charCodeAt(index++) - 63
+    75→            result |= (byte & 0x1f) << shift
+    76→            shift += 5
+    77→          } while (byte >= 0x20)
+    78→          const dlng = ((result & 1) !== 0 ? ~(result >> 1) : (result >> 1))
+    79→          lng += dlng
+    80→          geometry.push([lat / 1e5, lng / 1e5])
+    81→        }
+    82→      } else if (Array.isArray(route.geometry)) {
+    83→        for (const coord of route.geometry) {
+    84→          if (Array.isArray(coord) && coord.length >= 2) {
+    85→            geometry.push([coord[1], coord[0]])
+    86→          }
+    87→        }
+    88→      }
+    89→    }
+    90→    return {
+    91→      distance: route.distance / 1000,
+    92→      duration: route.duration / 60,
+    93→      geometry,
+    94→    }
+    95→  } catch {
+    96→    return null
+    97→  }
+    98→}
+    99→
+   100→/* ─────────── scroll-triggered animation ─────────── */
+   101→function useInView(threshold = 0.1) {
+   102→  const ref = useRef<HTMLDivElement>(null)
+   103→  const [visible, setVisible] = useState(false)
+   104→  useEffect(() => {
+   105→    const el = ref.current
+   106→    if (!el) return
+   107→    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) setVisible(true) }, { threshold })
+   108→    obs.observe(el)
+   109→    return () => obs.disconnect()
+   110→  }, [threshold])
+   111→  return { ref, visible }
+   112→}
+   113→
+   114→function A({ children, className = '', delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
+   115→  const { ref, visible } = useInView(0.08)
+   116→  return (
+   117→    <div ref={ref} className={`transition-all duration-700 ease-out ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'} ${className}`}
+   118→      style={{ transitionDelay: visible ? `${delay}ms` : '0ms' }}>{children}</div>
+   119→  )
+   120→}
+   121→
+   122→/* ═══════════════════════════════════════════════════════════════════════════════
+   123→   FURNITURE DATA
+   124→   ═══════════════════════════════════════════════════════════════════════════════ */
+   125→interface FurnitureItem { name: string; vol: number; emoji: string }
+   126→
+   127→const ROOMS: Record<string, { label: string; items: FurnitureItem[] }> = {
+   128→  recamara: { label: 'Recámara', items: [
+   129→    { name: 'Cama Individual', vol: 1.2, emoji: '🛏️' }, { name: 'Cama Matrimonial', vol: 1.8, emoji: '🛏️' },
+   130→    { name: 'Cama Queen', vol: 2.2, emoji: '🛏️' }, { name: 'Cama King', vol: 2.5, emoji: '🛏️' },
+   131→    { name: 'Buró', vol: 0.3, emoji: '🪑' }, { name: 'Cabecera', vol: 0.4, emoji: '🪵' },
+   132→    { name: 'Ropero Mediano', vol: 1.0, emoji: '🚪' }, { name: 'Ropero Grande', vol: 1.5, emoji: '🚪' },
+   133→    { name: 'Cómoda/Tocador', vol: 0.6, emoji: '🪞' }, { name: 'Cajonera', vol: 0.5, emoji: '🗄️' },
+   134→    { name: 'Litera', vol: 1.8, emoji: '🛏️' }, { name: 'Escritorio', vol: 0.5, emoji: '🖥️' },
+   135→    { name: 'Silla', vol: 0.3, emoji: '🪑' }, { name: 'Ventilador de techo', vol: 0.2, emoji: '🌀' },
+   136→    { name: 'Aire acondicionado', vol: 0.3, emoji: '❄️' }, { name: 'Baúl', vol: 0.5, emoji: '📦' },
+   137→    { name: 'Mecedora', vol: 0.6, emoji: '🪑' }, { name: 'Cuna', vol: 0.5, emoji: '👶' },
+   138→    { name: 'Zapatera', vol: 0.3, emoji: '👟' },
+   139→  ]},
+   140→  sala: { label: 'Sala', items: [
+   141→    { name: 'Sofá 2 cuerpos', vol: 1.2, emoji: '🛋️' }, { name: 'Sofá 3 cuerpos', vol: 1.8, emoji: '🛋️' },
+   142→    { name: 'Sofá esquinero (L)', vol: 2.5, emoji: '🛋️' }, { name: 'Mesa de centro', vol: 0.4, emoji: '🪵' },
+   143→    { name: 'Mesa de centro vidrio', vol: 0.3, emoji: '🪟' }, { name: 'Mueble de TV', vol: 0.8, emoji: '📺' },
+   144→    { name: 'Sillón individual', vol: 0.6, emoji: '🛋️' }, { name: 'Estantería/Bibliorato', vol: 0.7, emoji: '📚' },
+   145→    { name: 'Cuadro grande', vol: 0.2, emoji: '🖼️' }, { name: 'Alfombra', vol: 0.3, emoji: '🟫' },
+   146→    { name: 'Lámpara de piso', vol: 0.2, emoji: '💡' }, { name: 'Rack de componentes', vol: 0.5, emoji: '🎵' },
+   147→  ]},
+   148→  cocina: { label: 'Cocina', items: [
+   149→    { name: 'Refrigerador', vol: 1.0, emoji: '🧊' }, { name: 'Cocina/Estufa', vol: 0.8, emoji: '🍳' },
+   150→    { name: 'Microondas', vol: 0.3, emoji: '📦' }, { name: 'Horno', vol: 0.5, emoji: '🫕' },
+   151→    { name: 'Lavadora', vol: 0.6, emoji: '🫧' }, { name: 'Secadora', vol: 0.6, emoji: '🌀' },
+   152→    { name: 'Mesa de cocina', vol: 0.5, emoji: '🪑' }, { name: 'Silla de cocina (c/u)', vol: 0.2, emoji: '🪑' },
+   153→    { name: 'Gabinete cocina', vol: 0.6, emoji: '🗄️' }, { name: 'Lavavajillas', vol: 0.5, emoji: '🫧' },
+   154→    { name: 'Licuadora', vol: 0.1, emoji: '🥤' },
+   155→  ]},
+   156→  comedor: { label: 'Comedor', items: [
+   157→    { name: 'Mesa comedor 4 puestos', vol: 1.0, emoji: '🪑' }, { name: 'Mesa comedor 6 puestos', vol: 1.5, emoji: '🪑' },
+   158→    { name: 'Mesa comedor 8 puestos', vol: 2.0, emoji: '🪑' }, { name: 'Silla comedor (c/u)', vol: 0.3, emoji: '🪑' },
+   159→    { name: 'Vitrina/Mueble cristal', vol: 1.0, emoji: '🪟' }, { name: 'Cristalera', vol: 0.8, emoji: '🍷' },
+   160→  ]},
+   161→  bano: { label: 'Baño', items: [
+   162→    { name: 'Mueble de baño', vol: 0.3, emoji: '🪞' }, { name: 'Espejo grande', vol: 0.1, emoji: '🪞' },
+   163→  ]},
+   164→  oficina: { label: 'Oficina', items: [
+   165→    { name: 'Escritorio ejecutivo', vol: 1.0, emoji: '🖥️' }, { name: 'Silla ejecutiva', vol: 0.5, emoji: '🪑' },
+   166→    { name: 'Archivador', vol: 0.5, emoji: '🗄️' }, { name: 'Impresora', vol: 0.3, emoji: '🖨️' },
+   167→    { name: 'Gabinete servidores', vol: 1.0, emoji: '🖥️' }, { name: 'Pizarra', vol: 0.2, emoji: '📋' },
+   168→    { name: 'Proyector', vol: 0.1, emoji: '📽️' }, { name: 'Mesa de reunión', vol: 1.5, emoji: '🪑' },
+   169→  ]},
+   170→  otros: { label: 'Otros', items: [
+   171→    { name: 'Caja grande', vol: 0.15, emoji: '📦' }, { name: 'Caja mediana', vol: 0.08, emoji: '📦' },
+   172→    { name: 'Caja pequeña', vol: 0.04, emoji: '📦' }, { name: 'Bicicleta', vol: 0.5, emoji: '🚲' },
+   173→    { name: 'Piano vertical', vol: 1.5, emoji: '🎹' }, { name: 'Piano de cola', vol: 2.5, emoji: '🎹' },
+   174→    { name: 'Caja fuerte', vol: 1.0, emoji: '🔐' }, { name: 'Máquina de ejercicio', vol: 0.8, emoji: '🏋️' },
+   175→    { name: 'Refrigerador comercial', vol: 2.0, emoji: '🧊' }, { name: 'Equipo médico', vol: 0.5, emoji: '🏥' },
+   176→    { name: 'Mascota (jaula grande)', vol: 0.5, emoji: '🐾' }, { name: 'Plantas', vol: 0.2, emoji: '🪴' },
+   177→    { name: 'TV 32-50"', vol: 0.3, emoji: '📺' }, { name: 'TV 50"+', vol: 0.5, emoji: '📺' },
+   178→    { name: 'Bicicleta estática', vol: 0.6, emoji: '🚲' }, { name: 'Caminadora', vol: 0.8, emoji: '🏃' },
+   179→  ]},
+   180→}
+   181→
+   182→const ROOM_KEYS = Object.keys(ROOMS)
+   183→
+   184→/* extras (legacy - kept for type reference) */
+   185→interface Extra { name: string; price: number; unit?: string }
+   186→
+   187→/* Box purchase options */
+   188→const BOX_OPTIONS = [
+   189→  { id: 'caja_peq', name: 'Caja Pequeña (30×30×30 cm)', price: 15, emoji: '📦' },
+   190→  { id: 'caja_med', name: 'Caja Mediana (40×40×40 cm)', price: 25, emoji: '📦' },
+   191→  { id: 'caja_gra', name: 'Caja Grande (50×50×50 cm)', price: 35, emoji: '📦' },
+   192→]
+   193→
+   194→/* Packing materials */
+   195→const PACKING_MATERIALS = [
+   196→  { id: 'papel_film', name: 'Papel Film (rollo)', price: 30, emoji: '🔀' },
+   197→  { id: 'papel_burbuja', name: 'Papel Burbuja (rollo)', price: 45, emoji: '🫧' },
+   198→  { id: 'papel_kraft', name: 'Papel Kraft (rollo)', price: 25, emoji: '🟫' },
+   199→  { id: 'manta_proteccion', name: 'Manta de Protección', price: 50, emoji: '🛡️' },
+   200→  { id: 'cinta_embalar', name: 'Cinta de Embalar (rollo)', price: 15, emoji: '📎' },
+   201→  { id: 'etiquetas', name: 'Etiquetas y Marcadores', price: 10, emoji: '🏷️' },
+   202→]
+   203→
+   204→/* Handling extras - Precios según tabla oficial EcoTaxi */
+   205→const HANDLING_EXTRAS = [
+   206→  { id: 'muebles_simples', name: 'Muebles Simples (Camas, Mesas)', price: 40, unit: 'mueble', emoji: '🛏️', desc: 'Camas, mesas, sillas, mesitas de noche' },
+   207→  { id: 'muebles_medianos', name: 'Muebles Medianos (Roperos medianos)', price: 70, unit: 'mueble', emoji: '🗄️', desc: 'Roperos medianos, libreros, vitrinas' },
+   208→  { id: 'muebles_complejos', name: 'Muebles Complejos (Roperos gigantes)', price: 100, unit: 'mueble', emoji: '🔧', desc: 'Roperos gigantes, muebles modulares grandes, closets enteros' },
+   209→]
+   210→
+   211→/* Accessibility extras (per location - origin and destination separately) */
+   212→const ACCESSIBILITY_EXTRAS = [
+   213→  { id: 'distancia_caminata', name: 'Distancia de Acarreo', price: 0, unit: '25m', emoji: '🚶', desc: 'Primeros 25m incluidos, luego por cada 25m adicional' },
+   214→  { id: 'elevador_fachada', name: 'Elevador por Fachada (Grúa)', price: 200, unit: 'hr', emoji: '🏗️', desc: 'Grúa externa para subir muebles por ventana' },
+   215→]
+   216→
+   217→/* Logistics extras */
+   218→const LOGISTICS_EXTRAS = [
+   219→  { id: 'punto_carga_extra', name: 'Punto de Carga Adicional (parada extra)', price: 100, unit: 'parada', emoji: '📍' },
+   220→  { id: 'retiro_cajas', name: 'Desescombro / Retiro de Cajas y Material', price: 150, emoji: '♻️', desc: 'Retornamos días después para llevar cartón y plástico' },
+   221→]
+   222→
+   223→/* Mudanza size categories for Path B */
+   224→const MUDANZA_CATEGORIES = [
+   225→  {
+   226→    id: 'express',
+   227→    name: 'Mudanza Express',
+   228→    subtitle: 'Monoambiente / Departamento Pequeño',
+   229→    emoji: '📦',
+   230→    color: '#00E676',
+   231→    desc: 'Ideal para departamentos de 1 dormitorio o monoambientes. Incluye camas, un ropero mediano, heladera, electrodomésticos básicos y 10-15 cajas.',
+   232→    suggestedVehicle: { cerrado: 'Furgón Pequeño', abierto: 'Pickup' },
+   233→    maxVolume: 7,
+   234→  },
+   235→  {
+   236→    id: 'estandar',
+   237→    name: 'Mudanza Estándar',
+   238→    subtitle: 'Departamento Familiar',
+   239→    emoji: '🏠',
+   240→    color: '#0077BD',
+   241→    desc: 'Ideal para departamentos de 2 a 3 dormitorios. Muebles de living, comedor, camas, línea blanca completa y 20-30 cajas.',
+   242→    suggestedVehicle: { cerrado: 'Furgón Mediano', abierto: 'Camión Mediano' },
+   243→    maxVolume: 12,
+   244→  },
+   245→  {
+   246→    id: 'familiar',
+   247→    name: 'Mudanza Familiar',
+   248→    subtitle: 'Casa Familiar Mediana',
+   249→    emoji: '🏡',
+   250→    color: '#FF9800',
+   251→    desc: 'Ideal para casas de 3 a 4 dormitorios. Mobiliario completo de casa, muebles de jardín, múltiples roperos y más de 40 cajas.',
+   252→    suggestedVehicle: { cerrado: 'Furgón Largo', abierto: 'Camión Largo' },
+   253→    maxVolume: 22,
+   254→  },
+   255→  {
+   256→    id: 'premium',
+   257→    name: 'Mudanza Premium',
+   258→    subtitle: 'Casa Grande / Corporativa',
+   259→    emoji: '🏢',
+   260→    color: '#818CF8',
+   261→    desc: 'Ideal para casas amplias de más de 4 dormitorios o traslados de oficinas. Residencias grandes en un solo viaje o múltiples vehículos.',
+   262→    suggestedVehicle: { cerrado: 'Furgón Grande', abierto: 'Camión Grande' },
+   263→    maxVolume: 35,
+   264→  },
+   265→]
+   266→
+   267→/* vehicles - Tarifas actualizadas según tabla oficial EcoTaxi */
+   268→const VEHICLES = [
+   269→  { cat: 'Camioneta', color: '#FB923C', items: [
+   270→    { name: 'Pickup', cap: 4, desc: '0.8-1.2 Tn · 1.5×2.3 mt · Caja abierta', pax: 2, floorElev: 8, floorNoElev: 10, helperPrice: 50, perKm: 9, baseFare: 90, acarreoPrice: 8, embStd: 100, embPrem: 150, desemb: 40, img: '/vehicles/6-CAMIONETA/pickup.png' },
+   271→    { name: 'Camión Pequeño', cap: 6, desc: '1.0-1.5 Tn · 1.5×2.8 mt · Caja abierta', pax: 2, floorElev: 10, floorNoElev: 15, helperPrice: 60, perKm: 10, baseFare: 110, acarreoPrice: 10, embStd: 120, embPrem: 200, desemb: 60, img: '/vehicles/6-CAMIONETA/pequena.png' },
+   272→    { name: 'Camión Mediano', cap: 12, desc: '1.5-3.0 Tn · 1.7×3.2 mt · Caja abierta', pax: 3, floorElev: 12, floorNoElev: 18, helperPrice: 80, perKm: 12, baseFare: 150, acarreoPrice: 10, embStd: 250, embPrem: 350, desemb: 75, img: '/vehicles/6-CAMIONETA/mediana.png' },
+   273→    { name: 'Camión Largo', cap: 22, desc: '3.0-4.0 Tn · 2.0×4.0 mt · Caja abierta', pax: 3, floorElev: 15, floorNoElev: 20, helperPrice: 100, perKm: 15, baseFare: 230, acarreoPrice: 15, embStd: 400, embPrem: 600, desemb: 200, img: '/vehicles/6-CAMIONETA/larga.png' },
+   274→    { name: 'Camión Grande', cap: 35, desc: '4.0-6.0 Tn · 2.3×6.2 mt · Caja abierta', pax: 3, floorElev: 15, floorNoElev: 20, helperPrice: 120, perKm: 20, baseFare: 280, acarreoPrice: 15, embStd: 600, embPrem: 800, desemb: 300, img: '/vehicles/6-CAMIONETA/grande.jpg' },
+   275→  ]},
+   276→  { cat: 'Furgón', color: '#818CF8', items: [
+   277→    { name: 'Furgón Pequeño', cap: 7, desc: '1.0-1.5 Tn · ~7.1 m³ · Cerrado', pax: 2, floorElev: 15, floorNoElev: 15, helperPrice: 80, perKm: 12, baseFare: 150, acarreoPrice: 10, embStd: 120, embPrem: 200, desemb: 60, img: '/vehicles/7-FURGON/pequeno.png' },
+   278→    { name: 'Furgón Mediano', cap: 10, desc: '1.5-3.0 Tn · ~10.3 m³ · Cerrado', pax: 2, floorElev: 18, floorNoElev: 18, helperPrice: 100, perKm: 15, baseFare: 180, acarreoPrice: 10, embStd: 250, embPrem: 350, desemb: 75, img: '/vehicles/7-FURGON/mediano.png' },
+   279→    { name: 'Furgón Largo', cap: 17, desc: '3.0-4.0 Tn · ~16.8 m³ · Cerrado', pax: 3, floorElev: 18, floorNoElev: 18, helperPrice: 110, perKm: 18, baseFare: 280, acarreoPrice: 15, embStd: 400, embPrem: 600, desemb: 200, img: '/vehicles/7-FURGON/largo.png' },
+   280→    { name: 'Furgón Grande', cap: 30, desc: '4.0-6.0 Tn · ~30.0 m³ · Cerrado', pax: 3, floorElev: 20, floorNoElev: 20, helperPrice: 120, perKm: 20, baseFare: 300, acarreoPrice: 15, embStd: 600, embPrem: 800, desemb: 300, img: '/vehicles/7-FURGON/grande.png' },
+   281→  ]},
+   282→]
+   283→
+   284→/* Payment methods */
+   285→const PAYMENT_METHODS = [
+   286→  { id: 'efectivo', label: 'Efectivo', icon: CircleDollarSign },
+   287→  { id: 'qr', label: 'QR', icon: CreditCard },
+   288→  { id: 'transferencia', label: 'Transferencia bancaria', icon: Building2 },
+   289→  { id: 'tarjeta', label: 'Tarjeta crédito/débito', icon: CreditCard },
+   290→  { id: 'corporativa', label: 'Cuenta corporativa', icon: Building2 },
+   291→]
+   292→
+   293→/* Insurance options */
+   294→const INSURANCE_OPTIONS = [
+   295→  { amount: 5000, label: 'Bs 5,000' },
+   296→  { amount: 10000, label: 'Bs 10,000' },
+   297→  { amount: 20000, label: 'Bs 20,000' },
+   298→  { amount: 50000, label: 'Bs 50,000' },
+   299→]
+   300→
+   301→/* Shared types */
+   302→type MoveType = 'local' | 'provincial' | 'nacional'
+   303→type CatType = 'casa' | 'oficina' | 'especial'
+   304→type PaymentMethod = 'efectivo' | 'qr' | 'transferencia' | 'tarjeta' | 'corporativa'
+   305→
+   306→interface LatLng { lat: number; lng: number }
+   307→interface IntermediateStop { id: string; latlng: LatLng; address: string }
+   308→interface NominatimResult { display_name: string; lat: string; lon: string }
+   309→
+   310→/* ═══════════════════════════════════════════════════════════════════════════════
+   311→   1. HERO
+   312→   ═══════════════════════════════════════════════════════════════════════════════ */
+   313→function HeroSection() {
+   314→  const truckRef = useRef<HTMLDivElement>(null)
+   315→  const [heroSlide, setHeroSlide] = useState(0)
+   316→  const heroImages = ['/mudanza-hero1.webp', '/mudanza-hero2.webp']
+   317→
+   318→  useEffect(() => {
+   319→    if (truckRef.current) {
+   320→      anime({ targets: truckRef.current, translateX: [-120, 0], opacity: [0, 1], duration: 1400, easing: 'easeOutExpo' })
+   321→    }
+   322→  }, [])
+   323→
+   324→  // Auto-slide hero images
+   325→  useEffect(() => {
+   326→    const interval = setInterval(() => {
+   327→      setHeroSlide(prev => (prev + 1) % heroImages.length)
+   328→    }, 5000)
+   329→    return () => clearInterval(interval)
+   330→  }, [heroImages.length])
+   331→
+   332→  return (
+   333→    <section className="relative min-h-[92vh] flex items-center justify-center overflow-hidden">
+   334→      {/* Background images with fade transition */}
+   335→      {heroImages.map((img, i) => (
+   336→        <div key={img} className="absolute inset-0 bg-cover bg-center transition-opacity duration-1000"
+   337→          style={{ backgroundImage: `url('${img}')`, opacity: heroSlide === i ? 0.2 : 0 }} />
+   338→      ))}
+   339→      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17]/80 via-[#0d1320]/70 to-[#0a0e17]/90" />
+   340→      <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: `linear-gradient(rgba(0,230,118,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(0,230,118,0.3) 1px, transparent 1px)`, backgroundSize: '60px 60px' }} />
+   341→      <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full bg-[#00E676]/12 blur-[120px] animate-pulse" />
+   342→      <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full bg-[#0077BD]/10 blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
+   343→      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full bg-[#FF9800]/6 blur-[100px] animate-pulse" style={{ animationDelay: '2s' }} />
+   344→
+   345→      {/* Animated Truck */}
+   346→      <div ref={truckRef} className="absolute bottom-[12%] left-1/2 -translate-x-1/2 md:left-[15%] md:translate-x-0 opacity-0">
+   347→        <svg width="200" height="100" viewBox="0 0 200 100" fill="none">
+   348→          <rect x="60" y="20" width="100" height="50" rx="6" fill="#00E676" opacity="0.15" stroke="#00E676" strokeWidth="1.5" />
+   349→          <rect x="65" y="25" width="90" height="40" rx="3" fill="#00E676" opacity="0.08" />
+   350→          <rect x="160" y="35" width="35" height="35" rx="4" fill="#0077BD" opacity="0.2" stroke="#0077BD" strokeWidth="1.5" />
+   351→          <rect x="170" y="40" width="18" height="20" rx="2" fill="#0077BD" opacity="0.1" />
+   352→          <circle cx="80" cy="75" r="10" fill="#1a1a2e" stroke="#00E676" strokeWidth="1.5" />
+   353→          <circle cx="80" cy="75" r="5" fill="#2a2a3e" />
+   354→          <circle cx="175" cy="75" r="10" fill="#1a1a2e" stroke="#00E676" strokeWidth="1.5" />
+   355→          <circle cx="175" cy="75" r="5" fill="#2a2a3e" />
+   356→          <rect x="85" y="55" width="20" height="8" rx="2" fill="#00E676" opacity="0.25" />
+   357→          <rect x="110" y="55" width="20" height="8" rx="2" fill="#00E676" opacity="0.25" />
+   358→          <rect x="135" y="55" width="20" height="8" rx="2" fill="#00E676" opacity="0.25" />
+   359→        </svg>
+   360→      </div>
+   361→
+   362→      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-28 pb-16">
+   363→        <A>
+   364→          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00E676]/10 border border-[#00E676]/20 mb-8 backdrop-blur-sm">
+   365→            <Truck className="w-4 h-4 text-[#00E676]" />
+   366→            <span className="text-sm text-[#00E676] font-medium">Servicio de Mudanza</span>
+   367→          </div>
+   368→        </A>
+   369→        <A delay={100}>
+   370→          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6">
+   371→            Mudanzas Profesionales en{' '}
+   372→            <span className="bg-gradient-to-r from-[#00E676] via-[#0077BD] to-[#00E676] bg-clip-text text-transparent">Bolivia</span>
+   373→          </h1>
+   374→        </A>
+   375→        <A delay={200}>
+   376→          <p className="text-lg md:text-xl text-white/60 max-w-3xl mx-auto mb-10 leading-relaxed">
+   377→            Servicio profesional de mudanzas local, provincial y nacional. Transportamos tus pertenencias
+   378→            con cuidado, seguridad y la tecnología de seguimiento GPS que nos distingue.
+   379→          </p>
+   380→        </A>
+   381→        <A delay={300}>
+   382→          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-14">
+   383→            <a href="#calculadora" className="px-8 py-4 rounded-full text-lg font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_30px_rgba(0,230,118,0.3)] hover:shadow-[0_0_50px_rgba(0,230,118,0.5)] hover:scale-105">
+   384→              Calcular Mi Mudanza
+   385→            </a>
+   386→            <a href="#flota" className="px-8 py-4 rounded-full text-lg font-semibold text-white border border-white/20 hover:border-[#00E676]/50 hover:bg-white/5 transition-all duration-300">
+   387→              Ver Flota
+   388→            </a>
+   389→          </div>
+   390→        </A>
+   391→        <A delay={400}>
+   392→          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
+   393→            {[
+   394→              { value: '3', label: 'Tipos de Mudanza', icon: MapPin },
+   395→              { value: '9+', label: 'Vehículos', icon: Truck },
+   396→              { value: 'GPS', label: 'Rastreo en Vivo', icon: Globe },
+   397→              { value: '100%', label: 'Seguro Disponible', icon: Shield },
+   398→            ].map((s) => (
+   399→              <div key={s.label} className="p-4 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm hover:border-[#00E676]/20 transition-all duration-300">
+   400→                <s.icon className="w-5 h-5 text-[#00E676] mx-auto mb-2" />
+   401→                <div className="text-2xl md:text-3xl font-bold text-white">{s.value}</div>
+   402→                <div className="text-xs text-white/50 mt-1">{s.label}</div>
+   403→              </div>
+   404→            ))}
+   405→          </div>
+   406→        </A>
+   407→      </div>
+   408→
+   409→      {/* Slide indicators */}
+   410→      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+   411→        {heroImages.map((_, i) => (
+   412→          <button key={i} onClick={() => setHeroSlide(i)}
+   413→            className={`h-1.5 rounded-full transition-all duration-300 ${heroSlide === i ? 'bg-[#00E676] w-12' : 'bg-white/20 w-8'}`} />
+   414→        ))}
+   415→      </div>
+   416→    </section>
+   417→  )
+   418→}
+   419→
+   420→/* ═══════════════════════════════════════════════════════════════════════════════
+   421→   2. SERVICE TYPES
+   422→   ═══════════════════════════════════════════════════════════════════════════════ */
+   423→const serviceTypes = [
+   424→  { icon: MapPin, title: 'Mudanza Local', color: '#00E676', price: 'Desde Bs 200',
+   425→    desc: 'Dentro de la misma ciudad. Disponibles en Santa Cruz, La Paz y Cochabamba. Servicio el mismo día con equipo profesional y vehículos adecuados para cada tipo de mudanza.',
+   426→    features: ['Servicio el mismo día', 'Cobertura en 3 ciudades principales', 'Rastreo GPS en tiempo real', 'Seguro de carga incluido'] },
+   427→  { icon: Route, title: 'Mudanza Provincial', color: '#0077BD', price: 'Desde Bs 500',
+   428→    desc: 'Entre provincias dentro del mismo departamento. Servicio al día siguiente con logística coordinada y protección especial para traslados de mayor distancia dentro del departamento.',
+   429→    features: ['Servicio al día siguiente', 'Protección especial para distancia', 'Coordinación logística completa', 'Reporte de ubicación en ruta'] },
+   430→  { icon: Globe, title: 'Mudanza Nacional', color: '#FF9800', price: 'Desde Bs 1,000',
+   431→    desc: 'Entre departamentos y ciudades de toda Bolivia. Servicio programado con seguimiento satelital, protección reforzada y seguro premium para traslados de larga distancia a nivel nacional.',
+   432→    features: ['Servicio programado con tracking', 'Seguro premium de carga', 'Protección reforzada', 'Cobertura nacional completa'] },
+   433→]
+   434→
+   435→function ServiceTypesSection() {
+   436→  return (
+   437→    <section className="relative py-24 md:py-32">
+   438→      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1320] to-[#0a0e17]" />
+   439→      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] rounded-full bg-[#00E676]/5 blur-[150px]" />
+   440→      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   441→        <A><div className="text-center mb-16">
+   442→          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00E676]/10 border border-[#00E676]/20 mb-4">
+   443→            <MapPin className="w-4 h-4 text-[#00E676]" /><span className="text-sm text-[#00E676]">Tipos de Servicio</span>
+   444→          </div>
+   445→          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">Mudanzas a tu <span className="bg-gradient-to-r from-[#00E676] via-[#0077BD] to-[#FF9800] bg-clip-text text-transparent">Medida</span></h2>
+   446→          <p className="text-white/50 max-w-2xl mx-auto text-lg">Cobertura local, provincial y nacional con la misma calidad y profesionalismo.</p>
+   447→        </div></A>
+   448→        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+   449→          {serviceTypes.map((s, i) => (
+   450→            <A key={s.title} delay={i * 100}>
+   451→              <div className="group relative p-6 md:p-8 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm hover:border-white/10 transition-all duration-500 h-full flex flex-col">
+   452→                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300" style={{ backgroundColor: `${s.color}12` }}>
+   453→                  <s.icon className="w-7 h-7" style={{ color: s.color }} />
+   454→                </div>
+   455→                <h3 className="text-xl font-bold text-white mb-3">{s.title}</h3>
+   456→                <p className="text-sm text-white/50 leading-relaxed mb-5 flex-1">{s.desc}</p>
+   457→                <div className="space-y-2 mb-5">
+   458→                  {s.features.map((f) => (
+   459→                    <div key={f} className="flex items-start gap-2">
+   460→                      <CheckCircle className="w-4 h-4 mt-0.5 shrink-0" style={{ color: s.color }} />
+   461→                      <span className="text-sm text-white/60">{f}</span>
+   462→                    </div>
+   463→                  ))}
+   464→                </div>
+   465→                <div className="pt-4 border-t border-white/[0.06]">
+   466→                  <span className="text-lg font-bold" style={{ color: s.color }}>{s.price}</span>
+   467→                  <span className="text-xs text-white/30 ml-2">+ distancia</span>
+   468→                </div>
+   469→              </div>
+   470→            </A>
+   471→          ))}
+   472→        </div>
+   473→      </div>
+   474→    </section>
+   475→  )
+   476→}
+   477→
+   478→/* ═══════════════════════════════════════════════════════════════════════════════
+   479→   3. MOVING CATEGORIES (TABS)
+   480→   ═══════════════════════════════════════════════════════════════════════════════ */
+   481→const categories = [
+   482→  { id: 'casa', icon: Home, label: 'Mudanza Domiciliaria', color: '#00E676',
+   483→    bgImage: '/mudanza-servicio-casa.webp',
+   484→    desc: 'Mudanza residencial completa. Transportamos tus muebles, electrodomésticos y pertenencias con el máximo cuidado desde tu hogar actual hasta tu nuevo hogar.',
+   485→    included: ['Desmontaje y montaje de muebles', 'Protección con mantas y plástico', 'Transporte de electrodomésticos', 'Carga y descarga profesional'],
+   486→    vehicles: 'Camioneta Mediana, Furgón Grande', notes: 'Recomendamos embalaje profesional para cristalería y objetos frágiles.' },
+   487→  { id: 'especial', icon: Shield, label: 'Mudanza Especial', color: '#FF9800',
+   488→    bgImage: '/mudanza-servicio-especial.webp',
+   489→    desc: 'Para artículos de alto valor o delicados: pianos, obras de arte, cajas fuertes, equipo médico y antigüedades. Personal especializado y embalaje a medida.',
+   490→    included: ['Embalaje a medida personalizado', 'Personal especializado certificado', 'Seguro premium obligatorio', 'Equipamiento de sujeción profesional'],
+   491→    vehicles: 'Furgón Grande con suspensión reforzada', notes: 'Cotización personalizada obligatoria. Se requiere evaluación previa del artículo.' },
+   492→  { id: 'oficina', icon: Building2, label: 'Mudanza de Oficina', color: '#0077BD',
+   493→    bgImage: '/mudanza-servicio-oficina.webp',
+   494→    desc: 'Relocalización de oficinas con mínima interrupción. Manejamos equipos informáticos, mobiliario corporativo y documentación con protocolos de seguridad especiales.',
+   495→    included: ['Protocolo para equipos electrónicos', 'Embalaje de documentación', 'Desconexión/conexión de equipos', 'Montaje de estaciones de trabajo'],
+   496→    vehicles: 'Furgón Mediano, Furgón Largo', notes: 'Disponemos de servicio nocturno y fin de semana para no afectar la operatividad.' },
+   497→]
+   498→
+   499→function CategoriesSection() {
+   500→  return (
+   501→    <section className="relative py-24 md:py-32">
+   502→      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#080c15] to-[#0a0e17]" />
+   503→      <div className="absolute bottom-1/3 right-0 w-[500px] h-[500px] rounded-full bg-[#0077BD]/5 blur-[120px]" />
+   504→      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   505→        <A><div className="text-center mb-12">
+   506→          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#0077BD]/10 border border-[#0077BD]/20 mb-4">
+   507→            <Home className="w-4 h-4 text-[#0077BD]" /><span className="text-sm text-[#0077BD]">Categorías</span>
+   508→          </div>
+   509→          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">Tipo de <span className="bg-gradient-to-r from-[#00E676] to-[#FF9800] bg-clip-text text-transparent">Mudanza</span></h2>
+   510→        </div></A>
+   511→        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+   512→          {categories.map((c, i) => (
+   513→            <A key={c.id} delay={i * 100}>
+   514→              <div className="group relative rounded-2xl overflow-hidden border border-white/[0.08] hover:border-white/20 transition-all duration-500 h-full flex flex-col min-h-[420px]">
+   515→                {/* Background image with lighter overlay for visibility */}
+   516→                <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
+   517→                  style={{ backgroundImage: `url('${c.bgImage}')` }} />
+   518→                {/* Lighter gradient overlay so image is visible */}
+   519→                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0e17] via-[#0a0e17]/60 to-[#0a0e17]/30" />
+   520→                <div className="absolute inset-0 bg-[#0a0e17]/20" />
+   521→                {/* Content */}
+   522→                <div className="relative z-10 p-6 md:p-7 flex flex-col h-full justify-end">
+   523→                  <div className="flex items-center gap-3 mb-3">
+   524→                    <div className="w-11 h-11 rounded-xl flex items-center justify-center backdrop-blur-sm" style={{ backgroundColor: `${c.color}25`, border: `1px solid ${c.color}40` }}>
+   525→                      <c.icon className="w-5 h-5" style={{ color: c.color }} />
+   526→                    </div>
+   527→                    <h3 className="text-xl font-bold text-white">{c.label}</h3>
+   528→                  </div>
+   529→                  <p className="text-white/70 text-sm leading-relaxed mb-4">{c.desc}</p>
+   530→                  <div className="space-y-2 mb-4">
+   531→                    {c.included.map((item) => (
+   532→                      <div key={item} className="flex items-start gap-2">
+   533→                        <CheckCircle className="w-4 h-4 mt-0.5 shrink-0" style={{ color: c.color }} />
+   534→                        <span className="text-sm text-white/75">{item}</span>
+   535→                      </div>
+   536→                    ))}
+   537→                  </div>
+   538→                  <div className="mt-auto pt-3 border-t border-white/10">
+   539→                    <div className="flex items-start gap-2">
+   540→                      <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: c.color }} />
+   541→                      <span className="text-xs text-white/50">{c.vehicles} — {c.notes}</span>
+   542→                    </div>
+   543→                  </div>
+   544→                </div>
+   545→              </div>
+   546→            </A>
+   547→          ))}
+   548→        </div>
+   549→      </div>
+   550→    </section>
+   551→  )
+   552→}
+   553→
+   554→/* ═══════════════════════════════════════════════════════════════════════════════
+   555→   4. MOVING FLEET
+   556→   ═══════════════════════════════════════════════════════════════════════════════ */
+   557→function FleetSection() {
+   558→  return (
+   559→    <section id="flota" className="relative py-24 md:py-32">
+   560→      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1320] to-[#0a0e17]" />
+   561→      <div className="absolute top-1/3 left-0 w-[500px] h-[500px] rounded-full bg-[#FF9800]/5 blur-[120px]" />
+   562→      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   563→        <A><div className="text-center mb-16">
+   564→          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FF9800]/10 border border-[#FF9800]/20 mb-4">
+   565→            <Truck className="w-4 h-4 text-[#FF9800]" /><span className="text-sm text-[#FF9800]">Flota de Mudanza</span>
+   566→          </div>
+   567→          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">Vehículos para tu <span className="bg-gradient-to-r from-[#FF9800] to-[#818CF8] bg-clip-text text-transparent">Mudanza</span></h2>
+   568→          <p className="text-white/50 max-w-2xl mx-auto text-lg">Camionetas y furgones de diferentes capacidades para cada necesidad.</p>
+   569→        </div></A>
+   570→        {VEHICLES.map((cat) => (
+   571→          <div key={cat.cat} className="mb-10">
+   572→            <A><h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+   573→              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.color }} />
+   574→              {cat.cat === 'Furgón' ? '🚛 Furgones (Cerrados)' : '🛻 Camionetas (Abiertas)'}
+   575→            </h3></A>
+   576→            <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-${cat.cat === 'Camioneta' ? '5' : '4'} gap-4`}>
+   577→              {cat.items.map((v, i) => (
+   578→                <A key={v.name} delay={i * 80}>
+   579→                  <div className="group p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm hover:border-white/10 transition-all duration-300">
+   580→                    <div className="flex justify-center mb-3 h-20 items-center">
+   581→                      <img src={v.img} alt={v.name} className="max-h-full max-w-full object-contain drop-shadow-[0_0_12px_rgba(255,255,255,0.08)] group-hover:drop-shadow-[0_0_20px_rgba(255,255,255,0.15)] transition-all duration-300 group-hover:scale-105" />
+   582→                    </div>
+   583→                    <h4 className="text-white font-semibold text-sm mb-1">{v.name}</h4>
+   584→                    <div className="flex items-center gap-3 mb-2">
+   585→                      <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ backgroundColor: `${cat.color}15`, color: cat.color }}>{v.cap} m³</span>
+   586→                      <span className="text-xs text-white/40">{v.pax} pasajeros</span>
+   587→                    </div>
+   588→                    <p className="text-xs text-white/40 leading-relaxed">{v.desc}</p>
+   589→                  </div>
+   590→                </A>
+   591→              ))}
+   592→            </div>
+   593→          </div>
+   594→        ))}
+   595→      </div>
+   596→    </section>
+   597→  )
+   598→}
+   599→
+   600→/* ═══════════════════════════════════════════════════════════════════════════════
+   601→   5. MOVING CALCULATOR (6 STEPS)
+   602→   ═══════════════════════════════════════════════════════════════════════════════ */
+   603→
+   604→/* ═══ CALCULATOR SECTION ═══ */
+   605→function CalculatorSection() {
+   606→  const [step, setStep] = useState(1)
+   607→  const [moveType, setMoveType] = useState<MoveType>('local')
+   608→  const [catType, setCatType] = useState<CatType>('casa')
+   609→  const [inventory, setInventory] = useState<Record<string, number>>({})
+   610→  const [activeRoom, setActiveRoom] = useState('recamara')
+   611→
+   612→  // Vehicle selection
+   613→  const [vehicleType, setVehicleType] = useState<'cerrado' | 'abierto'>('cerrado')
+   614→  const [selectedVehicle, setSelectedVehicle] = useState<typeof VEHICLES[0]['items'][0] | null>(null)
+   615→
+   616→  // Three-path flow
+   617→  const [calcPath, setCalcPath] = useState<'A' | 'B' | 'C' | null>(null) // A=knows vehicle, B=knows size, C=needs help
+   618→  const [mudanzaCategory, setMudanzaCategory] = useState<string | null>(null) // For Path B category selection
+   619→  const [showVehicleChange, setShowVehicleChange] = useState(false) // Path B vehicle change expand
+   620→  const [additionalVehicles, setAdditionalVehicles] = useState<typeof VEHICLES[0]['items'][0][]>([])
+   621→
+   622→  // Step 3: Route & Direction
+   623→  const [origin, setOrigin] = useState<LatLng | null>(null)
+   624→  const [destination, setDestination] = useState<LatLng | null>(null)
+   625→  const [intermediateStops, setIntermediateStops] = useState<IntermediateStop[]>([])
+   626→  const [originAddress, setOriginAddress] = useState('')
+   627→  const [destAddress, setDestAddress] = useState('')
+   628→  const [routeDistance, setRouteDistance] = useState<number>(0)
+   629→  const [routeDuration, setRouteDuration] = useState<number>(0)
+   630→  const [routeGeometry, setRouteGeometry] = useState<[number, number][]>([])
+   631→  const [mapSelectionMode, setMapSelectionMode] = useState<'origin' | 'destination' | 'stop'>('origin')
+   632→  const [searchingOrigin, setSearchingOrigin] = useState(false)
+   633→  const [searchingDest, setSearchingDest] = useState(false)
+   634→  const [originResults, setOriginResults] = useState<NominatimResult[]>([])
+   635→  const [destResults, setDestResults] = useState<NominatimResult[]>([])
+   636→  const [isCalculatingRoute, setIsCalculatingRoute] = useState(false)
+   637→
+   638→  // Embalaje
+   639→  const [embalajeType, setEmbalajeType] = useState<'ninguno' | 'completo' | 'solo_embalaje' | 'solo_desembalaje'>('ninguno')
+   640→  const [needsEmbalaje, setNeedsEmbalaje] = useState<boolean | null>(null) // null = not answered, true = yes, false = no
+   641→  const [showMaterialsShop, setShowMaterialsShop] = useState(false)
+   642→
+   643→  // Boxes and materials
+   644→  const [boxes, setBoxes] = useState<Record<string, number>>({})
+   645→  const [materials, setMaterials] = useState<Record<string, number>>({})
+   646→
+   647→  // Handling extras
+   648→  const [handlingExtras, setHandlingExtras] = useState<Record<string, number>>({})
+   649→
+   650→  // Accessibility - Origin
+   651→  const [originFloor, setOriginFloor] = useState('baja')
+   652→  const [elevatorOrigin, setElevatorOrigin] = useState(false)
+   653→  const [originCaminata, setOriginCaminata] = useState(0)
+   654→  const [originFachada, setOriginFachada] = useState(0)
+   655→
+   656→  // Accessibility - Destination
+   657→  const [destFloor, setDestFloor] = useState('baja')
+   658→  const [elevatorDest, setElevatorDest] = useState(false)
+   659→  const [destCaminata, setDestCaminata] = useState(0)
+   660→  const [destFachada, setDestFachada] = useState(0)
+   661→
+   662→  // Helpers (shared for carga y descarga)
+   663→  const [helpers, setHelpers] = useState(0)
+   664→
+   665→  // Logistics
+   666→  const [logisticsExtras, setLogisticsExtras] = useState<Record<string, number>>({})
+   667→  const [retiroMaterial, setRetiroMaterial] = useState(false) // Retiro de Material y Limpieza toggle
+   668→
+   669→  // Step 5: Insurance, IVA, Payment
+   670→  const [wantsInsurance, setWantsInsurance] = useState(false)
+   671→  const [insuranceAmount, setInsuranceAmount] = useState<number>(5000)
+   672→  const [customInsurance, setCustomInsurance] = useState('')
+   673→  const [includeIva, setIncludeIva] = useState(false)
+   674→  const [razonSocial, setRazonSocial] = useState('')
+   675→  const [nit, setNit] = useState('')
+   676→  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('efectivo')
+   677→
+   678→  // Step 6: Personal data
+   679→  const [fullName, setFullName] = useState('')
+   680→  const [phone, setPhone] = useState('')
+   681→  const [hasWhatsApp, setHasWhatsApp] = useState(true)
+   682→  const [email, setEmail] = useState('')
+   683→  const [isSubmitting, setIsSubmitting] = useState(false)
+   684→  const [submitResult, setSubmitResult] = useState<'success' | 'error' | null>(null)
+   685→
+   686→  // ──── Inventory helpers ────
+   687→  const setQty = (name: string, delta: number) => {
+   688→    setInventory(prev => {
+   689→      const cur = prev[name] || 0
+   690→      const next = Math.max(0, cur + delta)
+   691→      if (next === 0) { const { [name]: _, ...rest } = prev; return rest }
+   692→      return { ...prev, [name]: next }
+   693→    })
+   694→  }
+   695→
+   696→  // ──── Calculations ────
+   697→  const totalVolume = useMemo(() => {
+   698→    let v = 0
+   699→    Object.entries(inventory).forEach(([name, qty]) => {
+   700→      for (const room of Object.values(ROOMS)) {
+   701→        const item = room.items.find(i => i.name === name)
+   702→        if (item) { v += item.vol * qty; break }
+   703→      }
+   704→    })
+   705→    return Math.round(v * 100) / 100
+   706→  }, [inventory])
+   707→
+   708→  // Smart vehicle suggestion based on volume and vehicle type preference
+   709→  const getVehicleSuggestion = (vol: number, vType: 'cerrado' | 'abierto') => {
+   710→    const cat = vType === 'cerrado' ? VEHICLES.find(v => v.cat === 'Furgón')! : VEHICLES.find(v => v.cat === 'Camioneta')!
+   711→    const items = cat.items
+   712→
+   713→    // Find the smallest vehicle that fits
+   714→    for (const vehicle of items) {
+   715→      if (vol <= vehicle.cap) return { vehicle, additional: [] }
+   716→    }
+   717→
+   718→    // Volume exceeds largest vehicle - need additional vehicles
+   719→    const largest = items[items.length - 1]
+   720→    const remaining = vol - largest.cap
+   721→    const additional: typeof items[0][] = []
+   722→
+   723→    // Add more vehicles for remaining volume
+   724→    let rem = remaining
+   725→    while (rem > 0) {
+   726→      let found = false
+   727→      for (const vehicle of items) {
+   728→        if (rem <= vehicle.cap) {
+   729→          additional.push(vehicle)
+   730→          rem = 0
+   731→          found = true
+   732→          break
+   733→        }
+   734→      }
+   735→      if (!found) {
+   736→        additional.push(largest)
+   737→        rem -= largest.cap
+   738→      }
+   739→    }
+   740→
+   741→    return { vehicle: largest, additional }
+   742→  }
+   743→
+   744→  // Legacy compatibility
+   745→  const getRecommendation = (vol: number) => {
+   746→    if (vol <= 0) return { vehicle: '—', detail: 'Selecciona artículos para ver recomendación' }
+   747→    if (vol <= 6) return { vehicle: 'Furgón Pequeño', detail: '6m³ — Ideal para studios' }
+   748→    if (vol <= 12) return { vehicle: 'Furgón Mediano o Camioneta Pequeña', detail: '12m³ — Ideal para 1-2 dormitorios' }
+   749→    if (vol <= 20) return { vehicle: 'Furgón Grande o Camioneta Mediana', detail: '20m³ — Ideal para 2-3 dormitorios' }
+   750→    if (vol <= 30) return { vehicle: 'Furgón Largo o Camioneta Larga', detail: '30m³ — Ideal para casas grandes' }
+   751→    return { vehicle: 'Camioneta Grande + Furgón Largo', detail: '2 vehículos o 2 viajes recomendados' }
+   752→  }
+   753→
+   754→  // Auto-suggest vehicle when in Path C and volume changes
+   755→  useEffect(() => {
+   756→    if (calcPath === 'C' && vehicleType && totalVolume > 0) {
+   757→      const suggestion = getVehicleSuggestion(totalVolume, vehicleType)
+   758→      setSelectedVehicle(suggestion.vehicle)
+   759→      setAdditionalVehicles(suggestion.additional)
+   760→    }
+   761→  }, [totalVolume, calcPath, vehicleType])
+   762→
+   763→  // ──── Calculations ────
+   764→  // Floor cost helpers
+   765→  const getFloorCount = (floor: string) => floor === 'baja' ? 0 : parseInt(floor) || 0
+   766→
+   767→  const originFloorCost = useMemo(() => {
+   768→    if (!selectedVehicle) return 0
+   769→    const floors = getFloorCount(originFloor)
+   770→    if (floors === 0) return 0
+   771→    const pricePerFloor = elevatorOrigin ? selectedVehicle.floorElev : selectedVehicle.floorNoElev
+   772→    return floors * pricePerFloor
+   773→  }, [selectedVehicle, originFloor, elevatorOrigin])
+   774→
+   775→  const destFloorCost = useMemo(() => {
+   776→    if (!selectedVehicle) return 0
+   777→    const floors = getFloorCount(destFloor)
+   778→    if (floors === 0) return 0
+   779→    const pricePerFloor = elevatorDest ? selectedVehicle.floorElev : selectedVehicle.floorNoElev
+   780→    return floors * pricePerFloor
+   781→  }, [selectedVehicle, destFloor, elevatorDest])
+   782→
+   783→  // Embalaje cost - según tabla oficial por vehículo
+   784→  const embalajeCost = useMemo(() => {
+   785→    if (embalajeType === 'ninguno' || !selectedVehicle) return 0
+   786→    if (embalajeType === 'completo') return selectedVehicle.embStd + selectedVehicle.desemb // Standard + Desembalaje
+   787→    if (embalajeType === 'solo_embalaje') return selectedVehicle.embStd
+   788→    if (embalajeType === 'solo_desembalaje') return selectedVehicle.desemb
+   789→    return 0
+   790→  }, [embalajeType, selectedVehicle])
+   791→
+   792→  // Boxes cost
+   793→  const boxesCost = useMemo(() => {
+   794→    let t = 0
+   795→    Object.entries(boxes).forEach(([id, qty]) => {
+   796→      const box = BOX_OPTIONS.find(b => b.id === id)
+   797→      if (box) t += box.price * qty
+   798→    })
+   799→    return t
+   800→  }, [boxes])
+   801→
+   802→  // Materials cost
+   803→  const materialsCost = useMemo(() => {
+   804→    let t = 0
+   805→    Object.entries(materials).forEach(([id, qty]) => {
+   806→      const mat = PACKING_MATERIALS.find(m => m.id === id)
+   807→      if (mat) t += mat.price * qty
+   808→    })
+   809→    return t
+   810→  }, [materials])
+   811→
+   812→  // Handling extras cost
+   813→  const handlingCost = useMemo(() => {
+   814→    let t = 0
+   815→    Object.entries(handlingExtras).forEach(([id, qty]) => {
+   816→      const extra = HANDLING_EXTRAS.find(e => e.id === id)
+   817→      if (extra) t += extra.price * qty
+   818→    })
+   819→    return t
+   820→  }, [handlingExtras])
+   821→
+   822→  // Accessibility extras cost (no fachada - removed per design)
+   823→  const accessibilityCost = useMemo(() => {
+   824→    // Acarreo: primeros 25m incluidos, luego por cada 25m adicional según vehículo
+   825→    const oAcarreo = originCaminata > 0 ? (selectedVehicle?.acarreoPrice || 10) * originCaminata : 0
+   826→    const dAcarreo = destCaminata > 0 ? (selectedVehicle?.acarreoPrice || 10) * destCaminata : 0
+   827→    return oAcarreo + dAcarreo
+   828→  }, [originCaminata, destCaminata, selectedVehicle])
+   829→
+   830→  // Helpers cost
+   831→  const helpersCost = useMemo(() => {
+   832→    if (!selectedVehicle) return helpers * 80
+   833→    return helpers * selectedVehicle.helperPrice
+   834→  }, [helpers, selectedVehicle])
+   835→
+   836→  // Logistics cost
+   837→  const logisticsCost = useMemo(() => {
+   838→    let t = 0
+   839→    Object.entries(logisticsExtras).forEach(([id, qty]) => {
+   840→      const extra = LOGISTICS_EXTRAS.find(e => e.id === id)
+   841→      if (extra) t += extra.price * qty
+   842→    })
+   843→    return t
+   844→  }, [logisticsExtras])
+   845→
+   846→  const extrasTotal = embalajeCost + boxesCost + materialsCost + handlingCost + originFloorCost + destFloorCost + accessibilityCost + helpersCost + logisticsCost + (retiroMaterial ? 150 : 0)
+   847→
+   848→  const basePrice = useMemo(() => {
+   849→    if (!selectedVehicle) return 0
+   850→    const d = routeDistance > 0 ? routeDistance : 10
+   851→    // Tarifa base del vehículo (incluye 4 km) + costo extra por km adicional
+   852→    const includedKm = 4
+   853→    const extraKm = Math.max(0, d - includedKm)
+   854→    let price = selectedVehicle.baseFare + selectedVehicle.perKm * extraKm
+   855→    // Vehículos adicionales al 70%
+   856→    for (const av of additionalVehicles) {
+   857→      price += av.baseFare * 0.7 + av.perKm * extraKm * 0.7
+   858→    }
+   859→    return price
+   860→  }, [routeDistance, selectedVehicle, additionalVehicles])
+   861→
+   862→  const insuranceCost = useMemo(() => {
+   863→    if (!wantsInsurance) return 0
+   864→    const amount = customInsurance ? parseFloat(customInsurance) || 0 : insuranceAmount
+   865→    return Math.round(amount * 0.03)
+   866→  }, [wantsInsurance, insuranceAmount, customInsurance])
+   867→
+   868→  const subtotal = basePrice + extrasTotal + insuranceCost
+   869→  const ivaAmount = includeIva ? Math.round(subtotal * 0.16) : 0
+   870→  const grandTotal = subtotal + ivaAmount
+   871→
+   872→  const getSelectedItems = () => {
+   873→    const items: { name: string; qty: number; vol: number; emoji: string }[] = []
+   874→    Object.entries(inventory).forEach(([name, qty]) => {
+   875→      for (const room of Object.values(ROOMS)) {
+   876→        const item = room.items.find(i => i.name === name)
+   877→        if (item) { items.push({ name, qty, vol: item.vol * qty, emoji: item.emoji }); break }
+   878→      }
+   879→    })
+   880→    return items
+   881→  }
+   882→
+   883→  // ──── Nominatim search ────
+   884→  const handleOriginSearch = useCallback(async (query: string) => {
+   885→    setOriginAddress(query)
+   886→    if (query.length < 3) { setOriginResults([]); return }
+   887→    const results = await searchAddress(query)
+   888→    setOriginResults(results)
+   889→  }, [])
+   890→
+   891→  const handleDestSearch = useCallback(async (query: string) => {
+   892→    setDestAddress(query)
+   893→    if (query.length < 3) { setDestResults([]); return }
+   894→    const results = await searchAddress(query)
+   895→    setDestResults(results)
+   896→  }, [])
+   897→
+   898→  const selectOrigin = (result: NominatimResult) => {
+   899→    const latlng = { lat: parseFloat(result.lat), lng: parseFloat(result.lon) }
+   900→    setOrigin(latlng)
+   901→    setOriginAddress(result.display_name.split(',').slice(0, 3).join(','))
+   902→    setOriginResults([])
+   903→    setSearchingOrigin(false)
+   904→  }
+   905→
+   906→  const selectDest = (result: NominatimResult) => {
+   907→    const latlng = { lat: parseFloat(result.lat), lng: parseFloat(result.lon) }
+   908→    setDestination(latlng)
+   909→    setDestAddress(result.display_name.split(',').slice(0, 3).join(','))
+   910→    setDestResults([])
+   911→    setSearchingDest(false)
+   912→  }
+   913→
+   914→  // ──── Route calculation ────
+   915→  const handleCalculateRoute = useCallback(async () => {
+   916→    if (!origin || !destination) return
+   917→    setIsCalculatingRoute(true)
+   918→    const stops = intermediateStops.map(s => s.latlng)
+   919→    const result = await calculateRoute(origin, destination, stops)
+   920→    if (result) {
+   921→      setRouteDistance(Math.round(result.distance * 10) / 10)
+   922→      setRouteDuration(Math.round(result.duration))
+   923→      setRouteGeometry(result.geometry)
+   924→    }
+   925→    setIsCalculatingRoute(false)
+   926→  }, [origin, destination, intermediateStops])
+   927→
+   928→  // Auto-calculate route when origin, destination, or stops change
+   929→  useEffect(() => {
+   930→    if (origin && destination) {
+   931→      handleCalculateRoute()
+   932→    }
+   933→  }, [origin, destination, intermediateStops, handleCalculateRoute])
+   934→
+   935→  // ──── Map click handler ────
+   936→  const handleMapClick = useCallback((latlng: LatLng) => {
+   937→    if (mapSelectionMode === 'origin') {
+   938→      setOrigin(latlng)
+   939→      setOriginAddress(`${latlng.lat.toFixed(5)}, ${latlng.lng.toFixed(5)}`)
+   940→    } else if (mapSelectionMode === 'destination') {
+   941→      setDestination(latlng)
+   942→      setDestAddress(`${latlng.lat.toFixed(5)}, ${latlng.lng.toFixed(5)}`)
+   943→    } else if (mapSelectionMode === 'stop') {
+   944→      const newStop: IntermediateStop = {
+   945→        id: `stop-${Date.now()}`,
+   946→        latlng,
+   947→        address: `${latlng.lat.toFixed(5)}, ${latlng.lng.toFixed(5)}`,
+   948→      }
+   949→      setIntermediateStops(prev => [...prev, newStop])
+   950→    }
+   951→  }, [mapSelectionMode])
+   952→
+   953→  const removeStop = (id: string) => {
+   954→    setIntermediateStops(prev => prev.filter(s => s.id !== id))
+   955→  }
+   956→
+   957→  // ──── Form submission ────
+   958→  const buildSummaryText = () => {
+   959→    const items = getSelectedItems().map(i => `${i.qty}x ${i.name}`).join(', ')
+   960→    const vehicleName = selectedVehicle ? selectedVehicle.name : getRecommendation(totalVolume).vehicle
+   961→    const embalajeLabel = embalajeType === 'completo' ? `Completo (Bs ${selectedVehicle?.embStd || 0} + ${selectedVehicle?.desemb || 0})` : embalajeType === 'solo_embalaje' ? `Solo Embalaje (Bs ${selectedVehicle?.embStd || 0})` : embalajeType === 'solo_desembalaje' ? `Solo Desembalaje (Bs ${selectedVehicle?.desemb || 0})` : 'Ninguno'
+   962→    const catLabel = MUDANZA_CATEGORIES.find(c => c.id === mudanzaCategory)?.name || catType
+   963→
+   964→    let text = `COTIZACIÓN DE MUDANZA\n`
+   965→    text += `═══════════════════════\n`
+   966→    text += `Ruta: ${calcPath === 'A' ? 'A (Selección directa)' : calcPath === 'B' ? 'B (Tamaño de mudanza)' : 'C (Asistencia guiada)'}\n`
+   967→    text += `Tipo: ${moveType.toUpperCase()}\n`
+   968→    text += `Categoría: ${catLabel.toUpperCase()}\n`
+   969→    text += `Vehículo: ${vehicleName}\n`
+   970→    if (additionalVehicles.length > 0) {
+   971→      text += `Vehículos adicionales: ${additionalVehicles.map(av => av.name).join(', ')}\n`
+   972→    }
+   973→    text += `Capacidad total: ${selectedVehicle ? selectedVehicle.cap : 0}${additionalVehicles.length > 0 ? ` + ${additionalVehicles.reduce((s, av) => s + av.cap, 0)}` : ''} m³\n`
+   974→    text += `Volumen: ${totalVolume} m³\n`
+   975→    text += `Distancia: ${routeDistance > 0 ? routeDistance : '~10'} km\n`
+   976→    if (routeDuration > 0) text += `Duración estimada: ${routeDuration} min\n`
+   977→    text += `\nORIGEN: ${originAddress || 'No especificado'}\n`
+   978→    text += `  Piso: ${originFloor === 'baja' ? 'Planta baja' : `Piso ${originFloor}`}${elevatorOrigin ? ' (con elevador)' : ' (sin elevador)'}\n`
+   979→    if (originFloorCost > 0) text += `  Costo piso: Bs ${originFloorCost}\n`
+   980→    if (originCaminata > 0) text += `  Acarreo origen: ${originCaminata} x 25m (Bs ${selectedVehicle?.acarreoPrice || 10}/25m)\n`
+   981→    if (originFachada > 0) text += `  Elevador fachada: ${originFachada} hr\n`
+   982→    if (retiroMaterial) text += `  Retiro de Material y Limpieza: Bs 150\n`
+   983→    text += `\nDESTINO: ${destAddress || 'No especificado'}\n`
+   984→    text += `  Piso: ${destFloor === 'baja' ? 'Planta baja' : `Piso ${destFloor}`}${elevatorDest ? ' (con elevador)' : ' (sin elevador)'}\n`
+   985→    if (destFloorCost > 0) text += `  Costo piso: Bs ${destFloorCost}\n`
+   986→    if (destCaminata > 0) text += `  Acarreo destino: ${destCaminata} x 25m (Bs ${selectedVehicle?.acarreoPrice || 10}/25m)\n`
+   987→    if (destFachada > 0) text += `  Elevador fachada: ${destFachada} hr\n`
+   988→    if (intermediateStops.length > 0) {
+   989→      text += `\nPARADAS: ${intermediateStops.map(s => s.address).join(' → ')}\n`
+   990→    }
+   991→    text += `\nEMBALAJE: ${embalajeLabel}\n`
+   992→    if (embalajeCost > 0) text += `  Costo embalaje: Bs ${embalajeCost}\n`
+   993→    if (Object.keys(boxes).length > 0) {
+   994→      text += `CAJAS: ${Object.entries(boxes).map(([id, q]) => { const b = BOX_OPTIONS.find(x => x.id === id); return b ? `${q}x ${b.name}` : '' }).join(', ')}\n`
+   995→    }
+   996→    if (Object.keys(materials).length > 0) {
+   997→      text += `MATERIALES: ${Object.entries(materials).map(([id, q]) => { const m = PACKING_MATERIALS.find(x => x.id === id); return m ? `${q}x ${m.name}` : '' }).join(', ')}\n`
+   998→    }
+   999→    if (Object.keys(handlingExtras).length > 0) {
+  1000→      text += `MANIPULACIÓN: ${Object.entries(handlingExtras).map(([id, q]) => { const h = HANDLING_EXTRAS.find(x => x.id === id); return h ? `${q}x ${h.name}` : '' }).join(', ')}\n`
+  1001→    }
+  1002→    if (helpers > 0) text += `AYUDANTES: ${helpers} (Bs ${selectedVehicle?.helperPrice || 80} c/u = Bs ${helpersCost})\n`
+  1003→    if (Object.keys(logisticsExtras).length > 0) {
+  1004→      text += `LOGÍSTICA: ${Object.entries(logisticsExtras).map(([id, q]) => { const l = LOGISTICS_EXTRAS.find(x => x.id === id); return l ? `${q}x ${l.name}` : '' }).join(', ')}\n`
+  1005→    }
+  1006→    if (wantsInsurance) text += `\nSeguro: Bs ${customInsurance || insuranceAmount} (costo: Bs ${insuranceCost})\n`
+  1007→    text += `\nMETODO PAGO: ${paymentMethod}\n`
+  1008→    if (includeIva) text += `IVA 16%: Bs ${ivaAmount}\n`
+  1009→    if (includeIva && razonSocial) text += `Razón Social: ${razonSocial}\n`
+  1010→    if (includeIva && nit) text += `NIT: ${nit}\n`
+  1011→    text += `\nTOTAL: Bs ${grandTotal.toLocaleString()}\n`
+  1012→    text += `\nCLIENTE:\n`
+  1013→    text += `Nombre: ${fullName}\n`
+  1014→    text += `Teléfono: ${phone}${hasWhatsApp ? ' (WhatsApp)' : ''}\n`
+  1015→    text += `Email: ${email}\n`
+  1016→    text += `\nArtículos: ${items || 'Ninguno seleccionado'}`
+  1017→
+  1018→    return text
+  1019→  }
+  1020→
+  1021→  const buildWhatsAppMsg = () => {
+  1022→    return encodeURIComponent(buildSummaryText())
+  1023→  }
+  1024→
+  1025→  const handleSubmit = async () => {
+  1026→    if (!fullName || !phone || !email) return
+  1027→    setIsSubmitting(true)
+  1028→    try {
+  1029→      const res = await fetch('/api/mudanza/submit', {
+  1030→        method: 'POST',
+  1031→        headers: { 'Content-Type': 'application/json' },
+  1032→        body: JSON.stringify({
+  1033→          moveType, catType, totalVolume, routeDistance, routeDuration,
+  1034→          originAddress, destAddress, intermediateStops,
+  1035→          vehicleType, selectedVehicle: selectedVehicle ? { name: selectedVehicle.name, cap: selectedVehicle.cap, perKm: selectedVehicle.perKm, helperPrice: selectedVehicle.helperPrice, floorElev: selectedVehicle.floorElev, floorNoElev: selectedVehicle.floorNoElev } : null,
+  1036→          calcPath, mudanzaCategory, additionalVehicles: additionalVehicles.map(av => ({ name: av.name, cap: av.cap, perKm: av.perKm })),
+  1037→          embalajeType, embalajeCost, boxes, boxesCost, materials, materialsCost,
+  1038→          handlingExtras, handlingCost,
+  1039→          originFloor, elevatorOrigin, originFloorCost, originCaminata, originFachada,
+  1040→          destFloor, elevatorDest, destFloorCost, destCaminata, destFachada,
+  1041→          accessibilityCost,
+  1042→          helpers, helpersCost,
+  1043→          retiroMaterial,
+  1044→          logisticsExtras, logisticsCost,
+  1045→          wantsInsurance, insuranceAmount: customInsurance || insuranceAmount, insuranceCost,
+  1046→          includeIva, ivaAmount, razonSocial, nit, paymentMethod,
+  1047→          basePrice, extrasTotal, subtotal, grandTotal,
+  1048→          fullName, phone, hasWhatsApp, email,
+  1049→          items: getSelectedItems(),
+  1050→          vehicleRecommendation: selectedVehicle ? selectedVehicle.name : getRecommendation(totalVolume).vehicle,
+  1051→        }),
+  1052→      })
+  1053→      if (res.ok) {
+  1054→        setSubmitResult('success')
+  1055→      } else {
+  1056→        setSubmitResult('error')
+  1057→      }
+  1058→    } catch {
+  1059→      setSubmitResult('error')
+  1060→    }
+  1061→    setIsSubmitting(false)
+  1062→  }
+  1063→
+  1064→  // ──── Steps config (dynamic based on path) ────
+  1065→  const steps = calcPath === 'A'
+  1066→    ? [
+  1067→        { num: 1, label: 'Vehículo' },
+  1068→        { num: 2, label: 'Ruta' },
+  1069→        { num: 3, label: 'Extras' },
+  1070→        { num: 4, label: 'Seguro' },
+  1071→        { num: 5, label: 'Envío' },
+  1072→      ]
+  1073→    : calcPath === 'B'
+  1074→    ? [
+  1075→        { num: 1, label: 'Tamaño' },
+  1076→        { num: 2, label: 'Vehículo' },
+  1077→        { num: 3, label: 'Ruta' },
+  1078→        { num: 4, label: 'Extras' },
+  1079→        { num: 5, label: 'Seguro' },
+  1080→        { num: 6, label: 'Envío' },
+  1081→      ]
+  1082→    : calcPath === 'C'
+  1083→    ? [
+  1084→        { num: 1, label: 'Inventario' },
+  1085→        { num: 2, label: 'Ruta' },
+  1086→        { num: 3, label: 'Extras' },
+  1087→        { num: 4, label: 'Seguro' },
+  1088→        { num: 5, label: 'Envío' },
+  1089→      ]
+  1090→    : [
+  1091→        { num: 1, label: 'Inicio' },
+  1092→      ]
+  1093→
+  1094→  // ──── Step type helper ────
+  1095→  const getStepType = (stepNum: number, path: string) => {
+  1096→    if (path === 'A') {
+  1097→      if (stepNum === 1) return 'vehicle'
+  1098→      if (stepNum === 2) return 'route'
+  1099→      if (stepNum === 3) return 'extras'
+  1100→      if (stepNum === 4) return 'insurance'
+  1101→      if (stepNum === 5) return 'submit'
+  1102→    }
+  1103→    if (path === 'B') {
+  1104→      if (stepNum === 1) return 'size'
+  1105→      if (stepNum === 2) return 'vehicle'
+  1106→      if (stepNum === 3) return 'route'
+  1107→      if (stepNum === 4) return 'extras'
+  1108→      if (stepNum === 5) return 'insurance'
+  1109→      if (stepNum === 6) return 'submit'
+  1110→    }
+  1111→    if (path === 'C') {
+  1112→      if (stepNum === 1) return 'inventory'
+  1113→      if (stepNum === 2) return 'route'
+  1114→      if (stepNum === 3) return 'extras'
+  1115→      if (stepNum === 4) return 'insurance'
+  1116→      if (stepNum === 5) return 'submit'
+  1117→    }
+  1118→    return null
+  1119→  }
+  1120→
+  1121→  // ──── Volume-based helper recommendation ────
+  1122→  const getRecommendedHelpers = (vol: number) => {
+  1123→    if (vol <= 0) return 1
+  1124→    if (vol <= 6) return 1
+  1125→    if (vol <= 14) return 2
+  1126→    if (vol <= 25) return 3
+  1127→    return 4
+  1128→  }
+  1129→
+  1130→  const inputClass = 'w-full bg-white/[0.04] border border-white/[0.08] text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#00E676]/40 transition-all'
+  1131→
+  1132→  return (
+  1133→    <section id="calculadora" className="relative py-24 md:py-32">
+  1134→      {/* Background image */}
+  1135→      <div className="absolute inset-0 bg-[url('/mudanza-calculator.webp')] bg-cover bg-center opacity-[0.15]" />
+  1136→      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17]/95 via-[#0d1320]/90 to-[#0a0e17]/95" />
+  1137→
+  1138→      <div className="absolute top-1/2 left-1/3 w-[600px] h-[600px] rounded-full bg-[#00E676]/5 blur-[150px]" />
+  1139→      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  1140→        <A><div className="text-center mb-12">
+  1141→          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00E676]/10 border border-[#00E676]/20 mb-4">
+  1142→            <Calculator className="w-4 h-4 text-[#00E676]" /><span className="text-sm text-[#00E676] font-medium">Calculadora de Mudanza</span>
+  1143→          </div>
+  1144→          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">Calcula tu <span className="bg-gradient-to-r from-[#00E676] via-[#0077BD] to-[#FF9800] bg-clip-text text-transparent">Mudanza</span></h2>
+  1145→          <p className="text-white/50 max-w-2xl mx-auto text-lg">Selecciona tus artículos, define tu ruta, elige extras y obtén una cotización estimada al instante.</p>
+  1146→        </div></A>
+  1147→
+  1148→        {/* Step indicator */}
+  1149→        <div className="flex items-center justify-center gap-1 sm:gap-2 mb-10 overflow-x-auto pb-2">
+  1150→          {steps.map((s, i) => (
+  1151→            <div key={s.num} className="flex items-center shrink-0">
+  1152→              <button onClick={() => s.num < step && setStep(s.num)}
+  1153→                className={`flex items-center gap-1.5 px-2.5 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all duration-300 ${step === s.num ? 'bg-[#00E676] text-black shadow-[0_0_20px_rgba(0,230,118,0.3)]' : step > s.num ? 'bg-[#00E676]/20 text-[#00E676] cursor-pointer' : 'bg-white/[0.05] text-white/40'}`}>
+  1154→                <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-bold" style={{ backgroundColor: step >= s.num ? 'rgba(0,230,118,0.2)' : 'rgba(255,255,255,0.05)' }}>{step > s.num ? '✓' : s.num}</span>
+  1155→                <span className="hidden md:inline">{s.label}</span>
+  1156→              </button>
+  1157→              {i < steps.length - 1 && <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 text-white/20 mx-0.5 sm:mx-1" />}
+  1158→            </div>
+  1159→          ))}
+  1160→        </div>
+  1161→
+  1162→        {/* Volume & Distance badges */}
+  1163→        <div className="flex flex-wrap justify-center gap-3 mb-8">
+  1164→          <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-white/[0.04] border border-[#00E676]/20">
+  1165→            <Box className="w-4 h-4 text-[#00E676]" />
+  1166→            <span className="text-sm text-white/60">Volumen:</span>
+  1167→            <span className="text-lg font-bold text-[#00E676]">{totalVolume} m³</span>
+  1168→          </div>
+  1169→          {routeDistance > 0 && (
+  1170→            <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-white/[0.04] border border-[#0077BD]/20">
+  1171→              <Navigation className="w-4 h-4 text-[#0077BD]" />
+  1172→              <span className="text-sm text-white/60">Distancia:</span>
+  1173→              <span className="text-lg font-bold text-[#0077BD]">{routeDistance} km</span>
+  1174→            </div>
+  1175→          )}
+  1176→          {(calcPath === 'B' || calcPath === 'C') && selectedVehicle && (
+  1177→            <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-white/[0.04] border border-[#818CF8]/20">
+  1178→              <Truck className="w-4 h-4 text-[#818CF8]" />
+  1179→              <span className="text-sm text-white/60">Sugerido:</span>
+  1180→              <span className="text-lg font-bold text-[#818CF8]">{selectedVehicle.name}</span>
+  1181→              {additionalVehicles.length > 0 && (
+  1182→                <span className="text-sm text-[#FF9800]">+ {additionalVehicles.length} vehículo{additionalVehicles.length > 1 ? 's' : ''} adicional{additionalVehicles.length > 1 ? 'es' : ''}</span>
+  1183→              )}
+  1184→            </div>
+  1185→          )}
+  1186→        </div>
+  1187→
+  1188→        {/* ═══════════════ Step 1: Path Selection / Vehicle / Category ═══════════════ */}
+  1189→        {step === 1 && calcPath === null && (
+  1190→          <div className="max-w-4xl mx-auto">
+  1191→            <h3 className="text-xl font-bold text-white mb-2 text-center">¿Cómo deseas cotizar tu mudanza?</h3>
+  1192→            <p className="text-sm text-white/40 text-center mb-8">Elige la opción que mejor se adapte a ti</p>
+  1193→
+  1194→            {/* Three-path selection */}
+  1195→            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+  1196→              <button onClick={() => { setCalcPath('A') }}
+  1197→                className="group p-8 rounded-2xl text-left transition-all duration-300 bg-white/[0.03] border border-white/[0.06] hover:border-[#00E676]/40 hover:bg-white/[0.05]">
+  1198→                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 bg-[#00E676]/10 group-hover:bg-[#00E676]/20 transition-all">
+  1199→                  <Truck className="w-7 h-7 text-[#00E676]" />
+  1200→                </div>
+  1201→                <h4 className="text-lg font-bold text-white mb-2">🚛 Ya sé qué vehículo necesito</h4>
+  1202→                <p className="text-sm text-white/50 leading-relaxed mb-3">Selecciona tu camión o furgón directamente y cotiza sin inventario detallado.</p>
+  1203→                <span className="text-xs text-[#00E676] font-semibold">Ruta A — Selección directa →</span>
+  1204→              </button>
+  1205→              <button onClick={() => { setCalcPath('B') }}
+  1206→                className="group p-8 rounded-2xl text-left transition-all duration-300 bg-white/[0.03] border border-white/[0.06] hover:border-[#0077BD]/40 hover:bg-white/[0.05]">
+  1207→                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 bg-[#0077BD]/10 group-hover:bg-[#0077BD]/20 transition-all">
+  1208→                  <Package className="w-7 h-7 text-[#0077BD]" />
+  1209→                </div>
+  1210→                <h4 className="text-lg font-bold text-white mb-2">📦 Conozco el tamaño de mi mudanza</h4>
+  1211→                <p className="text-sm text-white/50 leading-relaxed mb-3">Selecciona el tamaño de tu mudanza y te asignamos el vehículo ideal automáticamente.</p>
+  1212→                <span className="text-xs text-[#0077BD] font-semibold">Ruta B — Por tamaño →</span>
+  1213→              </button>
+  1214→              <button onClick={() => { setCalcPath('C') }}
+  1215→                className="group p-8 rounded-2xl text-left transition-all duration-300 bg-white/[0.03] border border-white/[0.06] hover:border-[#818CF8]/40 hover:bg-white/[0.05]">
+  1216→                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 bg-[#818CF8]/10 group-hover:bg-[#818CF8]/20 transition-all">
+  1217→                  <ClipboardList className="w-7 h-7 text-[#818CF8]" />
+  1218→                </div>
+  1219→                <h4 className="text-lg font-bold text-white mb-2">📋 Ayúdame a elegir</h4>
+  1220→                <p className="text-sm text-white/50 leading-relaxed mb-3">Te guiamos con un inventario detallado para sugerirte el vehículo ideal.</p>
+  1221→                <span className="text-xs text-[#818CF8] font-semibold">Ruta C — Asistencia guiada →</span>
+  1222→              </button>
+  1223→            </div>
+  1224→
+  1225→            {/* Move type selection */}
+  1226→            <h3 className="text-lg font-bold text-white mb-2 text-center">Tipo de Mudanza</h3>
+  1227→            <p className="text-sm text-white/40 text-center mb-4">Selecciona la distancia de tu traslado</p>
+  1228→            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+  1229→              {([['local', 'Local', MapPin, '#00E676'], ['provincial', 'Provincial', Route, '#0077BD'], ['nacional', 'Nacional', Globe, '#FF9800']] as const).map(([id, label, Icon, color]) => (
+  1230→                <button key={id} onClick={() => setMoveType(id)}
+  1231→                  className={`p-5 rounded-2xl text-left transition-all duration-300 ${moveType === id ? 'bg-white/[0.06] border-2' : 'bg-white/[0.03] border border-white/[0.06] hover:border-white/10'}`}
+  1232→                  style={moveType === id ? { borderColor: `${color}60` } : {}}>
+  1233→                  <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ backgroundColor: `${color}15` }}>
+  1234→                    <Icon className="w-5 h-5" style={{ color }} />
+  1235→                  </div>
+  1236→                  <h4 className="text-base font-bold text-white mb-1">Mudanza {label}</h4>
+  1237→                  <p className="text-xs text-white/40">{id === 'local' ? 'Misma ciudad' : id === 'provincial' ? 'Mismo departamento' : 'Todo Bolivia'}</p>
+  1238→                </button>
+  1239→              ))}
+  1240→            </div>
+  1241→
+  1242→            {/* Category selection */}
+  1243→            <h3 className="text-lg font-bold text-white mb-2 text-center">¿Qué mudas?</h3>
+  1244→            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+  1245→              {([['casa', 'Casa', Home, '#00E676'], ['oficina', 'Oficina', Building2, '#0077BD'], ['especial', 'Especial', Shield, '#FF9800']] as const).map(([id, label, Icon, color]) => (
+  1246→                <button key={id} onClick={() => setCatType(id)}
+  1247→                  className={`p-4 rounded-2xl text-left transition-all duration-300 ${catType === id ? 'bg-white/[0.06] border-2' : 'bg-white/[0.03] border border-white/[0.06] hover:border-white/10'}`}
+  1248→                  style={catType === id ? { borderColor: `${color}60` } : {}}>
+  1249→                  <div className="flex items-center gap-3">
+  1250→                    <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${color}15` }}>
+  1251→                      <Icon className="w-4 h-4" style={{ color }} />
+  1252→                    </div>
+  1253→                    <span className="text-white font-semibold text-sm">{label}</span>
+  1254→                  </div>
+  1255→                </button>
+  1256→              ))}
+  1257→            </div>
+  1258→          </div>
+  1259→        )}
+  1260→
+  1261→        {/* ═══════════════ Step 1 (Path A): Vehicle Selection ═══════════════ */}
+  1262→        {step === 1 && calcPath === 'A' && (
+  1263→          <div className="max-w-4xl mx-auto">
+  1264→            <div className="flex items-center gap-2 mb-6">
+  1265→              <button onClick={() => { setCalcPath(null); setSelectedVehicle(null) }}
+  1266→                className="text-xs text-white/40 hover:text-white/60 transition-colors flex items-center gap-1">
+  1267→                ← Cambiar ruta
+  1268→              </button>
+  1269→              <span className="text-xs px-2 py-0.5 rounded-full bg-[#00E676]/10 text-[#00E676] font-semibold">Ruta A</span>
+  1270→            </div>
+  1271→
+  1272→            {/* Vehicle type selection */}
+  1273→            <h3 className="text-xl font-bold text-white mb-2 text-center">¿Vehículo cerrado o abierto?</h3>
+  1274→            <p className="text-sm text-white/40 text-center mb-6">Los furgones protegen del clima, las camionetas tienen caja abierta</p>
+  1275→            <div className="grid grid-cols-2 gap-4 mb-6">
+  1276→              <button onClick={() => { setVehicleType('cerrado'); setSelectedVehicle(null) }}
+  1277→                className={`p-5 rounded-2xl text-center transition-all duration-300 ${vehicleType === 'cerrado' ? 'bg-[#818CF8]/10 border-2 border-[#818CF8]/50' : 'bg-white/[0.03] border border-white/[0.06] hover:border-white/10'}`}>
+  1278→                <div className="flex justify-center mb-2 h-16 items-center">
+  1279→                  <img src="/vehicles/7-FURGON/mediano.png" alt="Furgón" className="max-h-full max-w-[80px] object-contain" />
+  1280→                </div>
+  1281→                <div className="text-white font-semibold mb-1">Furgón (Cerrado)</div>
+  1282→                <div className="text-xs text-white/40">Protección completa del clima</div>
+  1283→              </button>
+  1284→              <button onClick={() => { setVehicleType('abierto'); setSelectedVehicle(null) }}
+  1285→                className={`p-5 rounded-2xl text-center transition-all duration-300 ${vehicleType === 'abierto' ? 'bg-[#FB923C]/10 border-2 border-[#FB923C]/50' : 'bg-white/[0.03] border border-white/[0.06] hover:border-white/10'}`}>
+  1286→                <div className="flex justify-center mb-2 h-16 items-center">
+  1287→                  <img src="/vehicles/6-CAMIONETA/mediana.png" alt="Camioneta" className="max-h-full max-w-[80px] object-contain" />
+  1288→                </div>
+  1289→                <div className="text-white font-semibold mb-1">Camioneta (Abierto)</div>
+  1290→                <div className="text-xs text-white/40">Caja abierta, ideal para cargas resistentes</div>
+  1291→              </button>
+  1292→            </div>
+  1293→
+  1294→            {/* Vehicle options */}
+  1295→            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
+  1296→              {(vehicleType === 'cerrado' ? VEHICLES.find(v => v.cat === 'Furgón')! : VEHICLES.find(v => v.cat === 'Camioneta')!).items.map((v) => {
+  1297→                const isSelected = selectedVehicle?.name === v.name
+  1298→                const catColor = vehicleType === 'cerrado' ? '#818CF8' : '#FB923C'
+  1299→                return (
+  1300→                  <button key={v.name} onClick={() => { setSelectedVehicle(v); setAdditionalVehicles([]) }}
+  1301→                    className={`p-4 rounded-xl text-left transition-all duration-200 ${isSelected ? `border-2` : 'bg-white/[0.02] border border-white/[0.06] hover:border-white/10'}`}
+  1302→                    style={isSelected ? { backgroundColor: `${catColor}08`, borderColor: `${catColor}50` } : {}}>
+  1303→                    <div className="flex items-center gap-4">
+  1304→                      <div className="w-20 h-14 shrink-0 flex items-center justify-center">
+  1305→                        <img src={v.img} alt={v.name} className="max-h-full max-w-full object-contain" />
+  1306→                      </div>
+  1307→                      <div className="flex-1 min-w-0">
+  1308→                        <div className="flex items-center justify-between mb-1">
+  1309→                          <span className="text-white font-semibold text-sm">{v.name}</span>
+  1310→                          <span className="text-xs px-2 py-0.5 rounded-full font-semibold shrink-0" style={{ backgroundColor: `${catColor}15`, color: catColor }}>{v.cap} m³</span>
+  1311→                        </div>
+  1312→                        <p className="text-xs text-white/40 mb-1">{v.desc}</p>
+  1313→                        <div className="flex items-center gap-3 text-xs text-white/30">
+  1314→                          <span>{v.pax} pax</span>
+  1315→                          <span>Bs {v.perKm}/km</span>
+  1316→                          <span>Ayud. Bs {v.helperPrice}</span>
+  1317→                        </div>
+  1318→                      </div>
+  1319→                    </div>
+  1320→                  </button>
+  1321→                )
+  1322→              })}
+  1323→            </div>
+  1324→            <div className="flex justify-end">
+  1325→              <button onClick={() => setStep(2)} disabled={!selectedVehicle}
+  1326→                className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)] disabled:opacity-40 disabled:cursor-not-allowed">
+  1327→                Siguiente: Ruta →
+  1328→              </button>
+  1329→            </div>
+  1330→          </div>
+  1331→        )}
+  1332→
+  1333→        {/* ═══════════════ Step 1 (Path B): Tamaño de Mudanza ═══════════════ */}
+  1334→        {step === 1 && calcPath === 'B' && (
+  1335→          <div className="max-w-4xl mx-auto">
+  1336→            <div className="flex items-center gap-2 mb-6">
+  1337→              <button onClick={() => { setCalcPath(null); setSelectedVehicle(null); setMudanzaCategory(null); setAdditionalVehicles([]); setShowVehicleChange(false) }}
+  1338→                className="text-xs text-white/40 hover:text-white/60 transition-colors flex items-center gap-1">
+  1339→                ← Cambiar ruta
+  1340→              </button>
+  1341→              <span className="text-xs px-2 py-0.5 rounded-full bg-[#0077BD]/10 text-[#0077BD] font-semibold">Ruta B — Tamaño</span>
+  1342→            </div>
+  1343→
+  1344→            {/* Vehicle type selection */}
+  1345→            <h3 className="text-xl font-bold text-white mb-2 text-center">¿Vehículo cerrado o abierto?</h3>
+  1346→            <p className="text-sm text-white/40 text-center mb-6">Los furgones protegen del clima, las camionetas tienen caja abierta</p>
+  1347→            <div className="grid grid-cols-2 gap-4 mb-8">
+  1348→              <button onClick={() => { setVehicleType('cerrado'); setSelectedVehicle(null); setMudanzaCategory(null); setShowVehicleChange(false) }}
+  1349→                className={`p-5 rounded-2xl text-center transition-all duration-300 ${vehicleType === 'cerrado' ? 'bg-[#818CF8]/10 border-2 border-[#818CF8]/50' : 'bg-white/[0.03] border border-white/[0.06] hover:border-white/10'}`}>
+  1350→                <div className="flex justify-center mb-2 h-16 items-center">
+  1351→                  <img src="/vehicles/7-FURGON/mediano.png" alt="Furgón" className="max-h-full max-w-[80px] object-contain" />
+  1352→                </div>
+  1353→                <div className="text-white font-semibold mb-1">Furgón (Cerrado)</div>
+  1354→                <div className="text-xs text-white/40">Protección completa del clima</div>
+  1355→              </button>
+  1356→              <button onClick={() => { setVehicleType('abierto'); setSelectedVehicle(null); setMudanzaCategory(null); setShowVehicleChange(false) }}
+  1357→                className={`p-5 rounded-2xl text-center transition-all duration-300 ${vehicleType === 'abierto' ? 'bg-[#FB923C]/10 border-2 border-[#FB923C]/50' : 'bg-white/[0.03] border border-white/[0.06] hover:border-white/10'}`}>
+  1358→                <div className="flex justify-center mb-2 h-16 items-center">
+  1359→                  <img src="/vehicles/6-CAMIONETA/mediana.png" alt="Camioneta" className="max-h-full max-w-[80px] object-contain" />
+  1360→                </div>
+  1361→                <div className="text-white font-semibold mb-1">Camioneta (Abierto)</div>
+  1362→                <div className="text-xs text-white/40">Caja abierta, ideal para cargas resistentes</div>
+  1363→              </button>
+  1364→            </div>
+  1365→
+  1366→            {/* Mudanza size categories */}
+  1367→            <h3 className="text-xl font-bold text-white mb-2 text-center">¿Qué tamaño es tu mudanza?</h3>
+  1368→            <p className="text-sm text-white/40 text-center mb-6">Selecciona la categoría que mejor describe tu mudanza</p>
+  1369→            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+  1370→              {MUDANZA_CATEGORIES.map((cat) => {
+  1371→                const isSelected = mudanzaCategory === cat.id
+  1372→                const suggestedName = cat.suggestedVehicle[vehicleType]
+  1373→                const vehicleList = vehicleType === 'cerrado' ? VEHICLES.find(v => v.cat === 'Furgón')! : VEHICLES.find(v => v.cat === 'Camioneta')!
+  1374→                const suggestedVehicle = vehicleList.items.find(v => v.name === suggestedName)
+  1375→                return (
+  1376→                  <button key={cat.id} onClick={() => {
+  1377→                    setMudanzaCategory(cat.id)
+  1378→                    setShowVehicleChange(false)
+  1379→                    // Auto-suggest vehicle based on category
+  1380→                    if (suggestedVehicle) { setSelectedVehicle(suggestedVehicle); setAdditionalVehicles([]) }
+  1381→                  }}
+  1382→                    className={`p-5 rounded-2xl text-left transition-all duration-300 ${isSelected ? 'border-2' : 'bg-white/[0.03] border border-white/[0.06] hover:border-white/10'}`}
+  1383→                    style={isSelected ? { backgroundColor: `${cat.color}08`, borderColor: `${cat.color}50` } : {}}>
+  1384→                    <div className="flex items-center gap-3 mb-3">
+  1385→                      <div className="w-16 h-12 shrink-0 flex items-center justify-center">
+  1386→                        {suggestedVehicle ? (
+  1387→                          <img src={suggestedVehicle.img} alt={suggestedName} className="max-h-full max-w-full object-contain" />
+  1388→                        ) : (
+  1389→                          <span className="text-2xl">{cat.emoji}</span>
+  1390→                        )}
+  1391→                      </div>
+  1392→                      <div>
+  1393→                        <h4 className="text-white font-bold text-sm">{cat.name}</h4>
+  1394→                        <span className="text-xs text-white/40">{cat.subtitle}</span>
+  1395→                      </div>
+  1396→                    </div>
+  1397→                    <p className="text-xs text-white/50 leading-relaxed mb-3">{cat.desc}</p>
+  1398→                    <div className="flex items-center gap-2 flex-wrap">
+  1399→                      <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ backgroundColor: `${cat.color}15`, color: cat.color }}>Hasta {cat.maxVolume} m³</span>
+  1400→                      <span className="text-xs text-white/30">→ {suggestedName}</span>
+  1401→                    </div>
+  1402→                  </button>
+  1403→                )
+  1404→              })}
+  1405→            </div>
+  1406→
+  1407→            {/* Vehículo Asignado */}
+  1408→            {mudanzaCategory && selectedVehicle && (
+  1409→              <div className="p-4 rounded-xl bg-[#0077BD]/5 border border-[#0077BD]/15 mb-6">
+  1410→                <div className="flex items-center gap-3">
+  1411→                  <div className="w-20 h-14 shrink-0 flex items-center justify-center">
+  1412→                    <img src={selectedVehicle.img} alt={selectedVehicle.name} className="max-h-full max-w-full object-contain" />
+  1413→                  </div>
+  1414→                  <div className="flex-1">
+  1415→                    <div className="flex items-center gap-2 mb-1">
+  1416→                      <Sparkles className="w-4 h-4 text-[#0077BD]" />
+  1417→                      <span className="text-sm font-semibold text-[#0077BD]">Vehículo asignado</span>
+  1418→                    </div>
+  1419→                    <p className="text-sm text-white/60">
+  1420→                      <span className="text-white font-semibold">{selectedVehicle.name}</span> ({selectedVehicle.cap} m³)
+  1421→                      {additionalVehicles.length > 0 && (
+  1422→                        <span className="text-[#FF9800]"> + {additionalVehicles.length} vehículo{additionalVehicles.length > 1 ? 's' : ''} adicional{additionalVehicles.length > 1 ? 'es' : ''}</span>
+  1423→                      )}
+  1424→                    </p>
+  1425→                    <button onClick={() => setShowVehicleChange(!showVehicleChange)}
+  1426→                      className="text-xs text-[#0077BD] hover:text-[#0077BD]/80 mt-1 transition-colors underline">
+  1427→                      ¿Deseas cambiar el vehículo?
+  1428→                    </button>
+  1429→                  </div>
+  1430→                </div>
+  1431→                {showVehicleChange && (
+  1432→                  <div className="mt-4 pt-4 border-t border-[#0077BD]/15">
+  1433→                    <p className="text-xs text-white/40 mb-3">Selecciona otro vehículo:</p>
+  1434→                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+  1435→                      {(vehicleType === 'cerrado' ? VEHICLES.find(v => v.cat === 'Furgón')! : VEHICLES.find(v => v.cat === 'Camioneta')!).items.map((v) => {
+  1436→                        const isSelected = selectedVehicle?.name === v.name
+  1437→                        return (
+  1438→                          <button key={v.name} onClick={() => { setSelectedVehicle(v); setAdditionalVehicles([]); setShowVehicleChange(false) }}
+  1439→                            className={`p-3 rounded-xl text-left text-xs transition-all ${isSelected ? 'bg-[#0077BD]/10 border border-[#0077BD]/30' : 'bg-white/[0.02] border border-white/[0.06] hover:border-white/10'}`}>
+  1440→                            <div className="flex items-center gap-2">
+  1441→                              <img src={v.img} alt={v.name} className="h-8 object-contain" />
+  1442→                              <div>
+  1443→                                <span className="text-white font-semibold">{v.name}</span>
+  1444→                                <span className="text-white/30 ml-1">({v.cap} m³)</span>
+  1445→                              </div>
+  1446→                            </div>
+  1447→                          </button>
+  1448→                        )
+  1449→                      })}
+  1450→                    </div>
+  1451→                  </div>
+  1452→                )}
+  1453→              </div>
+  1454→            )}
+  1455→
+  1456→            <div className="flex justify-end">
+  1457→              <button onClick={() => setStep(2)} disabled={!mudanzaCategory || !selectedVehicle}
+  1458→                className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)] disabled:opacity-40 disabled:cursor-not-allowed">
+  1459→                Siguiente: Vehículo →
+  1460→              </button>
+  1461→            </div>
+  1462→          </div>
+  1463→        )}
+  1464→
+  1465→        {/* ═══════════════ Step 2 (Path B): Vehicle Confirmation ═══════════════ */}
+  1466→        {step === 2 && calcPath === 'B' && (
+  1467→          <div className="max-w-4xl mx-auto">
+  1468→            <h3 className="text-xl font-bold text-white mb-2 text-center">Confirma tu Vehículo</h3>
+  1469→            <p className="text-sm text-white/40 text-center mb-6">Este es el vehículo sugerido para tu mudanza. Puedes cambiarlo si lo deseas.</p>
+  1470→
+  1471→            {/* Prominent vehicle display */}
+  1472→            {selectedVehicle && (
+  1473→              <div className="p-6 rounded-2xl bg-[#0077BD]/8 border-2 border-[#0077BD]/30 mb-6">
+  1474→                <div className="flex items-center gap-5">
+  1475→                  <div className="w-28 h-20 shrink-0 flex items-center justify-center">
+  1476→                    <img src={selectedVehicle.img} alt={selectedVehicle.name} className="max-h-full max-w-full object-contain" />
+  1477→                  </div>
+  1478→                  <div className="flex-1">
+  1479→                    <div className="flex items-center gap-2 mb-1">
+  1480→                      <Sparkles className="w-5 h-5 text-[#0077BD]" />
+  1481→                      <span className="text-base font-semibold text-[#0077BD]">Vehículo asignado</span>
+  1482→                    </div>
+  1483→                    <h4 className="text-2xl font-bold text-white mb-1">{selectedVehicle.name}</h4>
+  1484→                    <div className="flex items-center gap-4 text-sm">
+  1485→                      <span className="px-2.5 py-0.5 rounded-full font-semibold" style={{ backgroundColor: '#0077BD15', color: '#0077BD' }}>{selectedVehicle.cap} m³</span>
+  1486→                      <span className="text-white/40">{selectedVehicle.pax} pasajeros</span>
+  1487→                      <span className="text-white/40">Bs {selectedVehicle.perKm}/km</span>
+  1488→                    </div>
+  1489→                    <p className="text-xs text-white/40 mt-2">{selectedVehicle.desc}</p>
+  1490→                    {additionalVehicles.length > 0 && (
+  1491→                      <div className="mt-2 flex items-center gap-2">
+  1492→                        {additionalVehicles.map((av, i) => (
+  1493→                          <span key={i} className="text-xs px-2 py-1 rounded-lg bg-[#FF9800]/10 text-[#FF9800]">+ {av.name} ({av.cap} m³)</span>
+  1494→                        ))}
+  1495→                      </div>
+  1496→                    )}
+  1497→                  </div>
+  1498→                </div>
+  1499→              </div>
+  1500→            )}
+  1501→
+  1502→            {/* Collapsible change vehicle */}
+  1503→            <div className="mb-6">
+  1504→              <button onClick={() => setShowVehicleChange(!showVehicleChange)}
+  1505→                className="w-full p-4 rounded-xl bg-white/[0.03] border border-white/[0.06] text-left flex items-center justify-between hover:border-white/10 transition-all">
+  1506→                <span className="text-sm text-white/60 flex items-center gap-2">
+  1507→                  <ChevronDown className={`w-4 h-4 transition-transform ${showVehicleChange ? 'rotate-180' : ''}`} />
+  1508→                  Cambiar vehículo
+  1509→                </span>
+  1510→                <Truck className="w-4 h-4 text-white/30" />
+  1511→              </button>
+  1512→              {showVehicleChange && (
+  1513→                <div className="mt-3 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+  1514→                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+  1515→                    {(vehicleType === 'cerrado' ? VEHICLES.find(v => v.cat === 'Furgón')! : VEHICLES.find(v => v.cat === 'Camioneta')!).items.map((v) => {
+  1516→                      const isSelected = selectedVehicle?.name === v.name
+  1517→                      const catColor = vehicleType === 'cerrado' ? '#818CF8' : '#FB923C'
+  1518→                      return (
+  1519→                        <button key={v.name} onClick={() => { setSelectedVehicle(v); setAdditionalVehicles([]) }}
+  1520→                          className={`p-4 rounded-xl text-left transition-all duration-200 ${isSelected ? `border-2` : 'bg-white/[0.02] border border-white/[0.06] hover:border-white/10'}`}
+  1521→                          style={isSelected ? { backgroundColor: `${catColor}08`, borderColor: `${catColor}50` } : {}}>
+  1522→                          <div className="flex items-center gap-3">
+  1523→                            <div className="w-16 h-12 shrink-0 flex items-center justify-center">
+  1524→                              <img src={v.img} alt={v.name} className="max-h-full max-w-full object-contain" />
+  1525→                            </div>
+  1526→                            <div className="flex-1 min-w-0">
+  1527→                              <div className="flex items-center justify-between mb-1">
+  1528→                                <span className="text-white font-semibold text-sm">{v.name}</span>
+  1529→                                <span className="text-xs px-2 py-0.5 rounded-full font-semibold shrink-0" style={{ backgroundColor: `${catColor}15`, color: catColor }}>{v.cap} m³</span>
+  1530→                              </div>
+  1531→                              <p className="text-xs text-white/40">{v.desc}</p>
+  1532→                            </div>
+  1533→                          </div>
+  1534→                        </button>
+  1535→                      )
+  1536→                    })}
+  1537→                  </div>
+  1538→                </div>
+  1539→              )}
+  1540→            </div>
+  1541→
+  1542→            <div className="flex justify-between">
+  1543→              <button onClick={() => setStep(1)} className="px-6 py-3 rounded-full text-sm font-semibold text-white/60 border border-white/[0.1] hover:border-white/20 transition-all">← Atrás</button>
+  1544→              <button onClick={() => setStep(3)} className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)]">
+  1545→                Siguiente: Ruta →
+  1546→              </button>
+  1547→            </div>
+  1548→          </div>
+  1549→        )}
+  1550→
+  1551→        {/* ═══════════════ Step 1 (Path C): Inventario ═══════════════ */}
+  1552→        {step === 1 && calcPath === 'C' && (
+  1553→          <div className="max-w-5xl mx-auto">
+  1554→            <div className="flex items-center gap-2 mb-6">
+  1555→              <button onClick={() => { setCalcPath(null); setSelectedVehicle(null); setMudanzaCategory(null); setAdditionalVehicles([]) }}
+  1556→                className="text-xs text-white/40 hover:text-white/60 transition-colors flex items-center gap-1">
+  1557→                ← Cambiar ruta
+  1558→              </button>
+  1559→              <span className="text-xs px-2 py-0.5 rounded-full bg-[#818CF8]/10 text-[#818CF8] font-semibold">Ruta C — Inventario</span>
+  1560→            </div>
+  1561→
+  1562→            {/* Vehicle type selection */}
+  1563→            <h3 className="text-xl font-bold text-white mb-2 text-center">¿Vehículo cerrado o abierto?</h3>
+  1564→            <p className="text-sm text-white/40 text-center mb-6">Los furgones protegen del clima, las camionetas tienen caja abierta</p>
+  1565→            <div className="grid grid-cols-2 gap-4 mb-8">
+  1566→              <button onClick={() => { setVehicleType('cerrado'); setSelectedVehicle(null) }}
+  1567→                className={`p-5 rounded-2xl text-center transition-all duration-300 ${vehicleType === 'cerrado' ? 'bg-[#818CF8]/10 border-2 border-[#818CF8]/50' : 'bg-white/[0.03] border border-white/[0.06] hover:border-white/10'}`}>
+  1568→                <div className="flex justify-center mb-2 h-16 items-center">
+  1569→                  <img src="/vehicles/7-FURGON/mediano.png" alt="Furgón" className="max-h-full max-w-[80px] object-contain" />
+  1570→                </div>
+  1571→                <div className="text-white font-semibold mb-1">Furgón (Cerrado)</div>
+  1572→                <div className="text-xs text-white/40">Protección completa del clima</div>
+  1573→              </button>
+  1574→              <button onClick={() => { setVehicleType('abierto'); setSelectedVehicle(null) }}
+  1575→                className={`p-5 rounded-2xl text-center transition-all duration-300 ${vehicleType === 'abierto' ? 'bg-[#FB923C]/10 border-2 border-[#FB923C]/50' : 'bg-white/[0.03] border border-white/[0.06] hover:border-white/10'}`}>
+  1576→                <div className="flex justify-center mb-2 h-16 items-center">
+  1577→                  <img src="/vehicles/6-CAMIONETA/mediana.png" alt="Camioneta" className="max-h-full max-w-[80px] object-contain" />
+  1578→                </div>
+  1579→                <div className="text-white font-semibold mb-1">Camioneta (Abierto)</div>
+  1580→                <div className="text-xs text-white/40">Caja abierta, ideal para cargas resistentes</div>
+  1581→              </button>
+  1582→            </div>
+  1583→
+  1584→            <h3 className="text-xl font-bold text-white mb-2 text-center">Inventario de Artículos</h3>
+  1585→            <p className="text-sm text-white/40 text-center mb-6">Selecciona la cantidad de cada artículo por ambiente</p>
+  1586→
+  1587→            {/* Live vehicle suggestion card for Path C */}
+  1588→            {totalVolume > 0 && selectedVehicle && (
+  1589→              <div className="mb-6 p-4 rounded-2xl bg-[#818CF8]/5 border border-[#818CF8]/15">
+  1590→                <div className="flex items-center justify-between flex-wrap gap-3">
+  1591→                  <div className="flex items-center gap-3">
+  1592→                    <div className="w-20 h-14 shrink-0 flex items-center justify-center">
+  1593→                      <img src={selectedVehicle.img} alt={selectedVehicle.name} className="max-h-full max-w-full object-contain" />
+  1594→                    </div>
+  1595→                    <div>
+  1596→                      <div className="flex items-center gap-2">
+  1597→                        <span className="text-sm font-semibold text-[#818CF8]">Vehículo sugerido</span>
+  1598→                        <Sparkles className="w-3.5 h-3.5 text-[#818CF8]" />
+  1599→                      </div>
+  1600→                      <p className="text-white font-semibold text-sm">{selectedVehicle.name} ({selectedVehicle.cap} m³)</p>
+  1601→                    </div>
+  1602→                  </div>
+  1603→                  <div className="flex items-center gap-4">
+  1604→                    <div className="text-center">
+  1605→                      <div className="text-lg font-bold text-[#00E676]">{totalVolume}</div>
+  1606→                      <div className="text-xs text-white/30">m³ total</div>
+  1607→                    </div>
+  1608→                    <div className="text-center">
+  1609→                      <div className="text-lg font-bold text-white">{selectedVehicle.cap}</div>
+  1610→                      <div className="text-xs text-white/30">m³ capacidad</div>
+  1611→                    </div>
+  1612→                    {totalVolume > selectedVehicle.cap && (
+  1613→                      <div className="text-center">
+  1614→                        <div className="text-lg font-bold text-[#FF9800]">{additionalVehicles.length + 1}</div>
+  1615→                        <div className="text-xs text-white/30">vehículos</div>
+  1616→                      </div>
+  1617→                    )}
+  1618→                  </div>
+  1619→                </div>
+  1620→                {additionalVehicles.length > 0 && (
+  1621→                  <div className="mt-3 pt-3 border-t border-[#818CF8]/10">
+  1622→                    <div className="flex items-center gap-3">
+  1623→                      {additionalVehicles.map((av, i) => (
+  1624→                        <div key={i} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.03]">
+  1625→                          <img src={av.img} alt={av.name} className="h-8 object-contain" />
+  1626→                          <span className="text-xs text-white/60">{av.name} ({av.cap} m³)</span>
+  1627→                        </div>
+  1628→                      ))}
+  1629→                    </div>
+  1630→                    <p className="text-xs text-white/50 mt-2">
+  1631→                      <span className="text-[#FF9800] font-semibold">+ {additionalVehicles.length} vehículo{additionalVehicles.length > 1 ? 's' : ''} adicional{additionalVehicles.length > 1 ? 'es' : ''}</span>
+  1632→                    </p>
+  1633→                  </div>
+  1634→                )}
+  1635→                {totalVolume > selectedVehicle.cap && (
+  1636→                  <div className="mt-3 p-2.5 rounded-lg bg-[#FF9800]/10 border border-[#FF9800]/20">
+  1637→                    <p className="text-xs text-[#FF9800]">
+  1638→                      ⚠️ Tu volumen ({totalVolume} m³) excede la capacidad máxima de un solo vehículo. Se recomienda {additionalVehicles.length + 1} vehículos.
+  1639→                    </p>
+  1640→                  </div>
+  1641→                )}
+  1642→              </div>
+  1643→            )}
+  1644→
+  1645→            <div className="flex flex-wrap justify-center gap-2 mb-6">
+  1646→              {ROOM_KEYS.map((key) => (
+  1647→                <button key={key} onClick={() => setActiveRoom(key)}
+  1648→                  className={`px-4 py-2 rounded-full text-xs font-semibold transition-all ${activeRoom === key ? 'bg-[#00E676] text-black' : 'bg-white/[0.05] text-white/50 hover:text-white/70'}`}>
+  1649→                  {ROOMS[key].label}
+  1650→                </button>
+  1651→              ))}
+  1652→            </div>
+  1653→            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-8 max-h-[480px] overflow-y-auto pr-2 custom-scroll">
+  1654→              {ROOMS[activeRoom].items.map((item) => {
+  1655→                const qty = inventory[item.name] || 0
+  1656→                return (
+  1657→                  <div key={item.name} className={`flex items-center justify-between p-3 rounded-xl border transition-all duration-200 ${qty > 0 ? 'bg-[#00E676]/5 border-[#00E676]/20' : 'bg-white/[0.02] border-white/[0.06] hover:border-white/10'}`}>
+  1658→                    <div className="flex items-center gap-3 min-w-0">
+  1659→                      <span className="text-lg shrink-0">{item.emoji}</span>
+  1660→                      <div className="min-w-0">
+  1661→                        <div className="text-sm text-white font-medium truncate">{item.name}</div>
+  1662→                        <div className="text-xs text-white/30">{item.vol} m³</div>
+  1663→                      </div>
+  1664→                    </div>
+  1665→                    <div className="flex items-center gap-2 shrink-0">
+  1666→                      <button onClick={() => setQty(item.name, -1)} className="w-7 h-7 rounded-lg bg-white/[0.06] flex items-center justify-center text-white/60 hover:bg-white/10 transition-all">
+  1667→                        <Minus className="w-3 h-3" />
+  1668→                      </button>
+  1669→                      <span className="w-6 text-center text-sm font-semibold text-white">{qty}</span>
+  1670→                      <button onClick={() => setQty(item.name, 1)} className="w-7 h-7 rounded-lg bg-[#00E676]/20 flex items-center justify-center text-[#00E676] hover:bg-[#00E676]/30 transition-all">
+  1671→                        <Plus className="w-3 h-3" />
+  1672→                      </button>
+  1673→                    </div>
+  1674→                  </div>
+  1675→                )
+  1676→              })}
+  1677→            </div>
+  1678→            <div className="flex justify-end">
+  1679→              <button onClick={() => setStep(2)} className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)]">
+  1680→                Siguiente: Ruta →
+  1681→              </button>
+  1682→            </div>
+  1683→          </div>
+  1684→        )}
+  1685→
+  1686→        {/* ═══════════════ Step: Ruta y Dirección (MAP) ═══════════════ */}
+  1687→        {calcPath && getStepType(step, calcPath) === 'route' && (
+  1688→          <div className="max-w-7xl mx-auto">
+  1689→            <h3 className="text-xl font-bold text-white mb-2 text-center">Ruta y Dirección</h3>
+  1690→            <p className="text-sm text-white/40 text-center mb-6">Define origen, destino y paradas intermedias en el mapa</p>
+  1691→
+  1692→            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+  1693→              {/* Left: Form fields */}
+  1694→              <div className="space-y-4">
+  1695→                {/* Map selection mode indicator */}
+  1696→                <div className="p-4 rounded-2xl bg-white/[0.03] border border-[#00E676]/15">
+  1697→                  <div className="flex items-center gap-2 mb-3">
+  1698→                    <Navigation className="w-4 h-4 text-[#00E676]" />
+  1699→                    <span className="text-sm font-semibold text-[#00E676]">Modo de selección en mapa</span>
+  1700→                  </div>
+  1701→                  <div className="flex gap-2">
+  1702→                    <button onClick={() => setMapSelectionMode('origin')}
+  1703→                      className={`flex-1 px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${mapSelectionMode === 'origin' ? 'bg-[#00E676] text-black' : 'bg-white/[0.04] text-white/50 border border-white/[0.08]'}`}>
+  1704→                      <Flag className="w-3 h-3" /> Origen
+  1705→                    </button>
+  1706→                    <button onClick={() => setMapSelectionMode('destination')}
+  1707→                      className={`flex-1 px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${mapSelectionMode === 'destination' ? 'bg-red-500 text-white' : 'bg-white/[0.04] text-white/50 border border-white/[0.08]'}`}>
+  1708→                      <Flag className="w-3 h-3" /> Destino
+  1709→                    </button>
+  1710→                    <button onClick={() => setMapSelectionMode('stop')}
+  1711→                      className={`flex-1 px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${mapSelectionMode === 'stop' ? 'bg-[#4FC3F7] text-black' : 'bg-white/[0.04] text-white/50 border border-white/[0.08]'}`}>
+  1712→                      <Plus className="w-3 h-3" /> Parada
+  1713→                    </button>
+  1714→                  </div>
+  1715→                </div>
+  1716→
+  1717→                {/* Origin search */}
+  1718→                <div className="relative">
+  1719→                  <label className="text-xs text-white/40 block mb-1.5">
+  1720→                    <Flag className="w-3 h-3 inline mr-1 text-[#00E676]" /> Dirección de Origen
+  1721→                  </label>
+  1722→                  <div className="relative">
+  1723→                    <input type="text" value={originAddress}
+  1724→                      onChange={(e) => handleOriginSearch(e.target.value)}
+  1725→                      onFocus={() => { setSearchingOrigin(true); setMapSelectionMode('origin') }}
+  1726→                      onBlur={() => setTimeout(() => setSearchingOrigin(false), 200)}
+  1727→                      className={inputClass + ' pr-10'}
+  1728→                      placeholder="Buscar dirección de origen..." />
+  1729→                    <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+  1730→                  </div>
+  1731→                  {searchingOrigin && originResults.length > 0 && (
+  1732→                    <div className="absolute z-30 w-full mt-1 rounded-xl bg-[#0a0e17] border border-white/[0.1] max-h-48 overflow-y-auto custom-scroll shadow-2xl">
+  1733→                      {originResults.map((r, i) => (
+  1734→                        <button key={i} onClick={() => selectOrigin(r)}
+  1735→                          className="w-full text-left px-4 py-3 text-sm text-white/70 hover:bg-white/[0.06] border-b border-white/[0.04] last:border-b-0 transition-all">
+  1736→                          {r.display_name}
+  1737→                        </button>
+  1738→                      ))}
+  1739→                    </div>
+  1740→                  )}
+  1741→                </div>
+  1742→
+  1743→                {/* Destination search */}
+  1744→                <div className="relative">
+  1745→                  <label className="text-xs text-white/40 block mb-1.5">
+  1746→                    <Flag className="w-3 h-3 inline mr-1 text-red-400" /> Dirección de Destino
+  1747→                  </label>
+  1748→                  <div className="relative">
+  1749→                    <input type="text" value={destAddress}
+  1750→                      onChange={(e) => handleDestSearch(e.target.value)}
+  1751→                      onFocus={() => { setSearchingDest(true); setMapSelectionMode('destination') }}
+  1752→                      onBlur={() => setTimeout(() => setSearchingDest(false), 200)}
+  1753→                      className={inputClass + ' pr-10'}
+  1754→                      placeholder="Buscar dirección de destino..." />
+  1755→                    <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+  1756→                  </div>
+  1757→                  {searchingDest && destResults.length > 0 && (
+  1758→                    <div className="absolute z-30 w-full mt-1 rounded-xl bg-[#0a0e17] border border-white/[0.1] max-h-48 overflow-y-auto custom-scroll shadow-2xl">
+  1759→                      {destResults.map((r, i) => (
+  1760→                        <button key={i} onClick={() => selectDest(r)}
+  1761→                          className="w-full text-left px-4 py-3 text-sm text-white/70 hover:bg-white/[0.06] border-b border-white/[0.04] last:border-b-0 transition-all">
+  1762→                          {r.display_name}
+  1763→                        </button>
+  1764→                      ))}
+  1765→                    </div>
+  1766→                  )}
+  1767→                </div>
+  1768→
+  1769→                {/* Intermediate stops */}
+  1770→                <div className="space-y-2">
+  1771→                  <div className="flex items-center justify-between">
+  1772→                    <label className="text-xs text-white/40">
+  1773→                      <Flag className="w-3 h-3 inline mr-1 text-[#4FC3F7]" /> Paradas Intermedias
+  1774→                    </label>
+  1775→                    <button onClick={() => setMapSelectionMode('stop')}
+  1776→                      className="text-xs text-[#4FC3F7] hover:text-[#4FC3F7]/80 transition-colors flex items-center gap-1">
+  1777→                      <Plus className="w-3 h-3" /> Agregar
+  1778→                    </button>
+  1779→                  </div>
+  1780→                  {intermediateStops.map((stop) => (
+  1781→                    <div key={stop.id} className="flex items-center gap-2 p-2.5 rounded-xl bg-[#4FC3F7]/5 border border-[#4FC3F7]/20">
+  1782→                      <Flag className="w-3.5 h-3.5 text-[#4FC3F7] shrink-0" />
+  1783→                      <span className="text-sm text-white/60 flex-1 truncate">{stop.address}</span>
+  1784→                      <button onClick={() => removeStop(stop.id)} className="shrink-0 text-white/30 hover:text-red-400 transition-colors">
+  1785→                        <X className="w-4 h-4" />
+  1786→                      </button>
+  1787→                    </div>
+  1788→                  ))}
+  1789→                  {intermediateStops.length === 0 && (
+  1790→                    <p className="text-xs text-white/20 text-center py-2">No hay paradas intermedias</p>
+  1791→                  )}
+  1792→                </div>
+  1793→
+  1794→                {/* Route info */}
+  1795→                {routeDistance > 0 && (
+  1796→                  <div className="p-4 rounded-2xl bg-[#0077BD]/10 border border-[#0077BD]/20">
+  1797→                    <div className="flex items-center gap-2 mb-2">
+  1798→                      <Route className="w-4 h-4 text-[#0077BD]" />
+  1799→                      <span className="text-sm font-semibold text-[#0077BD]">Ruta Calculada</span>
+  1800→                    </div>
+  1801→                    <div className="grid grid-cols-2 gap-3 text-sm">
+  1802→                      <div>
+  1803→                        <span className="text-white/40">Distancia</span>
+  1804→                        <div className="text-white font-bold">{routeDistance} km</div>
+  1805→                      </div>
+  1806→                      <div>
+  1807→                        <span className="text-white/40">Duración est.</span>
+  1808→                        <div className="text-white font-bold">{routeDuration} min</div>
+  1809→                      </div>
+  1810→                    </div>
+  1811→                  </div>
+  1812→                )}
+  1813→
+  1814→                {isCalculatingRoute && (
+  1815→                  <div className="flex items-center gap-2 text-sm text-[#0077BD]">
+  1816→                    <Loader2 className="w-4 h-4 animate-spin" /> Calculando ruta...
+  1817→                  </div>
+  1818→                )}
+  1819→              </div>
+  1820→
+  1821→              {/* Right: Map */}
+  1822→              <div className="relative rounded-2xl overflow-hidden border border-white/[0.08]" style={{ height: '400px' }}>
+  1823→                <MudanzaMap
+  1824→                  origin={origin}
+  1825→                  destination={destination}
+  1826→                  intermediateStops={intermediateStops}
+  1827→                  originAddress={originAddress}
+  1828→                  destAddress={destAddress}
+  1829→                  routeGeometry={routeGeometry}
+  1830→                  mapSelectionMode={mapSelectionMode}
+  1831→                  onMapClick={handleMapClick}
+  1832→                />
+  1833→              </div>
+  1834→            </div>
+  1835→
+  1836→            <div className="flex justify-between">
+  1837→              <button onClick={() => setStep(calcPath === 'A' ? 1 : calcPath === 'B' ? 2 : 1)} className="px-6 py-3 rounded-full text-sm font-semibold text-white/60 border border-white/[0.1] hover:border-white/20 transition-all">← Atrás</button>
+  1838→              <button onClick={() => setStep(calcPath === 'A' ? 3 : calcPath === 'B' ? 4 : 3)} className="px-8 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.3)]">
+  1839→                Siguiente: Extras y Servicios →
+  1840→              </button>
+  1841→            </div>
+  1842→          </div>
+  1843→        )}
+  1844→
+  1845→        {/* ═══════════════ Step: Extras y Servicios ═══════════════ */}
+  1846→        {calcPath && getStepType(step, calcPath) === 'extras' && (
+  1847→          <div className="max-w-4xl mx-auto max-h-[80vh] overflow-y-auto custom-scroll pr-1">
+  1848→            <h3 className="text-xl font-bold text-white mb-2 text-center">Extras y Servicios</h3>
+  1849→            <p className="text-sm text-white/40 text-center mb-8">Personaliza tu mudanza con servicios adicionales</p>
+  1850→
+  1851→            {/* ──── A) AYUDANTE ──── */}
+  1852→            <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] mb-4">
+  1853→              <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
+  1854→                <span className="text-lg">👥</span> Ayudante
+  1855→              </h4>
+  1856→              <div className="flex items-center justify-center gap-6 mb-3">
+  1857→                <button onClick={() => setHelpers(Math.max(0, helpers - 1))}
+  1858→                  className="w-12 h-12 rounded-xl bg-white/[0.06] flex items-center justify-center text-white/60 hover:bg-white/10 transition-all">
+  1859→                  <Minus className="w-5 h-5" />
+  1860→                </button>
+  1861→                <span className="text-3xl font-bold text-white w-12 text-center">{helpers}</span>
+  1862→                <button onClick={() => setHelpers(helpers + 1)}
+  1863→                  className="w-12 h-12 rounded-xl bg-[#818CF8]/20 flex items-center justify-center text-[#818CF8] hover:bg-[#818CF8]/30 transition-all">
+  1864→                  <Plus className="w-5 h-5" />
+  1865→                </button>
+  1866→              </div>
+  1867→              <p className="text-xs text-white/30 text-center mb-2">
+  1868→                Recomendado: {getRecommendedHelpers(totalVolume || (mudanzaCategory ? MUDANZA_CATEGORIES.find(c => c.id === mudanzaCategory)?.maxVolume || 0 : 0))} ayudantes según el tamaño
+  1869→              </p>
+  1870→              <p className="text-xs text-white/40 text-center">
+  1871→                Bs {selectedVehicle?.helperPrice || 80} c/u
+  1872→                {helpers > 0 && <span className="text-[#818CF8] font-semibold ml-2">→ Bs {helpersCost}</span>}
+  1873→              </p>
+  1874→            </div>
+  1875→
+  1876→            {/* ──── B) ACCESIBILIDAD (two columns: Origen | Destino) ──── */}
+  1877→            <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] mb-4">
+  1878→              <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
+  1879→                <span className="text-lg">🏢</span> Accesibilidad
+  1880→              </h4>
+  1881→              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+  1882→                {/* Origen column */}
+  1883→                <div className="p-4 rounded-xl bg-white/[0.02] border border-[#00E676]/10">
+  1884→                  <div className="flex items-center gap-2 mb-3">
+  1885→                    <Flag className="w-3.5 h-3.5 text-[#00E676]" />
+  1886→                    <span className="text-sm font-semibold text-[#00E676]">Origen</span>
+  1887→                  </div>
+  1888→                  <div className="space-y-3">
+  1889→                    <div>
+  1890→                      <label className="text-xs text-white/40 block mb-1">Piso</label>
+  1891→                      <select value={originFloor} onChange={e => setOriginFloor(e.target.value)}
+  1892→                        className={inputClass + ' appearance-none'}>
+  1893→                        {['baja', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'].map(f => <option key={f} value={f} className="bg-[#0a0e17]">{f === 'baja' ? 'Planta baja' : f + '° piso'}</option>)}
+  1894→                      </select>
+  1895→                    </div>
+  1896→                    <div>
+  1897→                      <label className="text-xs text-white/40 block mb-1">Ascensor</label>
+  1898→                      <div className="flex gap-2">
+  1899→                        <button onClick={() => setElevatorOrigin(true)}
+  1900→                          className={`flex-1 px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1 ${elevatorOrigin ? 'bg-[#00E676] text-black' : 'bg-white/[0.04] text-white/40 border border-white/[0.08]'}`}>
+  1901→                          {elevatorOrigin && <CheckCircle className="w-3 h-3" />} Con ascensor
+  1902→                        </button>
+  1903→                        <button onClick={() => setElevatorOrigin(false)}
+  1904→                          className={`flex-1 px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1 ${!elevatorOrigin ? 'bg-white/[0.08] text-white border border-white/20' : 'bg-white/[0.04] text-white/40 border border-white/[0.08]'}`}>
+  1905→                          Sin ascensor
+  1906→                        </button>
+  1907→                      </div>
+  1908→                    </div>
+  1909→                    {originFloorCost > 0 && (
+  1910→                      <div className="p-2 rounded-lg bg-[#00E676]/5 border border-[#00E676]/10 text-xs text-white/50">
+  1911→                        {getFloorCount(originFloor)} pisos × Bs {elevatorOrigin ? selectedVehicle?.floorElev : selectedVehicle?.floorNoElev}/piso = <span className="text-[#00E676] font-bold">Bs {originFloorCost}</span>
+  1912→                      </div>
+  1913→                    )}
+  1914→                    <div>
+  1915→                      <label className="text-xs text-white/40 block mb-1">Distancia de acarreo</label>
+  1916→                      <div className="flex items-center gap-2 text-xs text-white/30 mb-1">
+  1917→                        <span>Primeros 25m incluidos</span>
+  1918→                        <span>· Bs {selectedVehicle?.acarreoPrice || 10}/25m adicional</span>
+  1919→                      </div>
+  1920→                      <div className="flex items-center gap-2">
+  1921→                        <button onClick={() => setOriginCaminata(Math.max(0, originCaminata - 1))}
+  1922→                          className="w-7 h-7 rounded-lg bg-white/[0.06] flex items-center justify-center text-white/60 hover:bg-white/10 transition-all">
+  1923→                          <Minus className="w-3 h-3" />
+  1924→                        </button>
+  1925→                        <span className="w-8 text-center text-sm font-semibold text-white">{originCaminata}</span>
+  1926→                        <button onClick={() => setOriginCaminata(originCaminata + 1)}
+  1927→                          className="w-7 h-7 rounded-lg bg-[#00E676]/20 flex items-center justify-center text-[#00E676] hover:bg-[#00E676]/30 transition-all">
+  1928→                          <Plus className="w-3 h-3" />
+  1929→                        </button>
+  1930→                        <span className="text-xs text-white/30 ml-1">× 25m</span>
+  1931→                      </div>
+  1932→                    </div>
+  1933→                  </div>
+  1934→                </div>
+  1935→
+  1936→                {/* Destino column */}
+  1937→                <div className="p-4 rounded-xl bg-white/[0.02] border border-[#0077BD]/10">
+  1938→                  <div className="flex items-center gap-2 mb-3">
+  1939→                    <Flag className="w-3.5 h-3.5 text-[#0077BD]" />
+  1940→                    <span className="text-sm font-semibold text-[#0077BD]">Destino</span>
+  1941→                  </div>
+  1942→                  <div className="space-y-3">
+  1943→                    <div>
+  1944→                      <label className="text-xs text-white/40 block mb-1">Piso</label>
+  1945→                      <select value={destFloor} onChange={e => setDestFloor(e.target.value)}
+  1946→                        className={inputClass + ' appearance-none'}>
+  1947→                        {['baja', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'].map(f => <option key={f} value={f} className="bg-[#0a0e17]">{f === 'baja' ? 'Planta baja' : f + '° piso'}</option>)}
+  1948→                      </select>
+  1949→                    </div>
+  1950→                    <div>
+  1951→                      <label className="text-xs text-white/40 block mb-1">Ascensor</label>
+  1952→                      <div className="flex gap-2">
+  1953→                        <button onClick={() => setElevatorDest(true)}
+  1954→                          className={`flex-1 px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1 ${elevatorDest ? 'bg-[#0077BD] text-white' : 'bg-white/[0.04] text-white/40 border border-white/[0.08]'}`}>
+  1955→                          {elevatorDest && <CheckCircle className="w-3 h-3" />} Con ascensor
+  1956→                        </button>
+  1957→                        <button onClick={() => setElevatorDest(false)}
+  1958→                          className={`flex-1 px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1 ${!elevatorDest ? 'bg-white/[0.08] text-white border border-white/20' : 'bg-white/[0.04] text-white/40 border border-white/[0.08]'}`}>
+  1959→                          Sin ascensor
+  1960→                        </button>
+  1961→                      </div>
+  1962→                    </div>
+  1963→                    {destFloorCost > 0 && (
+  1964→                      <div className="p-2 rounded-lg bg-[#0077BD]/5 border border-[#0077BD]/10 text-xs text-white/50">
+  1965→                        {getFloorCount(destFloor)} pisos × Bs {elevatorDest ? selectedVehicle?.floorElev : selectedVehicle?.floorNoElev}/piso = <span className="text-[#0077BD] font-bold">Bs {destFloorCost}</span>
+  1966→                      </div>
+  1967→                    )}
+  1968→                    <div>
+  1969→                      <label className="text-xs text-white/40 block mb-1">Distancia de acarreo</label>
+  1970→                      <div className="flex items-center gap-2 text-xs text-white/30 mb-1">
+  1971→                        <span>Primeros 25m incluidos</span>
+  1972→                        <span>· Bs {selectedVehicle?.acarreoPrice || 10}/25m adicional</span>
+  1973→                      </div>
+  1974→                      <div className="flex items-center gap-2">
+  1975→                        <button onClick={() => setDestCaminata(Math.max(0, destCaminata - 1))}
+  1976→                          className="w-7 h-7 rounded-lg bg-white/[0.06] flex items-center justify-center text-white/60 hover:bg-white/10 transition-all">
+  1977→                          <Minus className="w-3 h-3" />
+  1978→                        </button>
+  1979→                        <span className="w-8 text-center text-sm font-semibold text-white">{destCaminata}</span>
+  1980→                        <button onClick={() => setDestCaminata(destCaminata + 1)}
+  1981→                          className="w-7 h-7 rounded-lg bg-[#0077BD]/20 flex items-center justify-center text-[#0077BD] hover:bg-[#0077BD]/30 transition-all">
+  1982→                          <Plus className="w-3 h-3" />
+  1983→                        </button>
+  1984→                        <span className="text-xs text-white/30 ml-1">× 25m</span>
+  1985→                      </div>
+  1986→                    </div>
+  1987→                  </div>
+  1988→                </div>
+  1989→              </div>
+  1990→            </div>
+  1991→
+  1992→            {/* ──── C) EMBALAJE ──── */}
+  1993→            <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] mb-4">
+  1994→              <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
+  1995→                <span className="text-lg">📦</span> Embalaje
+  1996→              </h4>
+  1997→
+  1998→              {/* Yes/No question */}
+  1999→              {needsEmbalaje === null ? (
+  2000→                <div>
+
+[showing lines 1-2000 of 2631; use offset=2001 with limit to continue reading]

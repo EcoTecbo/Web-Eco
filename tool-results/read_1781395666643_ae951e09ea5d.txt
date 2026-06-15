@@ -1,0 +1,1356 @@
+     1→'use client'
+     2→
+     3→import { useEffect, useRef, useState } from 'react'
+     4→import {
+     5→  Clock, Car, Shield, CreditCard, CheckCircle2, ArrowRight,
+     6→  Phone, MapPin, Smartphone, Globe, MessageCircle, Headphones,
+     7→  TrendingDown, Fuel, User, Star, Award, Zap, ChevronRight,
+     8→  BadgeCheck, Wallet, Navigation, Building2, Eye, Users,
+     9→  Timer, MapPinned, Route, Calculator, CarFront, Crown, Bus,
+    10→  Bike, Package, CircleDollarSign, Sparkles, KeyRound,
+    11→  FileText, Ban, Percent, Gauge, Map as MapIcon, Landmark,
+    12→  Mountain, Trees, CircleDot, Info
+    13→} from 'lucide-react'
+    14→import { Navbar } from '@/components/ecotaxi/navbar'
+    15→import { Footer } from '@/components/ecotaxi/footer'
+    16→
+    17→/* ─────────────────────── scroll-triggered animation hook ──────────────────── */
+    18→function useInView(threshold = 0.1) {
+    19→  const ref = useRef<HTMLDivElement>(null)
+    20→  const [visible, setVisible] = useState(false)
+    21→  useEffect(() => {
+    22→    const el = ref.current
+    23→    if (!el) return
+    24→    const obs = new IntersectionObserver(
+    25→      ([e]) => { if (e.isIntersecting) setVisible(true) },
+    26→      { threshold }
+    27→    )
+    28→    obs.observe(el)
+    29→    return () => obs.disconnect()
+    30→  }, [threshold])
+    31→  return { ref, visible }
+    32→}
+    33→
+    34→/* ─────────────────────── animated section wrapper ─────────────────────────── */
+    35→function AnimatedSection({ children, className = '', delay = 0 }: {
+    36→  children: React.ReactNode; className?: string; delay?: number
+    37→}) {
+    38→  const { ref, visible } = useInView(0.08)
+    39→  return (
+    40→    <div
+    41→      ref={ref}
+    42→      className={`transition-all duration-700 ease-out ${
+    43→        visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+    44→      } ${className}`}
+    45→      style={{ transitionDelay: visible ? `${delay}ms` : '0ms' }}
+    46→    >
+    47→      {children}
+    48→    </div>
+    49→  )
+    50→}
+    51→
+    52→/* ═══════════════════════════════════════════════════════════════════════════════
+    53→   1. HERO SECTION
+    54→   ═══════════════════════════════════════════════════════════════════════════════ */
+    55→function HeroSection() {
+    56→  return (
+    57→    <section className="relative min-h-[92vh] flex items-center justify-center overflow-hidden">
+    58→      {/* Background gradient */}
+    59→      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1320] to-[#0a0e17]" />
+    60→
+    61→      {/* Grid pattern */}
+    62→      <div
+    63→        className="absolute inset-0 opacity-[0.03]"
+    64→        style={{
+    65→          backgroundImage: `linear-gradient(rgba(0,230,118,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(0,230,118,0.3) 1px, transparent 1px)`,
+    66→          backgroundSize: '60px 60px',
+    67→        }}
+    68→      />
+    69→
+    70→      {/* Glow orbs */}
+    71→      <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full bg-[#0077BD]/15 blur-[120px] animate-pulse" />
+    72→      <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full bg-[#00E676]/10 blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
+    73→      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full bg-[#FF9800]/6 blur-[100px] animate-pulse" style={{ animationDelay: '2s' }} />
+    74→
+    75→      {/* Animated clock icon */}
+    76→      <div className="absolute top-32 right-[8%] md:right-[18%] opacity-10">
+    77→        <Clock className="w-28 h-28 md:w-40 md:h-40 text-[#00E676]" />
+    78→      </div>
+    79→      <div className="absolute bottom-28 left-[5%] md:left-[12%] opacity-8">
+    80→        <Car className="w-20 h-20 md:w-28 md:h-28 text-[#0077BD]" />
+    81→      </div>
+    82→
+    83→      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-28 pb-16">
+    84→        {/* Badge */}
+    85→        <AnimatedSection>
+    86→          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00E676]/10 border border-[#00E676]/20 mb-8 backdrop-blur-sm">
+    87→            <Clock className="w-4 h-4 text-[#00E676]" />
+    88→            <span className="text-sm text-[#00E676] font-medium">Servicio por Hora</span>
+    89→          </div>
+    90→        </AnimatedSection>
+    91→
+    92→        {/* Title */}
+    93→        <AnimatedSection delay={100}>
+    94→          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6">
+    95→            Tu Vehículo a{' '}
+    96→            <span className="bg-gradient-to-r from-[#00E676] via-[#0077BD] to-[#00E676] bg-clip-text text-transparent">
+    97→              Hora Cierta
+    98→            </span>
+    99→          </h1>
+   100→        </AnimatedSection>
+   101→
+   102→        {/* Subtitle */}
+   103→        <AnimatedSection delay={200}>
+   104→          <p className="text-lg md:text-xl text-white/60 max-w-3xl mx-auto mb-10 leading-relaxed">
+   105→            Alquila un vehículo con chofer por hora y tenlo a tu entera disposición. Vehículo, conductor, 
+   106→            combustible y guía incluidos. Sin tarjeta de crédito, sin garantías, sin contratos complicados. 
+   107→            Solo un clic y es tuyo.
+   108→          </p>
+   109→        </AnimatedSection>
+   110→
+   111→        {/* CTA buttons */}
+   112→        <AnimatedSection delay={300}>
+   113→          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-14">
+   114→            <a
+   115→              href="#modelos"
+   116→              className="px-8 py-4 rounded-full text-lg font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_30px_rgba(0,230,118,0.3)] hover:shadow-[0_0_50px_rgba(0,230,118,0.5)] hover:scale-105"
+   117→            >
+   118→              Ver Modelos de Pago
+   119→            </a>
+   120→            <a
+   121→              href="#como-funciona"
+   122→              className="px-8 py-4 rounded-full text-lg font-semibold text-white border border-white/20 hover:border-[#00E676]/50 hover:bg-white/5 transition-all duration-300"
+   123→            >
+   124→              Cómo Funciona
+   125→            </a>
+   126→          </div>
+   127→        </AnimatedSection>
+   128→
+   129→        {/* Stats bar */}
+   130→        <AnimatedSection delay={400}>
+   131→          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
+   132→            {[
+   133→              { value: '80%', label: 'Ahorro máximo', icon: TrendingDown },
+   134→              { value: '0', label: 'Tarjeta de crédito', icon: CreditCard },
+   135→              { value: '100%', label: 'Todo incluido', icon: Package },
+   136→              { value: '1 clic', label: 'Para reservar', icon: Zap },
+   137→            ].map((stat) => (
+   138→              <div
+   139→                key={stat.label}
+   140→                className="p-4 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm hover:border-[#00E676]/20 transition-all duration-300"
+   141→              >
+   142→                <stat.icon className="w-5 h-5 text-[#00E676] mx-auto mb-2" />
+   143→                <div className="text-2xl md:text-3xl font-bold text-white">{stat.value}</div>
+   144→                <div className="text-xs text-white/50 mt-1">{stat.label}</div>
+   145→              </div>
+   146→            ))}
+   147→          </div>
+   148→        </AnimatedSection>
+   149→      </div>
+   150→    </section>
+   151→  )
+   152→}
+   153→
+   154→/* ═══════════════════════════════════════════════════════════════════════════════
+   155→   2. WHAT IS IT SECTION
+   156→   ═══════════════════════════════════════════════════════════════════════════════ */
+   157→function WhatIsItSection() {
+   158→  return (
+   159→    <section className="relative py-24 md:py-32">
+   160→      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1320] to-[#0a0e17]" />
+   161→      <div
+   162→        className="absolute inset-0 opacity-[0.02]"
+   163→        style={{
+   164→          backgroundImage: `radial-gradient(circle, rgba(0,119,189,0.4) 1px, transparent 1px)`,
+   165→          backgroundSize: '30px 30px',
+   166→        }}
+   167→      />
+   168→
+   169→      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   170→        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+   171→          {/* Left: Content */}
+   172→          <AnimatedSection>
+   173→            <div>
+   174→              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#0077BD]/10 border border-[#0077BD]/20 mb-6">
+   175→                <Timer className="w-4 h-4 text-[#0077BD]" />
+   176→                <span className="text-sm text-[#0077BD]">Alquiler por Hora</span>
+   177→              </div>
+   178→
+   179→              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
+   180→                Un vehículo a tu{' '}
+   181→                <span className="bg-gradient-to-r from-[#0077BD] to-[#00E676] bg-clip-text text-transparent">
+   182→                  entera disposición
+   183→                </span>
+   184→              </h2>
+   185→
+   186→              <p className="text-white/55 text-lg leading-relaxed mb-6">
+   187→                El alquiler por hora significa que el vehículo estará a tu entera disposición durante 
+   188→                el tiempo que lo requieras. Sin preocupaciones de si hay taxi en la zona, sin perder 
+   189→                tiempo buscando transporte cuando necesitas moverte con prisa de un lugar a otro. 
+   190→                Es como tener tu propio chofer personal, pero sin los costos fijos de mantener un vehículo.
+   191→              </p>
+   192→
+   193→              <p className="text-white/55 text-lg leading-relaxed mb-8">
+   194→                Somos la <strong className="text-[#00E676]">única compañía en Bolivia</strong> que te 
+   195→                brinda este tipo de servicio. Funciona como un renta car con todo incluido: vehículo, 
+   196→                chofer, combustible y un conductor que conoce la ciudad y será como tu guía. Lo mejor 
+   197→                de todo: <strong className="text-[#00E676]">no necesitas tarjeta de crédito</strong> para 
+   198→                reservar, no dejas ningún tipo de garantía, y no hay montón de requisitos ni contratos 
+   199→                complicados que te mantienen como prisionero.
+   200→              </p>
+   201→
+   202→              <div className="space-y-3">
+   203→                {[
+   204→                  { icon: Car, text: 'Vehículo a tu disposición completa', color: '#0077BD' },
+   205→                  { icon: User, text: 'Chofer que conoce la ciudad como guía', color: '#00E676' },
+   206→                  { icon: Fuel, text: 'Combustible incluido sin costo extra', color: '#FF9800' },
+   207→                  { icon: Ban, text: 'Sin tarjeta de crédito ni garantías', color: '#E91E63' },
+   208→                  { icon: FileText, text: 'Sin contratos complicados ni cláusulas', color: '#8B5CF6' },
+   209→                ].map((item) => (
+   210→                  <div key={item.text} className="flex items-center gap-3">
+   211→                    <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `${item.color}15` }}>
+   212→                      <item.icon className="w-4 h-4" style={{ color: item.color }} />
+   213→                    </div>
+   214→                    <span className="text-white/65 text-sm">{item.text}</span>
+   215→                  </div>
+   216→                ))}
+   217→              </div>
+   218→            </div>
+   219→          </AnimatedSection>
+   220→
+   221→          {/* Right: Visual card / Glass mock-up */}
+   222→          <AnimatedSection delay={200}>
+   223→            <div className="relative">
+   224→              {/* Decorative ring */}
+   225→              <div className="absolute -inset-4 rounded-3xl border border-[#00E676]/10 animate-glow-pulse" />
+   226→
+   227→              <div className="relative p-8 rounded-2xl bg-white/[0.04] border border-[#00E676]/15 backdrop-blur-xl">
+   228→                {/* Header */}
+   229→                <div className="flex items-center justify-between mb-6">
+   230→                  <div className="flex items-center gap-2">
+   231→                    <div className="w-3 h-3 rounded-full bg-[#00E676]" />
+   232→                    <span className="text-sm text-white/60">Reserva por Hora</span>
+   233→                  </div>
+   234→                  <div className="flex gap-1.5">
+   235→                    <div className="w-2.5 h-2.5 rounded-full bg-red-500/60" />
+   236→                    <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/60" />
+   237→                    <div className="w-2.5 h-2.5 rounded-full bg-green-500/60" />
+   238→                  </div>
+   239→                </div>
+   240→
+   241→                {/* Service type selector mock */}
+   242→                <div className="grid grid-cols-2 gap-3 mb-6">
+   243→                  <div className="p-3 rounded-xl bg-[#00E676]/10 border border-[#00E676]/20 text-center">
+   244→                    <Clock className="w-5 h-5 text-[#00E676] mx-auto mb-1" />
+   245→                    <span className="text-xs text-[#00E676] font-semibold">POR HORA</span>
+   246→                  </div>
+   247→                  <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-center">
+   248→                    <MapPin className="w-5 h-5 text-white/30 mx-auto mb-1" />
+   249→                    <span className="text-xs text-white/30 font-semibold">POR RECORRIDO</span>
+   250→                  </div>
+   251→                </div>
+   252→
+   253→                {/* Vehicle selection mock */}
+   254→                <div className="mb-6">
+   255→                  <div className="text-xs text-white/30 mb-3">Selecciona tu vehículo</div>
+   256→                  <div className="grid grid-cols-3 gap-2">
+   257→                    {[
+   258→                      { name: 'Clásico', icon: CarFront, color: '#FF9800' },
+   259→                      { name: 'Confort', icon: Car, color: '#0077BD' },
+   260→                      { name: 'SUV', icon: Car, color: '#00E676' },
+   261→                    ].map((v) => (
+   262→                      <div key={v.name} className="p-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06] text-center hover:border-white/10 transition-all">
+   263→                        <v.icon className="w-5 h-5 mx-auto mb-1" style={{ color: v.color }} />
+   264→                        <span className="text-[10px] text-white/50">{v.name}</span>
+   265→                      </div>
+   266→                    ))}
+   267→                  </div>
+   268→                </div>
+   269→
+   270→                {/* Duration mock */}
+   271→                <div className="mb-6">
+   272→                  <div className="text-xs text-white/30 mb-3">Duración estimada</div>
+   273→                  <div className="flex items-center gap-3">
+   274→                    {[1, 2, 3, 4, 8].map((h) => (
+   275→                      <div
+   276→                        key={h}
+   277→                        className={`w-10 h-10 rounded-lg flex items-center justify-center text-sm font-semibold transition-all ${
+   278→                          h === 2
+   279→                            ? 'bg-[#00E676] text-black'
+   280→                            : 'bg-white/[0.03] text-white/40 border border-white/[0.06]'
+   281→                        }`}
+   282→                      >
+   283→                        {h}h
+   284→                      </div>
+   285→                    ))}
+   286→                  </div>
+   287→                </div>
+   288→
+   289→                {/* Price mock */}
+   290→                <div className="p-4 rounded-xl bg-[#00E676]/5 border border-[#00E676]/15">
+   291→                  <div className="flex items-center justify-between mb-2">
+   292→                    <span className="text-xs text-white/40">Precio estimado</span>
+   293→                    <span className="text-xs text-[#00E676]">Todo incluido</span>
+   294→                  </div>
+   295→                  <div className="text-3xl font-bold text-white mb-1">
+   296→                    Bs 120<span className="text-base font-normal text-white/40">/hora</span>
+   297→                  </div>
+   298→                  <div className="text-xs text-white/30">Vehículo + Chofer + Combustible</div>
+   299→                </div>
+   300→
+   301→                {/* Confirm button mock */}
+   302→                <div className="mt-4 w-full py-3 rounded-xl bg-[#00E676] text-center text-black font-semibold text-sm">
+   303→                  Confirmar Reserva — 1 Clic
+   304→                </div>
+   305→              </div>
+   306→            </div>
+   307→          </AnimatedSection>
+   308→        </div>
+   309→      </div>
+   310→    </section>
+   311→  )
+   312→}
+   313→
+   314→/* ═══════════════════════════════════════════════════════════════════════════════
+   315→   3. BENEFITS SECTION
+   316→   ═══════════════════════════════════════════════════════════════════════════════ */
+   317→const benefits = [
+   318→  {
+   319→    icon: TrendingDown,
+   320→    title: 'Ahorra hasta un 80%',
+   321→    description: 'Comparado con un taxi por recorrido, el servicio por hora te permite ahorrar hasta un 80% cuando necesitas múltiples traslados en un periodo de tiempo. Cada parada no suma como un viaje nuevo, sino que forma parte del mismo servicio continuo.',
+   322→    color: '#00E676',
+   323→  },
+   324→  {
+   325→    icon: Shield,
+   326→    title: 'Sin Tarjeta de Crédito',
+   327→    description: 'A diferencia de las empresas de renta car que exigen tarjeta de crédito para garantizar el vehículo, en Ecotaxi no necesitas dejar ningún tipo de garantía ni depósito. Reservas, usas y pagas. Simple y sin complicaciones.',
+   328→    color: '#0077BD',
+   329→  },
+   330→  {
+   331→    icon: FileText,
+   332→    title: 'Sin Contratos Complicados',
+   333→    description: 'Olvídate de los montones de cláusulas, letras pequeñas y compromisos a largo plazo que te mantienen como prisionero del volante. En Ecotaxi, un solo clic y tienes un vehículo a disposición. Sin ataduras, sin letra pequeña.',
+   334→    color: '#FF9800',
+   335→  },
+   336→  {
+   337→    icon: Package,
+   338→    title: 'Todo Incluido',
+   339→    description: 'Vehículo, chofer profesional, combustible y guía que conoce la ciudad. No hay costos ocultos ni cargos adicionales por kilometraje base. Es como un renta car premium donde tú solo te preocupas de tu agenda.',
+   340→    color: '#8B5CF6',
+   341→  },
+   342→  {
+   343→    icon: Users,
+   344→    title: 'Para Todas las Personas',
+   345→    description: 'No hacemos distinción. Este servicio está disponible para cualquier persona, ya seas un estudiante de primaria que necesita trasladarse a clases o un alto ejecutivo con reuniones por toda la ciudad. Solo selecciona el tipo de vehículo.',
+   346→    color: '#E91E63',
+   347→  },
+   348→  {
+   349→    icon: Sparkles,
+   350→    title: 'Único en Bolivia',
+   351→    description: 'Somos la única compañía en Bolivia que ofrece el servicio de alquiler por hora con todas estas ventajas. Una innovación que revoluciona la forma en que te mueves por la ciudad, combinando la comodidad de un vehículo propio sin sus costos.',
+   352→    color: '#00BCD4',
+   353→  },
+   354→]
+   355→
+   356→function BenefitsSection() {
+   357→  return (
+   358→    <section className="relative py-24 md:py-32">
+   359→      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#080c15] to-[#0a0e17]" />
+   360→
+   361→      {/* Accent glow */}
+   362→      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] rounded-full bg-[#00E676]/5 blur-[150px]" />
+   363→
+   364→      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   365→        <AnimatedSection>
+   366→          <div className="text-center mb-16">
+   367→            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00E676]/10 border border-[#00E676]/20 mb-4">
+   368→              <Award className="w-4 h-4 text-[#00E676]" />
+   369→              <span className="text-sm text-[#00E676]">Ventajas Exclusivas</span>
+   370→            </div>
+   371→            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+   372→              Ecotaxi lo hizo{' '}
+   373→              <span className="bg-gradient-to-r from-[#00E676] via-[#0077BD] to-[#FF9800] bg-clip-text text-transparent">
+   374→                Simple y Seguro
+   375→              </span>
+   376→            </h2>
+   377→            <p className="text-white/50 max-w-2xl mx-auto text-lg">
+   378→              Seis razones por las que el servicio por hora de Ecotaxi es la mejor opción de movilidad en Bolivia.
+   379→            </p>
+   380→          </div>
+   381→        </AnimatedSection>
+   382→
+   383→        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+   384→          {benefits.map((benefit, i) => (
+   385→            <AnimatedSection key={benefit.title} delay={i * 100}>
+   386→              <div className="group relative p-6 md:p-8 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm hover:border-white/10 transition-all duration-500 h-full">
+   387→                {/* Hover glow */}
+   388→                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/0 to-white/0 group-hover:from-white/[0.02] group-hover:to-white/[0.01] transition-all duration-500" />
+   389→
+   390→                <div className="relative z-10">
+   391→                  <div
+   392→                    className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300"
+   393→                    style={{ backgroundColor: `${benefit.color}12` }}
+   394→                  >
+   395→                    <benefit.icon className="w-7 h-7" style={{ color: benefit.color }} />
+   396→                  </div>
+   397→                  <h3 className="text-lg font-semibold text-white mb-3">{benefit.title}</h3>
+   398→                  <p className="text-sm text-white/50 leading-relaxed">{benefit.description}</p>
+   399→                </div>
+   400→              </div>
+   401→            </AnimatedSection>
+   402→          ))}
+   403→        </div>
+   404→      </div>
+   405→    </section>
+   406→  )
+   407→}
+   408→
+   409→/* ═══════════════════════════════════════════════════════════════════════════════
+   410→   4. TWO PRICING MODELS SECTION
+   411→   ═══════════════════════════════════════════════════════════════════════════════ */
+   412→function PricingModelsSection() {
+   413→  const [activeTab, setActiveTab] = useState<'zona' | 'libre'>('zona')
+   414→
+   415→  return (
+   416→    <section id="modelos" className="relative py-24 md:py-32">
+   417→      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1320] to-[#0a0e17]" />
+   418→
+   419→      {/* Accent glows */}
+   420→      <div className="absolute top-1/3 left-0 w-[500px] h-[500px] rounded-full bg-[#0077BD]/5 blur-[120px]" />
+   421→      <div className="absolute bottom-1/3 right-0 w-[400px] h-[400px] rounded-full bg-[#FF9800]/5 blur-[120px]" />
+   422→
+   423→      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   424→        <AnimatedSection>
+   425→          <div className="text-center mb-12">
+   426→            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FF9800]/10 border border-[#FF9800]/20 mb-4">
+   427→              <Calculator className="w-4 h-4 text-[#FF9800]" />
+   428→              <span className="text-sm text-[#FF9800]">Modelos de Pago</span>
+   429→            </div>
+   430→            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+   431→              Elige cómo quieres{' '}
+   432→              <span className="bg-gradient-to-r from-[#00E676] via-[#0077BD] to-[#FF9800] bg-clip-text text-transparent">
+   433→                moverte
+   434→              </span>
+   435→            </h2>
+   436→            <p className="text-white/50 max-w-3xl mx-auto text-lg">
+   437→              Tenemos el mejor algoritmo para reducir tu gasto a lo más mínimo. Hemos diseñado 2 modelos 
+   438→              pensando en tu economía: puedes elegir entre <strong className="text-[#0077BD]">horas por zonas</strong> u 
+   439→              <strong className="text-[#FF9800]"> horas libres</strong>. Tú eliges cómo moverte, nosotros 
+   440→              nos aseguramos de que te salga lo más económico.
+   441→            </p>
+   442→          </div>
+   443→        </AnimatedSection>
+   444→
+   445→        {/* Tab selector */}
+   446→        <AnimatedSection delay={100}>
+   447→          <div className="flex items-center justify-center mb-12">
+   448→            <div className="p-1 rounded-2xl bg-white/[0.04] border border-white/[0.06] inline-flex">
+   449→              <button
+   450→                onClick={() => setActiveTab('zona')}
+   451→                className={`px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 ${
+   452→                  activeTab === 'zona'
+   453→                    ? 'bg-[#0077BD] text-white shadow-[0_0_20px_rgba(0,119,189,0.3)]'
+   454→                    : 'text-white/50 hover:text-white/70'
+   455→                }`}
+   456→              >
+   457→                <div className="flex items-center gap-2">
+   458→                  <MapPinned className="w-4 h-4" />
+   459→                  Horas por Zonas
+   460→                </div>
+   461→              </button>
+   462→              <button
+   463→                onClick={() => setActiveTab('libre')}
+   464→                className={`px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 ${
+   465→                  activeTab === 'libre'
+   466→                    ? 'bg-[#FF9800] text-white shadow-[0_0_20px_rgba(255,152,0,0.3)]'
+   467→                    : 'text-white/50 hover:text-white/70'
+   468→                }`}
+   469→              >
+   470→                <div className="flex items-center gap-2">
+   471→                  <Route className="w-4 h-4" />
+   472→                  Horas Libres
+   473→                </div>
+   474→              </button>
+   475→            </div>
+   476→          </div>
+   477→        </AnimatedSection>
+   478→
+   479→        {/* Content for each tab */}
+   480→        <div className="relative">
+   481→          {/* ZONA MODEL */}
+   482→          <div className={`transition-all duration-500 ${activeTab === 'zona' ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 absolute inset-0 pointer-events-none'}`}>
+   483→            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+   484→              {/* Left: Explanation */}
+   485→              <div className="space-y-6">
+   486→                <div className="p-6 md:p-8 rounded-2xl bg-white/[0.03] border border-[#0077BD]/15 backdrop-blur-sm">
+   487→                  <div className="flex items-center gap-3 mb-6">
+   488→                    <div className="w-12 h-12 rounded-xl bg-[#0077BD]/15 flex items-center justify-center">
+   489→                      <MapPinned className="w-6 h-6 text-[#0077BD]" />
+   490→                    </div>
+   491→                    <div>
+   492→                      <h3 className="text-xl font-bold text-white">Horas por Zonas</h3>
+   493→                      <p className="text-sm text-white/40">Pago inteligente por ubicación</p>
+   494→                    </div>
+   495→                  </div>
+   496→
+   497→                  <div className="space-y-4">
+   498→                    <div className="p-4 rounded-xl bg-[#0077BD]/5 border border-[#0077BD]/10">
+   499→                      <div className="flex items-start gap-3">
+   500→                        <div className="w-8 h-8 rounded-lg bg-[#0077BD]/15 flex items-center justify-center shrink-0 mt-0.5">
+   501→                          <span className="text-sm font-bold text-[#0077BD]">1</span>
+   502→                        </div>
+   503→                        <div>
+   504→                          <h4 className="text-white font-semibold text-sm mb-1">Primera hora: 100%</h4>
+   505→                          <p className="text-xs text-white/40 leading-relaxed">
+   506→                            La primera hora se cobra al 100%, ya sea que hubieras utilizado la hora total 
+   507→                            o una fracción de ella. Esto garantiza la disponibilidad del vehículo para ti.
+   508→                          </p>
+   509→                        </div>
+   510→                      </div>
+   511→                    </div>
+   512→
+   513→                    <div className="p-4 rounded-xl bg-[#0077BD]/5 border border-[#0077BD]/10">
+   514→                      <div className="flex items-start gap-3">
+   515→                        <div className="w-8 h-8 rounded-lg bg-[#0077BD]/15 flex items-center justify-center shrink-0 mt-0.5">
+   516→                          <span className="text-sm font-bold text-[#0077BD]">2</span>
+   517→                        </div>
+   518→                        <div>
+   519→                          <h4 className="text-white font-semibold text-sm mb-1">Luego: cobro por minuto por zona</h4>
+   520→                          <p className="text-xs text-white/40 leading-relaxed">
+   521→                            Después de la primera hora, el servicio se cobra por minuto según la zona donde 
+   522→                            te encuentres. Si te cambias de zona, no necesitas discutir con el chofer sobre 
+   523→                            el precio — el sistema reconoce automáticamente tu ubicación y va sumando a tu consumo.
+   524→                          </p>
+   525→                        </div>
+   526→                      </div>
+   527→                    </div>
+   528→
+   529→                    <div className="p-4 rounded-xl bg-[#00E676]/5 border border-[#00E676]/10">
+   530→                      <div className="flex items-start gap-3">
+   531→                        <CheckCircle2 className="w-5 h-5 text-[#00E676] shrink-0 mt-0.5" />
+   532→                        <div>
+   533→                          <h4 className="text-white font-semibold text-sm mb-1">Detección automática de zona</h4>
+   534→                          <p className="text-xs text-white/40 leading-relaxed">
+   535→                            Si estás por zona central, te cobrará los minutos al precio de esa zona. Si te 
+   536→                            mueves a zona Sur, el sistema aplica automáticamente el precio por minuto de 
+   537→                            la zona Sur. Todo sin complicaciones ni discusiones.
+   538→                          </p>
+   539→                        </div>
+   540→                      </div>
+   541→                    </div>
+   542→                  </div>
+   543→                </div>
+   544→
+   545→                {/* Benefits list */}
+   546→                <div className="space-y-3">
+   547→                  {[
+   548→                    { icon: Gauge, text: 'Cobro preciso por minutos reales de uso', color: '#0077BD' },
+   549→                    { icon: Navigation, text: 'Cambio de zona automático sin intervención', color: '#00E676' },
+   550→                    { icon: BadgeCheck, text: 'Sin discusiones con el chofer sobre tarifas', color: '#FF9800' },
+   551→                    { icon: TrendingDown, text: 'Solo pagas por el tiempo efectivo en cada zona', color: '#8B5CF6' },
+   552→                  ].map((item) => (
+   553→                    <div key={item.text} className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+   554→                      <item.icon className="w-5 h-5 shrink-0" style={{ color: item.color }} />
+   555→                      <span className="text-sm text-white/60">{item.text}</span>
+   556→                    </div>
+   557→                  ))}
+   558→                </div>
+   559→              </div>
+   560→
+   561→              {/* Right: Visual diagram */}
+   562→              <div className="relative">
+   563→                <div className="p-6 md:p-8 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm">
+   564→                  <div className="text-center mb-6">
+   565→                    <h4 className="text-white font-semibold mb-1">Ejemplo: Viaje por Zonas</h4>
+   566→                    <p className="text-xs text-white/30">El sistema detecta automáticamente los cambios</p>
+   567→                  </div>
+   568→
+   569→                  {/* Zone visualization */}
+   570→                  <div className="space-y-4 mb-6">
+   571→                    {/* Zone Central */}
+   572→                    <div className="p-4 rounded-xl bg-[#0077BD]/8 border border-[#0077BD]/15">
+   573→                      <div className="flex items-center justify-between mb-2">
+   574→                        <div className="flex items-center gap-2">
+   575→                          <Landmark className="w-4 h-4 text-[#0077BD]" />
+   576→                          <span className="text-sm font-semibold text-[#0077BD]">Zona Central</span>
+   577→                        </div>
+   578→                        <span className="text-xs text-white/30">45 min</span>
+   579→                      </div>
+   580→                      <div className="h-2 rounded-full bg-white/[0.04] overflow-hidden">
+   581→                        <div className="h-full rounded-full bg-gradient-to-r from-[#0077BD] to-[#00E676]" style={{ width: '45%' }} />
+   582→                      </div>
+   583→                      <p className="text-xs text-white/30 mt-2">Precio por minuto zona central aplicado automáticamente</p>
+   584→                    </div>
+   585→
+   586→                    {/* Arrow */}
+   587→                    <div className="flex justify-center">
+   588→                      <div className="w-8 h-8 rounded-full bg-white/[0.05] flex items-center justify-center">
+   589→                        <ArrowRight className="w-4 h-4 text-white/30 rotate-90" />
+   590→                      </div>
+   591→                    </div>
+   592→
+   593→                    {/* Zone Sur */}
+   594→                    <div className="p-4 rounded-xl bg-[#00E676]/8 border border-[#00E676]/15">
+   595→                      <div className="flex items-center justify-between mb-2">
+   596→                        <div className="flex items-center gap-2">
+   597→                          <Mountain className="w-4 h-4 text-[#00E676]" />
+   598→                          <span className="text-sm font-semibold text-[#00E676]">Zona Sur</span>
+   599→                        </div>
+   600→                        <span className="text-xs text-white/30">30 min</span>
+   601→                      </div>
+   602→                      <div className="h-2 rounded-full bg-white/[0.04] overflow-hidden">
+   603→                        <div className="h-full rounded-full bg-gradient-to-r from-[#00E676] to-[#71B124]" style={{ width: '30%' }} />
+   604→                      </div>
+   605→                      <p className="text-xs text-white/30 mt-2">El sistema cambia a tarifa zona Sur sin intervención</p>
+   606→                    </div>
+   607→
+   608→                    {/* Arrow */}
+   609→                    <div className="flex justify-center">
+   610→                      <div className="w-8 h-8 rounded-full bg-white/[0.05] flex items-center justify-center">
+   611→                        <ArrowRight className="w-4 h-4 text-white/30 rotate-90" />
+   612→                      </div>
+   613→                    </div>
+   614→
+   615→                    {/* Zone Norte */}
+   616→                    <div className="p-4 rounded-xl bg-[#FF9800]/8 border border-[#FF9800]/15">
+   617→                      <div className="flex items-center justify-between mb-2">
+   618→                        <div className="flex items-center gap-2">
+   619→                          <Trees className="w-4 h-4 text-[#FF9800]" />
+   620→                          <span className="text-sm font-semibold text-[#FF9800]">Zona Norte</span>
+   621→                        </div>
+   622→                        <span className="text-xs text-white/30">15 min</span>
+   623→                      </div>
+   624→                      <div className="h-2 rounded-full bg-white/[0.04] overflow-hidden">
+   625→                        <div className="h-full rounded-full bg-gradient-to-r from-[#FF9800] to-[#E91E63]" style={{ width: '15%' }} />
+   626→                      </div>
+   627→                      <p className="text-xs text-white/30 mt-2">Tarifa zona Norte aplicada al cruzar el límite</p>
+   628→                    </div>
+   629→                  </div>
+   630→
+   631→                  {/* Total mock */}
+   632→                  <div className="p-4 rounded-xl bg-[#00E676]/5 border border-[#00E676]/15">
+   633→                    <div className="flex items-center justify-between">
+   634→                      <span className="text-sm text-white/50">Total calculado automáticamente</span>
+   635→                      <div className="flex items-center gap-2">
+   636→                        <Sparkles className="w-4 h-4 text-[#00E676]" />
+   637→                        <span className="text-lg font-bold text-[#00E676]">Bs 185</span>
+   638→                      </div>
+   639→                    </div>
+   640→                    <p className="text-xs text-white/30 mt-2">1h base + 45min central + 30min sur + 15min norte</p>
+   641→                  </div>
+   642→                </div>
+   643→              </div>
+   644→            </div>
+   645→          </div>
+   646→
+   647→          {/* LIBRE MODEL */}
+   648→          <div className={`transition-all duration-500 ${activeTab === 'libre' ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 absolute inset-0 pointer-events-none'}`}>
+   649→            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+   650→              {/* Left: Explanation */}
+   651→              <div className="space-y-6">
+   652→                <div className="p-6 md:p-8 rounded-2xl bg-white/[0.03] border border-[#FF9800]/15 backdrop-blur-sm">
+   653→                  <div className="flex items-center gap-3 mb-6">
+   654→                    <div className="w-12 h-12 rounded-xl bg-[#FF9800]/15 flex items-center justify-center">
+   655→                      <Route className="w-6 h-6 text-[#FF9800]" />
+   656→                    </div>
+   657→                    <div>
+   658→                      <h3 className="text-xl font-bold text-white">Horas Libres</h3>
+   659→                      <p className="text-sm text-white/40">Libertad total con monto único</p>
+   660→                    </div>
+   661→                  </div>
+   662→
+   663→                  <div className="space-y-4">
+   664→                    <div className="p-4 rounded-xl bg-[#FF9800]/5 border border-[#FF9800]/10">
+   665→                      <div className="flex items-start gap-3">
+   666→                        <div className="w-8 h-8 rounded-lg bg-[#FF9800]/15 flex items-center justify-center shrink-0 mt-0.5">
+   667→                          <span className="text-sm font-bold text-[#FF9800]">1</span>
+   668→                        </div>
+   669→                        <div>
+   670→                          <h4 className="text-white font-semibold text-sm mb-1">Monto único por hora con km incluidos</h4>
+   671→                          <p className="text-xs text-white/40 leading-relaxed">
+   672→                            Pagas un monto fijo por cada hora que incluye una cantidad de kilómetros 
+   673→                            determinados. Eso te da la libertad de moverte por cualquier zona de la 
+   674→                            ciudad con un solo monto, sin preocuparte por los límites de zonas.
+   675→                          </p>
+   676→                        </div>
+   677→                      </div>
+   678→                    </div>
+   679→
+   680→                    <div className="p-4 rounded-xl bg-[#FF9800]/5 border border-[#FF9800]/10">
+   681→                      <div className="flex items-start gap-3">
+   682→                        <div className="w-8 h-8 rounded-lg bg-[#FF9800]/15 flex items-center justify-center shrink-0 mt-0.5">
+   683→                          <span className="text-sm font-bold text-[#FF9800]">2</span>
+   684→                        </div>
+   685→                        <div>
+   686→                          <h4 className="text-white font-semibold text-sm mb-1">Kilometraje incluido por hora</h4>
+   687→                          <p className="text-xs text-white/40 leading-relaxed">
+   688→                            Cada hora incluye un número determinado de kilómetros. Si no los usas todos, 
+   689→                            no hay problema. Si necesitas moverte más, solo se aplica el costo por 
+   690→                            kilómetro adicional una vez que superas el kilometraje incluido en la hora.
+   691→                          </p>
+   692→                        </div>
+   693→                      </div>
+   694→                    </div>
+   695→
+   696→                    <div className="p-4 rounded-xl bg-[#00E676]/5 border border-[#00E676]/10">
+   697→                      <div className="flex items-start gap-3">
+   698→                        <CheckCircle2 className="w-5 h-5 text-[#00E676] shrink-0 mt-0.5" />
+   699→                        <div>
+   700→                          <h4 className="text-white font-semibold text-sm mb-1">Libertad entre zonas sin costo extra</h4>
+   701→                          <p className="text-xs text-white/40 leading-relaxed">
+   702→                            A diferencia del modelo por zonas, aquí puedes moverte libremente entre 
+   703→                            cualquier zona de la ciudad sin que cambie la tarifa. Solo importan los 
+   704→                            kilómetros recorridos dentro del periodo contratado.
+   705→                          </p>
+   706→                        </div>
+   707→                      </div>
+   708→                    </div>
+   709→                  </div>
+   710→                </div>
+   711→
+   712→                {/* Benefits list */}
+   713→                <div className="space-y-3">
+   714→                  {[
+   715→                    { icon: CircleDollarSign, text: 'Monto fijo por hora sin sorpresas', color: '#FF9800' },
+   716→                    { icon: MapIcon, text: 'Libertad para moverte por cualquier zona', color: '#00E676' },
+   717→                    { icon: Gauge, text: 'Kilómetros incluidos en cada hora', color: '#0077BD' },
+   718→                    { icon: Calculator, text: 'Costo por km adicional solo si excedes', color: '#8B5CF6' },
+   719→                  ].map((item) => (
+   720→                    <div key={item.text} className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+   721→                      <item.icon className="w-5 h-5 shrink-0" style={{ color: item.color }} />
+   722→                      <span className="text-sm text-white/60">{item.text}</span>
+   723→                    </div>
+   724→                  ))}
+   725→                </div>
+   726→              </div>
+   727→
+   728→              {/* Right: Visual diagram */}
+   729→              <div className="relative">
+   730→                <div className="p-6 md:p-8 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm">
+   731→                  <div className="text-center mb-6">
+   732→                    <h4 className="text-white font-semibold mb-1">Ejemplo: Hora Libre</h4>
+   733→                    <p className="text-xs text-white/30">Monto único con kilómetros incluidos</p>
+   734→                  </div>
+   735→
+   736→                  {/* Hour package visualization */}
+   737→                  <div className="p-6 rounded-xl bg-gradient-to-br from-[#FF9800]/10 to-[#FF9800]/5 border border-[#FF9800]/15 mb-6">
+   738→                    <div className="text-center">
+   739→                      <div className="text-4xl font-bold text-white mb-2">Bs 150<span className="text-lg font-normal text-white/40">/hora</span></div>
+   740→                      <div className="text-sm text-[#FF9800] font-semibold mb-4">Hasta 20 km incluidos</div>
+   741→                      
+   742→                      {/* KM gauge */}
+   743→                      <div className="relative mb-4">
+   744→                        <div className="h-4 rounded-full bg-white/[0.06] overflow-hidden">
+   745→                          <div className="h-full rounded-full bg-gradient-to-r from-[#00E676] via-[#FF9800] to-[#E91E63]" style={{ width: '65%' }} />
+   746→                        </div>
+   747→                        <div className="flex justify-between mt-1">
+   748→                          <span className="text-[10px] text-white/30">0 km</span>
+   749→                          <span className="text-[10px] text-[#FF9800] font-semibold">13 km usados</span>
+   750→                          <span className="text-[10px] text-white/30">20 km</span>
+   751→                        </div>
+   752→                      </div>
+   753→                    </div>
+   754→                  </div>
+   755→
+   756→                  {/* Route visualization */}
+   757→                  <div className="mb-6">
+   758→                    <div className="text-xs text-white/30 mb-3">Recorrido libre por la ciudad</div>
+   759→                    <div className="relative p-4 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+   760→                      {/* Simple route map mock */}
+   761→                      <div className="flex items-center gap-4 flex-wrap">
+   762→                        {[
+   763→                          { zone: 'Centro', color: '#0077BD' },
+   764→                          { zone: 'Sur', color: '#00E676' },
+   765→                          { zone: 'Norte', color: '#FF9800' },
+   766→                          { zone: 'Equipetrol', color: '#8B5CF6' },
+   767→                          { zone: 'Centro', color: '#0077BD' },
+   768→                        ].map((stop, i, arr) => (
+   769→                          <div key={i} className="flex items-center gap-2">
+   770→                            <div className="flex items-center gap-1.5">
+   771→                              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: stop.color }} />
+   772→                              <span className="text-xs text-white/50">{stop.zone}</span>
+   773→                            </div>
+   774→                            {i < arr.length - 1 && (
+   775→                              <div className="w-6 h-px bg-white/10" />
+   776→                            )}
+   777→                          </div>
+   778→                        ))}
+   779→                      </div>
+   780→                      <div className="mt-3 text-xs text-[#00E676]">
+   781→                        Mismo precio por hora — sin importar las zonas que recorras
+   782→                      </div>
+   783→                    </div>
+   784→                  </div>
+   785→
+   786→                  {/* What happens if you exceed km */}
+   787→                  <div className="p-4 rounded-xl bg-[#FF9800]/5 border border-[#FF9800]/10">
+   788→                    <div className="flex items-center gap-2 mb-2">
+   789→                      <Info className="w-4 h-4 text-[#FF9800]" />
+   790→                      <span className="text-sm font-semibold text-[#FF9800]">Si superas los km incluidos</span>
+   791→                    </div>
+   792→                    <p className="text-xs text-white/40 leading-relaxed">
+   793→                      Si llegas a superar el kilometraje incluido en la hora, recién se aplica el costo 
+   794→                      por kilómetro adicional. Sin penalizaciones, sin recargos sorpresa — solo pagas 
+   795→                      lo que realmente usas.
+   796→                    </p>
+   797→                  </div>
+   798→
+   799→                  {/* Total mock */}
+   800→                  <div className="mt-4 p-4 rounded-xl bg-[#00E676]/5 border border-[#00E676]/15">
+   801→                    <div className="flex items-center justify-between">
+   802→                      <span className="text-sm text-white/50">Total (2 horas, 13 km)</span>
+   803→                      <div className="flex items-center gap-2">
+   804→                        <Sparkles className="w-4 h-4 text-[#00E676]" />
+   805→                        <span className="text-lg font-bold text-[#00E676]">Bs 300</span>
+   806→                      </div>
+   807→                    </div>
+   808→                    <p className="text-xs text-white/30 mt-2">2h × Bs 150 — Dentro del km incluido</p>
+   809→                  </div>
+   810→                </div>
+   811→              </div>
+   812→            </div>
+   813→          </div>
+   814→        </div>
+   815→
+   816→        {/* Bottom comparison summary */}
+   817→        <AnimatedSection delay={200}>
+   818→          <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+   819→            <div className="p-6 rounded-2xl bg-white/[0.03] border border-[#0077BD]/15 text-center">
+   820→              <MapPinned className="w-8 h-8 text-[#0077BD] mx-auto mb-3" />
+   821→              <h4 className="text-white font-semibold mb-2">Ideal para: Zonas</h4>
+   822→              <p className="text-sm text-white/40 leading-relaxed">
+   823→                Si tu recorrido se concentra en una o dos zonas y quieres pagar solo por los minutos 
+   824→                reales en cada zona. Perfecto para citas médicas, trámites en una zona específica, 
+   825→                o cuando tu itinerario es predecible.
+   826→              </p>
+   827→            </div>
+   828→            <div className="p-6 rounded-2xl bg-white/[0.03] border border-[#FF9800]/15 text-center">
+   829→              <Route className="w-8 h-8 text-[#FF9800] mx-auto mb-3" />
+   830→              <h4 className="text-white font-semibold mb-2">Ideal para: Libre</h4>
+   831→              <p className="text-sm text-white/40 leading-relaxed">
+   832→                Si necesitas moverte por toda la ciudad sin restricciones de zona. Perfecto para 
+   833→                ejecutivos con reuniones en distintos puntos, turistas que quieren conocer la ciudad, 
+   834→                o días de compras y entrevistas en múltiples ubicaciones.
+   835→              </p>
+   836→            </div>
+   837→          </div>
+   838→        </AnimatedSection>
+   839→      </div>
+   840→    </section>
+   841→  )
+   842→}
+   843→
+   844→/* ═══════════════════════════════════════════════════════════════════════════════
+   845→   5. VEHICLE TYPES SECTION
+   846→   ═══════════════════════════════════════════════════════════════════════════════ */
+   847→const vehicleTypes = [
+   848→  { icon: Car, name: 'Auto Clásico', passengers: 4, ac: false, desc: 'Vehículo económico para moverte por la ciudad sin complicaciones. Ideal para traslados urbanos donde lo que importa es llegar rápido y eficiente.', color: '#FF9800' },
+   849→  { icon: Car, name: 'Sedan Confort', passengers: 4, ac: true, desc: 'Sedán con aire acondicionado para mayor comodidad. Perfecto si tienes reuniones o necesitas llegar fresco a tu destino.', color: '#0077BD' },
+   850→  { icon: Car, name: 'SUV', passengers: 4, ac: true, desc: 'SUV amplio con A/C y espacio de equipaje superior. Ideal si llevas carga, compras del día o simplemente quieres más espacio.', color: '#00E676' },
+   851→  { icon: Crown, name: 'Sedan VIP', passengers: 4, ac: true, desc: 'Servicio premium con conductor profesional y total discreción. Para el ejecutivo que busca la máxima comodidad y privacidad.', color: '#8B5CF6' },
+   852→  { icon: Bus, name: 'MiniVan', passengers: 8, ac: true, desc: 'MiniVan para grupos con equipaje. Perfecto para equipos de trabajo, familias o grupos de amigos que quieren moverse juntos.', color: '#E91E63' },
+   853→  { icon: Bike, name: 'Moto', passengers: 1, ac: false, desc: 'Motocicleta para traslados ágiles y rápidos. Llega a tu destino evitando el tráfico cuando el tiempo es oro.', color: '#00BCD4' },
+   854→]
+   855→
+   856→function VehicleTypesSection() {
+   857→  const [activeVehicle, setActiveVehicle] = useState<string | null>(null)
+   858→
+   859→  return (
+   860→    <section className="relative py-24 md:py-32">
+   861→      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#080c15] to-[#0a0e17]" />
+   862→      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-[#0077BD]/5 blur-[150px]" />
+   863→
+   864→      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   865→        <AnimatedSection>
+   866→          <div className="text-center mb-16">
+   867→            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#0077BD]/10 border border-[#0077BD]/20 mb-4">
+   868→              <Car className="w-4 h-4 text-[#0077BD]" />
+   869→              <span className="text-sm text-[#0077BD]">Opciones para Cada Necesidad</span>
+   870→            </div>
+   871→            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+   872→              Selecciona tu{' '}
+   873→              <span className="bg-gradient-to-r from-[#0077BD] to-[#00E676] bg-clip-text text-transparent">
+   874→                Vehículo
+   875→              </span>
+   876→            </h2>
+   877→            <p className="text-white/50 max-w-2xl mx-auto text-lg">
+   878→              Ya seas un estudiante de primaria o un alto ejecutivo, solo selecciona el tipo de vehículo 
+   879→              que requieras. Un solo clic y es tuyo. No hacemos distinción.
+   880→            </p>
+   881→          </div>
+   882→        </AnimatedSection>
+   883→
+   884→        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+   885→          {vehicleTypes.map((vehicle, i) => {
+   886→            const isActive = activeVehicle === vehicle.name
+   887→            return (
+   888→              <AnimatedSection key={vehicle.name} delay={i * 80}>
+   889→                <div
+   890→                  onClick={() => setActiveVehicle(isActive ? null : vehicle.name)}
+   891→                  className={`group relative p-6 rounded-2xl bg-white/[0.03] border backdrop-blur-sm cursor-pointer transition-all duration-500 overflow-hidden ${
+   892→                    isActive ? 'bg-white/[0.06]' : 'border-white/[0.06] hover:border-white/10'
+   893→                  }`}
+   894→                  style={{
+   895→                    borderColor: isActive ? `${vehicle.color}50` : undefined,
+   896→                  }}
+   897→                >
+   898→                  <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+   899→                    style={{ boxShadow: `0 0 30px ${vehicle.color}15` }}
+   900→                  />
+   901→                  <div className="relative z-10">
+   902→                    <div className="flex items-start justify-between mb-4">
+   903→                      <div className="w-14 h-14 rounded-xl flex items-center justify-center" style={{ background: `${vehicle.color}15` }}>
+   904→                        <vehicle.icon className="w-7 h-7" style={{ color: vehicle.color }} />
+   905→                      </div>
+   906→                      <div className="flex items-center gap-3 text-xs text-white/30">
+   907→                        <div className="flex items-center gap-1">
+   908→                          <Users className="w-3 h-3" />
+   909→                          <span>{vehicle.passengers}</span>
+   910→                        </div>
+   911→                        {vehicle.ac && (
+   912→                          <div className="flex items-center gap-1">
+   913→                            <Zap className="w-3 h-3" />
+   914→                            <span>A/C</span>
+   915→                          </div>
+   916→                        )}
+   917→                      </div>
+   918→                    </div>
+   919→                    <h3 className="text-lg font-semibold text-white mb-2">{vehicle.name}</h3>
+   920→                    
+   921→                    {/* Expandable description */}
+   922→                    <div className={`transition-all duration-500 overflow-hidden ${
+   923→                      isActive ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'
+   924→                    }`}>
+   925→                      <p className="text-sm text-white/50 leading-relaxed pt-3 border-t border-white/[0.06]">
+   926→                        {vehicle.desc}
+   927→                      </p>
+   928→                    </div>
+   929→
+   930→                    {!isActive && (
+   931→                      <p className="text-xs text-white/30 mt-3">Click para ver detalles</p>
+   932→                    )}
+   933→                  </div>
+   934→                </div>
+   935→              </AnimatedSection>
+   936→            )
+   937→          })}
+   938→        </div>
+   939→      </div>
+   940→    </section>
+   941→  )
+   942→}
+   943→
+   944→/* ═══════════════════════════════════════════════════════════════════════════════
+   945→   6. HOW TO BOOK SECTION
+   946→   ═══════════════════════════════════════════════════════════════════════════════ */
+   947→const bookingSteps = [
+   948→  {
+   949→    icon: Smartphone,
+   950→    title: 'Desde la App o Web',
+   951→    desc: 'En el formulario de reserva, simplemente indica el atributo "por hora" al solicitar tu servicio. Selecciona la duración estimada y el tipo de vehículo.',
+   952→    color: '#0077BD',
+   953→    channel: 'App / Web',
+   954→  },
+   955→  {
+   956→    icon: Phone,
+   957→    title: 'Vía Call Center',
+   958→    desc: 'Llama al (+591) 3 3296885 o la línea gratuita 800-240-002 e indica al operador que requieres el servicio por hora. Ellos coordinan todo por ti.',
+   959→    color: '#00E676',
+   960→    channel: 'Teléfono',
+   961→  },
+   962→  {
+   963→    icon: MessageCircle,
+   964→    title: 'Por WhatsApp',
+   965→    desc: 'Escríbenos al +591 73662803 indicando que necesitas una unidad por hora. Envía tu ubicación, duración estimada y tipo de vehículo preferido.',
+   966→    color: '#25D366',
+   967→    channel: 'WhatsApp',
+   968→  },
+   969→]
+   970→
+   971→function HowToBookSection() {
+   972→  return (
+   973→    <section id="como-funciona" className="relative py-24 md:py-32">
+   974→      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1320] to-[#0a0e17]" />
+   975→      <div
+   976→        className="absolute inset-0 opacity-[0.02]"
+   977→        style={{
+   978→          backgroundImage: `radial-gradient(circle, rgba(0,230,118,0.4) 1px, transparent 1px)`,
+   979→          backgroundSize: '30px 30px',
+   980→        }}
+   981→      />
+   982→
+   983→      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   984→        <AnimatedSection>
+   985→          <div className="text-center mb-16">
+   986→            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#71B124]/10 border border-[#71B124]/20 mb-4">
+   987→              <Navigation className="w-4 h-4 text-[#71B124]" />
+   988→              <span className="text-sm text-[#71B124]">Así Funciona</span>
+   989→            </div>
+   990→            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+   991→              Reservar es{' '}
+   992→              <span className="bg-gradient-to-r from-[#71B124] to-[#00E676] bg-clip-text text-transparent">
+   993→                Simple
+   994→              </span>
+   995→            </h2>
+   996→            <p className="text-white/50 max-w-2xl mx-auto text-lg">
+   997→              Solicitar tu vehículo por hora es tan fácil como pedir un taxi regular. Solo indica 
+   998→              que quieres el servicio por hora a través de cualquiera de nuestros canales.
+   999→            </p>
+  1000→          </div>
+  1001→        </AnimatedSection>
+  1002→
+  1003→        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+  1004→          {bookingSteps.map((step, i) => (
+  1005→            <AnimatedSection key={step.title} delay={i * 150}>
+  1006→              <div className="group relative p-6 md:p-8 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm hover:border-white/10 transition-all duration-500 h-full">
+  1007→                {/* Channel badge */}
+  1008→                <div className="absolute top-4 right-4">
+  1009→                  <span
+  1010→                    className="px-2 py-1 rounded-full text-[10px] font-bold uppercase"
+  1011→                    style={{ backgroundColor: `${step.color}15`, color: step.color }}
+  1012→                  >
+  1013→                    {step.channel}
+  1014→                  </span>
+  1015→                </div>
+  1016→
+  1017→                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300"
+  1018→                  style={{ backgroundColor: `${step.color}12` }}>
+  1019→                  <step.icon className="w-7 h-7" style={{ color: step.color }} />
+  1020→                </div>
+  1021→                <h3 className="text-lg font-semibold text-white mb-3">{step.title}</h3>
+  1022→                <p className="text-sm text-white/50 leading-relaxed">{step.desc}</p>
+  1023→              </div>
+  1024→            </AnimatedSection>
+  1025→          ))}
+  1026→        </div>
+  1027→
+  1028→        {/* Step timeline */}
+  1029→        <AnimatedSection delay={200}>
+  1030→          <div className="max-w-3xl mx-auto">
+  1031→            <div className="relative">
+  1032→              {/* Vertical line */}
+  1033→              <div className="absolute left-6 top-0 bottom-0 w-px bg-gradient-to-b from-[#0077BD] via-[#00E676] to-[#71B124]" />
+  1034→
+  1035→              {[
+  1036→                { step: 1, title: 'Indica "Por Hora"', desc: 'En la app, formulario web, llamada o WhatsApp, selecciona la opción de servicio por hora.', color: '#0077BD' },
+  1037→                { step: 2, title: 'Elige tu Vehículo', desc: 'Selecciona el tipo de vehículo según tu necesidad y presupuesto: clásico, confort, SUV, VIP, MiniVan o moto.', color: '#00E676' },
+  1038→                { step: 3, title: 'Define la Duración', desc: 'Estima cuántas horas necesitas el vehículo. Puedes extender el servicio en cualquier momento.', color: '#FF9800' },
+  1039→                { step: 4, title: 'Elige tu Modelo de Pago', desc: 'Horas por Zonas (pago por minuto según zona) u Horas Libres (monto único con km incluidos).', color: '#8B5CF6' },
+  1040→                { step: 5, title: 'Un Clic y es Tuyo', desc: 'Confirma tu reserva y tu vehículo estará en camino. Sin tarjeta de crédito, sin garantías, sin contratos.', color: '#00E676' },
+  1041→              ].map((item, i) => (
+  1042→                <div key={item.step} className="relative flex items-start mb-8 last:mb-0">
+  1043→                  {/* Dot */}
+  1044→                  <div
+  1045→                    className="absolute left-6 -translate-x-1/2 w-4 h-4 rounded-full z-10"
+  1046→                    style={{ backgroundColor: item.color, boxShadow: `0 0 20px ${item.color}50` }}
+  1047→                  />
+  1048→                  {/* Content */}
+  1049→                  <div className="ml-14 p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm hover:border-white/10 transition-all duration-300 flex-1">
+  1050→                    <div className="flex items-center gap-3 mb-2">
+  1051→                      <span className="text-xs font-bold" style={{ color: item.color }}>PASO {item.step}</span>
+  1052→                    </div>
+  1053→                    <h3 className="text-white font-semibold mb-1">{item.title}</h3>
+  1054→                    <p className="text-sm text-white/50 leading-relaxed">{item.desc}</p>
+  1055→                  </div>
+  1056→                </div>
+  1057→              ))}
+  1058→            </div>
+  1059→          </div>
+  1060→        </AnimatedSection>
+  1061→      </div>
+  1062→    </section>
+  1063→  )
+  1064→}
+  1065→
+  1066→/* ═══════════════════════════════════════════════════════════════════════════════
+  1067→   7. SAVINGS COMPARISON SECTION
+  1068→   ═══════════════════════════════════════════════════════════════════════════════ */
+  1069→function SavingsComparisonSection() {
+  1070→  return (
+  1071→    <section className="relative py-24 md:py-32 overflow-hidden">
+  1072→      <div className="absolute inset-0 bg-gradient-to-br from-[#0a0e17] via-[#0d1a12] to-[#0a0e17]" />
+  1073→
+  1074→      {/* Prominent green glow */}
+  1075→      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[500px] rounded-full bg-[#00E676]/8 blur-[180px]" />
+  1076→
+  1077→      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  1078→        <AnimatedSection>
+  1079→          <div className="text-center mb-16">
+  1080→            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00E676]/10 border border-[#00E676]/20 mb-4">
+  1081→              <TrendingDown className="w-4 h-4 text-[#00E676]" />
+  1082→              <span className="text-sm text-[#00E676]">Ahorro Real</span>
+  1083→            </div>
+  1084→            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+  1085→              Hasta un{' '}
+  1086→              <span className="bg-gradient-to-r from-[#00E676] to-[#71B124] bg-clip-text text-transparent">
+  1087→                80% de Ahorro
+  1088→              </span>
+  1089→            </h2>
+  1090→            <p className="text-white/50 max-w-3xl mx-auto text-lg">
+  1091→              Compara cuánto pagarías por múltiples taxis por recorrido vs. un solo vehículo por hora. 
+  1092→              La diferencia es significativa.
+  1093→            </p>
+  1094→          </div>
+  1095→        </AnimatedSection>
+  1096→
+  1097→        {/* Comparison cards */}
+  1098→        <AnimatedSection delay={150}>
+  1099→          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+  1100→            {/* Traditional taxi */}
+  1101→            <div className="p-6 md:p-8 rounded-2xl bg-white/[0.03] border border-white/[0.06]">
+  1102→              <div className="text-center mb-6">
+  1103→                <div className="w-14 h-14 rounded-2xl bg-red-500/10 flex items-center justify-center mx-auto mb-3">
+  1104→                  <Car className="w-7 h-7 text-red-400" />
+  1105→                </div>
+  1106→                <h3 className="text-xl font-bold text-white mb-1">Taxi por Recorrido</h3>
+  1107→                <p className="text-sm text-white/40">Múltiples viajes en un día</p>
+  1108→              </div>
+  1109→
+  1110→              <div className="space-y-3 mb-6">
+  1111→                {[
+  1112→                  { trip: 'Oficina → Cliente A', cost: 'Bs 35' },
+  1113→                  { trip: 'Cliente A → Banco', cost: 'Bs 28' },
+  1114→                  { trip: 'Banco → Almuerzo', cost: 'Bs 20' },
+  1115→                  { trip: 'Almuerzo → Cliente B', cost: 'Bs 32' },
+  1116→                  { trip: 'Cliente B → Oficina', cost: 'Bs 30' },
+  1117→                ].map((item) => (
+  1118→                  <div key={item.trip} className="flex items-center justify-between p-3 rounded-lg bg-white/[0.02]">
+  1119→                    <span className="text-sm text-white/50">{item.trip}</span>
+  1120→                    <span className="text-sm text-red-400/70 font-medium">{item.cost}</span>
+  1121→                  </div>
+  1122→                ))}
+  1123→              </div>
+  1124→
+  1125→              <div className="p-4 rounded-xl bg-red-500/5 border border-red-500/10 text-center">
+  1126→                <p className="text-xs text-white/30 mb-1">Total del día</p>
+  1127→                <p className="text-3xl font-bold text-red-400">Bs 145</p>
+  1128→                <p className="text-xs text-white/30 mt-1">5 taxis separados + tiempos de espera</p>
+  1129→              </div>
+  1130→            </div>
+  1131→
+  1132→            {/* Ecotaxi by hour */}
+  1133→            <div className="p-6 md:p-8 rounded-2xl bg-white/[0.03] border-2 border-[#00E676]/20 relative">
+  1134→              {/* Badge */}
+  1135→              <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+  1136→                <span className="px-4 py-1.5 rounded-full text-xs font-bold text-black bg-[#00E676] uppercase tracking-wider shadow-[0_0_20px_rgba(0,230,118,0.3)]">
+  1137→                  80% Más Económico
+  1138→                </span>
+  1139→              </div>
+  1140→
+  1141→              <div className="text-center mb-6 pt-2">
+  1142→                <div className="w-14 h-14 rounded-2xl bg-[#00E676]/10 flex items-center justify-center mx-auto mb-3">
+  1143→                  <Clock className="w-7 h-7 text-[#00E676]" />
+  1144→                </div>
+  1145→                <h3 className="text-xl font-bold text-white mb-1">Ecotaxi por Hora</h3>
+  1146→                <p className="text-sm text-white/40">Un vehículo todo el día</p>
+  1147→              </div>
+  1148→
+  1149→              <div className="space-y-3 mb-6">
+  1150→                {[
+  1151→                  { trip: 'Oficina → Cliente A → Banco', included: true },
+  1152→                  { trip: 'Banco → Almuerzo', included: true },
+  1153→                  { trip: 'Almuerzo → Cliente B → Oficina', included: true },
+  1154→                  { trip: 'Chofer espera mientras atiendes', included: true },
+  1155→                  { trip: 'Combustible incluido', included: true },
+  1156→                ].map((item) => (
+  1157→                  <div key={item.trip} className="flex items-center justify-between p-3 rounded-lg bg-[#00E676]/3">
+  1158→                    <span className="text-sm text-white/50">{item.trip}</span>
+  1159→                    <CheckCircle2 className="w-4 h-4 text-[#00E676]" />
+  1160→                  </div>
+  1161→                ))}
+  1162→              </div>
+  1163→
+  1164→              <div className="p-4 rounded-xl bg-[#00E676]/5 border border-[#00E676]/15 text-center">
+  1165→                <p className="text-xs text-[#00E676] mb-1">Total del día</p>
+  1166→                <p className="text-3xl font-bold text-[#00E676]">Bs 120</p>
+  1167→                <p className="text-xs text-white/30 mt-1">2 horas con todo incluido</p>
+  1168→              </div>
+  1169→            </div>
+  1170→          </div>
+  1171→        </AnimatedSection>
+  1172→
+  1173→        {/* Additional savings note */}
+  1174→        <AnimatedSection delay={300}>
+  1175→          <div className="mt-12 max-w-3xl mx-auto">
+  1176→            <div className="p-6 rounded-2xl bg-[#00E676]/5 border border-[#00E676]/15 text-center">
+  1177→              <div className="flex items-center justify-center gap-2 mb-3">
+  1178→                <Percent className="w-5 h-5 text-[#00E676]" />
+  1179→                <span className="text-[#00E676] font-semibold">El ahorro es aún mayor con más viajes</span>
+  1180→              </div>
+  1181→              <p className="text-sm text-white/50 leading-relaxed">
+  1182→                Cuantos más traslados necesites en el día, mayor es el ahorro por hora frente a taxis por recorrido. 
+  1183→                Si necesitas 5 o más traslados, el ahorro puede superar el 80%. Además, no pierdes tiempo 
+  1184→                esperando que llegue cada taxi, no pagas tiempos de espera, y tu chofer te acompaña a cada 
+  1185→                destino sin interrupciones.
+  1186→              </p>
+  1187→            </div>
+  1188→          </div>
+  1189→        </AnimatedSection>
+  1190→      </div>
+  1191→    </section>
+  1192→  )
+  1193→}
+  1194→
+  1195→/* ═══════════════════════════════════════════════════════════════════════════════
+  1196→   8. DISPATCH CENTER SECTION
+  1197→   ═══════════════════════════════════════════════════════════════════════════════ */
+  1198→const supportChannels = [
+  1199→  { icon: Headphones, title: 'Central de Despacho', desc: 'Operadores reales 24/7 que coordinan cada servicio por hora, asignan unidades y gestionan extensiones de tiempo en tiempo real.', color: '#0077BD' },
+  1200→  { icon: Phone, title: 'Call Center', desc: 'Llámanos al (+591) 3 3296885 o 800-240-002 para reservar tu vehículo por hora de forma inmediata con atención personalizada.', color: '#00E676' },
+  1201→  { icon: MessageCircle, title: 'WhatsApp', desc: 'Escríbenos al +591 73662803. Indica que requieres servicio por hora, la duración y el tipo de vehículo. Recibe confirmación al instante.', color: '#25D366' },
+  1202→  { icon: Smartphone, title: 'App Móvil', desc: 'Selecciona "Por Hora" en la app, define la duración y el modelo de pago. Todo desde tu celular con seguimiento GPS en tiempo real.', color: '#8B5CF6' },
+  1203→  { icon: Globe, title: 'Reserva Web', desc: 'Usa nuestro formulario online para reservar el servicio por hora desde cualquier dispositivo con conexión a internet.', color: '#FF9800' },
+  1204→]
+  1205→
+  1206→function DispatchCenterSection() {
+  1207→  return (
+  1208→    <section className="relative py-24 md:py-32">
+  1209→      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1320] to-[#0a0e17]" />
+  1210→      <div className="absolute bottom-1/3 right-1/4 w-[500px] h-[500px] rounded-full bg-[#0077BD]/5 blur-[120px]" />
+  1211→
+  1212→      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  1213→        <AnimatedSection>
+  1214→          <div className="text-center mb-16">
+  1215→            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#8B5CF6]/10 border border-[#8B5CF6]/20 mb-4">
+  1216→              <Headphones className="w-4 h-4 text-[#8B5CF6]" />
+  1217→              <span className="text-sm text-[#8B5CF6]">Soporte Humano</span>
+  1218→            </div>
+  1219→            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+  1220→              Central de Despacho{' '}
+  1221→              <span className="bg-gradient-to-r from-[#8B5CF6] to-[#00E676] bg-clip-text text-transparent">
+  1222→                Humana
+  1223→              </span>
+  1224→            </h2>
+  1225→            <p className="text-white/50 max-w-2xl mx-auto text-lg">
+  1226→              Un equipo real de operadores y soporte que coordina cada servicio por hora y te ayuda 
+  1227→              en todo momento. Nunca estás solo, siempre hay alguien al otro lado.
+  1228→            </p>
+  1229→          </div>
+  1230→        </AnimatedSection>
+  1231→
+  1232→        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+  1233→          {supportChannels.map((channel, i) => (
+  1234→            <AnimatedSection key={channel.title} delay={i * 80}>
+  1235→              <div className="group relative p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] text-center hover:border-white/10 transition-all duration-500 h-full">
+  1236→                <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+  1237→                  style={{ boxShadow: `0 0 30px ${channel.color}10` }}
+  1238→                />
+  1239→                <div className="relative z-10">
+  1240→                  <div className="w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center" style={{ background: `${channel.color}10` }}>
+  1241→                    <channel.icon className="w-6 h-6" style={{ color: channel.color }} />
+  1242→                  </div>
+  1243→                  <h3 className="text-white font-semibold text-sm mb-2">{channel.title}</h3>
+  1244→                  <p className="text-xs text-white/40 leading-relaxed">{channel.desc}</p>
+  1245→                </div>
+  1246→              </div>
+  1247→            </AnimatedSection>
+  1248→          ))}
+  1249→        </div>
+  1250→      </div>
+  1251→    </section>
+  1252→  )
+  1253→}
+  1254→
+  1255→/* ═══════════════════════════════════════════════════════════════════════════════
+  1256→   9. CTA SECTION
+  1257→   ═══════════════════════════════════════════════════════════════════════════════ */
+  1258→function CTASection() {
+  1259→  return (
+  1260→    <section className="relative py-24 md:py-32 overflow-hidden">
+  1261→      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1320] to-[#0a0e17]" />
+  1262→      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-[#00E676]/10 blur-[120px]" />
+  1263→
+  1264→      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+  1265→        <AnimatedSection>
+  1266→          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00E676]/10 border border-[#00E676]/20 mb-6">
+  1267→            <Clock className="w-4 h-4 text-[#00E676]" />
+  1268→            <span className="text-sm text-[#00E676]">Un Clic y es Tuyo</span>
+  1269→          </div>
+  1270→        </AnimatedSection>
+  1271→
+  1272→        <AnimatedSection delay={100}>
+  1273→          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
+  1274→            ¿Necesitas un vehículo{' '}
+  1275→            <span className="bg-gradient-to-r from-[#00E676] to-[#0077BD] bg-clip-text text-transparent">
+  1276→              a tu disposición
+  1277→            </span>
+  1278→            ?
+  1279→          </h2>
+  1280→        </AnimatedSection>
+  1281→
+  1282→        <AnimatedSection delay={200}>
+  1283→          <p className="text-white/50 text-lg mb-10 leading-relaxed max-w-2xl mx-auto">
+  1284→            No pierdas más tiempo buscando taxi en cada esquina. Reserva tu vehículo por hora y ten la 
+  1285→            tranquilidad de moverte cuando y como quieras. Sin tarjeta de crédito, sin garantías, sin 
+  1286→            contratos. Solo un clic.
+  1287→          </p>
+  1288→        </AnimatedSection>
+  1289→
+  1290→        <AnimatedSection delay={300}>
+  1291→          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
+  1292→            <a
+  1293→              href="https://id3251.tm.taxi:58443/?cid=1"
+  1294→              target="_blank"
+  1295→              rel="noopener noreferrer"
+  1296→              className="px-8 py-4 rounded-full text-lg font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_30px_rgba(0,230,118,0.3)] hover:shadow-[0_0_50px_rgba(0,230,118,0.5)] hover:scale-105 flex items-center gap-2"
+  1297→            >
+  1298→              Reservar por Hora
+  1299→              <ArrowRight className="w-5 h-5" />
+  1300→            </a>
+  1301→            <a
+  1302→              href="https://wa.me/59173662803?text=Hola%2C%20necesito%20un%20veh%C3%ADculo%20por%20hora"
+  1303→              target="_blank"
+  1304→              rel="noopener noreferrer"
+  1305→              className="px-8 py-4 rounded-full text-lg font-semibold text-white border border-[#25D366]/40 bg-[#25D366]/10 hover:bg-[#25D366]/20 hover:border-[#25D366]/60 transition-all duration-300 flex items-center gap-2"
+  1306→            >
+  1307→              <MessageCircle className="w-5 h-5 text-[#25D366]" />
+  1308→              WhatsApp
+  1309→            </a>
+  1310→          </div>
+  1311→        </AnimatedSection>
+  1312→
+  1313→        {/* Trust indicators */}
+  1314→        <AnimatedSection delay={400}>
+  1315→          <div className="flex flex-wrap items-center justify-center gap-6">
+  1316→            {[
+  1317→              { icon: Shield, text: 'Sin tarjeta de crédito' },
+  1318→              { icon: KeyRound, text: 'Sin garantías' },
+  1319→              { icon: FileText, text: 'Sin contratos' },
+  1320→              { icon: Clock, text: 'Disponible 24/7' },
+  1321→            ].map((item) => (
+  1322→              <div key={item.text} className="flex items-center gap-2 text-white/30">
+  1323→                <item.icon className="w-4 h-4 text-[#00E676]/50" />
+  1324→                <span className="text-sm">{item.text}</span>
+  1325→              </div>
+  1326→            ))}
+  1327→          </div>
+  1328→        </AnimatedSection>
+  1329→      </div>
+  1330→    </section>
+  1331→  )
+  1332→}
+  1333→
+  1334→/* ═══════════════════════════════════════════════════════════════════════════════
+  1335→   MAIN PAGE COMPONENT
+  1336→   ═══════════════════════════════════════════════════════════════════════════════ */
+  1337→export default function PorHoraPage() {
+  1338→  return (
+  1339→    <div className="min-h-screen flex flex-col bg-[#0a0e17]">
+  1340→      <Navbar />
+  1341→      <main className="flex-1">
+  1342→        <HeroSection />
+  1343→        <WhatIsItSection />
+  1344→        <BenefitsSection />
+  1345→        <PricingModelsSection />
+  1346→        <VehicleTypesSection />
+  1347→        <SavingsComparisonSection />
+  1348→        <HowToBookSection />
+  1349→        <DispatchCenterSection />
+  1350→        <CTASection />
+  1351→      </main>
+  1352→      <Footer />
+  1353→    </div>
+  1354→  )
+  1355→}
+  1356→
