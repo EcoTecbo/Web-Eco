@@ -203,9 +203,9 @@ const PACKING_MATERIALS = [
 
 /* Handling extras (per item, applies to both origin/dest) */
 const HANDLING_EXTRAS = [
-  { id: 'armado_muebles', name: 'Armado y Desarmado de Muebles Grandes', price: 80, unit: 'mueble', emoji: '🔧', desc: 'Roperos, camas, cunas, escritorios grandes' },
-  { id: 'embalaje_fragil', name: 'Embalaje Especial Objetos Frágiles', price: 60, unit: 'juego', emoji: '🍷', desc: 'Vajilla, espejos, obras de arte, pantallas TV' },
-  { id: 'objetos_pesados', name: 'Objetos de Gran Peso / Línea Blanca', price: 120, unit: 'objeto', emoji: '🏋️', desc: 'Pianos, cajas fuertes, refrigeradores 2 puertas' },
+  { id: 'armado_muebles', name: 'Armado / Desarmado de Muebles', price: 80, unit: 'mueble', emoji: '🔧', desc: 'Desarmar en origen y armar en destino: roperos, camas, cunas, escritorios' },
+  { id: 'embalaje_fragil', name: 'Puesta en Marcha de Equipos', price: 60, unit: 'equipo', emoji: '🔌', desc: 'Instalación y conexión: TV, lavadoras, refrigeradores, equipos de sonido' },
+  { id: 'objetos_pesados', name: 'Manipulación Especial de Objetos Pesados', price: 120, unit: 'objeto', emoji: '🏋️', desc: 'Trato especializado: pianos, cajas fuertes, objetos de valor que requieren técnica especial' },
 ]
 
 /* Accessibility extras (per location - origin and destination separately) */
@@ -1820,9 +1820,10 @@ function CalculatorSection() {
 
             {/* Section B: Manipulación de Objetos */}
             <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] mb-4">
-              <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
-                <span className="text-lg">🔧</span> Manipulación de Objetos
+              <h4 className="text-white font-semibold mb-1 flex items-center gap-2">
+                <span className="text-lg">🔧</span> Armado, Desarmado y Puesta en Marcha
               </h4>
+              <p className="text-xs text-white/40 mb-4 ml-7">Servicios de armado/desarmado de muebles y puesta en marcha de equipos. No incluye carga ni traslado (eso ya está incluido en el servicio base).</p>
               <div className="space-y-3">
                 {HANDLING_EXTRAS.map((extra) => {
                   const qty = handlingExtras[extra.id] || 0
