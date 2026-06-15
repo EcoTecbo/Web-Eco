@@ -267,17 +267,17 @@ const MUDANZA_CATEGORIES = [
 /* vehicles - Tarifas actualizadas según tabla oficial EcoTaxi */
 const VEHICLES = [
   { cat: 'Camioneta', color: '#FB923C', items: [
-    { name: 'Pickup', cap: 4, desc: '0.8-1.2 Tn · 1.5×2.3 mt · Caja abierta', pax: 2, floorElev: 8, floorNoElev: 10, helperPrice: 50, perKm: 9, baseFare: 90, acarreoPrice: 8, embStd: 100, embPrem: 150, desemb: 40, img: '/vehicles/6-CAMIONETA/pickup.png' },
-    { name: 'Camión Pequeño', cap: 6, desc: '1.0-1.5 Tn · 1.5×2.8 mt · Caja abierta', pax: 2, floorElev: 10, floorNoElev: 15, helperPrice: 60, perKm: 10, baseFare: 110, acarreoPrice: 10, embStd: 120, embPrem: 200, desemb: 60, img: '/vehicles/6-CAMIONETA/pequena.png' },
-    { name: 'Camión Mediano', cap: 12, desc: '1.5-3.0 Tn · 1.7×3.2 mt · Caja abierta', pax: 3, floorElev: 12, floorNoElev: 18, helperPrice: 80, perKm: 12, baseFare: 150, acarreoPrice: 10, embStd: 250, embPrem: 350, desemb: 75, img: '/vehicles/6-CAMIONETA/mediana.png' },
-    { name: 'Camión Largo', cap: 22, desc: '3.0-4.0 Tn · 2.0×4.0 mt · Caja abierta', pax: 3, floorElev: 15, floorNoElev: 20, helperPrice: 100, perKm: 15, baseFare: 230, acarreoPrice: 15, embStd: 400, embPrem: 600, desemb: 200, img: '/vehicles/6-CAMIONETA/larga.png' },
-    { name: 'Camión Grande', cap: 35, desc: '4.0-6.0 Tn · 2.3×6.2 mt · Caja abierta', pax: 3, floorElev: 15, floorNoElev: 20, helperPrice: 120, perKm: 20, baseFare: 280, acarreoPrice: 15, embStd: 600, embPrem: 800, desemb: 300, img: '/vehicles/6-CAMIONETA/grande.png' },
+    { name: 'Pickup', cap: 4, desc: '0.8-1.2 Tn · 1.5×2.3 mt · Caja abierta', pax: 2, floorElev: 8, floorNoElev: 10, helperPrice: 50, perKm: 9, baseFare: 90, acarreoPrice: 8, embStd: 100, embPrem: 150, desemb: 40, img: '/fleet-camioneta-pickup.webp' },
+    { name: 'Camión Pequeño', cap: 6, desc: '1.0-1.5 Tn · 1.5×2.8 mt · Caja abierta', pax: 2, floorElev: 10, floorNoElev: 15, helperPrice: 60, perKm: 10, baseFare: 110, acarreoPrice: 10, embStd: 120, embPrem: 200, desemb: 60, img: '/fleet-camioneta-pequena.webp' },
+    { name: 'Camión Mediano', cap: 12, desc: '1.5-3.0 Tn · 1.7×3.2 mt · Caja abierta', pax: 3, floorElev: 12, floorNoElev: 18, helperPrice: 80, perKm: 12, baseFare: 150, acarreoPrice: 10, embStd: 250, embPrem: 350, desemb: 75, img: '/fleet-camioneta-mediana.webp' },
+    { name: 'Camión Largo', cap: 22, desc: '3.0-4.0 Tn · 2.0×4.0 mt · Caja abierta', pax: 3, floorElev: 15, floorNoElev: 20, helperPrice: 100, perKm: 15, baseFare: 230, acarreoPrice: 15, embStd: 400, embPrem: 600, desemb: 200, img: '/fleet-camioneta-larga.webp' },
+    { name: 'Camión Grande', cap: 35, desc: '4.0-6.0 Tn · 2.3×6.2 mt · Caja abierta', pax: 3, floorElev: 15, floorNoElev: 20, helperPrice: 120, perKm: 20, baseFare: 280, acarreoPrice: 15, embStd: 600, embPrem: 800, desemb: 300, img: '/fleet-camioneta-grande.webp' },
   ]},
   { cat: 'Furgón', color: '#818CF8', items: [
-    { name: 'Furgón Pequeño', cap: 7, desc: '1.0-1.5 Tn · ~7.1 m³ · Cerrado', pax: 2, floorElev: 15, floorNoElev: 15, helperPrice: 80, perKm: 12, baseFare: 150, acarreoPrice: 10, embStd: 120, embPrem: 200, desemb: 60, img: '/vehicles/7-FURGON/pequeno.png' },
-    { name: 'Furgón Mediano', cap: 10, desc: '1.5-3.0 Tn · ~10.3 m³ · Cerrado', pax: 2, floorElev: 18, floorNoElev: 18, helperPrice: 100, perKm: 15, baseFare: 180, acarreoPrice: 10, embStd: 250, embPrem: 350, desemb: 75, img: '/vehicles/7-FURGON/mediano.png' },
-    { name: 'Furgón Largo', cap: 17, desc: '3.0-4.0 Tn · ~16.8 m³ · Cerrado', pax: 3, floorElev: 18, floorNoElev: 18, helperPrice: 110, perKm: 18, baseFare: 280, acarreoPrice: 15, embStd: 400, embPrem: 600, desemb: 200, img: '/vehicles/7-FURGON/largo.png' },
-    { name: 'Furgón Grande', cap: 30, desc: '4.0-6.0 Tn · ~30.0 m³ · Cerrado', pax: 3, floorElev: 20, floorNoElev: 20, helperPrice: 120, perKm: 20, baseFare: 300, acarreoPrice: 15, embStd: 600, embPrem: 800, desemb: 300, img: '/vehicles/7-FURGON/grande.png' },
+    { name: 'Furgón Pequeño', cap: 7, desc: '1.0-1.5 Tn · ~7.1 m³ · Cerrado', pax: 2, floorElev: 15, floorNoElev: 15, helperPrice: 80, perKm: 12, baseFare: 150, acarreoPrice: 10, embStd: 120, embPrem: 200, desemb: 60, img: '/fleet-furgon-pequeno.webp' },
+    { name: 'Furgón Mediano', cap: 10, desc: '1.5-3.0 Tn · ~10.3 m³ · Cerrado', pax: 2, floorElev: 18, floorNoElev: 18, helperPrice: 100, perKm: 15, baseFare: 180, acarreoPrice: 10, embStd: 250, embPrem: 350, desemb: 75, img: '/fleet-furgon-mediano.webp' },
+    { name: 'Furgón Largo', cap: 17, desc: '3.0-4.0 Tn · ~16.8 m³ · Cerrado', pax: 3, floorElev: 18, floorNoElev: 18, helperPrice: 110, perKm: 18, baseFare: 280, acarreoPrice: 15, embStd: 400, embPrem: 600, desemb: 200, img: '/fleet-furgon-largo.webp' },
+    { name: 'Furgón Grande', cap: 30, desc: '4.0-6.0 Tn · ~30.0 m³ · Cerrado', pax: 3, floorElev: 20, floorNoElev: 20, helperPrice: 120, perKm: 20, baseFare: 300, acarreoPrice: 15, embStd: 600, embPrem: 800, desemb: 300, img: '/fleet-furgon-grande.webp' },
   ]},
 ]
 
@@ -1277,7 +1277,7 @@ function CalculatorSection() {
               <button onClick={() => { setVehicleType('cerrado'); setSelectedVehicle(null) }}
                 className={`p-5 rounded-2xl text-center transition-all duration-300 ${vehicleType === 'cerrado' ? 'bg-[#818CF8]/10 border-2 border-[#818CF8]/50' : 'bg-white/[0.03] border border-white/[0.06] hover:border-white/10'}`}>
                 <div className="flex justify-center mb-2 h-16 items-center">
-                  <img src="/vehicles/7-FURGON/mediano.png" alt="Furgón" className="max-h-full max-w-[80px] object-contain" />
+                  <img src="/fleet-furgon-mediano.webp" alt="Furgón" className="max-h-full max-w-[80px] object-contain" />
                 </div>
                 <div className="text-white font-semibold mb-1">Furgón (Cerrado)</div>
                 <div className="text-xs text-white/40">Protección completa del clima</div>
@@ -1285,7 +1285,7 @@ function CalculatorSection() {
               <button onClick={() => { setVehicleType('abierto'); setSelectedVehicle(null) }}
                 className={`p-5 rounded-2xl text-center transition-all duration-300 ${vehicleType === 'abierto' ? 'bg-[#FB923C]/10 border-2 border-[#FB923C]/50' : 'bg-white/[0.03] border border-white/[0.06] hover:border-white/10'}`}>
                 <div className="flex justify-center mb-2 h-16 items-center">
-                  <img src="/vehicles/6-CAMIONETA/mediana.png" alt="Camioneta" className="max-h-full max-w-[80px] object-contain" />
+                  <img src="/fleet-camioneta-mediana.webp" alt="Camioneta" className="max-h-full max-w-[80px] object-contain" />
                 </div>
                 <div className="text-white font-semibold mb-1">Camioneta (Abierto)</div>
                 <div className="text-xs text-white/40">Caja abierta, ideal para cargas resistentes</div>
@@ -1349,7 +1349,7 @@ function CalculatorSection() {
               <button onClick={() => { setVehicleType('cerrado'); setSelectedVehicle(null); setMudanzaCategory(null); setShowVehicleChange(false) }}
                 className={`p-5 rounded-2xl text-center transition-all duration-300 ${vehicleType === 'cerrado' ? 'bg-[#818CF8]/10 border-2 border-[#818CF8]/50' : 'bg-white/[0.03] border border-white/[0.06] hover:border-white/10'}`}>
                 <div className="flex justify-center mb-2 h-16 items-center">
-                  <img src="/vehicles/7-FURGON/mediano.png" alt="Furgón" className="max-h-full max-w-[80px] object-contain" />
+                  <img src="/fleet-furgon-mediano.webp" alt="Furgón" className="max-h-full max-w-[80px] object-contain" />
                 </div>
                 <div className="text-white font-semibold mb-1">Furgón (Cerrado)</div>
                 <div className="text-xs text-white/40">Protección completa del clima</div>
@@ -1357,7 +1357,7 @@ function CalculatorSection() {
               <button onClick={() => { setVehicleType('abierto'); setSelectedVehicle(null); setMudanzaCategory(null); setShowVehicleChange(false) }}
                 className={`p-5 rounded-2xl text-center transition-all duration-300 ${vehicleType === 'abierto' ? 'bg-[#FB923C]/10 border-2 border-[#FB923C]/50' : 'bg-white/[0.03] border border-white/[0.06] hover:border-white/10'}`}>
                 <div className="flex justify-center mb-2 h-16 items-center">
-                  <img src="/vehicles/6-CAMIONETA/mediana.png" alt="Camioneta" className="max-h-full max-w-[80px] object-contain" />
+                  <img src="/fleet-camioneta-mediana.webp" alt="Camioneta" className="max-h-full max-w-[80px] object-contain" />
                 </div>
                 <div className="text-white font-semibold mb-1">Camioneta (Abierto)</div>
                 <div className="text-xs text-white/40">Caja abierta, ideal para cargas resistentes</div>
@@ -1567,7 +1567,7 @@ function CalculatorSection() {
               <button onClick={() => { setVehicleType('cerrado'); setSelectedVehicle(null) }}
                 className={`p-5 rounded-2xl text-center transition-all duration-300 ${vehicleType === 'cerrado' ? 'bg-[#818CF8]/10 border-2 border-[#818CF8]/50' : 'bg-white/[0.03] border border-white/[0.06] hover:border-white/10'}`}>
                 <div className="flex justify-center mb-2 h-16 items-center">
-                  <img src="/vehicles/7-FURGON/mediano.png" alt="Furgón" className="max-h-full max-w-[80px] object-contain" />
+                  <img src="/fleet-furgon-mediano.webp" alt="Furgón" className="max-h-full max-w-[80px] object-contain" />
                 </div>
                 <div className="text-white font-semibold mb-1">Furgón (Cerrado)</div>
                 <div className="text-xs text-white/40">Protección completa del clima</div>
@@ -1575,7 +1575,7 @@ function CalculatorSection() {
               <button onClick={() => { setVehicleType('abierto'); setSelectedVehicle(null) }}
                 className={`p-5 rounded-2xl text-center transition-all duration-300 ${vehicleType === 'abierto' ? 'bg-[#FB923C]/10 border-2 border-[#FB923C]/50' : 'bg-white/[0.03] border border-white/[0.06] hover:border-white/10'}`}>
                 <div className="flex justify-center mb-2 h-16 items-center">
-                  <img src="/vehicles/6-CAMIONETA/mediana.png" alt="Camioneta" className="max-h-full max-w-[80px] object-contain" />
+                  <img src="/fleet-camioneta-mediana.webp" alt="Camioneta" className="max-h-full max-w-[80px] object-contain" />
                 </div>
                 <div className="text-white font-semibold mb-1">Camioneta (Abierto)</div>
                 <div className="text-xs text-white/40">Caja abierta, ideal para cargas resistentes</div>
