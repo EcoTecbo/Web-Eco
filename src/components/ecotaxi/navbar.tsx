@@ -250,41 +250,7 @@ export function Navbar() {
               )}
             </div>
 
-            {/* Partners Dropdown with 600ms close delay */}
-            <div className="relative"
-              onMouseEnter={handlePartnersEnter}
-              onMouseLeave={handlePartnersLeave}
-            >
-              <button
-                onClick={() => setPartnersOpen(prev => !prev)}
-                className={`flex items-center gap-1 text-sm transition-colors duration-200 ${
-                  isPartnerActive ? 'text-[#00E676]' : 'text-white/85 hover:text-white'
-                }`}>
-                Partners
-                <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${partnersOpen ? 'rotate-180' : ''}`} />
-              </button>
-              {partnersOpen && (
-                <div className="absolute top-full right-0 mt-2 w-56 rounded-xl bg-[#0d1320]/95 backdrop-blur-xl border border-white/[0.08] shadow-xl shadow-black/30 overflow-hidden z-50"
-                  onMouseEnter={handlePartnersEnter}
-                  onMouseLeave={handlePartnersLeave}
-                >
-                  {partnerPages.map((partner) => (
-                    <Link
-                      key={partner.href}
-                      href={partner.href}
-                      className={`block px-4 py-3 text-sm transition-colors duration-200 ${
-                        pathname === partner.href
-                          ? 'text-[#00E676] bg-[#00E676]/5'
-                          : 'text-white/85 hover:text-white hover:bg-white/5'
-                      }`}
-                      onClick={() => setPartnersOpen(false)}
-                    >
-                      {partner.label}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
+            {/* Partners removed from main nav — only in footer */}
           </div>
 
           {/* CTA */}
@@ -329,16 +295,16 @@ export function Navbar() {
       {/* Mobile Menu */}
       <div
         className={`md:hidden transition-all duration-300 overflow-hidden ${
-          mobileOpen ? 'max-h-[700px] opacity-100' : 'max-h-0 opacity-0'
+          mobileOpen ? 'max-h-[85vh] opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
-        <div className="bg-[#0a0e17]/95 backdrop-blur-xl border-t border-white/5 px-4 py-4 space-y-3">
+        <div className="bg-[#0a0e17]/98 backdrop-blur-xl border-t border-white/5 px-4 py-3 overflow-y-auto max-h-[85vh]">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               onClick={() => setMobileOpen(false)}
-              className={`block py-2 text-lg transition-colors ${
+              className={`block py-2.5 text-base transition-colors ${
                 isActive(link.href) ? 'text-[#00E676]' : 'text-white/70'
               }`}
             >
@@ -346,10 +312,10 @@ export function Navbar() {
             </Link>
           ))}
           {/* Mobile service pages - expandable */}
-          <div className="border-t border-white/5 pt-3">
+          <div className="border-t border-white/5 mt-2 pt-2">
             <button
               onClick={() => setMobileServicesOpen(!mobileServicesOpen)}
-              className="flex items-center justify-between w-full py-2 px-2 text-lg text-white/70"
+              className="flex items-center justify-between w-full py-2.5 px-1 text-base text-white/70"
             >
               <span>Servicios</span>
               <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${mobileServicesOpen ? 'rotate-180' : ''}`} />
@@ -360,7 +326,7 @@ export function Navbar() {
                   key={service.href}
                   href={service.href}
                   onClick={() => { setMobileOpen(false); setMobileServicesOpen(false) }}
-                  className={`block py-2 px-4 text-base transition-colors ${
+                  className={`block py-2 px-3 text-sm transition-colors ${
                     pathname === service.href ? 'text-[#00E676]' : 'text-white/60'
                   }`}
                 >
@@ -369,11 +335,11 @@ export function Navbar() {
               ))}
             </div>
           </div>
-          {/* Mobile partners - expandable */}
-          <div className="border-t border-white/5 pt-3">
+          {/* Partners link in mobile footer section */}
+          <div className="border-t border-white/5 mt-2 pt-2">
             <button
               onClick={() => setMobilePartnersOpen(!mobilePartnersOpen)}
-              className="flex items-center justify-between w-full py-2 px-2 text-lg text-white/70"
+              className="flex items-center justify-between w-full py-2.5 px-1 text-base text-white/70"
             >
               <span>Partners</span>
               <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${mobilePartnersOpen ? 'rotate-180' : ''}`} />
@@ -384,7 +350,7 @@ export function Navbar() {
                   key={partner.href}
                   href={partner.href}
                   onClick={() => { setMobileOpen(false); setMobilePartnersOpen(false) }}
-                  className={`block py-2 px-4 text-base transition-colors ${
+                  className={`block py-2 px-3 text-sm transition-colors ${
                     pathname === partner.href ? 'text-[#00E676]' : 'text-white/60'
                   }`}
                 >
@@ -394,11 +360,11 @@ export function Navbar() {
             </div>
           </div>
           <a
-            href="/#reservas"
+            href="https://wa.me/59173662803"
             onClick={() => setMobileOpen(false)}
-            className="block w-full text-center px-6 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all mt-2"
+            className="flex items-center justify-center gap-2 w-full mt-3 px-6 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all"
           >
-            Pedir Taxi
+            <Phone className="w-4 h-4" /> Pedir Taxi
           </a>
         </div>
       </div>

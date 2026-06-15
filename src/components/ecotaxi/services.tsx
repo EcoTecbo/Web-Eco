@@ -79,9 +79,9 @@ Más de 17 servicios de transporte diseñados para cubrir cada necesidad. Haz cl
               <div
                 key={service.title}
                 onClick={() => setExpandedService(isExpanded ? null : service.title)}
-                className={`group relative p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm cursor-pointer transition-all duration-500 ${
+                className={`group relative p-4 sm:p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm cursor-pointer transition-all duration-500 ${
                   isExpanded
-                    ? 'border-[#00E676]/30 bg-white/[0.06] sm:col-span-2 lg:col-span-2 xl:col-span-2'
+                    ? 'border-[#00E676]/30 bg-white/[0.06] col-span-2'
                     : 'hover:border-white/10 hover:bg-white/[0.05]'
                 } ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
                 style={{ transitionDelay: visible ? `${i * 40}ms` : '0ms' }}
@@ -92,15 +92,15 @@ Más de 17 servicios de transporte diseñados para cubrir cada necesidad. Haz cl
                 }`} />
 
                 <div className="relative z-10">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300 ${
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300 ${
                       isExpanded ? 'bg-[#00E676]/20' : 'bg-gradient-to-br from-[#0077BD]/20 to-[#00E676]/20'
                     }`}>
-                      <service.icon className={`w-5 h-5 transition-colors duration-300 ${
+                      <service.icon className={`w-4 h-4 sm:w-5 sm:h-5 transition-colors duration-300 ${
                         isExpanded ? 'text-[#00E676]' : 'text-white/90'
                       }`} />
                     </div>
-                    <h3 className={`text-sm font-semibold transition-colors duration-300 ${
+                    <h3 className={`text-xs sm:text-sm font-semibold transition-colors duration-300 leading-tight ${
                       isExpanded ? 'text-[#00E676]' : 'text-white/80 group-hover:text-white'
                     }`}>
                       {service.title}
@@ -112,26 +112,26 @@ Más de 17 servicios de transporte diseñados para cubrir cada necesidad. Haz cl
 
                   {/* Expanded description */}
                   <div className={`overflow-hidden transition-all duration-500 ${
-                    isExpanded ? 'max-h-40 opacity-100 mt-4' : 'max-h-0 opacity-0'
+                    isExpanded ? 'max-h-40 opacity-100 mt-3' : 'max-h-0 opacity-0'
                   }`}>
-                    <p className="text-sm text-white/50 leading-relaxed">
+                    <p className="text-xs sm:text-sm text-white/50 leading-relaxed">
                       {service.desc}
                     </p>
                     {service.href ? (
                       <Link
                         href={service.href}
-                        className="inline-flex items-center gap-1 mt-3 text-xs font-semibold text-[#00E676] hover:text-[#00ff88] transition-colors"
+                        className="inline-flex items-center gap-1 mt-3 px-3 py-1.5 rounded-lg text-xs font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-colors"
                         onClick={(e) => e.stopPropagation()}
                       >
-Ver servicio →
+                        Ver servicio →
                       </Link>
                     ) : (
                       <a
                         href="#reservas"
-                        className="inline-flex items-center gap-1 mt-3 text-xs font-semibold text-[#00E676] hover:text-[#00ff88] transition-colors"
+                        className="inline-flex items-center gap-1 mt-3 px-3 py-1.5 rounded-lg text-xs font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-colors"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        Reservar este servicio →
+                        Reservar →
                       </a>
                     )}
                   </div>
