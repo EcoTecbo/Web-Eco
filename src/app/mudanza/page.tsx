@@ -271,7 +271,7 @@ const VEHICLES = [
     { name: 'Camión Pequeño', cap: 6, desc: '1.0-1.5 Tn · 1.5×2.8 mt · Caja abierta', pax: 2, floorElev: 10, floorNoElev: 15, helperPrice: 60, perKm: 10, baseFare: 110, acarreoPrice: 10, embStd: 120, embPrem: 200, desemb: 60, img: '/vehicles/6-CAMIONETA/pequena.png' },
     { name: 'Camión Mediano', cap: 12, desc: '1.5-3.0 Tn · 1.7×3.2 mt · Caja abierta', pax: 3, floorElev: 12, floorNoElev: 18, helperPrice: 80, perKm: 12, baseFare: 150, acarreoPrice: 10, embStd: 250, embPrem: 350, desemb: 75, img: '/vehicles/6-CAMIONETA/mediana.png' },
     { name: 'Camión Largo', cap: 22, desc: '3.0-4.0 Tn · 2.0×4.0 mt · Caja abierta', pax: 3, floorElev: 15, floorNoElev: 20, helperPrice: 100, perKm: 15, baseFare: 230, acarreoPrice: 15, embStd: 400, embPrem: 600, desemb: 200, img: '/vehicles/6-CAMIONETA/larga.png' },
-    { name: 'Camión Grande', cap: 35, desc: '4.0-6.0 Tn · 2.3×6.2 mt · Caja abierta', pax: 3, floorElev: 15, floorNoElev: 20, helperPrice: 120, perKm: 20, baseFare: 280, acarreoPrice: 15, embStd: 600, embPrem: 800, desemb: 300, img: '/vehicles/6-CAMIONETA/grande.jpg' },
+    { name: 'Camión Grande', cap: 35, desc: '4.0-6.0 Tn · 2.3×6.2 mt · Caja abierta', pax: 3, floorElev: 15, floorNoElev: 20, helperPrice: 120, perKm: 20, baseFare: 280, acarreoPrice: 15, embStd: 600, embPrem: 800, desemb: 300, img: '/vehicles/6-CAMIONETA/grande.png' },
   ]},
   { cat: 'Furgón', color: '#818CF8', items: [
     { name: 'Furgón Pequeño', cap: 7, desc: '1.0-1.5 Tn · ~7.1 m³ · Cerrado', pax: 2, floorElev: 15, floorNoElev: 15, helperPrice: 80, perKm: 12, baseFare: 150, acarreoPrice: 10, embStd: 120, embPrem: 200, desemb: 60, img: '/vehicles/7-FURGON/pequeno.png' },
@@ -421,13 +421,13 @@ function HeroSection() {
    2. SERVICE TYPES
    ═══════════════════════════════════════════════════════════════════════════════ */
 const serviceTypes = [
-  { icon: MapPin, title: 'Mudanza Local', color: '#00E676', price: 'Desde Bs 200',
+  { icon: MapPin, title: 'Mudanza Local', color: '#00E676', price: 'Desde Bs 80',
     desc: 'Dentro de la misma ciudad. Disponibles en Santa Cruz, La Paz y Cochabamba. Servicio el mismo día con equipo profesional y vehículos adecuados para cada tipo de mudanza.',
     features: ['Servicio el mismo día', 'Cobertura en 3 ciudades principales', 'Rastreo GPS en tiempo real', 'Seguro de carga incluido'] },
-  { icon: Route, title: 'Mudanza Provincial', color: '#0077BD', price: 'Desde Bs 500',
+  { icon: Route, title: 'Mudanza Provincial', color: '#0077BD', price: 'Desde Bs 200',
     desc: 'Entre provincias dentro del mismo departamento. Servicio al día siguiente con logística coordinada y protección especial para traslados de mayor distancia dentro del departamento.',
     features: ['Servicio al día siguiente', 'Protección especial para distancia', 'Coordinación logística completa', 'Reporte de ubicación en ruta'] },
-  { icon: Globe, title: 'Mudanza Nacional', color: '#FF9800', price: 'Desde Bs 1,000',
+  { icon: Globe, title: 'Mudanza Nacional', color: '#FF9800', price: 'Desde Bs 500',
     desc: 'Entre departamentos y ciudades de toda Bolivia. Servicio programado con seguimiento satelital, protección reforzada y seguro premium para traslados de larga distancia a nivel nacional.',
     features: ['Servicio programado con tracking', 'Seguro premium de carga', 'Protección reforzada', 'Cobertura nacional completa'] },
 ]
@@ -848,16 +848,17 @@ function CalculatorSection() {
   const basePrice = useMemo(() => {
     if (!selectedVehicle) return 0
     const d = routeDistance > 0 ? routeDistance : 10
-    // Tarifa base del vehículo (incluye 4 km) + costo extra por km adicional
-    const includedKm = 4
-    const extraKm = Math.max(0, d - includedKm)
-    let price = selectedVehicle.baseFare + selectedVehicle.perKm * extraKm
+    // Tarifa base según tipo de mudanza (local=80, provincial=200, nacional=500) + costo por km
+    const moveTypeBase: Record<MoveType, number> = { local: 80, provincial: 200, nacional: 500 }
+    const baseFare = moveTypeBase[moveType]
+    const perKmTotal = selectedVehicle.perKm * d
+    let price = baseFare + perKmTotal
     // Vehículos adicionales al 70%
     for (const av of additionalVehicles) {
-      price += av.baseFare * 0.7 + av.perKm * extraKm * 0.7
+      price += baseFare * 0.7 + av.perKm * d * 0.7
     }
-    return price
-  }, [routeDistance, selectedVehicle, additionalVehicles])
+    return Math.round(price)
+  }, [routeDistance, selectedVehicle, additionalVehicles, moveType])
 
   const insuranceCost = useMemo(() => {
     if (!wantsInsurance) return 0
