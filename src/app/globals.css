@@ -87,6 +87,10 @@
   }
   html {
     scroll-behavior: smooth;
+    overflow-x: hidden;
+  }
+  body {
+    overflow-x: hidden;
   }
 }
 
@@ -227,7 +231,7 @@
 .navbar-taxi-track {
   position: relative;
   height: 3px;
-  overflow: visible;
+  overflow: hidden;
   border-radius: 0 0 2px 2px;
 }
 
