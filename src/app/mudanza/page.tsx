@@ -201,16 +201,16 @@ const PACKING_MATERIALS = [
   { id: 'etiquetas', name: 'Etiquetas y Marcadores', price: 10, emoji: '🏷️' },
 ]
 
-/* Handling extras (per item, applies to both origin/dest) */
+/* Handling extras - Precios según tabla oficial EcoTaxi */
 const HANDLING_EXTRAS = [
-  { id: 'armado_muebles', name: 'Armado y Desarmado de Muebles Grandes', price: 80, unit: 'mueble', emoji: '🔧', desc: 'Roperos, camas, cunas, escritorios grandes' },
-  { id: 'embalaje_fragil', name: 'Embalaje Especial Objetos Frágiles', price: 60, unit: 'juego', emoji: '🍷', desc: 'Vajilla, espejos, obras de arte, pantallas TV' },
-  { id: 'objetos_pesados', name: 'Objetos de Gran Peso / Línea Blanca', price: 120, unit: 'objeto', emoji: '🏋️', desc: 'Pianos, cajas fuertes, refrigeradores 2 puertas' },
+  { id: 'muebles_simples', name: 'Muebles Simples (Camas, Mesas)', price: 40, unit: 'mueble', emoji: '🛏️', desc: 'Camas, mesas, sillas, mesitas de noche' },
+  { id: 'muebles_medianos', name: 'Muebles Medianos (Roperos medianos)', price: 70, unit: 'mueble', emoji: '🗄️', desc: 'Roperos medianos, libreros, vitrinas' },
+  { id: 'muebles_complejos', name: 'Muebles Complejos (Roperos gigantes)', price: 100, unit: 'mueble', emoji: '🔧', desc: 'Roperos gigantes, muebles modulares grandes, closets enteros' },
 ]
 
 /* Accessibility extras (per location - origin and destination separately) */
 const ACCESSIBILITY_EXTRAS = [
-  { id: 'distancia_caminata', name: 'Distancia de Caminata / Acarreo', price: 20, unit: '10m', emoji: '🚶', desc: 'Si el camión no puede estacionar frente a la puerta' },
+  { id: 'distancia_caminata', name: 'Distancia de Acarreo', price: 0, unit: '25m', emoji: '🚶', desc: 'Primeros 25m incluidos, luego por cada 25m adicional' },
   { id: 'elevador_fachada', name: 'Elevador por Fachada (Grúa)', price: 200, unit: 'hr', emoji: '🏗️', desc: 'Grúa externa para subir muebles por ventana' },
 ]
 
@@ -230,7 +230,7 @@ const MUDANZA_CATEGORIES = [
     color: '#00E676',
     desc: 'Ideal para departamentos de 1 dormitorio o monoambientes. Incluye camas, un ropero mediano, heladera, electrodomésticos básicos y 10-15 cajas.',
     suggestedVehicle: { cerrado: 'Furgón Pequeño', abierto: 'Pickup' },
-    maxVolume: 6,
+    maxVolume: 7,
   },
   {
     id: 'estandar',
@@ -239,8 +239,8 @@ const MUDANZA_CATEGORIES = [
     emoji: '🏠',
     color: '#0077BD',
     desc: 'Ideal para departamentos de 2 a 3 dormitorios. Muebles de living, comedor, camas, línea blanca completa y 20-30 cajas.',
-    suggestedVehicle: { cerrado: 'Furgón Mediano', abierto: 'Camioneta Mediana' },
-    maxVolume: 14,
+    suggestedVehicle: { cerrado: 'Furgón Mediano', abierto: 'Camión Mediano' },
+    maxVolume: 12,
   },
   {
     id: 'familiar',
@@ -249,8 +249,8 @@ const MUDANZA_CATEGORIES = [
     emoji: '🏡',
     color: '#FF9800',
     desc: 'Ideal para casas de 3 a 4 dormitorios. Mobiliario completo de casa, muebles de jardín, múltiples roperos y más de 40 cajas.',
-    suggestedVehicle: { cerrado: 'Furgón Grande', abierto: 'Camioneta Larga' },
-    maxVolume: 25,
+    suggestedVehicle: { cerrado: 'Furgón Largo', abierto: 'Camión Largo' },
+    maxVolume: 22,
   },
   {
     id: 'premium',
@@ -259,25 +259,25 @@ const MUDANZA_CATEGORIES = [
     emoji: '🏢',
     color: '#818CF8',
     desc: 'Ideal para casas amplias de más de 4 dormitorios o traslados de oficinas. Residencias grandes en un solo viaje o múltiples vehículos.',
-    suggestedVehicle: { cerrado: 'Furgón Largo', abierto: 'Camioneta Grande' },
+    suggestedVehicle: { cerrado: 'Furgón Grande', abierto: 'Camión Grande' },
     maxVolume: 35,
   },
 ]
 
-/* vehicles */
+/* vehicles - Tarifas actualizadas según tabla oficial EcoTaxi */
 const VEHICLES = [
   { cat: 'Camioneta', color: '#FB923C', items: [
-    { name: 'Pickup', cap: 8, desc: 'Caja abierta grande, ideal para cargas sin protección del clima', pax: 2, floorElev: 5, floorNoElev: 10, helperPrice: 60, perKm: 8, img: '/vehicles/6-CAMIONETA/pickup.png' },
-    { name: 'Camioneta Pequeña', cap: 5, desc: 'Mudanzas pequeñas, departamento studio o 1 dormitorio', pax: 2, floorElev: 10, floorNoElev: 15, helperPrice: 80, perKm: 10, img: '/vehicles/6-CAMIONETA/pequena.png' },
-    { name: 'Camioneta Mediana', cap: 12, desc: 'Mudanzas medianas, departamento 2 dormitorios', pax: 3, floorElev: 15, floorNoElev: 20, helperPrice: 100, perKm: 12, img: '/vehicles/6-CAMIONETA/mediana.png' },
-    { name: 'Camioneta Grande', cap: 35, desc: 'Mudanzas extra grandes o múltiples destinos', pax: 3, floorElev: 20, floorNoElev: 25, helperPrice: 120, perKm: 15, img: '/vehicles/6-CAMIONETA/grande.jpg' },
-    { name: 'Camioneta Larga', cap: 22, desc: 'Mudanzas grandes, casa 3+ dormitorios', pax: 3, floorElev: 25, floorNoElev: 30, helperPrice: 150, perKm: 18, img: '/vehicles/6-CAMIONETA/larga.png' },
+    { name: 'Pickup', cap: 4, desc: '0.8-1.2 Tn · 1.5×2.3 mt · Caja abierta', pax: 2, floorElev: 8, floorNoElev: 10, helperPrice: 50, perKm: 9, baseFare: 90, acarreoPrice: 8, embStd: 100, embPrem: 150, desemb: 40, img: '/vehicles/6-CAMIONETA/pickup.png' },
+    { name: 'Camión Pequeño', cap: 6, desc: '1.0-1.5 Tn · 1.5×2.8 mt · Caja abierta', pax: 2, floorElev: 10, floorNoElev: 15, helperPrice: 60, perKm: 10, baseFare: 110, acarreoPrice: 10, embStd: 120, embPrem: 200, desemb: 60, img: '/vehicles/6-CAMIONETA/pequena.png' },
+    { name: 'Camión Mediano', cap: 12, desc: '1.5-3.0 Tn · 1.7×3.2 mt · Caja abierta', pax: 3, floorElev: 12, floorNoElev: 18, helperPrice: 80, perKm: 12, baseFare: 150, acarreoPrice: 10, embStd: 250, embPrem: 350, desemb: 75, img: '/vehicles/6-CAMIONETA/mediana.png' },
+    { name: 'Camión Largo', cap: 22, desc: '3.0-4.0 Tn · 2.0×4.0 mt · Caja abierta', pax: 3, floorElev: 15, floorNoElev: 20, helperPrice: 100, perKm: 15, baseFare: 230, acarreoPrice: 15, embStd: 400, embPrem: 600, desemb: 200, img: '/vehicles/6-CAMIONETA/larga.png' },
+    { name: 'Camión Grande', cap: 35, desc: '4.0-6.0 Tn · 2.3×6.2 mt · Caja abierta', pax: 3, floorElev: 15, floorNoElev: 20, helperPrice: 120, perKm: 20, baseFare: 280, acarreoPrice: 15, embStd: 600, embPrem: 800, desemb: 300, img: '/vehicles/6-CAMIONETA/grande.jpg' },
   ]},
   { cat: 'Furgón', color: '#818CF8', items: [
-    { name: 'Furgón Pequeño', cap: 6, desc: 'Carga pequeña, mudanzas studio (6m³)', pax: 2, floorElev: 10, floorNoElev: 15, helperPrice: 80, perKm: 10, img: '/vehicles/7-FURGON/pequeno.png' },
-    { name: 'Furgón Mediano', cap: 12, desc: 'Carga mediana, mudanzas 1-2 dormitorios (12m³)', pax: 2, floorElev: 15, floorNoElev: 20, helperPrice: 100, perKm: 12, img: '/vehicles/7-FURGON/mediano.png' },
-    { name: 'Furgón Grande', cap: 20, desc: 'Carga grande, mudanzas 2-3 dormitorios (20m³)', pax: 3, floorElev: 20, floorNoElev: 25, helperPrice: 120, perKm: 15, img: '/vehicles/7-FURGON/grande.png' },
-    { name: 'Furgón Largo', cap: 30, desc: 'Carga extra grande, casas grandes (30m³)', pax: 3, floorElev: 25, floorNoElev: 30, helperPrice: 150, perKm: 18, img: '/vehicles/7-FURGON/largo.png' },
+    { name: 'Furgón Pequeño', cap: 7, desc: '1.0-1.5 Tn · ~7.1 m³ · Cerrado', pax: 2, floorElev: 15, floorNoElev: 15, helperPrice: 80, perKm: 12, baseFare: 150, acarreoPrice: 10, embStd: 120, embPrem: 200, desemb: 60, img: '/vehicles/7-FURGON/pequeno.png' },
+    { name: 'Furgón Mediano', cap: 10, desc: '1.5-3.0 Tn · ~10.3 m³ · Cerrado', pax: 2, floorElev: 18, floorNoElev: 18, helperPrice: 100, perKm: 15, baseFare: 180, acarreoPrice: 10, embStd: 250, embPrem: 350, desemb: 75, img: '/vehicles/7-FURGON/mediano.png' },
+    { name: 'Furgón Largo', cap: 17, desc: '3.0-4.0 Tn · ~16.8 m³ · Cerrado', pax: 3, floorElev: 18, floorNoElev: 18, helperPrice: 110, perKm: 18, baseFare: 280, acarreoPrice: 15, embStd: 400, embPrem: 600, desemb: 200, img: '/vehicles/7-FURGON/largo.png' },
+    { name: 'Furgón Grande', cap: 30, desc: '4.0-6.0 Tn · ~30.0 m³ · Cerrado', pax: 3, floorElev: 20, floorNoElev: 20, helperPrice: 120, perKm: 20, baseFare: 300, acarreoPrice: 15, embStd: 600, embPrem: 800, desemb: 300, img: '/vehicles/7-FURGON/grande.png' },
   ]},
 ]
 
@@ -780,14 +780,14 @@ function CalculatorSection() {
     return floors * pricePerFloor
   }, [selectedVehicle, destFloor, elevatorDest])
 
-  // Embalaje cost
+  // Embalaje cost - según tabla oficial por vehículo
   const embalajeCost = useMemo(() => {
-    if (embalajeType === 'ninguno') return 0
-    if (embalajeType === 'completo') return Math.round(totalVolume * 45)
-    if (embalajeType === 'solo_embalaje') return Math.round(totalVolume * 30)
-    if (embalajeType === 'solo_desembalaje') return Math.round(totalVolume * 15)
+    if (embalajeType === 'ninguno' || !selectedVehicle) return 0
+    if (embalajeType === 'completo') return selectedVehicle.embStd + selectedVehicle.desemb // Standard + Desembalaje
+    if (embalajeType === 'solo_embalaje') return selectedVehicle.embStd
+    if (embalajeType === 'solo_desembalaje') return selectedVehicle.desemb
     return 0
-  }, [embalajeType, totalVolume])
+  }, [embalajeType, selectedVehicle])
 
   // Boxes cost
   const boxesCost = useMemo(() => {
@@ -821,9 +821,11 @@ function CalculatorSection() {
 
   // Accessibility extras cost (no fachada - removed per design)
   const accessibilityCost = useMemo(() => {
-    const caminataPrice = ACCESSIBILITY_EXTRAS.find(a => a.id === 'distancia_caminata')!.price
-    return (originCaminata * caminataPrice) + (destCaminata * caminataPrice)
-  }, [originCaminata, destCaminata])
+    // Acarreo: primeros 25m incluidos, luego por cada 25m adicional según vehículo
+    const oAcarreo = originCaminata > 0 ? (selectedVehicle?.acarreoPrice || 10) * originCaminata : 0
+    const dAcarreo = destCaminata > 0 ? (selectedVehicle?.acarreoPrice || 10) * destCaminata : 0
+    return oAcarreo + dAcarreo
+  }, [originCaminata, destCaminata, selectedVehicle])
 
   // Helpers cost
   const helpersCost = useMemo(() => {
@@ -844,16 +846,18 @@ function CalculatorSection() {
   const extrasTotal = embalajeCost + boxesCost + materialsCost + handlingCost + originFloorCost + destFloorCost + accessibilityCost + helpersCost + logisticsCost + (retiroMaterial ? 150 : 0)
 
   const basePrice = useMemo(() => {
+    if (!selectedVehicle) return 0
     const d = routeDistance > 0 ? routeDistance : 10
-    const bases: Record<MoveType, number> = { local: 200, provincial: 500, nacional: 1000 }
-    const perKm = selectedVehicle ? selectedVehicle.perKm : 10
-    let price = bases[moveType] + perKm * d
-    // Add cost for additional vehicles
+    // Tarifa base del vehículo (incluye 4 km) + costo extra por km adicional
+    const includedKm = 4
+    const extraKm = Math.max(0, d - includedKm)
+    let price = selectedVehicle.baseFare + selectedVehicle.perKm * extraKm
+    // Vehículos adicionales al 70%
     for (const av of additionalVehicles) {
-      price += av.perKm * d * 0.7 // Additional vehicles at 70% rate
+      price += av.baseFare * 0.7 + av.perKm * extraKm * 0.7
     }
     return price
-  }, [moveType, routeDistance, selectedVehicle, additionalVehicles])
+  }, [routeDistance, selectedVehicle, additionalVehicles])
 
   const insuranceCost = useMemo(() => {
     if (!wantsInsurance) return 0
@@ -954,7 +958,7 @@ function CalculatorSection() {
   const buildSummaryText = () => {
     const items = getSelectedItems().map(i => `${i.qty}x ${i.name}`).join(', ')
     const vehicleName = selectedVehicle ? selectedVehicle.name : getRecommendation(totalVolume).vehicle
-    const embalajeLabel = embalajeType === 'completo' ? 'Completo (Bs 45/m³)' : embalajeType === 'solo_embalaje' ? 'Solo Embalaje (Bs 30/m³)' : embalajeType === 'solo_desembalaje' ? 'Solo Desembalaje (Bs 15/m³)' : 'Ninguno'
+    const embalajeLabel = embalajeType === 'completo' ? `Completo (Bs ${selectedVehicle?.embStd || 0} + ${selectedVehicle?.desemb || 0})` : embalajeType === 'solo_embalaje' ? `Solo Embalaje (Bs ${selectedVehicle?.embStd || 0})` : embalajeType === 'solo_desembalaje' ? `Solo Desembalaje (Bs ${selectedVehicle?.desemb || 0})` : 'Ninguno'
     const catLabel = MUDANZA_CATEGORIES.find(c => c.id === mudanzaCategory)?.name || catType
 
     let text = `COTIZACIÓN DE MUDANZA\n`
@@ -973,13 +977,13 @@ function CalculatorSection() {
     text += `\nORIGEN: ${originAddress || 'No especificado'}\n`
     text += `  Piso: ${originFloor === 'baja' ? 'Planta baja' : `Piso ${originFloor}`}${elevatorOrigin ? ' (con elevador)' : ' (sin elevador)'}\n`
     if (originFloorCost > 0) text += `  Costo piso: Bs ${originFloorCost}\n`
-    if (originCaminata > 0) text += `  Distancia caminata: ${originCaminata} x 10m\n`
+    if (originCaminata > 0) text += `  Acarreo origen: ${originCaminata} x 25m (Bs ${selectedVehicle?.acarreoPrice || 10}/25m)\n`
     if (originFachada > 0) text += `  Elevador fachada: ${originFachada} hr\n`
     if (retiroMaterial) text += `  Retiro de Material y Limpieza: Bs 150\n`
     text += `\nDESTINO: ${destAddress || 'No especificado'}\n`
     text += `  Piso: ${destFloor === 'baja' ? 'Planta baja' : `Piso ${destFloor}`}${elevatorDest ? ' (con elevador)' : ' (sin elevador)'}\n`
     if (destFloorCost > 0) text += `  Costo piso: Bs ${destFloorCost}\n`
-    if (destCaminata > 0) text += `  Distancia caminata: ${destCaminata} x 10m\n`
+    if (destCaminata > 0) text += `  Acarreo destino: ${destCaminata} x 25m (Bs ${selectedVehicle?.acarreoPrice || 10}/25m)\n`
     if (destFachada > 0) text += `  Elevador fachada: ${destFachada} hr\n`
     if (intermediateStops.length > 0) {
       text += `\nPARADAS: ${intermediateStops.map(s => s.address).join(' → ')}\n`
@@ -1910,8 +1914,8 @@ function CalculatorSection() {
                     <div>
                       <label className="text-xs text-white/40 block mb-1">Distancia de acarreo</label>
                       <div className="flex items-center gap-2 text-xs text-white/30 mb-1">
-                        <span>Solo si excede 10m</span>
-                        <span>· Bs 20/10m</span>
+                        <span>Primeros 25m incluidos</span>
+                        <span>· Bs {selectedVehicle?.acarreoPrice || 10}/25m adicional</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <button onClick={() => setOriginCaminata(Math.max(0, originCaminata - 1))}
@@ -1923,7 +1927,7 @@ function CalculatorSection() {
                           className="w-7 h-7 rounded-lg bg-[#00E676]/20 flex items-center justify-center text-[#00E676] hover:bg-[#00E676]/30 transition-all">
                           <Plus className="w-3 h-3" />
                         </button>
-                        <span className="text-xs text-white/30 ml-1">× 10m</span>
+                        <span className="text-xs text-white/30 ml-1">× 25m</span>
                       </div>
                     </div>
                   </div>
@@ -1964,8 +1968,8 @@ function CalculatorSection() {
                     <div>
                       <label className="text-xs text-white/40 block mb-1">Distancia de acarreo</label>
                       <div className="flex items-center gap-2 text-xs text-white/30 mb-1">
-                        <span>Solo si excede 10m</span>
-                        <span>· Bs 20/10m</span>
+                        <span>Primeros 25m incluidos</span>
+                        <span>· Bs {selectedVehicle?.acarreoPrice || 10}/25m adicional</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <button onClick={() => setDestCaminata(Math.max(0, destCaminata - 1))}
@@ -1977,7 +1981,7 @@ function CalculatorSection() {
                           className="w-7 h-7 rounded-lg bg-[#0077BD]/20 flex items-center justify-center text-[#0077BD] hover:bg-[#0077BD]/30 transition-all">
                           <Plus className="w-3 h-3" />
                         </button>
-                        <span className="text-xs text-white/30 ml-1">× 10m</span>
+                        <span className="text-xs text-white/30 ml-1">× 25m</span>
                       </div>
                     </div>
                   </div>
@@ -2014,7 +2018,7 @@ function CalculatorSection() {
                       className="text-xs text-white/30 hover:text-white/50 underline">Cambiar</button>
                   </div>
                   <div className="grid grid-cols-3 gap-2 mb-3">
-                    {([['completo', 'Completo', 'Bs 45/m³', '#00E676'], ['solo_embalaje', 'Solo Embalaje', 'Bs 30/m³', '#0077BD'], ['solo_desembalaje', 'Solo Desembalaje', 'Bs 15/m³', '#FF9800']] as const).map(([id, label, price, color]) => (
+                    {([['completo', 'Completo', `Bs ${selectedVehicle?.embStd || 0}+${selectedVehicle?.desemb || 0}`, '#00E676'], ['solo_embalaje', 'Solo Embalaje', `Bs ${selectedVehicle?.embStd || 0}`, '#0077BD'], ['solo_desembalaje', 'Solo Desembalaje', `Bs ${selectedVehicle?.desemb || 0}`, '#FF9800']] as const).map(([id, label, price, color]) => (
                       <button key={id} onClick={() => setEmbalajeType(id as typeof embalajeType)}
                         className={`p-3 rounded-xl text-xs font-semibold transition-all text-center ${embalajeType === id ? `border-2` : 'bg-white/[0.03] border border-white/[0.06] hover:border-white/10 text-white/50'}`}
                         style={embalajeType === id ? { backgroundColor: `${color}10`, borderColor: `${color}50`, color } : {}}>
@@ -2025,9 +2029,9 @@ function CalculatorSection() {
                   </div>
                   {embalajeType !== 'ninguno' && totalVolume > 0 && (
                     <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.06] text-xs text-white/50">
-                      {embalajeType === 'completo' && <span>Bs 45/m³ × {totalVolume}m³ = <span className="text-[#00E676] font-bold">Bs {embalajeCost}</span></span>}
-                      {embalajeType === 'solo_embalaje' && <span>Bs 30/m³ × {totalVolume}m³ = <span className="text-[#0077BD] font-bold">Bs {embalajeCost}</span></span>}
-                      {embalajeType === 'solo_desembalaje' && <span>Bs 15/m³ × {totalVolume}m³ = <span className="text-[#FF9800] font-bold">Bs {embalajeCost}</span></span>}
+                      {embalajeType === 'completo' && <span>Embalaje Bs {selectedVehicle?.embStd || 0} + Desembalaje Bs {selectedVehicle?.desemb || 0} = <span className="text-[#00E676] font-bold">Bs {embalajeCost}</span></span>}
+                      {embalajeType === 'solo_embalaje' && <span>Embalaje Standard = <span className="text-[#0077BD] font-bold">Bs {embalajeCost}</span></span>}
+                      {embalajeType === 'solo_desembalaje' && <span>Desembalaje = <span className="text-[#FF9800] font-bold">Bs {embalajeCost}</span></span>}
                     </div>
                   )}
                 </div>
