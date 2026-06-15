@@ -231,7 +231,7 @@
 .navbar-taxi-track {
   position: relative;
   height: 3px;
-  overflow: hidden;
+  overflow: visible;
   border-radius: 0 0 2px 2px;
 }
 
