@@ -54,8 +54,14 @@ function AnimatedSection({ children, className = '', delay = 0 }: {
 function HeroSection() {
   return (
     <section className="relative min-h-[92vh] flex items-center justify-center overflow-hidden">
-      {/* Background gradient — darker, more premium */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#08060d] via-[#0d0a14] to-[#08060d]" />
+      {/* Background image cover — VIP taxi */}
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: "url('/vip-hero.webp')" }}
+      />
+
+      {/* Dark overlay for readability — keeps the premium gold & black feel */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#08060d]/80 via-[#0d0a14]/75 to-[#08060d]/90" />
 
       {/* Grid pattern — gold tint */}
       <div

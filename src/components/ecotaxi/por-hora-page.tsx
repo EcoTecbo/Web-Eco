@@ -247,7 +247,7 @@ export function PorHoraPage() {
         {/* background image cover */}
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: "url('/por-hora-hero.jpg')" }}
+          style={{ backgroundImage: "url('/por-hora-hero.webp')" }}
         />
         {/* dark overlay for readability */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17]/80 via-[#0a0e17]/70 to-[#0a0e17]/90" />
@@ -904,7 +904,7 @@ export function PorHoraPage() {
         {/* callcenter background image */}
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: "url('/callcenter-bg.jpg')" }}
+          style={{ backgroundImage: "url('/callcenter-bg.webp')" }}
         />
         {/* dark overlay for readability */}
         <div className="absolute inset-0 bg-[#0a0e17]/85" />
