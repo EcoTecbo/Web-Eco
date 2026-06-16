@@ -67,3 +67,7 @@ tool-results/
 
 # Scripts de conversión
 scripts/
+
+# Build output (rompe el scan de Tailwind v4)
+preview/
+
