@@ -52,37 +52,53 @@ const portalAccess = [
   {
     icon: Building2,
     title: 'Empresas',
-    description: 'Acceso corporativo para gestión de transporte, facturación y reportes de tu empresa.',
+    description: 'Monitorea el transporte de tus funcionarios en tiempo real. Gestiona rutas corporativas, asigna límites de presupuesto y descarga reportes de facturación al instante.',
     color: '#0077BD',
     bgColor: 'bg-[#0077BD]/10',
-    borderColor: 'border-[#0077BD]/20 hover:border-[#0077BD]/50',
+    borderColor: 'border-[#0077BD]/20 hover:border-[#0077BD]/60',
+    buttonLabel: 'Ingresar al Portal',
+    // outline button classes — blue
+    buttonClass:
+      'border-[#0077BD] text-[#0077BD] hover:bg-[#0077BD] hover:text-white hover:shadow-[0_4px_20px_rgba(0,119,189,0.35)]',
     href: 'https://ecotaxi-kc.tm.taxi/',
   },
   {
     icon: HandshakeIcon,
     title: 'Partners',
-    description: 'Portal para socios, afiliados y colaboradores comerciales. Gestiona tu cuenta de partner.',
+    description: 'Tu centro de control comercial. Administra convenios activos, visualiza métricas de rendimiento de tus alianzas y gestiona liquidaciones de manera transparente.',
     color: '#00E676',
     bgColor: 'bg-[#00E676]/10',
-    borderColor: 'border-[#00E676]/20 hover:border-[#00E676]/50',
+    borderColor: 'border-[#00E676]/20 hover:border-[#00E676]/60',
+    buttonLabel: 'Ingresar al Portal',
+    // outline button classes — green
+    buttonClass:
+      'border-[#00E676] text-[#00E676] hover:bg-[#00E676] hover:text-black hover:shadow-[0_4px_20px_rgba(0,230,118,0.35)]',
     href: 'https://crm.oyc-srl.com/',
   },
   {
     icon: Hotel,
     title: 'Hoteles',
-    description: 'Acceso para hoteles y alojamiento. Coordina traslados para tus huéspedes de manera eficiente.',
+    description: 'La oficina virtual para tu recepción. Solicita y programa traslados para tus huéspedes en segundos, monitorea el estado del vehículo desde el lobby y mejora su experiencia.',
     color: '#FF9800',
     bgColor: 'bg-orange-500/10',
-    borderColor: 'border-orange-500/20 hover:border-orange-500/50',
+    borderColor: 'border-orange-500/20 hover:border-orange-500/60',
+    buttonLabel: 'Ingresar al Portal',
+    // outline button classes — yellow (use FF9800 = orange-500 equivalent in brand palette)
+    buttonClass:
+      'border-[#FF9800] text-[#FF9800] hover:bg-[#FF9800] hover:text-black hover:shadow-[0_4px_20px_rgba(255,152,0,0.35)]',
     href: 'https://crm.oyc-srl.com/',
   },
   {
     icon: Users,
     title: 'Conductores',
-    description: 'Descarga la APP de conductor y únete a la flota más grande de Bolivia.',
+    description: 'Tu oficina sobre ruedas. Accede a tu panel de control para revisar el historial de tus viajes, ingresos acumulados, soporte y herramientas de la flota.',
     color: '#8B5CF6',
     bgColor: 'bg-purple-500/10',
-    borderColor: 'border-purple-500/20 hover:border-purple-500/50',
+    borderColor: 'border-purple-500/20 hover:border-purple-500/60',
+    buttonLabel: 'Descargar APP',
+    // outline button classes — purple
+    buttonClass:
+      'border-[#8B5CF6] text-[#8B5CF6] hover:bg-[#8B5CF6] hover:text-white hover:shadow-[0_4px_20px_rgba(139,92,246,0.35)]',
     href: 'https://play.google.com/store/apps/details?id=taxi.id3251&pcampaignid=web_share',
   },
 ]
@@ -472,7 +488,7 @@ export function Multicanal() {
                 href={portal.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`group relative p-6 rounded-2xl bg-white/[0.03] border backdrop-blur-sm transition-all duration-500 ${portal.borderColor} hover:bg-white/[0.05] ${
+                className={`group relative p-6 rounded-2xl bg-white/[0.03] border backdrop-blur-sm transition-all duration-500 hover:-translate-y-1 ${portal.borderColor} hover:bg-white/[0.05] ${
                   visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                 }`}
                 style={{ transitionDelay: visible ? `${300 + i * 100}ms` : '0ms' }}
@@ -481,20 +497,25 @@ export function Multicanal() {
                 <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
                   style={{ boxShadow: `0 0 30px ${portal.color}15` }} />
 
-                <div className="relative z-10">
-                  <div className={`w-14 h-14 rounded-2xl ${portal.bgColor} flex items-center justify-center mb-4`}>
+                <div className="relative z-10 flex flex-col h-full">
+                  <div className={`w-14 h-14 rounded-2xl ${portal.bgColor} flex items-center justify-center mb-4 transition-transform duration-300 group-hover:scale-110`}>
                     <portal.icon className="w-7 h-7 text-white" style={{ color: portal.color, filter: 'brightness(1.3)' }} />
                   </div>
                   <h4 className="text-lg font-semibold text-white mb-2 group-hover:text-white/90 transition-colors">
                     {portal.title}
                   </h4>
-                  <p className="text-sm text-white/40 leading-relaxed mb-4">
+                  <p className="text-sm text-white/50 leading-relaxed mb-5 flex-1">
                     {portal.description}
                   </p>
-                  <div className="flex items-center gap-2 text-sm font-medium transition-colors" style={{ color: portal.color }}>
-                    <span>{portal.title === 'Conductores' ? 'Descargar APP' : 'Acceder al portal'}</span>
+                  {/* Outline CTA button — fills on hover with brand color */}
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    className={`w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full text-sm font-semibold border-2 transition-all duration-300 ${portal.buttonClass}`}
+                  >
+                    {portal.buttonLabel}
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-                  </div>
+                  </button>
                 </div>
               </a>
             ))}
