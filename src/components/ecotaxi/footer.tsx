@@ -175,12 +175,12 @@ export function Footer() {
             <Link href="/nosotros" className="text-white/20 hover:text-white/40 text-xs transition-colors">
               Nosotros
             </Link>
-            <a href="#" className="text-white/20 hover:text-white/40 text-xs transition-colors">
+            <Link href="/politica-de-privacidad" className="text-white/20 hover:text-white/40 text-xs transition-colors">
               Política de Privacidad
-            </a>
-            <a href="#" className="text-white/20 hover:text-white/40 text-xs transition-colors">
+            </Link>
+            <Link href="/terminos-y-condiciones" className="text-white/20 hover:text-white/40 text-xs transition-colors">
               Términos de Uso
-            </a>
+            </Link>
           </div>
         </div>
       </div>
