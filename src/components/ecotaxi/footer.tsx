@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Script from 'next/script'
 import { Leaf, Facebook, Instagram, Linkedin, Youtube, Phone, Mail, MapPin } from 'lucide-react'
 
 const serviceLinks = [
@@ -149,6 +150,22 @@ export function Footer() {
           </div>
         </div>
 
+        {/* Tree-Nation Eco Website Offset Widget */}
+        <div className="mt-12 pt-8 border-t border-white/5">
+          <div className="flex flex-col items-center gap-3">
+            <div className="flex items-center gap-2 text-[#00E676]/80">
+              <Leaf className="w-4 h-4" />
+              <span className="text-xs uppercase tracking-wider font-medium">Sitio web ecológico · Sitio compensado con Tree-Nation</span>
+            </div>
+            <div
+              data-widget-type="offset-website"
+              data-tree-nation-code="601a92098de6e"
+              data-lang="es"
+              data-theme="dark"
+            />
+          </div>
+        </div>
+
         {/* Bottom Bar */}
         <div className="mt-12 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-white/20 text-xs">
@@ -167,6 +184,12 @@ export function Footer() {
           </div>
         </div>
       </div>
+
+      {/* Tree-Nation widget script */}
+      <Script
+        src="https://widgets.tree-nation.com/js/widgets/v3/widgets.min.js"
+        strategy="afterInteractive"
+      />
     </footer>
   )
 }
