@@ -279,9 +279,9 @@ export function PorHoraPage() {
 
           {/* title */}
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight mb-6">
-            Muévete a tu Ritmo:{' '}
+            Tu vehículo con chofer,{' '}
             <span className="bg-gradient-to-r from-[#FF9800] via-[#FFB74D] to-[#00E676] bg-clip-text text-transparent">
-              Vehículo por Hora a tu Disposición
+              el tiempo que necesites
             </span>
           </h1>
 
