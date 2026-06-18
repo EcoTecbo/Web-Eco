@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import Script from 'next/script'
 import { TreePine, MapPin, Wind, Leaf } from 'lucide-react'
 import { AnimatedCounter } from './animated-counter'
 
@@ -235,7 +236,43 @@ export function Arbolimetro() {
             <span className="text-sm text-[#00E676]/80">Cuidando el ambiente y a nuestros clientes</span>
           </div>
         </div>
+
+        {/* Tree-Nation Tree Counter Widget */}
+        <div
+          className={`mt-10 transition-all duration-1000 ${
+            visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}
+          style={{ transitionDelay: visible ? '1000ms' : '0ms' }}
+        >
+          <div className="max-w-2xl mx-auto p-6 md:p-8 rounded-3xl bg-white/[0.03] border border-[#00E676]/10 flex flex-col items-center gap-4">
+            <div className="flex items-center gap-2 text-[#00E676]">
+              <TreePine className="w-5 h-5" />
+              <span className="text-sm font-semibold uppercase tracking-wider">Nuestro aporte a Tree-Nation</span>
+            </div>
+            <div
+              data-widget-type="tree-counter"
+              data-tree-nation-code="f35060a6da2c0369"
+              data-lang="es"
+              data-theme="dark"
+            />
+            <a
+              href="https://tree-nation.com/profile/f35060a6da2c0369"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-2 inline-flex items-center gap-1.5 text-xs text-[#00E676] hover:text-[#00ff88] transition-colors"
+            >
+              <TreePine className="w-3.5 h-3.5" />
+              Ver nuestro perfil completo en Tree-Nation
+            </a>
+          </div>
+        </div>
       </div>
+
+      {/* Tree-Nation widget script */}
+      <Script
+        src="https://widgets.tree-nation.com/js/widgets/v3/widgets.min.js"
+        strategy="afterInteractive"
+      />
     </section>
   )
 }

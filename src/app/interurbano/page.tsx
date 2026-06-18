@@ -522,6 +522,176 @@ function DestinationsSection() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
+   3b. TOURIST DESTINATIONS BY CITY
+   ═══════════════════════════════════════════════════════════════════════════════ */
+const touristCities = [
+  {
+    city: 'Santa Cruz de la Sierra',
+    region: 'Departamento de Santa Cruz',
+    color: '#10B981',
+    icon: Sun,
+    intro: 'La capital oriental de Bolivia es la puerta de entrada a la biodiversidad del trópico cruceño. Desde playas fluviales hasta refugios de vida silvestre, los alrededores de Santa Cruz ofrecen atracciones accesibles en taxi para medio día o jornada completa.',
+    spots: [
+      { name: 'Samaipata', desc: 'Pueblo colonial a 120 km con el Fuerte de Samaipata (patrimonio UNESCO) y El Chorro.' },
+      { name: 'Lomas de Arena', desc: 'Dunas naturales a 16 km de la ciudad, ideal para sandboard y paseos en cuadraciclos.' },
+      { name: 'Mariposario Güembé', desc: 'Reserva ecológica con mariposario, senderos, cabañas y piscinas naturales.' },
+      { name: 'La Rinconada', desc: 'Balneario natural sobre el río Piraí con zonas de descanso y restaurantes.' },
+      { name: 'Vallegrande', desc: 'Pueblo histórico a 4 horas, conocido por la ruta del Che Guevara y paisajes de valle.' },
+      { name: 'Roboré', desc: 'Punto de acceso a las aguas termales de Aguas Calientes y serranía de Santiago.' },
+      { name: 'Aguas Calientes', desc: 'Fuentes termales naturales cerca de Roboré, ideales para relajarse tras el viaje.' },
+    ],
+  },
+  {
+    city: 'La Paz',
+    region: 'Departamento de La Paz',
+    color: '#0EA5E9',
+    icon: Mountain,
+    intro: 'La sede de gobierno de Bolivia combina altitud, cultura andina y paisajes surrealistas. Los atractivos cercanos se alcanzan en pocas horas y son perfectos para excursiones de un día saliendo desde el centro de la ciudad.',
+    spots: [
+      { name: 'Valle de la Luna', desc: 'Formaciones rocosas erosionadas a 10 km del centro, parecen un paisaje lunar.' },
+      { name: 'Copacabana', desc: 'Pueblo peregrino a orillas del Lago Titicaca, santuario de la Virgen de Copacabana.' },
+      { name: 'Tiwanaku', desc: 'Ruinas de una de las civilizaciones precolombinas más antiguas de América (UNESCO).' },
+      { name: 'Teleférico Mi Teleférico', desc: 'Red de cabinas aéreas con vistas panorámicas únicas de la ciudad y el Illimani.' },
+    ],
+  },
+  {
+    city: 'Potosí',
+    region: 'Departamento de Potosí',
+    color: '#F59E0B',
+    icon: Compass,
+    intro: 'Patrimonio minero y salino del altiplano boliviano. Potosí concentra algunos de los paisajes más fotografiados de Sudamérica, accesibles en vehículo 4x4 o sedán con cuidado de la altitud.',
+    spots: [
+      { name: 'Salar de Uyuni', desc: 'El desierto de sal más grande del mundo. Reflejo especular en época de lluvias.' },
+      { name: 'Cerro Rico de Potosí', desc: 'Histórica montaña de plata con tours guiados a minas activas.' },
+      { name: 'Lagunas Coloradas y Verde', desc: 'Lagunas de altiplano con flamencos y colores minerales únicos.' },
+    ],
+  },
+  {
+    city: 'Sucre',
+    region: 'Departamento de Chuquisaca',
+    color: '#8B5CF6',
+    icon: Building2,
+    intro: 'La capital constitucional de Bolivia es patrimonio UNESCO. Sus alrededores combinan paleontología, arquitectura colonial y paisajes de valle templados ideales para visitar todo el año.',
+    spots: [
+      { name: 'Huellas de Dinosaurios', desc: 'Cal Orcko: el yacimiento de huellas de dinosaurios más grande del mundo, a 5 km del centro.' },
+      { name: 'Cementerio de Dinosaurios', desc: 'Parque Cretácico con réplicas a tamaño real y museo paleontológico adjunto.' },
+      { name: 'Tarabuco', desc: 'Pueblo colonial famoso por su mercado dominical textil y la fiesta del Pujllay.' },
+    ],
+  },
+  {
+    city: 'Cochabamba',
+    region: 'Departamento de Cochabamba',
+    color: '#06B6D4',
+    icon: TreePine,
+    intro: 'El corazón gastronómico de Bolivia. Cochabamba ofrece clima templado, valles fértiles y acceso fácil a cordillera y tropico a poca distancia de la ciudad.',
+    spots: [
+      { name: 'Cristo de la Concordia', desc: 'Estatua de 40 m accesible por teleférico o a pie, con vista panorámica de la ciudad.' },
+      { name: 'Toro Toro', desc: 'Parque Nacional con cuevas, dinosaurios, cañones y piscinas naturales.' },
+      { name: 'Villa Tunari', desc: 'Acceso al trópico cochabambino, selva y refugios de vida silvestre.' },
+    ],
+  },
+  {
+    city: 'Tarija',
+    region: 'Departamento de Tarija',
+    color: '#E91E63',
+    icon: Sun,
+    intro: 'Tierra del vino y la hospitalidad. Tarija combina valles templados, viñedos y cultura gaucha con uno de los climas más agradables de Bolivia.',
+    spots: [
+      { name: 'Ruta del Vino', desc: 'Bodegas artesanales en Concepción y Valle de la Consolación con degustaciones.' },
+      { name: 'Cañón del Tolomos', desc: 'Cañón profundo con miradores naturales y biodiversidad endémica.' },
+      { name: 'Reserva Biológica Cordillera de Sama', desc: 'Área protegida con lagunas altoandinas y cóndores.' },
+    ],
+  },
+]
+
+function TouristByCitySection() {
+  return (
+    <section id="turismo-ciudad" className="relative py-24 md:py-32">
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1a12] to-[#0a0e17]" />
+      <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full bg-[#10B981]/6 blur-[150px]" />
+      <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full bg-[#0EA5E9]/5 blur-[130px]" />
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <AnimatedSection>
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#10B981]/10 border border-[#10B981]/20 mb-4">
+              <MapPin className="w-4 h-4 text-[#10B981]" />
+              <span className="text-sm text-[#10B981]">Atractivos por Ciudad</span>
+            </div>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+              Turismo en Taxi por{' '}
+              <span className="bg-gradient-to-r from-[#10B981] via-[#0EA5E9] to-[#10B981] bg-clip-text text-transparent">Ciudad</span>
+            </h2>
+            <p className="text-white/55 max-w-3xl mx-auto text-lg leading-relaxed">
+              Descubre los atractivos turísticos más visitados de cada ciudad boliviana. Todos estos destinos se pueden visitar en taxi, con salidas desde el centro urbano y regresos el mismo día o itinerarios personalizados para múltiples paradas.
+            </p>
+          </div>
+        </AnimatedSection>
+
+        <div className="space-y-8">
+          {touristCities.map((city, ci) => (
+            <AnimatedSection key={city.city} delay={ci * 80}>
+              <div className="group relative rounded-2xl bg-white/[0.025] border border-white/[0.06] backdrop-blur-sm overflow-hidden hover:border-white/10 transition-all duration-500">
+                {/* Left accent bar */}
+                <div className="absolute left-0 top-0 bottom-0 w-1.5" style={{ background: `linear-gradient(to bottom, ${city.color}, ${city.color}40)` }} />
+                <div className="p-6 md:p-8 pl-8">
+                  {/* Header */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-5">
+                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0" style={{ background: `${city.color}12` }}>
+                      <city.icon className="w-7 h-7" style={{ color: city.color }} />
+                    </div>
+                    <div>
+                      <h3 className="text-2xl md:text-3xl font-bold text-white leading-tight">{city.city}</h3>
+                      <p className="text-sm font-medium mt-0.5" style={{ color: city.color }}>{city.region}</p>
+                    </div>
+                  </div>
+                  {/* Intro paragraph */}
+                  <p className="text-white/55 leading-relaxed mb-6 text-sm md:text-base">{city.intro}</p>
+                  {/* Spots grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {city.spots.map((spot) => (
+                      <div
+                        key={spot.name}
+                        className="group/spot relative p-4 rounded-xl bg-white/[0.02] border border-white/[0.05] hover:border-white/15 hover:bg-white/[0.04] transition-all duration-300 cursor-default"
+                      >
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <div className="w-1.5 h-1.5 rounded-full" style={{ background: city.color }} />
+                          <h4 className="text-sm font-semibold text-white">{spot.name}</h4>
+                        </div>
+                        <p className="text-xs text-white/45 leading-relaxed">{spot.desc}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </AnimatedSection>
+          ))}
+        </div>
+
+        {/* CTA note */}
+        <AnimatedSection delay={150}>
+          <div className="mt-10 p-6 md:p-8 rounded-2xl bg-gradient-to-r from-[#0EA5E9]/8 via-[#10B981]/8 to-[#0EA5E9]/8 border border-[#10B981]/20 backdrop-blur-sm text-center">
+            <div className="flex items-center justify-center gap-3 mb-3">
+              <Sparkles className="w-5 h-5 text-[#10B981]" />
+              <h3 className="text-xl md:text-2xl font-bold text-white">¿No encuentras tu destino?</h3>
+            </div>
+            <p className="text-white/60 mb-5 max-w-2xl mx-auto text-sm md:text-base">
+              Coordinamos excursiones a cualquier rincón de Bolivia. Cotiza tu itinerario turístico con nosotros y diseña tu propia ruta combinando varios atractivos en un solo viaje.
+            </p>
+            <a
+              href="#contacto"
+              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full text-base font-bold text-black bg-[#10B981] hover:bg-[#34D399] transition-all duration-300 shadow-[0_0_30px_rgba(16,185,129,0.35)] hover:shadow-[0_0_50px_rgba(16,185,129,0.55)] hover:scale-105"
+            >
+              Cotizar mi ruta turística
+              <ArrowRight className="w-4 h-4" />
+            </a>
+          </div>
+        </AnimatedSection>
+      </div>
+    </section>
+  )
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
    4. FLEET
    ═══════════════════════════════════════════════════════════════════════════════ */
 const travelVehicles = [
@@ -683,6 +853,7 @@ export default function InterurbanoPage() {
       <HeroSection />
       <ServiceAreasSection />
       <DestinationsSection />
+      <TouristByCitySection />
       <FleetSection />
       <WhyChooseUsSection />
       <ContactSection />
