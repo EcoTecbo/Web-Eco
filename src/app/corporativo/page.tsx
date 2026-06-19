@@ -732,9 +732,18 @@ function ProfessionalDriversSection() {
    7. 200+ SATISFIED CLIENTS SECTION
    ═══════════════════════════════════════════════════════════════════════════════ */
 const clientNames = [
-  'Colgate-Palmolive', 'Banco BISA', 'Gloria', 'Coca-Cola', 'YPFB',
-  'Entel', 'Vinto', 'Cemento Nacional', 'Hidrocarbonos', 'Arcor',
-  'Grupo Económico', 'Banco Unión', 'PETROBRAS', 'Brady', 'FANCESA',
+  'Aldeas Infantiles SOS', 'Alicorp', 'Atlas Copco', 'BCP', 'CNPC',
+  'Copidsuj', 'Caja de Salud de la Banca Privada', 'Eurofarma', 'Fagal', 'Nestlé',
+  'Farmadical', 'Hanna', 'Hipermaxi S.A.', 'Madisa', 'Newage',
+  'Petrobras', 'Polysistema', 'PPO Abogados', 'Proesa', 'Turbin Solar',
+  'Tecnofarma', 'TIGO', 'UDABOL', 'Unifranz', 'What Tower',
+  'La Sante', 'Bioceanico', 'AHS Cosmetics', 'Belia Bolivia', 'Banco Mercantil Santa Cruz',
+  'Cainco', 'Colegio Alemán', 'DHL', 'DXN', 'EsSEN',
+  'Farmacrop', 'Floranet', 'Halliburton', 'Incotec', 'Meglod',
+  'Nacional Seguro', 'Pedido Ya', 'Rohling', 'Scanbioteck', 'Impuestos Nacionales',
+  'Sintesis', 'Sisegusa', 'Thayne', 'Tienda Amiga', 'Union Agronegocios',
+  'Valencia Citruz', 'Tribunal Departamental Electoral', 'Yanbal', 'Medio Producciones', 'Mathiesen',
+  'Banco Sol', 'Bovinsa', 'Oriental Consulting', 'Tigre S.A.', 'Prodem',
 ]
 
 const testimonials = [
