@@ -55,22 +55,17 @@ function AnimatedSection({ children, className = '', delay = 0 }: {
 function HeroSection() {
   return (
     <section className="relative min-h-[92vh] flex items-center justify-center overflow-hidden">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1320] to-[#0a0e17]" />
-
-      {/* Grid pattern */}
+      {/* Background image with overlay */}
       <div
-        className="absolute inset-0 opacity-[0.03]"
-        style={{
-          backgroundImage: `linear-gradient(rgba(0,230,118,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(0,230,118,0.3) 1px, transparent 1px)`,
-          backgroundSize: '60px 60px',
-        }}
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url('/por-hora-hero.webp')` }}
       />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17]/85 via-[#0a0e17]/75 to-[#0a0e17]/95" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#0a0e17]/80 via-transparent to-[#0a0e17]/60" />
 
-      {/* Glow orbs */}
-      <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full bg-[#0077BD]/15 blur-[120px] animate-pulse" />
-      <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full bg-[#00E676]/10 blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full bg-[#FF9800]/6 blur-[100px] animate-pulse" style={{ animationDelay: '2s' }} />
+      {/* Glow orbs (kept for depth, very subtle) */}
+      <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full bg-[#0077BD]/10 blur-[150px] animate-pulse" />
+      <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full bg-[#00E676]/8 blur-[150px] animate-pulse" style={{ animationDelay: '1s' }} />
 
       {/* Animated clock icon */}
       <div className="absolute top-32 right-[8%] md:right-[18%] opacity-10">
@@ -83,28 +78,27 @@ function HeroSection() {
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-28 pb-16">
         {/* Badge */}
         <AnimatedSection>
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00E676]/10 border border-[#00E676]/20 mb-8 backdrop-blur-sm">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00E676]/10 border border-[#00E676]/30 mb-8 backdrop-blur-md">
             <Clock className="w-4 h-4 text-[#00E676]" />
-            <span className="text-sm text-[#00E676] font-medium">Servicio por Hora</span>
+            <span className="text-sm text-[#00E676] font-medium">🕒 Servicio por Hora</span>
           </div>
         </AnimatedSection>
 
         {/* Title */}
         <AnimatedSection delay={100}>
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6">
-            Tu Vehículo a{' '}
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6 drop-shadow-lg">
+            Muévete a tu Ritmo:{' '}
             <span className="bg-gradient-to-r from-[#00E676] via-[#0077BD] to-[#00E676] bg-clip-text text-transparent">
-              Hora Cierta
+              Vehículo por Hora a tu Disposición
             </span>
           </h1>
         </AnimatedSection>
 
         {/* Subtitle */}
         <AnimatedSection delay={200}>
-          <p className="text-lg md:text-xl text-white/60 max-w-3xl mx-auto mb-10 leading-relaxed">
-            Alquila un vehículo con chofer por hora y tenlo a tu entera disposición. Vehículo, conductor, 
-            combustible y guía incluidos. Sin tarjeta de crédito, sin garantías, sin contratos complicados. 
-            Solo un clic y es tuyo.
+          <p className="text-lg md:text-xl text-white/85 max-w-3xl mx-auto mb-10 leading-relaxed drop-shadow">
+            Olvídate del papeleo y las tarifas dinámicas. Disfruta de un conductor privado con combustible incluido 
+            por el tiempo que decidas. Sin tarjetas de crédito ni contratos complicados.
           </p>
         </AnimatedSection>
 
@@ -112,14 +106,14 @@ function HeroSection() {
         <AnimatedSection delay={300}>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-14">
             <a
-              href="#modelos"
-              className="px-8 py-4 rounded-full text-lg font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_30px_rgba(0,230,118,0.3)] hover:shadow-[0_0_50px_rgba(0,230,118,0.5)] hover:scale-105"
+              href="#contacto"
+              className="px-8 py-4 rounded-full text-lg font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_30px_rgba(0,230,118,0.4)] hover:shadow-[0_0_50px_rgba(0,230,118,0.6)] hover:scale-105"
             >
-              Ver Modelos de Pago
+              Solicitar Auto Ahora
             </a>
             <a
               href="#como-funciona"
-              className="px-8 py-4 rounded-full text-lg font-semibold text-white border border-white/20 hover:border-[#00E676]/50 hover:bg-white/5 transition-all duration-300"
+              className="px-8 py-4 rounded-full text-lg font-semibold text-white border border-white/30 hover:border-[#00E676]/50 hover:bg-white/10 backdrop-blur-sm transition-all duration-300"
             >
               Cómo Funciona
             </a>
@@ -293,7 +287,7 @@ function WhatIsItSection() {
                     <span className="text-xs text-[#00E676]">Todo incluido</span>
                   </div>
                   <div className="text-3xl font-bold text-white mb-1">
-                    Bs 120<span className="text-base font-normal text-white/40">/hora</span>
+                    Bs 50<span className="text-base font-normal text-white/40">/hora</span>
                   </div>
                   <div className="text-xs text-white/30">Vehículo + Chofer + Combustible</div>
                 </div>
@@ -634,7 +628,7 @@ function PricingModelsSection() {
                       <span className="text-sm text-white/50">Total calculado automáticamente</span>
                       <div className="flex items-center gap-2">
                         <Sparkles className="w-4 h-4 text-[#00E676]" />
-                        <span className="text-lg font-bold text-[#00E676]">Bs 185</span>
+                        <span className="text-lg font-bold text-[#00E676]">Bs 75</span>
                       </div>
                     </div>
                     <p className="text-xs text-white/30 mt-2">1h base + 45min central + 30min sur + 15min norte</p>
@@ -736,7 +730,7 @@ function PricingModelsSection() {
                   {/* Hour package visualization */}
                   <div className="p-6 rounded-xl bg-gradient-to-br from-[#FF9800]/10 to-[#FF9800]/5 border border-[#FF9800]/15 mb-6">
                     <div className="text-center">
-                      <div className="text-4xl font-bold text-white mb-2">Bs 150<span className="text-lg font-normal text-white/40">/hora</span></div>
+                      <div className="text-4xl font-bold text-white mb-2">Bs 50<span className="text-lg font-normal text-white/40">/hora</span></div>
                       <div className="text-sm text-[#FF9800] font-semibold mb-4">Hasta 20 km incluidos</div>
                       
                       {/* KM gauge */}
@@ -802,10 +796,10 @@ function PricingModelsSection() {
                       <span className="text-sm text-white/50">Total (2 horas, 13 km)</span>
                       <div className="flex items-center gap-2">
                         <Sparkles className="w-4 h-4 text-[#00E676]" />
-                        <span className="text-lg font-bold text-[#00E676]">Bs 300</span>
+                        <span className="text-lg font-bold text-[#00E676]">Bs 100</span>
                       </div>
                     </div>
-                    <p className="text-xs text-white/30 mt-2">2h × Bs 150 — Dentro del km incluido</p>
+                    <p className="text-xs text-white/30 mt-2">2h × Bs 50 — Dentro del km incluido</p>
                   </div>
                 </div>
               </div>
@@ -1163,8 +1157,8 @@ function SavingsComparisonSection() {
 
               <div className="p-4 rounded-xl bg-[#00E676]/5 border border-[#00E676]/15 text-center">
                 <p className="text-xs text-[#00E676] mb-1">Total del día</p>
-                <p className="text-3xl font-bold text-[#00E676]">Bs 120</p>
-                <p className="text-xs text-white/30 mt-1">2 horas con todo incluido</p>
+                <p className="text-3xl font-bold text-[#00E676]">Bs 50</p>
+                <p className="text-xs text-white/30 mt-1">1 hora con todo incluido</p>
               </div>
             </div>
           </div>
