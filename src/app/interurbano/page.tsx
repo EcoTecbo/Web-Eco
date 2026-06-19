@@ -53,8 +53,14 @@ function AnimatedSection({ children, className = '', delay = 0 }: {
 function HeroSection() {
   return (
     <section className="relative min-h-[92vh] flex items-center justify-center overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1320] to-[#0a0e17]" />
-      <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: `linear-gradient(rgba(14,165,233,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(14,165,233,0.3) 1px, transparent 1px)`, backgroundSize: '60px 60px' }} />
+      {/* Background image: coche en carretera entre montañas */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url('/interurbano-hero.webp')` }}
+      />
+      {/* Dark gradient overlay for readability */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17]/85 via-[#0a0e17]/70 to-[#0a0e17]" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#0a0e17]/80 via-transparent to-[#0a0e17]/80" />
       <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full bg-[#0EA5E9]/12 blur-[120px] animate-pulse" />
       <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full bg-[#10B981]/10 blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full bg-[#F59E0B]/6 blur-[100px] animate-pulse" style={{ animationDelay: '2s' }} />
@@ -134,9 +140,14 @@ function ServiceAreasSection() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
           <AnimatedSection delay={100}>
             <div className="relative rounded-2xl overflow-hidden bg-white/[0.03] border border-[#0EA5E9]/15 backdrop-blur-sm h-full">
-              <div className="relative h-56 overflow-hidden bg-gradient-to-br from-[#0EA5E9]/20 via-[#0d1320] to-[#0a0e17]">
-                <div className="absolute inset-0 flex items-center justify-center"><Route className="w-24 h-24 text-[#0EA5E9]/20" /></div>
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0e17] via-[#0a0e17]/50 to-transparent" />
+              <div className="relative h-56 overflow-hidden">
+                <img
+                  src="/interurbano-card.webp"
+                  alt="Carretera interurbana con vehículos Ecotaxi y marcadores de ruta"
+                  className="absolute inset-0 w-full h-full object-cover"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0e17] via-[#0a0e17]/40 to-transparent" />
                 <div className="absolute top-4 left-4"><span className="px-4 py-1.5 rounded-full text-xs font-bold text-white bg-[#0EA5E9] uppercase tracking-wider shadow-[0_0_20px_rgba(14,165,233,0.3)]">Interurbano</span></div>
               </div>
               <div className="p-6 md:p-8">
@@ -168,11 +179,16 @@ function ServiceAreasSection() {
           </AnimatedSection>
           <AnimatedSection delay={200}>
             <div className="relative rounded-2xl overflow-hidden bg-white/[0.04] border-2 border-[#10B981]/20 backdrop-blur-sm h-full shadow-[0_0_40px_rgba(16,185,129,0.08)]">
-              <div className="relative h-56 overflow-hidden bg-gradient-to-br from-[#10B981]/20 via-[#0d1320] to-[#0a0e17]">
-                <div className="absolute inset-0 flex items-center justify-center"><Mountain className="w-24 h-24 text-[#10B981]/20" /></div>
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0e17] via-[#0a0e17]/50 to-transparent" />
+              <div className="relative h-56 overflow-hidden">
+                <img
+                  src="/interurbano-turismo.webp"
+                  alt="Formación rocosa con vegetación exuberante - destino turístico de Bolivia"
+                  className="absolute inset-0 w-full h-full object-cover"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0e17] via-[#0a0e17]/40 to-transparent" />
                 <div className="absolute top-4 left-4"><span className="px-4 py-1.5 rounded-full text-xs font-bold text-black bg-[#10B981] uppercase tracking-wider shadow-[0_0_20px_rgba(16,185,129,0.4)]">Turismo</span></div>
-                <div className="absolute top-4 right-4"><span className="px-3 py-1 rounded-full text-[10px] font-bold text-[#10B981] bg-[#10B981]/10 border border-[#10B981]/20">EXPERIENCIA COMPLETA</span></div>
+                <div className="absolute top-4 right-4"><span className="px-3 py-1 rounded-full text-[10px] font-bold text-[#10B981] bg-[#10B981]/10 border border-[#10B981]/20 backdrop-blur-sm">EXPERIENCIA COMPLETA</span></div>
               </div>
               <div className="p-6 md:p-8">
                 <div className="flex items-center gap-4 mb-6">
@@ -499,8 +515,7 @@ function DestinationsSection() {
               </div>
             </div>
           </AnimatedSection>
-        )}
-      </div>
+        )}      </div>
     </section>
   )
 }

@@ -606,7 +606,7 @@
         <div class="wc-container" id="et-wc">
           <div class="wc-placeholder">
             <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
-            <p>Chat en vivo con <strong style="color:#86efac">Chatwoot</strong> se abrirá aquí.<br>Configurá <code>CHATWOOT_BASE_URL</code> y tokens.<br><a href="#install">Ver guía de instalación →</a></p>
+            <p>Escribinos por WhatsApp y te atendemos al instante 👇</p>
           </div>
         </div>
         <a id="et-wa-link" href="#" target="_blank" class="wa-fallback">
@@ -798,6 +798,214 @@
   </div>
 </div>
 <!-- ════════ FIN WIDGET ════════ -->
-  </body>
-  </html>
+  <script>
+(function(){
+  var DEPTS = {
+    dispatch:  {name:'Despacho',                 sub:'Bot activo',      wa:'59173662803'},
+    bot:       {name:'Bot Automático',           sub:'Respuesta inmediata', wa:'59172100946'},
+    support:   {name:'Servicio al cliente',      sub:'Soporte técnico', wa:'59172140725'},
+    drivers:   {name:'Atención al chófer',       sub:'Pagos y flota',   wa:'59178264136'},
+    sales:     {name:'Comercial / Presupuestos', sub:'Cotizaciones',    wa:'59175242955'},
+    admin:     {name:'Administración',           sub:'Finanzas',        wa:'59175242955'},
+    special:   {name:'Servicios especiales',     sub:'Mudanzas y carga',wa:'59173662803'},
+    complaints:{name:'Quejas y sugerencias',     sub:'Atención al cliente', wa:'59172140725'},
+    info:      {name:'Información',              sub:'Consultas generales', wa:'59173662803'}
+  };
+  var CALL_TARGETS = {
+    dispatch: {tel:'+5913296885', wa:'59173662803', label:'🚕 Central de Despacho', tel_label:'3-296885 (línea fija)'},
+    drivers:  {tel:null, wa:'59178264136', label:'🔧 Atención Chóferes', tel_label:'78264136 (WhatsApp)'},
+    support:  {tel:null, wa:'59172140725', label:'🛠️ Soporte Técnico', tel_label:'72140725 (WhatsApp)'},
+    admin:    {tel:null, wa:'59175242955', label:'📊 Administración', tel_label:'75242955 (WhatsApp)'}
+  };
+  var startTime = Date.now();
+  var selectedCallTarget = 'dispatch';
+  var proactiveShown = false;
+
+  function $(id){ return document.getElementById(id); }
+
+  // ---------- FAB / PANEL ----------
+  window.etToggle = function(){
+    var fab = $('et-fab'), panel = $('et-panel');
+    var open = fab.classList.toggle('open');
+    panel.classList.toggle('open', open);
+    if(open){ closeProactive(); }
+  };
+
+  // ---------- TABS ----------
+  window.etTab = function(name, btn){
+    document.querySelectorAll('.et-tab').forEach(function(t){ t.classList.remove('active'); });
+    document.querySelectorAll('.et-pane').forEach(function(p){ p.classList.remove('active'); });
+    if(btn) btn.classList.add('active');
+    var pane = $('et-pane-' + name);
+    if(pane) pane.classList.add('active');
+  };
+
+  // ---------- PROACTIVE POPUP / TOAST ----------
+  window.closeProactive = function(){
+    var p = $('et-proactive');
+    if(p) p.classList.remove('show');
+    proactiveShown = true;
+  };
+
+  window.openToChat = function(){
+    closeProactive();
+    var fab = $('et-fab'), panel = $('et-panel');
+    fab.classList.add('open');
+    panel.classList.add('open');
+    etTab('chat', $('tab-chat'));
+  };
+
+  window.openToCall = function(){
+    closeProactive();
+    var fab = $('et-fab'), panel = $('et-panel');
+    fab.classList.add('open');
+    panel.classList.add('open');
+    etTab('call', $('tab-call'));
+  };
+
+  // ---------- CHAT DEPARTMENTS ----------
+  window.selectDept = function(dept){
+    var d = DEPTS[dept] || DEPTS.info;
+    $('chat-dept-name').textContent = d.name;
+    $('chat-dept-sub').textContent = d.sub;
+    $('wa-dept-label').textContent = 'Chatear con ' + d.name;
+    var waLink = $('et-wa-link');
+    var msg = encodeURIComponent('Hola, vengo desde la web de EcoTaxi y quisiera contactar con ' + d.name + '.');
+    waLink.href = 'https://wa.me/' + d.wa + '?text=' + msg;
+    $('et-dept-screen').style.display = 'none';
+    $('et-chat-screen').style.display = 'flex';
+    $('et-chat-screen').style.flexDirection = 'column';
+  };
+
+  window.backToDepts = function(){
+    $('et-chat-screen').style.display = 'none';
+    $('et-dept-screen').style.display = 'block';
+  };
+
+  // ---------- TAXI FORM ----------
+  window.updateSteps = function(){
+    var n = $('tf-n').value.trim();
+    var o = $('tf-o').value.trim();
+    var d = $('tf-d').value.trim();
+    var s1 = $('s1'), s2 = $('s2'), s3 = $('s3');
+    [s1,s2,s3].forEach(function(s){ s.classList.remove('done','active'); });
+    if(n){ s1.classList.add('done'); s2.classList.add('active'); } else { s1.classList.add('active'); return; }
+    if(o && d){ s2.classList.add('done'); s2.classList.remove('active'); s3.classList.add('active'); }
+  };
+
+  window.submitTaxi = function(){
+    var n = $('tf-n').value.trim();
+    var t = $('tf-t').value.trim();
+    var o = $('tf-o').value.trim();
+    var d = $('tf-d').value.trim();
+    var f = $('tf-f').value;
+    var h = $('tf-h').value;
+    var s = $('tf-s').value;
+    var nota = $('tf-nota').value.trim();
+
+    if(!o || !d){
+      alert('Por favor completá al menos el origen y el destino.');
+      return;
+    }
+
+    var lines = ['🚕 *Solicitud de taxi - EcoTaxi*'];
+    if(n) lines.push('Nombre: ' + n);
+    if(t) lines.push('WhatsApp: ' + t);
+    lines.push('Origen: ' + o);
+    lines.push('Destino: ' + d);
+    if(f) lines.push('Fecha: ' + f);
+    if(h) lines.push('Hora: ' + h);
+    if(s) lines.push('Servicio: ' + s);
+    if(nota) lines.push('Nota: ' + nota);
+
+    var msg = encodeURIComponent(lines.join('\n'));
+    window.open('https://wa.me/' + DEPTS.bot.wa + '?text=' + msg, '_blank');
+
+    $('et-form-wrap').style.display = 'none';
+    $('et-suc').classList.add('show');
+  };
+
+  window.resetTaxi = function(){
+    ['tf-n','tf-t','tf-o','tf-d','tf-f','tf-h','tf-nota'].forEach(function(id){ $(id).value = ''; });
+    $('tf-s').value = '';
+    $('et-suc').classList.remove('show');
+    $('et-form-wrap').style.display = 'block';
+    updateSteps();
+  };
+
+  // ---------- CALL ----------
+  window.selectCallTarget = function(el, target){
+    document.querySelectorAll('.call-target').forEach(function(b){ b.classList.remove('selected'); });
+    el.classList.add('selected');
+    selectedCallTarget = target;
+    var ct = CALL_TARGETS[target];
+    var telEl = $('fb-tel-num');
+    var waEl = $('fb-wa-call');
+    if(telEl) telEl.textContent = ct.tel_label;
+    if(waEl){
+      waEl.href = ct.tel ? 'https://wa.me/' + ct.wa : 'https://wa.me/' + ct.wa;
+      waEl.querySelector('h5').textContent = 'WhatsApp ' + ct.wa;
+    }
+    var telLink = document.querySelector('a.fb-option[href^="tel:"]');
+    if(telLink){
+      if(ct.tel){ telLink.href = 'tel:' + ct.tel; telLink.style.display = 'flex'; }
+      else { telLink.style.display = 'none'; }
+    }
+  };
+
+  window.startCall = function(){
+    var ct = CALL_TARGETS[selectedCallTarget] || CALL_TARGETS.dispatch;
+    if(ct.tel){
+      window.location.href = 'tel:' + ct.tel;
+    } else {
+      window.open('https://wa.me/' + ct.wa, '_blank');
+    }
+  };
+
+  window.hangUp = function(){
+    $('call-active').style.display = 'none';
+    $('call-idle').style.display = 'flex';
+  };
+
+  window.toggleHold = function(){};
+  window.toggleMute = function(){};
+
+  window.resetCall = function(){
+    $('call-ended').style.display = 'none';
+    $('call-idle').style.display = 'flex';
+  };
+
+  // ---------- VISITOR TRACKING ----------
+  function updateVisitorTime(){
+    var sec = Math.floor((Date.now() - startTime) / 1000);
+    var m = Math.floor(sec / 60), s = sec % 60;
+    var label = m + ':' + (s < 10 ? '0' : '') + s;
+    var vbTime = $('et-vb-time');
+    if(vbTime) vbTime.textContent = label;
+    var proTime = $('pro-time');
+    if(proTime) proTime.textContent = sec + ' seg';
+  }
+  var vbPage = $('et-vb-page');
+  if(vbPage){
+    var t = document.title.split('|')[0].split('-')[0].trim();
+    vbPage.textContent = t || 'Inicio';
+  }
+  setInterval(updateVisitorTime, 1000);
+  updateVisitorTime();
+
+  // ---------- PROACTIVE POPUP ----------
+  setTimeout(function(){
+    if(proactiveShown) return;
+    var fab = $('et-fab'), panel = $('et-panel'), pro = $('et-proactive');
+    if(fab && fab.classList.contains('open')) return;
+    if(panel && panel.classList.contains('open')) return;
+    if(pro) pro.classList.add('show');
+  }, 30000);
+
+  // ---------- INIT ----------
+  updateSteps();
+})();
+</script>
+</body>
+  <!-- EcoTaxi widget v2 --></html>
   
