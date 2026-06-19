@@ -53,17 +53,14 @@ function AnimatedSection({ children, className = '', delay = 0 }: {
 function HeroSection() {
   return (
     <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1320] to-[#0a0e17]" />
-
-      {/* Grid pattern */}
+      {/* Background image: taxi woman / servicio corporativo */}
       <div
-        className="absolute inset-0 opacity-[0.03]"
-        style={{
-          backgroundImage: `linear-gradient(rgba(0,230,118,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(0,230,118,0.3) 1px, transparent 1px)`,
-          backgroundSize: '60px 60px',
-        }}
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url('/corporativo-hero.webp')` }}
       />
+      {/* Dark gradient overlay for readability */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17]/85 via-[#0a0e17]/75 to-[#0a0e17]" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#0a0e17]/80 via-transparent to-[#0a0e17]/80" />
 
       {/* Glow orbs */}
       <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full bg-[#0077BD]/15 blur-[120px] animate-pulse" />
@@ -871,6 +868,99 @@ function SatisfiedClientsSection() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
+   7b. TRUSTED COMPANIES - Empresas que confían en nosotros
+   ═══════════════════════════════════════════════════════════════════════════════ */
+const trustedCompanies = [
+  'BCP', 'Banco Mercantil Santa Cruz', 'Banco Sol', 'Nacional Seguro', 'Caja de Salud de la Banca Privada',
+  'Nestlé', 'Alicorp', 'Eurofarma', 'Tecnofarma', 'Farmadical', 'Farmacrop', 'Scanbioteck', 'La Sante', 'Bioceanico',
+  'TIGO', 'Pedido Ya', 'DHL', 'Hipermaxi S.A.', 'Tienda Amiga', 'Floranet', 'EsSEN', 'Yanbal', 'DXN', 'AHS Cosmetics', 'Belia Bolivia',
+  'Petrobras', 'CNPC', 'Halliburton', 'Atlas Copco', 'Madisa', 'Newage', 'Tigre S.A.', 'Mathiesen', 'Turbin Solar',
+  'Prodem', 'Cainco', 'PPO Abogados', 'Oriental Consulting', 'Incotec', 'Sintesis', 'Sisegusa',
+  'Aldeas Infantiles SOS', 'Copidsuj', 'Proesa', 'Bovinsa', 'Union Agronegocios', 'Valencia Citruz',
+  'UDABOL', 'Unifranz', 'Colegio Alemán', 'Impuestos Nacionales', 'Tribunal Departamental Electoral',
+  'What Tower', 'Polysistema', 'Meglod', 'Rohling', 'Thayne', 'Medio Producciones', 'Fagal', 'Hanna', 'Cosmetic',
+]
+
+function TrustedCompaniesSection() {
+  return (
+    <section id="empresas" className="relative py-24 md:py-32 overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0a1a14] to-[#0a0e17]" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] rounded-full bg-[#00E676]/5 blur-[150px]" />
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <AnimatedSection>
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00E676]/10 border border-[#00E676]/20 mb-4 backdrop-blur-sm">
+              <BadgeCheck className="w-4 h-4 text-[#00E676]" />
+              <span className="text-sm text-[#00E676] font-medium">+60 Empresas Confían en Nosotros</span>
+            </div>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+              Empresas que{' '}
+              <span className="bg-gradient-to-r from-[#00E676] via-[#0077BD] to-[#00E676] bg-clip-text text-transparent">
+                confían
+              </span>{' '}
+              en Ecotaxi
+            </h2>
+            <p className="text-white/55 max-w-3xl mx-auto text-lg leading-relaxed">
+              Más de seis décadas empresas líderes en banca, minería, energía, salud, educación, telecomunicaciones y consumo masivo nos eligen como socio estratégico de movilidad corporativa.
+            </p>
+          </div>
+        </AnimatedSection>
+
+        {/* Grid de empresas (chips) */}
+        <AnimatedSection delay={100}>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+            {trustedCompanies.map((name, i) => (
+              <div
+                key={`${name}-${i}`}
+                className="group relative flex items-center justify-center px-3 py-4 rounded-xl bg-white/[0.025] border border-white/[0.06] backdrop-blur-sm hover:border-[#00E676]/30 hover:bg-white/[0.05] transition-all duration-300"
+              >
+                <span className="text-xs md:text-sm text-white/65 group-hover:text-white font-medium text-center leading-tight">
+                  {name}
+                </span>
+              </div>
+            ))}
+          </div>
+        </AnimatedSection>
+
+        {/* Stats + CTA */}
+        <AnimatedSection delay={200}>
+          <div className="mt-14 grid grid-cols-1 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+            {[
+              { value: '+60', label: 'Empresas activas', icon: Building2 },
+              { value: '+10', label: 'Años de experiencia', icon: Award },
+              { value: '24/7', label: 'Disponibilidad', icon: Clock },
+              { value: '100%', label: 'Facturación electrónica', icon: FileText },
+            ].map((s) => (
+              <div
+                key={s.label}
+                className="p-4 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm hover:border-[#00E676]/30 transition-all duration-300 text-center"
+              >
+                <s.icon className="w-5 h-5 text-[#00E676] mx-auto mb-2" />
+                <div className="text-2xl md:text-3xl font-bold text-white">{s.value}</div>
+                <div className="text-[10px] md:text-xs text-white/50 mt-1 uppercase tracking-wider">{s.label}</div>
+              </div>
+            ))}
+          </div>
+        </AnimatedSection>
+
+        <AnimatedSection delay={300}>
+          <div className="mt-12 text-center">
+            <a
+              href="#contacto"
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-full text-base font-bold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_30px_rgba(0,230,118,0.35)] hover:shadow-[0_0_50px_rgba(0,230,118,0.55)] hover:scale-105"
+            >
+              Solicitar propuesta corporativa
+              <ArrowRight className="w-4 h-4" />
+            </a>
+          </div>
+        </AnimatedSection>
+      </div>
+    </section>
+  )
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
    8. CONTACT / CTA SECTION
    ═══════════════════════════════════════════════════════════════════════════════ */
 function ContactSection() {
@@ -1150,6 +1240,7 @@ export default function CorporativoPage() {
         <VirtualOfficeSection />
         <ProfessionalDriversSection />
         <SatisfiedClientsSection />
+        <TrustedCompaniesSection />
         <ContactSection />
       </main>
       <Footer />
