@@ -1223,6 +1223,33 @@ function DispatchCenterSection() {
           </div>
         </AnimatedSection>
 
+        {/* Imagen real del call center */}
+        <AnimatedSection delay={100}>
+          <div className="mb-16 max-w-5xl mx-auto">
+            <div className="relative rounded-3xl overflow-hidden border border-white/[0.08] shadow-[0_0_60px_rgba(0,119,189,0.15)]">
+              <img
+                src="/despacho-humano.webp"
+                alt="Central de despacho humano de Ecotaxi — operadores reales 24/7"
+                className="w-full h-[280px] sm:h-[380px] md:h-[480px] object-cover"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0a0e17]/85 via-[#0a0e17]/15 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-2 h-2 rounded-full bg-[#00E676] animate-pulse" />
+                  <span className="text-xs text-[#00E676] font-semibold uppercase tracking-widest">Operación 24/7</span>
+                </div>
+                <h3 className="text-xl md:text-2xl font-bold text-white mb-1">
+                  Operadores reales, no bots
+                </h3>
+                <p className="text-sm text-white/70 max-w-xl">
+                  Nuestro equipo coordina cada servicio por hora en tiempo real, asigna unidades y gestiona extensiones de tiempo al instante.
+                </p>
+              </div>
+            </div>
+          </div>
+        </AnimatedSection>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           {supportChannels.map((channel, i) => (
             <AnimatedSection key={channel.title} delay={i * 80}>
