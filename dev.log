@@ -34,3 +34,5 @@ https://nextjs.org/telemetry
 Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
 ✓ Compiled in 205ms
 ✓ Compiled in 175ms
+ GET / 200 in 332ms (compile: 59ms, render: 273ms)
+ GET / 200 in 97ms (compile: 5ms, render: 92ms)
