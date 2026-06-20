@@ -1,6 +1,8 @@
 <!--
   Ecotaxi Chat Widget v4 Slim (production)
-  Source: ecotaxi-widget-v4-slim_2.html (demo content stripped)
+  Source: index.html from files.zip (uploaded 2026-06-20)
+  Changes: demo content stripped, CSS reset & vars scoped to #ecotaxi-widget-container
+  Layout: FAB on LEFT (28px from left) — makes room for CRM OYC WhatsApp widget on RIGHT
   Loaded dynamically by /src/components/ecotaxi/ecotaxi-chat-widget.tsx
 -->
 
@@ -30,7 +32,7 @@
 
 /* ── FAB ── */
 #et-fab{
-  position:fixed; bottom:28px; right:28px;
+  position:fixed; bottom:28px; left:28px;
   width:66px; height:66px; border-radius:50%;
   background:#fff;
   border:none; cursor:pointer;
@@ -54,7 +56,7 @@
 
 /* Tooltip */
 #et-tip{
-  position:fixed; bottom:36px; right:106px;
+  position:fixed; bottom:36px; left:106px;
   background:rgba(10,28,15,.95); border:1px solid rgba(34,197,94,.3);
   backdrop-filter:blur(12px);
   color:var(--mt); font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500;
@@ -77,7 +79,7 @@
 
 /* ── PANEL ── */
 #et-panel{
-  position:fixed; bottom:108px; right:28px;
+  position:fixed; bottom:108px; left:28px;
   width:350px; max-height:88vh;
   background:var(--bg); border-radius:var(--r);
   box-shadow:var(--sh); border:1px solid var(--br);
@@ -317,7 +319,7 @@
 
 /* ── TOAST ── */
 #et-toast{
-  position:fixed; bottom:108px; right:28px;
+  position:fixed; bottom:108px; left:28px;
   background:var(--sf); border:1px solid rgba(34,197,94,.2); border-left:3px solid var(--lm);
   border-radius:12px; padding:11px 15px; max-width:250px;
   box-shadow:0 8px 28px rgba(0,0,0,.45); z-index:9992;
@@ -330,7 +332,7 @@
 
 /* ── PROACTIVE ── */
 #et-pro{
-  position:fixed; bottom:108px; right:28px; max-width:240px;
+  position:fixed; bottom:108px; left:28px; max-width:240px;
   background:var(--sf); border:1px solid var(--br); border-radius:16px;
   padding:15px; box-shadow:0 16px 48px rgba(0,0,0,.55); z-index:9989;
   display:none; animation:slide-up .4s cubic-bezier(.34,1.3,.64,1);
@@ -347,12 +349,16 @@
 .pro-btn svg{ width:13px; height:13px; fill:currentColor; }
 
 @media(max-width:420px){
-  #et-panel{ width:calc(100vw - 20px); right:10px; bottom:90px; }
-  #et-fab{ right:12px; bottom:12px; }
-  #et-pro,#et-toast{ right:10px; width:calc(100vw - 20px); max-width:none; }
+  #et-panel{ width:calc(100vw - 20px); left:10px; bottom:90px; }
+  #et-fab{ left:12px; bottom:12px; }
+  #et-pro,#et-toast{ left:10px; width:calc(100vw - 20px); max-width:none; }
 }
 </style>
 
+
+<!-- ═══════════════════════════════════════════════════════════
+     ECOTAXI WIDGET v4 SLIM — Instalar desde aquí
+     ═══════════════════════════════════════════════════════════ -->
 
 <!-- Popup proactivo -->
 <div id="et-pro">
@@ -522,7 +528,6 @@
 <!-- ═══════════════════════════════════════════════════════════
      FIN WIDGET
      ═══════════════════════════════════════════════════════════ -->
-
 
 <script>
 /* ═══════════════════════════════════════════════
@@ -885,3 +890,364 @@ function resetCall(){
 initSIP();
 </script>
 
+
+<script>
+/* ═══════════════════════════════════════════════
+   CONFIGURACIÓN — editar antes de instalar
+   ═══════════════════════════════════════════════ */
+const C = {
+  /* WhatICket */
+  apiUrl:   "https://api.what-crm.com",
+  apiToken: "t9mznZgnCf9cg6ECOoxe32zfwMbyu9",
+  queueId:  2,         /* Cola "Solicitar servicio" */
+  waNumber: "59173662803", /* WhatsApp despacho */
+
+  /* Oktell WebRTC — completar cuando esté disponible */
+  sipServer: null,     /* "IP-OKTELL" cuando esté listo */
+  sipPort:   8443,
+  sipUser:   "webwidget",
+  sipPass:   null,
+
+  /* Fallback teléfono */
+  tel:    "+5913296885",
+  telTxt: "3-296885",
+
+  /* Comportamiento */
+  proDelay:   35,   /* segundos para popup proactivo */
+  onlineMin:  2,
+  onlineMax:  6,
+};
+
+/* ── Estado ── */
+const ST = {
+  open:false, tab:'chat', siteStart:Date.now(),
+  pageViews:parseInt(sessionStorage.getItem('et_pv')||'1'),
+  muted:false, onHold:false,
+  callSec:0, callInt:null, callSession:null, sipUA:null, sipReady:false,
+  chat:{ name:'', phone:'', ticketId:null, sending:false, socket:null, polling:null, msgs:[] },
+  online:Math.floor(Math.random()*(C.onlineMax-C.onlineMin+1))+C.onlineMin,
+  proShown:false, timerInt:null,
+};
+sessionStorage.setItem('et_pv', ST.pageViews+1);
+
+/* ── Inicializar ── */
+document.getElementById('vb-page').textContent = document.title || 'Inicio';
+document.getElementById('vb-online').textContent = ST.online + ' en línea';
+document.getElementById('et-status-txt').textContent = ST.online + ' agentes disponibles';
+const b = document.getElementById('et-badge');
+b.textContent = ST.online; b.style.display = 'flex';
+
+/* ── UI principal ── */
+function etToggle(){
+  ST.open = !ST.open;
+  document.getElementById('et-fab').classList.toggle('open', ST.open);
+  document.getElementById('et-panel').classList.toggle('open', ST.open);
+  document.getElementById('et-pro').classList.remove('show');
+  if(ST.open && !ST.timerInt){
+    ST.timerInt = setInterval(()=>{
+      const el=Math.floor((Date.now()-ST.siteStart)/1000);
+      document.getElementById('vb-time').textContent=Math.floor(el/60)+':'+(el%60<10?'0':'')+el%60;
+    },1000);
+  }
+}
+function etTab(name,btn){
+  document.querySelectorAll('.et-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.et-pane').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('et-pane-'+name).classList.add('active');
+  ST.tab=name;
+}
+function openChat(){ if(!ST.open)etToggle(); etTab('chat',document.getElementById('tab-chat')); closePro(); }
+function openCall(){ if(!ST.open)etToggle(); etTab('call',document.getElementById('tab-call')); closePro(); }
+function closePro(){ document.getElementById('et-pro').classList.remove('show'); }
+
+/* ── Toast ── */
+function toast(t,b){
+  document.getElementById('toast-t').textContent=t;
+  document.getElementById('toast-b').textContent=b;
+  const el=document.getElementById('et-toast');
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),4500);
+}
+
+/* ── Popup proactivo ── */
+setTimeout(()=>{
+  if(!ST.open&&!ST.proShown){
+    ST.proShown=true;
+    document.getElementById('et-pro').classList.add('show');
+    setTimeout(()=>document.getElementById('et-pro').classList.remove('show'),14000);
+  }
+}, C.proDelay*1000);
+setTimeout(()=>toast('👋 ¡Bienvenido!',ST.online+' agentes disponibles ahora mismo.'), 8000);
+setTimeout(()=>{
+  const lbl=document.getElementById('et-tip');
+  lbl.classList.add('show');
+  setTimeout(()=>lbl.classList.remove('show'),5000);
+},4000);
+
+/* ═══════════════════════════════════════════════
+   CHAT — WhatICket API + Socket.io
+   ═══════════════════════════════════════════════ */
+async function wqFetch(method, path, body){
+  const opts={method,headers:{'Authorization':'Bearer '+C.apiToken,'Content-Type':'application/json'}};
+  if(body) opts.body=JSON.stringify(body);
+  try{
+    const r=await fetch(C.apiUrl+path, opts);
+    const text=await r.text();
+    let json; try{json=JSON.parse(text)}catch(e){json={raw:text}}
+    if(!r.ok){ console.error('WQ '+method+' '+path+' →',r.status,json); return null; }
+    return json;
+  }catch(e){
+    console.error('WQ fetch:',e.message);
+    if(e.message.includes('fetch')||e.message.includes('Failed')){
+      renderMsg('⚠️ Error de conexión. <a href="https://wa.me/'+C.waNumber+'" target="_blank" style="color:var(--lm)">Continuar por WhatsApp →</a>','s');
+    }
+    return null;
+  }
+}
+
+function renderMsg(txt, role){
+  const box=document.getElementById('wq-msgs'); if(!box)return;
+  const now=new Date().toLocaleTimeString('es-BO',{hour:'2-digit',minute:'2-digit'});
+  const el=document.createElement('div'); el.className='wq-msg '+role;
+  el.innerHTML='<span class="wq-txt">'+txt+'</span><span class="wq-time">'+now+'</span>';
+  box.appendChild(el); box.scrollTop=box.scrollHeight;
+  ST.chat.msgs.push({role,txt,ts:Date.now()});
+}
+function renderTyping(){
+  const box=document.getElementById('wq-msgs'); if(!box)return null;
+  const el=document.createElement('div'); el.className='wq-msg a wq-typing-el';
+  el.innerHTML='<span class="wq-txt"><span class="wq-typing-wrap"><span></span><span></span><span></span></span></span>';
+  box.appendChild(el); box.scrollTop=box.scrollHeight; return el;
+}
+
+function loadSocketIO(cb){
+  if(window.io){cb();return;}
+  const s=document.createElement('script');
+  s.src=C.apiUrl+'/socket.io/socket.io.js';
+  s.onload=cb;
+  s.onerror=()=>{
+    const s2=document.createElement('script');
+    s2.src='https://cdn.socket.io/4.6.0/socket.io.min.js';
+    s2.onload=cb; s2.onerror=()=>console.warn('socket.io no disponible');
+    document.head.appendChild(s2);
+  };
+  document.head.appendChild(s);
+}
+
+function connectSocket(ticketId){
+  if(!window.io)return;
+  try{
+    if(ST.chat.socket){ST.chat.socket.disconnect();ST.chat.socket=null;}
+    const sock=window.io(C.apiUrl,{
+      transports:['websocket','polling'],
+      auth:{token:C.apiToken},
+      reconnection:true, reconnectionDelay:2000, timeout:10000
+    });
+    sock.on('connect',()=>{
+      sock.emit('joinChatBox',{ticketId:String(ticketId)});
+      const sub=document.getElementById('wq-sub');
+      if(sub)sub.textContent='Agente conectado — tiempo real ✅';
+      console.log('✅ Socket WhatICket conectado');
+    });
+    sock.on('appMessage',(data)=>{
+      const msg=data.message||data;
+      if(msg.fromMe)return;
+      const tId=msg.ticketId||data.ticket?.id;
+      if(tId&&String(tId)!==String(ST.chat.ticketId))return;
+      if(ST.chat.msgs.some(m=>m.wqId===msg.id))return;
+      ST.chat.msgs.push({role:'a',txt:msg.body,wqId:msg.id,ts:Date.now()});
+      document.querySelectorAll('.wq-typing-el').forEach(e=>e.remove());
+      renderMsg(msg.body,'a');
+      toast('💬 Despacho respondió',msg.body.substring(0,55)+'…');
+    });
+    sock.on('disconnect',()=>{ if(!ST.chat.polling&&ST.chat.ticketId)startPolling(ST.chat.ticketId); });
+    sock.on('connect_error',()=>{ if(!ST.chat.polling&&ST.chat.ticketId)startPolling(ST.chat.ticketId); });
+    ST.chat.socket=sock;
+  }catch(e){ if(ST.chat.ticketId)startPolling(ST.chat.ticketId); }
+}
+
+function startPolling(ticketId){
+  if(ST.chat.polling)return;
+  ST.chat.polling=setInterval(async()=>{
+    const data=await wqFetch('GET','/api/messages/'+ticketId+'?pageNumber=1');
+    if(!data)return;
+    const msgs=Array.isArray(data.messages)?data.messages:(data.messages?.records||[]);
+    msgs.forEach(m=>{
+      if(m.fromMe)return;
+      if(ST.chat.msgs.some(x=>x.wqId===m.id))return;
+      ST.chat.msgs.push({role:'a',txt:m.body,wqId:m.id,ts:Date.now()});
+      document.querySelectorAll('.wq-typing-el').forEach(e=>e.remove());
+      renderMsg(m.body,'a');
+      toast('💬 Despacho respondió',m.body.substring(0,55)+'…');
+    });
+  },4000);
+}
+
+async function startChat(){
+  const name=(document.getElementById('wq-name').value||''). trim();
+  const phone=(document.getElementById('wq-phone').value||''). trim();
+  if(!name){document.getElementById('wq-name').focus();return;}
+  if(!phone||phone.replace(/\D/g,'').length<8){document.getElementById('wq-phone').focus();return;}
+  ST.chat.name=name; ST.chat.phone=phone;
+
+  /* Mostrar pantalla de chat */
+  document.getElementById('wq-prechat').style.display='none';
+  document.getElementById('wq-live').style.display='flex';
+
+  const ctx=`📱 *Web EcoTaxi*\n🌐 ${document.title||location.pathname}\n⏱ ${Math.floor((Date.now()-ST.siteStart)/1000)}s en sitio\n📅 ${new Date().toLocaleString('es-BO')}`;
+  const initMsg=`*Chat Web — EcoTaxi Bolivia*\n\n👤 *Cliente:* ${name}\n📞 *WhatsApp:* ${phone}\n\n${ctx}`;
+
+  setTimeout(()=>renderMsg(`¡Hola <strong>${name}</strong>! Conectando con Despacho…`,'s'),300);
+  const typing=renderTyping();
+  const result=await wqFetch('POST','/api/messages/send',{
+    number:phone.replace(/\D/g,''),
+    body:initMsg,
+    queueId:C.queueId,
+    sendSignature:false,
+    closeTicket:false
+  });
+  if(typing)typing.remove();
+
+  const ok = result && (result.status === 'SUCCESS' || result.id || result.ticketId || result.message);
+
+  if(ok){
+    /* La API devuelve {"status":"SUCCESS"} sin ticketId.
+       Usamos el teléfono del visitante para rastrear respuestas. */
+    ST.chat.ticketId = result.id || result.ticketId || phone.replace(/\D/g,'');
+    document.getElementById('wq-sub').textContent='Conectado — Despacho notificado ✅';
+    renderMsg('✅ ¡Mensaje enviado a Despacho! Un agente te responderá en breve por aquí o por WhatsApp.','s');
+    loadSocketIO(()=>{ window.io?connectSocket(ST.chat.ticketId):startPolling(ST.chat.ticketId); });
+  }else{
+    document.getElementById('wq-sub').textContent='Error al conectar — usá WhatsApp';
+    renderMsg('⚠️ No se pudo conectar ahora. <a href="https://wa.me/'+C.waNumber+'" target="_blank" style="color:var(--lm)">Continuar por WhatsApp →</a>','s');
+  }
+  setTimeout(()=>document.getElementById('wq-inp')?.focus(),300);
+}
+
+async function wqSend(){
+  const inp=document.getElementById('wq-inp');
+  const txt=inp?.value.trim();
+  if(!txt||ST.chat.sending)return;
+  ST.chat.sending=true;
+  document.getElementById('wq-send').disabled=true;
+  inp.value=''; inp.style.height='';
+  renderMsg(txt,'v');
+  const typing=renderTyping();
+  const r=await wqFetch('POST','/api/messages/send',{
+    number:ST.chat.phone.replace(/\D/g,''),
+    body:txt, queueId:C.queueId,
+    sendSignature:false, closeTicket:false
+  });
+  if(typing)typing.remove();
+  const sent = r && (r.status === 'SUCCESS' || r.id || r.message);
+  if(!sent) renderMsg('⚠️ No se pudo enviar. <a href="https://wa.me/'+C.waNumber+'" target="_blank" style="color:var(--lm)">Seguí por WhatsApp →</a>','s');
+  ST.chat.sending=false;
+  document.getElementById('wq-send').disabled=false;
+  inp.focus();
+}
+
+/* ═══════════════════════════════════════════════
+   LLAMADA — JsSIP + Oktell
+   ═══════════════════════════════════════════════ */
+function initSIP(){
+  if(typeof JsSIP==='undefined'||!C.sipServer||!C.sipPass)return;
+  try{
+    const sock=new JsSIP.WebSocketInterface('wss://'+C.sipServer+':'+C.sipPort);
+    const ua=new JsSIP.UA({
+      sockets:[sock], uri:'sip:'+C.sipUser+'@'+C.sipServer, password:C.sipPass,
+      display_name:'Web EcoTaxi', register:true,
+      pcConfig:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]}
+    });
+    ua.on('registered',()=>{ST.sipReady=true;console.log('SIP registrado ✓');});
+    ua.on('registrationFailed',(e)=>console.warn('SIP reg failed:',e.cause));
+    ua.start(); ST.sipUA=ua;
+  }catch(e){console.warn('SIP init:',e);}
+}
+
+function startCall(){
+  if(!navigator.mediaDevices){
+    toast('Sin soporte','Tu navegador no soporta llamadas web. Usá las opciones de abajo.'); return;
+  }
+  document.getElementById('call-idle').style.display='none';
+  document.getElementById('call-active').style.display='flex';
+  document.getElementById('tab-call').classList.add('ringing');
+
+  if(ST.sipReady&&ST.sipUA){
+    const sess=ST.sipUA.call('sip:3296885@'+C.sipServer,{
+      mediaConstraints:{audio:true,video:false},
+      rtcOfferConstraints:{offerToReceiveAudio:true}
+    });
+    sess.on('accepted',()=>onConnected());
+    sess.on('ended',(e)=>onEnded(e));
+    sess.on('failed',(e)=>onFailed(e));
+    ST.callSession=sess;
+    document.getElementById('call-lbl').textContent='Llamando…';
+  }else{
+    /* Demo sin SIP — mostrar fallback después de 3s */
+    document.getElementById('call-lbl').textContent='Llamando…';
+    document.getElementById('call-sub').textContent='Conectando con central de despacho';
+    setTimeout(()=>{
+      if(!ST.sipReady) onFailed({cause:'no_sip'});
+    },3500);
+  }
+}
+
+function onConnected(){
+  const ic=document.getElementById('call-icon');
+  ic.classList.remove('connecting'); ic.classList.add('connected');
+  ic.querySelector('svg').style.fill='#4ade80';
+  document.getElementById('call-lbl').textContent='En llamada';
+  document.getElementById('call-sub').textContent='¡Hablá con el operador!';
+  document.getElementById('call-dur').style.display='block';
+  document.getElementById('ctrl-mute').disabled=false;
+  document.getElementById('ctrl-hold').disabled=false;
+  document.getElementById('tab-call').classList.remove('ringing');
+  ST.callSec=0;
+  ST.callInt=setInterval(()=>{
+    ST.callSec++;
+    const m=Math.floor(ST.callSec/60),s=ST.callSec%60;
+    document.getElementById('call-dur').textContent=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+  },1000);
+}
+
+function onEnded(){
+  clearInterval(ST.callInt);
+  document.getElementById('tab-call').classList.remove('ringing');
+  const m=Math.floor(ST.callSec/60),s=ST.callSec%60;
+  document.getElementById('ended-dur').textContent='Duración: '+(m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+  document.getElementById('call-active').style.display='none';
+  document.getElementById('call-ended').style.display='flex';
+  ST.callSession=null;
+}
+
+function onFailed(){
+  document.getElementById('tab-call').classList.remove('ringing');
+  document.getElementById('call-active').style.display='none';
+  document.getElementById('call-idle').style.display='block';
+  toast('Llamada web no disponible','Usá el teléfono fijo o WhatsApp de abajo.');
+}
+
+function hangUp(){ if(ST.callSession){try{ST.callSession.terminate()}catch(e){}} else{onEnded();} }
+function toggleMute(){
+  ST.muted=!ST.muted;
+  if(ST.callSession){ST.muted?ST.callSession.mute():ST.callSession.unmute();}
+  document.getElementById('ctrl-mute').classList.toggle('on',ST.muted);
+}
+function toggleHold(){
+  ST.onHold=!ST.onHold;
+  if(ST.callSession){ST.onHold?ST.callSession.hold():ST.callSession.unhold();}
+  document.getElementById('ctrl-hold').classList.toggle('on',ST.onHold);
+  document.getElementById('call-sub').textContent=ST.onHold?'⏸ En espera':'¡Hablá con el operador!';
+}
+function resetCall(){
+  document.getElementById('call-ended').style.display='none';
+  document.getElementById('call-idle').style.display='block';
+  document.getElementById('ctrl-mute').disabled=true;
+  document.getElementById('ctrl-hold').disabled=true;
+  ST.muted=false; ST.onHold=false;
+}
+
+/* Iniciar SIP cuando esté configurado */
+initSIP();
+</script>
