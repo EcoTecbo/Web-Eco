@@ -19,7 +19,7 @@ export function ServiceSchema({ name, description, url, price }: ServiceSchemaPr
     provider: {
       '@type': 'TaxiService',
       name: 'Ecotaxi Bolivia',
-      url: 'https://www.ecotaxi-bo.com',
+      url: 'https://www.ecotaxi.com.bo',
       telephone: '+591-3-3296885',
     },
     areaServed: [

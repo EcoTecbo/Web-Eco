@@ -8,6 +8,8 @@ const ADDITIONAL_PAGES = [
   { path: '/socios-transporte', priority: 0.5, changeFrequency: 'monthly' },
   { path: '/socio-de-servicios', priority: 0.5, changeFrequency: 'monthly' },
   { path: '/eventos-y-congresos', priority: 0.5, changeFrequency: 'monthly' },
+  { path: '/politica-de-privacidad', priority: 0.3, changeFrequency: 'yearly' },
+  { path: '/terminos-y-condiciones', priority: 0.3, changeFrequency: 'yearly' },
 ]
 
 export default function sitemap(): MetadataRoute.Sitemap {

@@ -60,3 +60,14 @@ db/
 Caddyfile
 worklog.md
 upload/
+
+
+# Logs internos de Claude (rompen el build de Tailwind)
+tool-results/
+
+# Scripts de conversión
+scripts/
+
+# Build output (rompe el scan de Tailwind v4)
+preview/
+
