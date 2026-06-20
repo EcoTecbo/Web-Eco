@@ -11,7 +11,7 @@
 
 export const SITE = {
   name: 'Ecotaxi Bolivia',
-  domain: 'https://www.ecotaxi-bo.com',
+  domain: 'https://www.ecotaxi.com.bo',
   phone: '+591-3-3296885',
   whatsapp: '59173662803',
   email: 'ecotaxi@oyc-srl.com',

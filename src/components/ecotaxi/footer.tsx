@@ -169,7 +169,7 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="mt-12 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-white/20 text-xs">
-            &copy; {new Date().getFullYear()} ecotaxi-bo.com — Todos los derechos reservados
+            &copy; {new Date().getFullYear()} ecotaxi.com.bo — Todos los derechos reservados
           </p>
           <div className="flex items-center gap-4">
             <Link href="/nosotros" className="text-white/20 hover:text-white/40 text-xs transition-colors">

@@ -14,7 +14,7 @@ const sections = [
     icon: FileText,
     title: '1. Aceptación de los Términos',
     content: [
-      'Los presentes Términos y Condiciones de Uso regulan el acceso y utilización de los servicios de transporte prestados por O&C Ingeniería y Representaciones SRL, identificada con NIT 1028737023 y marca comercial Ecotaxi (en adelante "Ecotaxi", "la Empresa", "nosotros" o "nuestro"), a través de su página web https://www.ecotaxi-bo.com, su aplicación móvil, sus canales de atención telefónica y cualquier otro canal de reserva o contacto habilitado oficialmente.',
+      'Los presentes Términos y Condiciones de Uso regulan el acceso y utilización de los servicios de transporte prestados por O&C Ingeniería y Representaciones SRL, identificada con NIT 1028737023 y marca comercial Ecotaxi (en adelante "Ecotaxi", "la Empresa", "nosotros" o "nuestro"), a través de su página web https://www.ecotaxi.com.bo, su aplicación móvil, sus canales de atención telefónica y cualquier otro canal de reserva o contacto habilitado oficialmente.',
       'Al solicitar, reservar, contratar o utilizar cualquiera de nuestros servicios, el usuario (en adelante "el Usuario", "el Pasajero" o "usted") manifiesta haber leído, comprendido y aceptado en su totalidad los presentes Términos y Condiciones, así como nuestra Política de Privacidad. Si no está de acuerdo con alguno de los términos aquí expuestos, deberá abstenerse de utilizar nuestros servicios.',
       'Ecotaxi se reserva el derecho de modificar en cualquier momento los presentes Términos y Condiciones. Las modificaciones entrarán en vigor desde su publicación en este sitio web. El uso continuado de los servicios después de dichas modificaciones implicará la aceptación tácita de los términos actualizados. Recomendamos al Usuario revisar periódicamente esta página.',
       'Estos Términos y Condiciones se aplican exclusivamente a la relación entre Ecotaxi y el Usuario. La contratación de servicios con terceros (hoteles, aerolíneas, agencias de viajes) se regirá por los términos propios de cada proveedor, sin que Ecotaxi asuma responsabilidad sobre dichas relaciones contractuales.',
@@ -133,7 +133,7 @@ const sections = [
     icon: Shield,
     title: '11. Privacidad y Protección de Datos',
     content: [
-      'El tratamiento de datos personales del Usuario se realiza conforme a nuestra Política de Privacidad, disponible en https://www.ecotaxi-bo.com/politica-de-privacidad, la cual forma parte integral de los presentes Términos y Condiciones. Al aceptar estos términos, el Usuario acepta igualmente la Política de Privacidad.',
+      'El tratamiento de datos personales del Usuario se realiza conforme a nuestra Política de Privacidad, disponible en https://www.ecotaxi.com.bo/politica-de-privacidad, la cual forma parte integral de los presentes Términos y Condiciones. Al aceptar estos términos, el Usuario acepta igualmente la Política de Privacidad.',
       'Ecotaxi se compromete a utilizar los datos personales únicamente para los fines descritos en la Política de Privacidad: prestación de servicios, comunicación operativa, facturación, mejora continua y cumplimiento legal. Los datos no serán comercializados con terceros ni utilizados para fines distintos sin consentimiento expreso del Usuario.',
       'El Usuario puede ejercer en cualquier momento sus derechos de acceso, rectificación, cancelación y oposición (derechos ARCO) contactando a ecotaxi@oyc-srl.com. Atenderemos las solicitudes en los plazos legalmente establecidos por la normativa boliviana.',
     ],
@@ -158,7 +158,7 @@ const sections = [
       'Correo electrónico: ecotaxi@oyc-srl.com — Atendemos consultas en un plazo máximo de 24 horas hábiles. Para reclamos formales, incluya en el asunto "Reclamo Formal" y proporcione su número de reserva, fecha del servicio y descripción detallada del incidente.',
       'Teléfono / WhatsApp: (+591) 3 3296885 — Horario de atención: lunes a viernes de 08:00 a 18:00, sábados de 08:00 a 13:00. Para emergencias operativas en curso (servicio activo), disponemos de atención 24/7 a través del mismo canal.',
       'Dirección postal y atención presencial: O&C Ingeniería y Representaciones SRL — Santa Cruz de la Sierra, Bolivia. Para visitas presenciales, coordine previamente una cita por los canales indicados. Las solicitudes formales por escrito pueden entregarse en sobre cerrado dirigido al área legal.',
-      'Canales digitales: sitio web https://www.ecotaxi-bo.com, aplicación móvil Ecotaxi disponible en Google Play y App Store, perfiles oficiales en Facebook (facebook.com/ecotaxibolivia), Instagram (instagram.com/ecotaxibo), y LinkedIn (linkedin.com/company/ecotaxibolivia).',
+      'Canales digitales: sitio web https://www.ecotaxi.com.bo, aplicación móvil Ecotaxi disponible en Google Play y App Store, perfiles oficiales en Facebook (facebook.com/ecotaxibolivia), Instagram (instagram.com/ecotaxibo), y LinkedIn (linkedin.com/company/ecotaxibolivia).',
     ],
   },
 ]

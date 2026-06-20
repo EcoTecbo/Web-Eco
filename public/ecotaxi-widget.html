@@ -972,7 +972,7 @@ function initSIP() {
           { urls: 'stun:stun.l.google.com:19302' },   /* STUN Google gratuito */
           { urls: 'stun:stun1.l.google.com:19302' }
           /* Si hay problemas con NAT, agregar servidor TURN propio:
-             { urls: 'turn:turn.ecotaxi-bo.com:3478', username:'user', credential:'pass' } */
+             { urls: 'turn:turn.ecotaxi.com.bo:3478', username:'user', credential:'pass' } */
         ]
       }
     });
@@ -1319,7 +1319,7 @@ async function startLiveChat(key) {
   }, 300);
 
   /* Mensaje inicial al agente vía WhatICket API */
-  const initMsg = `*Nueva consulta desde ecotaxi-bo.com*\n\n` +
+  const initMsg = `*Nueva consulta desde ecotaxi.com.bo*\n\n` +
     `👤 *Cliente:* ${name}\n📞 *WhatsApp:* ${phone}\n🏷️ *Área:* ${dept.name}\n\n` +
     getVisitorCtx();
 
@@ -1336,7 +1336,7 @@ async function startLiveChat(key) {
     if (CHAT.ticketId) startPolling(CHAT.ticketId);
   } else {
     document.getElementById('wq-chat-sub').textContent = 'Sin conexión — usando WhatsApp';
-    renderMsg(`⚠️ Chat web no disponible en este momento. <a href="https://wa.me/${dept.wa()}?text=${encodeURIComponent('Hola, me contacto desde ecotaxi-bo.com')}" target="_blank" style="color:var(--wlm)">Continuar por WhatsApp →</a>`, 'system');
+    renderMsg(`⚠️ Chat web no disponible en este momento. <a href="https://wa.me/${dept.wa()}?text=${encodeURIComponent('Hola, me contacto desde ecotaxi.com.bo')}" target="_blank" style="color:var(--wlm)">Continuar por WhatsApp →</a>`, 'system');
   }
   setTimeout(() => document.getElementById('wq-input')?.focus(), 300);
 }
@@ -1523,7 +1523,7 @@ initSIP();
   ──────────────────────────────────────────────────────────
   Para CADA departamento, en Chatwoot:
     Configuración → Bandejas → "Nueva bandeja" → Website
-    Nombre: "EcoTaxi Despacho" | URL: ecotaxi-bo.com
+    Nombre: "EcoTaxi Despacho" | URL: ecotaxi.com.bo
     Asignar agentes → Guardar
     → Ir a: Configuración → Copiar "website_token"
   
@@ -1604,7 +1604,7 @@ initSIP();
   ─────────────────────────────────────
   En WhatICket: Conexiones → Widget Web → Configurar
   Asociar departamentos: Despacho / Comercial / Chóferes
-  URL del sitio: ecotaxi-bo.com
+  URL del sitio: ecotaxi.com.bo
   Pegar el <script> generado en el <head> de WordPress
 
   PASO 3 — Instalar el Widget en WordPress

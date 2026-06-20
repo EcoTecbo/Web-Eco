@@ -11,7 +11,7 @@ const sections = [
     icon: FileText,
     title: '1. Introducción',
     content: [
-      'La presente Política de Privacidad describe cómo O&C Ingeniería y Representaciones SRL, identificada con NIT 1028737023 y marca comercial Ecotaxi (en adelante "Ecotaxi", "nosotros" o "nuestro"), recopila, utiliza, protege y divulga la información personal de los usuarios que utilizan nuestros servicios de transporte, nuestra página web https://www.ecotaxi-bo.com, nuestra aplicación móvil y nuestros canales digitales de atención.',
+      'La presente Política de Privacidad describe cómo O&C Ingeniería y Representaciones SRL, identificada con NIT 1028737023 y marca comercial Ecotaxi (en adelante "Ecotaxi", "nosotros" o "nuestro"), recopila, utiliza, protege y divulga la información personal de los usuarios que utilizan nuestros servicios de transporte, nuestra página web https://www.ecotaxi.com.bo, nuestra aplicación móvil y nuestros canales digitales de atención.',
       'Ecotaxi es una empresa boliviana comprometida con la protección de datos personales y el cumplimiento de la Ley N° 1581 de Protección de Datos Personales del Estado Plurinacional de Bolivia, así como de las mejores prácticas internacionales en materia de privacidad. Al utilizar nuestros servicios, usted acepta las prácticas descritas en esta política.',
       'Esta política aplica exclusivamente a la información recopilada a través de nuestros canales digitales y operativos. No aplica a sitios web de terceros que puedan ser enlazados desde nuestro sitio, sobre los cuales no tenemos control y recomendamos revisar sus propias políticas de privacidad.',
     ],

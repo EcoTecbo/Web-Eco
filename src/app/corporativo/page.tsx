@@ -1078,7 +1078,7 @@ function ContactSection() {
                   </a>
 
                   <a
-                    href="mailto:info@ecotaxi-bo.com"
+                    href="mailto:info@ecotaxi.com.bo"
                     className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:border-[#00E676]/20 transition-all group"
                   >
                     <div className="w-10 h-10 rounded-xl bg-[#00E676]/10 flex items-center justify-center shrink-0">
@@ -1086,7 +1086,7 @@ function ContactSection() {
                     </div>
                     <div>
                       <div className="text-xs text-white/40">Email</div>
-                      <div className="text-sm text-white/80 group-hover:text-white transition-colors">info@ecotaxi-bo.com</div>
+                      <div className="text-sm text-white/80 group-hover:text-white transition-colors">info@ecotaxi.com.bo</div>
                     </div>
                   </a>
 
