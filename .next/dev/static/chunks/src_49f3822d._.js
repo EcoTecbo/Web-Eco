@@ -566,9 +566,9 @@ function EcotaxiChatWidget() {
         "EcotaxiChatWidget.useEffect": ()=>{
             // Prevent duplicate injection
             if (document.getElementById('et-fab')) return;
-            // Load Google Fonts
+            // Load Google Fonts (v4-slim spec: Syne 700/800, DM Sans 400/500)
             const fontLink = document.createElement('link');
-            fontLink.href = 'https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500&display=swap';
+            fontLink.href = 'https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap';
             fontLink.rel = 'stylesheet';
             document.head.appendChild(fontLink);
             // Load JsSIP for WebRTC
@@ -576,6 +576,14 @@ function EcotaxiChatWidget() {
             jssipScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/jssip/3.10.0/jssip.min.js';
             jssipScript.async = true;
             document.head.appendChild(jssipScript);
+            // Load CRM OYC widget (Administración / Facturación) — parallel, no blocking
+            if (!document.getElementById('ecotaxi-crm-oyc-script')) {
+                const crmOycLoader = document.createElement('script');
+                crmOycLoader.id = 'ecotaxi-crm-oyc-script';
+                crmOycLoader.type = 'text/javascript';
+                crmOycLoader.textContent = `(function(){var d=document,s=d.createElement("script");s.src="https://crm.oyc-srl.com/prchat/Chatbot_Controller/widget/e6a9dd246f87b4d87804e4fb8342aaee";s.async=1;d.getElementsByTagName("head")[0].appendChild(s);})();`;
+                document.head.appendChild(crmOycLoader);
+            }
             // Inject critical floating override styles to ensure widget stays floating on all devices
             const overrideStyle = document.createElement('style');
             overrideStyle.id = 'ecotaxi-widget-float-fix';
@@ -602,9 +610,16 @@ function EcotaxiChatWidget() {
         right: 28px !important;
         pointer-events: auto !important;
       }
+      #et-tip {
+        position: fixed !important;
+        z-index: 9989 !important;
+        bottom: 36px !important;
+        right: 106px !important;
+        pointer-events: none !important;
+      }
       #et-panel {
         position: fixed !important;
-        z-index: 99991 !important;
+        z-index: 9991 !important;
         bottom: 108px !important;
         right: 28px !important;
         pointer-events: none !important;
@@ -612,29 +627,25 @@ function EcotaxiChatWidget() {
       #et-panel.open {
         pointer-events: auto !important;
       }
-      #et-proactive {
+      #et-pro {
         position: fixed !important;
-        z-index: 99989 !important;
+        z-index: 9989 !important;
         bottom: 110px !important;
         right: 28px !important;
         pointer-events: none !important;
       }
-      #et-proactive.show {
+      #et-pro.show {
         pointer-events: auto !important;
       }
       #et-toast {
         position: fixed !important;
-        z-index: 99992 !important;
+        z-index: 9992 !important;
         bottom: 110px !important;
         right: 28px !important;
         pointer-events: none !important;
       }
       #et-toast.show {
         pointer-events: auto !important;
-      }
-      /* Hide the FAB label text completely */
-      #et-fab-label {
-        display: none !important;
       }
       @media (max-width: 640px) {
         #et-fab {
@@ -643,13 +654,17 @@ function EcotaxiChatWidget() {
           width: 56px !important;
           height: 56px !important;
         }
+        #et-tip {
+          bottom: 88px !important;
+          right: 84px !important;
+        }
         #et-panel {
           bottom: 150px !important;
           right: 10px !important;
           width: calc(100vw - 20px) !important;
           max-height: 70vh !important;
         }
-        #et-proactive, #et-toast {
+        #et-pro, #et-toast {
           right: 10px !important;
           width: calc(100vw - 20px) !important;
           max-width: none !important;
@@ -712,6 +727,8 @@ function EcotaxiChatWidget() {
                     if (styles) styles.remove();
                     const floatFix = document.getElementById('ecotaxi-widget-float-fix');
                     if (floatFix) floatFix.remove();
+                    const crmOyc = document.getElementById('ecotaxi-crm-oyc-script');
+                    if (crmOyc) crmOyc.remove();
                 }
             })["EcotaxiChatWidget.useEffect"];
         }

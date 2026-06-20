@@ -1,1 +1,9 @@
 [00:00:01.490] Server  LOG     ✓ Ready in 1129ms
+[01:24:55.316] Server  LOG     ✓ Compiled in 213ms
+[01:25:00.081] Server  WARN    ⚠ Blocked cross-origin request from preview-chat-97b1d118-ee9d-46c5-a3f5-20dcc6e7bd02.space-z.ai to /_next/* resource. To allow this, configure "allowedDevOrigins" in next.config
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[01:25:00.157] Browser ERROR   uncaughtError: TypeError: Cannot set properties of null (setting 'textContent')
+[01:25:03.605] Server  LOG     ✓ Compiled in 205ms
+[01:25:04.755] Browser ERROR   uncaughtError: SyntaxError: Failed to execute 'appendChild' on 'Node': Identifier 'C' has already been declared
+[01:25:59.852] Server  LOG     ✓ Compiled in 175ms
+[01:26:01.714] Browser ERROR   uncaughtError: SyntaxError: Failed to execute 'appendChild' on 'Node': Identifier 'C' has already been declared
