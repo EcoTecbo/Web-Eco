@@ -585,14 +585,15 @@ function EcotaxiChatWidget() {
                 document.head.appendChild(crmOycLoader);
             }
             // Inject critical floating override styles to ensure widget stays floating on all devices
+            // Layout v4-slim-2: FAB on LEFT, CRM OYC WhatsApp widget on RIGHT
             const overrideStyle = document.createElement('style');
             overrideStyle.id = 'ecotaxi-widget-float-fix';
             overrideStyle.textContent = `
       #ecotaxi-widget-container {
         position: fixed !important;
         bottom: 0 !important;
-        right: 0 !important;
-        left: auto !important;
+        left: 0 !important;
+        right: auto !important;
         top: auto !important;
         width: auto !important;
         height: auto !important;
@@ -602,26 +603,29 @@ function EcotaxiChatWidget() {
         transform: none !important;
         contain: none !important;
       }
-      /* Only the FAB button gets pointer-events — everything else is click-through unless explicitly opened */
+      /* FAB on LEFT side — leaves room for CRM OYC WhatsApp widget on the right */
       #et-fab {
         position: fixed !important;
-        z-index: 99990 !important;
+        z-index: 9990 !important;
         bottom: 28px !important;
-        right: 28px !important;
+        left: 28px !important;
+        right: auto !important;
         pointer-events: auto !important;
       }
       #et-tip {
         position: fixed !important;
         z-index: 9989 !important;
         bottom: 36px !important;
-        right: 106px !important;
+        left: 106px !important;
+        right: auto !important;
         pointer-events: none !important;
       }
       #et-panel {
         position: fixed !important;
         z-index: 9991 !important;
         bottom: 108px !important;
-        right: 28px !important;
+        left: 28px !important;
+        right: auto !important;
         pointer-events: none !important;
       }
       #et-panel.open {
@@ -631,7 +635,8 @@ function EcotaxiChatWidget() {
         position: fixed !important;
         z-index: 9989 !important;
         bottom: 110px !important;
-        right: 28px !important;
+        left: 28px !important;
+        right: auto !important;
         pointer-events: none !important;
       }
       #et-pro.show {
@@ -641,7 +646,8 @@ function EcotaxiChatWidget() {
         position: fixed !important;
         z-index: 9992 !important;
         bottom: 110px !important;
-        right: 28px !important;
+        left: 28px !important;
+        right: auto !important;
         pointer-events: none !important;
       }
       #et-toast.show {
@@ -650,22 +656,26 @@ function EcotaxiChatWidget() {
       @media (max-width: 640px) {
         #et-fab {
           bottom: 80px !important;
-          right: 16px !important;
+          left: 16px !important;
+          right: auto !important;
           width: 56px !important;
           height: 56px !important;
         }
         #et-tip {
           bottom: 88px !important;
-          right: 84px !important;
+          left: 84px !important;
+          right: auto !important;
         }
         #et-panel {
           bottom: 150px !important;
-          right: 10px !important;
+          left: 10px !important;
+          right: auto !important;
           width: calc(100vw - 20px) !important;
           max-height: 70vh !important;
         }
         #et-pro, #et-toast {
-          right: 10px !important;
+          left: 10px !important;
+          right: auto !important;
           width: calc(100vw - 20px) !important;
           max-width: none !important;
           bottom: 150px !important;
