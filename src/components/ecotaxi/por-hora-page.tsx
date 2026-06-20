@@ -38,10 +38,10 @@ const paymentModels = [
     badge: 'Más Económico',
     highlight: false,
     exampleZones: [
-      { zone: 'Zona Central', price: 'Bs 60/h' },
-      { zone: 'Zona Norte', price: 'Bs 55/h' },
-      { zone: 'Zona Sur', price: 'Bs 55/h' },
-      { zone: 'Zona Este', price: 'Bs 50/h' },
+      { zone: 'Zona Central', price: 'Bs 100' },
+      { zone: 'Zona Norte', price: 'Bs 100' },
+      { zone: 'Zona Sur', price: 'Bs 100' },
+      { zone: 'Zona Este', price: 'Bs 100' },
     ],
   },
   {
@@ -62,9 +62,9 @@ const paymentModels = [
     badge: 'Más Popular',
     highlight: true,
     exampleRates: [
-      { hours: '2 horas', price: 'Bs 110' },
-      { hours: '4 horas', price: 'Bs 200' },
-      { hours: '6 horas', price: 'Bs 280' },
+      { hours: '1 hora', price: 'Bs 50' },
+      { hours: '2 horas', price: 'Bs 100' },
+      { hours: '4 horas', price: 'Bs 180' },
       { hours: '8 horas', price: 'Bs 350' },
     ],
   },
@@ -155,11 +155,11 @@ const keyBenefits = [
 ]
 
 const comparisonData = [
-  { scenario: '3 paradas en 4 horas', taxi: 'Bs 320', ecotaxi: 'Bs 110', saving: '66%' },
-  { scenario: 'Día completo (8 horas)', taxi: 'Bs 800+', ecotaxi: 'Bs 350', saving: '56%' },
-  { scenario: '5 recorridos cortos', taxi: 'Bs 250', ecotaxi: 'Bs 110', saving: '56%' },
-  { scenario: 'Tour ciudad (6 horas)', taxi: 'Bs 600', ecotaxi: 'Bs 280', saving: '53%' },
-  { scenario: 'Reuniones múltiples (4 horas)', taxi: 'Bs 400', ecotaxi: 'Bs 200', saving: '50%' },
+  { scenario: '3 paradas en 4 horas', taxi: 'Bs 320', ecotaxi: 'Bs 180', saving: '44%' },
+  { scenario: 'Día completo (8 horas)', taxi: 'Bs 600+', ecotaxi: 'Bs 350', saving: '42%' },
+  { scenario: '5 recorridos cortos', taxi: 'Bs 250', ecotaxi: 'Bs 100', saving: '60%' },
+  { scenario: 'Tour ciudad (6 horas)', taxi: 'Bs 400', ecotaxi: 'Bs 180', saving: '55%' },
+  { scenario: 'Reuniones múltiples (4 horas)', taxi: 'Bs 300', ecotaxi: 'Bs 180', saving: '40%' },
 ]
 
 const reservationChannels = [
@@ -244,11 +244,13 @@ export function PorHoraPage() {
           HERO
           ═══════════════════════════════════════════════════════ */}
       <section className="relative py-16 md:py-28 overflow-hidden">
-        {/* gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#1a1000] to-[#0a0e17]" />
-        <div className="absolute top-1/4 right-0 w-[600px] h-[600px] rounded-full bg-[#FF9800]/10 blur-[150px]" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full bg-[#00E676]/5 blur-[100px]" />
-        <div className="absolute top-1/2 left-1/4 w-[300px] h-[300px] rounded-full bg-[#FF9800]/5 blur-[80px]" />
+        {/* background image cover */}
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: "url('/por-hora-hero.webp')" }}
+        />
+        {/* dark overlay for readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17]/80 via-[#0a0e17]/70 to-[#0a0e17]/90" />
 
         {/* floating particles */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -276,10 +278,10 @@ export function PorHoraPage() {
           </div>
 
           {/* title */}
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white leading-tight mb-6">
-            Alquila{' '}
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight mb-6">
+            Tu vehículo con chofer,{' '}
             <span className="bg-gradient-to-r from-[#FF9800] via-[#FFB74D] to-[#00E676] bg-clip-text text-transparent">
-              por Hora
+              el tiempo que necesites
             </span>
           </h1>
 
@@ -891,24 +893,32 @@ export function PorHoraPage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════
-          RESERVATION CHANNELS
+          RESERVATION CHANNELS - Atención Humana
           ═══════════════════════════════════════════════════════ */}
       <section
         data-animate-section="channels"
-        className={`py-16 md:py-24 transition-all duration-700 ${
+        className={`relative py-16 md:py-24 overflow-hidden transition-all duration-700 ${
           animSections['channels'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* callcenter background image */}
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: "url('/callcenter-bg.webp')" }}
+        />
+        {/* dark overlay for readability */}
+        <div className="absolute inset-0 bg-[#0a0e17]/85" />
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#0077BD]/10 border border-[#0077BD]/20 mb-4">
-              <Smartphone className="w-4 h-4 text-[#0077BD]" />
-              <span className="text-sm text-[#0077BD]">Multicanal</span>
+              <Phone className="w-4 h-4 text-[#0077BD]" />
+              <span className="text-sm text-[#0077BD]">Atención Humana</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Reserva por{' '}
+              Atención Humana:{' '}
               <span className="bg-gradient-to-r from-[#0077BD] to-[#00E676] bg-clip-text text-transparent">
-                Donde Prefieras
+                Reserva por Donde Prefieras
               </span>
             </h2>
             <p className="text-white/50 max-w-2xl mx-auto">

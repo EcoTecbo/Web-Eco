@@ -53,8 +53,14 @@ function AnimatedSection({ children, className = '', delay = 0 }: {
 function HeroSection() {
   return (
     <section className="relative min-h-[92vh] flex items-center justify-center overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1320] to-[#0a0e17]" />
-      <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: `linear-gradient(rgba(14,165,233,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(14,165,233,0.3) 1px, transparent 1px)`, backgroundSize: '60px 60px' }} />
+      {/* Background image: coche en carretera entre montañas */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url('/interurbano-hero.webp')` }}
+      />
+      {/* Dark gradient overlay for readability */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17]/85 via-[#0a0e17]/70 to-[#0a0e17]" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#0a0e17]/80 via-transparent to-[#0a0e17]/80" />
       <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full bg-[#0EA5E9]/12 blur-[120px] animate-pulse" />
       <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full bg-[#10B981]/10 blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full bg-[#F59E0B]/6 blur-[100px] animate-pulse" style={{ animationDelay: '2s' }} />
@@ -134,9 +140,14 @@ function ServiceAreasSection() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
           <AnimatedSection delay={100}>
             <div className="relative rounded-2xl overflow-hidden bg-white/[0.03] border border-[#0EA5E9]/15 backdrop-blur-sm h-full">
-              <div className="relative h-56 overflow-hidden bg-gradient-to-br from-[#0EA5E9]/20 via-[#0d1320] to-[#0a0e17]">
-                <div className="absolute inset-0 flex items-center justify-center"><Route className="w-24 h-24 text-[#0EA5E9]/20" /></div>
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0e17] via-[#0a0e17]/50 to-transparent" />
+              <div className="relative h-56 overflow-hidden">
+                <img
+                  src="/interurbano-card.webp"
+                  alt="Carretera interurbana con vehículos Ecotaxi y marcadores de ruta"
+                  className="absolute inset-0 w-full h-full object-cover"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0e17] via-[#0a0e17]/40 to-transparent" />
                 <div className="absolute top-4 left-4"><span className="px-4 py-1.5 rounded-full text-xs font-bold text-white bg-[#0EA5E9] uppercase tracking-wider shadow-[0_0_20px_rgba(14,165,233,0.3)]">Interurbano</span></div>
               </div>
               <div className="p-6 md:p-8">
@@ -168,11 +179,16 @@ function ServiceAreasSection() {
           </AnimatedSection>
           <AnimatedSection delay={200}>
             <div className="relative rounded-2xl overflow-hidden bg-white/[0.04] border-2 border-[#10B981]/20 backdrop-blur-sm h-full shadow-[0_0_40px_rgba(16,185,129,0.08)]">
-              <div className="relative h-56 overflow-hidden bg-gradient-to-br from-[#10B981]/20 via-[#0d1320] to-[#0a0e17]">
-                <div className="absolute inset-0 flex items-center justify-center"><Mountain className="w-24 h-24 text-[#10B981]/20" /></div>
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0e17] via-[#0a0e17]/50 to-transparent" />
+              <div className="relative h-56 overflow-hidden">
+                <img
+                  src="/interurbano-turismo.webp"
+                  alt="Formación rocosa con vegetación exuberante - destino turístico de Bolivia"
+                  className="absolute inset-0 w-full h-full object-cover"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0e17] via-[#0a0e17]/40 to-transparent" />
                 <div className="absolute top-4 left-4"><span className="px-4 py-1.5 rounded-full text-xs font-bold text-black bg-[#10B981] uppercase tracking-wider shadow-[0_0_20px_rgba(16,185,129,0.4)]">Turismo</span></div>
-                <div className="absolute top-4 right-4"><span className="px-3 py-1 rounded-full text-[10px] font-bold text-[#10B981] bg-[#10B981]/10 border border-[#10B981]/20">EXPERIENCIA COMPLETA</span></div>
+                <div className="absolute top-4 right-4"><span className="px-3 py-1 rounded-full text-[10px] font-bold text-[#10B981] bg-[#10B981]/10 border border-[#10B981]/20 backdrop-blur-sm">EXPERIENCIA COMPLETA</span></div>
               </div>
               <div className="p-6 md:p-8">
                 <div className="flex items-center gap-4 mb-6">
@@ -208,7 +224,7 @@ function ServiceAreasSection() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   3. DESTINATIONS
+   3. DESTINATIONS - TABS: Interurbano (cards) + Turistico (acordeon por ciudad)
    ═══════════════════════════════════════════════════════════════════════════════ */
 const destinations = [
   { icon: Building2, title: 'Santa Cruz - Cochabamba', desc: 'La ruta más transitada del país. Conecta las dos ciudades más dinámicas en un viaje cómodo por la nueva carretera. Aproximadamente 4 horas.', color: '#0EA5E9', tag: 'POPULAR' },
@@ -219,7 +235,92 @@ const destinations = [
   { icon: Compass, title: 'Ruta Personalizada', desc: '¿Tu destino no aparece? Coordinamos viajes a cualquier ciudad o pueblo de Bolivia. Samaipata, Vallegrande, Roboré, Yacuiba y más. Tú defines el destino, nosotros la ruta.', color: '#E91E63', tag: 'A MEDIDA' },
 ]
 
+// Ciudades con atractivos turísticos accesibles en taxi
+const touristCities = [
+  {
+    city: 'Santa Cruz',
+    region: 'Departamento de Santa Cruz',
+    color: '#10B981',
+    icon: Sun,
+    intro: 'La capital oriental de Bolivia es la puerta de entrada a la biodiversidad del trópico cruceño. Desde playas fluviales hasta refugios de vida silvestre, los alrededores ofrecen atracciones accesibles en taxi para medio día o jornada completa.',
+    spots: [
+      { name: 'Samaipata', desc: 'Pueblo colonial a 120 km con el Fuerte de Samaipata (UNESCO) y El Chorro.' },
+      { name: 'Lomas de Arena', desc: 'Dunas naturales a 16 km, ideal para sandboard y cuadraciclos.' },
+      { name: 'Mariposario Güembé', desc: 'Reserva ecológica con mariposario, senderos y piscinas naturales.' },
+      { name: 'La Rinconada', desc: 'Balneario natural sobre el río Piraí con zonas de descanso.' },
+      { name: 'Vallegrande', desc: 'Pueblo histórico a 4 h, ruta del Che Guevara y paisajes de valle.' },
+      { name: 'Roboré', desc: 'Punto de acceso a las aguas termales de Aguas Calientes.' },
+      { name: 'Aguas Calientes', desc: 'Fuentes termales naturales cerca de Roboré.' },
+    ],
+  },
+  {
+    city: 'La Paz',
+    region: 'Departamento de La Paz',
+    color: '#0EA5E9',
+    icon: Mountain,
+    intro: 'La sede de gobierno combina altitud, cultura andina y paisajes surrealistas. Los atractivos cercanos se alcanzan en pocas horas y son perfectos para excursiones de un día saliendo desde el centro.',
+    spots: [
+      { name: 'Valle de la Luna', desc: 'Formaciones rocosas erosionadas a 10 km, parecen un paisaje lunar.' },
+      { name: 'Copacabana', desc: 'Pueblo peregrino a orillas del Lago Titicaca.' },
+      { name: 'Tiwanaku', desc: 'Ruinas de una de las civilizaciones precolombinas más antiguas (UNESCO).' },
+      { name: 'Mi Teleférico', desc: 'Red de cabinas aéreas con vistas panorámicas de la ciudad y el Illimani.' },
+    ],
+  },
+  {
+    city: 'Potosí',
+    region: 'Departamento de Potosí',
+    color: '#F59E0B',
+    icon: Compass,
+    intro: 'Patrimonio minero y salino del altiplano boliviano. Concentra algunos de los paisajes más fotografiados de Sudamérica, accesibles en vehículo 4x4 o sedán con cuidado de la altitud.',
+    spots: [
+      { name: 'Salar de Uyuni', desc: 'El desierto de sal más grande del mundo. Reflejo especular en lluvia.' },
+      { name: 'Cerro Rico de Potosí', desc: 'Histórica montaña de plata con tours guiados a minas activas.' },
+      { name: 'Lagunas Coloradas y Verde', desc: 'Lagunas de altiplano con flamencos y colores minerales únicos.' },
+    ],
+  },
+  {
+    city: 'Sucre',
+    region: 'Departamento de Chuquisaca',
+    color: '#8B5CF6',
+    icon: Building2,
+    intro: 'La capital constitucional es patrimonio UNESCO. Sus alrededores combinan paleontología, arquitectura colonial y valles templados ideales para visitar todo el año.',
+    spots: [
+      { name: 'Huellas de Dinosaurios', desc: 'Cal Orcko: el yacimiento de huellas más grande del mundo, a 5 km.' },
+      { name: 'Parque Cretácico', desc: 'Réplicas a tamaño real y museo paleontológico adjunto.' },
+      { name: 'Tarabuco', desc: 'Pueblo colonial famoso por su mercado dominical textil y el Pujllay.' },
+    ],
+  },
+  {
+    city: 'Cochabamba',
+    region: 'Departamento de Cochabamba',
+    color: '#06B6D4',
+    icon: TreePine,
+    intro: 'El corazón gastronómico de Bolivia. Ofrece clima templado, valles fértiles y acceso fácil a cordillera y trópico a poca distancia de la ciudad.',
+    spots: [
+      { name: 'Cristo de la Concordia', desc: 'Estatua de 40 m accesible por teleférico o a pie, vista panorámica.' },
+      { name: 'Toro Toro', desc: 'Parque Nacional con cuevas, dinosaurios, cañones y piscinas naturales.' },
+      { name: 'Villa Tunari', desc: 'Acceso al trópico cochabambino, selva y refugios de vida silvestre.' },
+    ],
+  },
+  {
+    city: 'Tarija',
+    region: 'Departamento de Tarija',
+    color: '#E91E63',
+    icon: Sun,
+    intro: 'Tierra del vino y la hospitalidad. Combina valles templados, viñedos y cultura gaucha con uno de los climas más agradables de Bolivia.',
+    spots: [
+      { name: 'Ruta del Vino', desc: 'Bodegas artesanales en Concepción y Valle de la Consolación.' },
+      { name: 'Cañón del Tolomos', desc: 'Cañón profundo con miradores naturales y biodiversidad endémica.' },
+      { name: 'Cordillera de Sama', desc: 'Reserva biológica con lagunas altoandinas y cóndores.' },
+    ],
+  },
+]
+
 function DestinationsSection() {
+  const [tab, setTab] = useState<'interurbano' | 'turistico'>('interurbano')
+  const [activeCity, setActiveCity] = useState(0)
+  const city = touristCities[activeCity]
+
   return (
     <section id="destinos" className="relative py-24 md:py-32">
       <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1320] to-[#0a0e17]" />
@@ -227,28 +328,194 @@ function DestinationsSection() {
       <div className="absolute top-1/3 right-0 w-[500px] h-[500px] rounded-full bg-[#10B981]/5 blur-[120px]" />
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <AnimatedSection>
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#10B981]/10 border border-[#10B981]/20 mb-4"><Map className="w-4 h-4 text-[#10B981]" /><span className="text-sm text-[#10B981]">Destinos y Rutas</span></div>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">Rutas <span className="bg-gradient-to-r from-[#0EA5E9] via-[#10B981] to-[#0EA5E9] bg-clip-text text-transparent">Principales</span></h2>
-            <p className="text-white/50 max-w-3xl mx-auto text-lg">Conectamos las ciudades más importantes de Bolivia con salidas regulares y servicio de calidad.</p>
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#10B981]/10 border border-[#10B981]/20 mb-4">
+              <Map className="w-4 h-4 text-[#10B981]" />
+              <span className="text-sm text-[#10B981]">Destinos y Rutas</span>
+            </div>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+              Explora{' '}
+              <span className="bg-gradient-to-r from-[#0EA5E9] via-[#10B981] to-[#0EA5E9] bg-clip-text text-transparent">
+                Bolivia
+              </span>
+            </h2>
+            <p className="text-white/55 max-w-3xl mx-auto text-lg leading-relaxed">
+              Elige entre nuestras rutas interurbanas entre ciudades o descubre los atractivos turísticos que cada ciudad boliviana tiene para ofrecerte, todos accesibles en taxi.
+            </p>
           </div>
         </AnimatedSection>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {destinations.map((dest, i) => (
-            <AnimatedSection key={dest.title} delay={i * 100}>
-              <div className="group relative p-6 md:p-7 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm hover:border-white/10 transition-all duration-500 h-full">
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/0 to-white/0 group-hover:from-white/[0.02] transition-all duration-500" />
-                <div className="absolute top-4 right-4"><span className="px-2 py-1 rounded-full text-[10px] font-bold border" style={{ color: dest.color, backgroundColor: `${dest.color}10`, borderColor: `${dest.color}20` }}>{dest.tag}</span></div>
-                <div className="relative z-10">
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300" style={{ backgroundColor: `${dest.color}12` }}><dest.icon className="w-6 h-6" style={{ color: dest.color }} /></div>
-                  <h3 className="text-lg font-semibold text-white mb-2">{dest.title}</h3>
-                  <p className="text-sm text-white/45 leading-relaxed">{dest.desc}</p>
+
+        {/* Tabs */}
+        <AnimatedSection delay={100}>
+          <div className="flex justify-center mb-12">
+            <div className="inline-flex p-1.5 rounded-full bg-white/[0.04] border border-white/[0.08] backdrop-blur-sm">
+              <button
+                onClick={() => setTab('interurbano')}
+                className={`flex items-center gap-2 px-6 md:px-8 py-3 rounded-full text-sm md:text-base font-semibold transition-all duration-300 ${
+                  tab === 'interurbano'
+                    ? 'text-black bg-[#0EA5E9] shadow-[0_0_30px_rgba(14,165,233,0.4)]'
+                    : 'text-white/60 hover:text-white'
+                }`}
+              >
+                <Route className="w-4 h-4" />
+                Interurbano
+              </button>
+              <button
+                onClick={() => setTab('turistico')}
+                className={`flex items-center gap-2 px-6 md:px-8 py-3 rounded-full text-sm md:text-base font-semibold transition-all duration-300 ${
+                  tab === 'turistico'
+                    ? 'text-black bg-[#10B981] shadow-[0_0_30px_rgba(16,185,129,0.4)]'
+                    : 'text-white/60 hover:text-white'
+                }`}
+              >
+                <Compass className="w-4 h-4" />
+                Turístico
+              </button>
+            </div>
+          </div>
+        </AnimatedSection>
+
+        {/* Content */}
+        {tab === 'interurbano' ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {destinations.map((dest, i) => (
+              <AnimatedSection key={dest.title} delay={i * 80}>
+                <div className="group relative p-6 md:p-7 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm hover:border-[#0EA5E9]/30 transition-all duration-500 h-full">
+                  <div className="absolute top-4 right-4">
+                    <span
+                      className="px-2 py-1 rounded-full text-[10px] font-bold border"
+                      style={{ color: dest.color, backgroundColor: `${dest.color}10`, borderColor: `${dest.color}20` }}
+                    >
+                      {dest.tag}
+                    </span>
+                  </div>
+                  <div className="relative z-10">
+                    <div
+                      className="w-12 h-12 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300"
+                      style={{ backgroundColor: `${dest.color}12` }}
+                    >
+                      <dest.icon className="w-6 h-6" style={{ color: dest.color }} />
+                    </div>
+                    <h3 className="text-lg font-semibold text-white mb-2">{dest.title}</h3>
+                    <p className="text-sm text-white/45 leading-relaxed">{dest.desc}</p>
+                  </div>
+                </div>
+              </AnimatedSection>
+            ))}
+          </div>
+        ) : (
+          <AnimatedSection>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              {/* Columna izquierda: botones de ciudades (acordeón vertical) */}
+              <div className="lg:col-span-4">
+                <div className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible pb-2 lg:pb-0 -mx-1 px-1">
+                  {touristCities.map((c, i) => {
+                    const isActive = i === activeCity
+                    return (
+                      <button
+                        key={c.city}
+                        onClick={() => setActiveCity(i)}
+                        onMouseEnter={() => setActiveCity(i)}
+                        className={`group relative flex items-center gap-3 px-4 py-3.5 rounded-xl text-left transition-all duration-300 shrink-0 lg:w-full ${
+                          isActive
+                            ? 'bg-white/[0.06] border backdrop-blur-sm'
+                            : 'bg-white/[0.02] border border-transparent hover:bg-white/[0.04]'
+                        }`}
+                        style={isActive ? { borderColor: `${c.color}40` } : undefined}
+                      >
+                        <div
+                          className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-transform duration-300"
+                          style={{ background: `${c.color}15` }}
+                        >
+                          <c.icon className="w-4 h-4" style={{ color: c.color }} />
+                        </div>
+                        <div className="min-w-0">
+                          <div
+                            className={`text-sm font-semibold transition-colors ${isActive ? 'text-white' : 'text-white/70 group-hover:text-white'}`}
+                          >
+                            {c.city}
+                          </div>
+                          <div className="text-[10px] text-white/40 truncate">{c.spots.length} atractivos</div>
+                        </div>
+                        {isActive && (
+                          <ChevronRight
+                            className="w-4 h-4 ml-auto shrink-0 hidden lg:block"
+                            style={{ color: c.color }}
+                          />
+                        )}
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
-            </AnimatedSection>
-          ))}
-        </div>
-      </div>
+
+              {/* Columna derecha: detalle de ciudad seleccionada */}
+              <div className="lg:col-span-8">
+                <div
+                  key={city.city}
+                  className="relative rounded-2xl bg-white/[0.025] border backdrop-blur-sm overflow-hidden transition-all duration-300"
+                  style={{ borderColor: `${city.color}30` }}
+                >
+                  {/* Barra lateral colorida */}
+                  <div
+                    className="absolute left-0 top-0 bottom-0 w-1.5"
+                    style={{ background: `linear-gradient(to bottom, ${city.color}, ${city.color}40)` }}
+                  />
+                  <div className="p-6 md:p-8 pl-8">
+                    {/* Header */}
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-5">
+                      <div
+                        className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0"
+                        style={{ background: `${city.color}12` }}
+                      >
+                        <city.icon className="w-7 h-7" style={{ color: city.color }} />
+                      </div>
+                      <div>
+                        <h3 className="text-2xl md:text-3xl font-bold text-white leading-tight">{city.city}</h3>
+                        <p className="text-sm font-medium mt-0.5" style={{ color: city.color }}>{city.region}</p>
+                      </div>
+                    </div>
+                    {/* Intro */}
+                    <p className="text-white/55 leading-relaxed mb-6 text-sm md:text-base">{city.intro}</p>
+                    {/* Spots grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {city.spots.map((spot) => (
+                        <div
+                          key={spot.name}
+                          className="group/spot relative p-4 rounded-xl bg-white/[0.02] border border-white/[0.05] hover:border-white/15 hover:bg-white/[0.04] transition-all duration-300"
+                        >
+                          <div className="flex items-center gap-2 mb-1.5">
+                            <div
+                              className="w-1.5 h-1.5 rounded-full"
+                              style={{ background: city.color }}
+                            />
+                            <h4 className="text-sm font-semibold text-white">{spot.name}</h4>
+                          </div>
+                          <p className="text-xs text-white/45 leading-relaxed">{spot.desc}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* CTA compacto */}
+                <div className="mt-5 flex flex-col sm:flex-row items-center justify-between gap-4 p-5 rounded-2xl bg-gradient-to-r from-[#0EA5E9]/8 via-[#10B981]/8 to-[#0EA5E9]/8 border border-[#10B981]/15">
+                  <div className="text-center sm:text-left">
+                    <p className="text-white font-semibold text-sm">¿Quieres visitar {city.city}?</p>
+                    <p className="text-white/50 text-xs">Cotiza tu ruta turística con paradas personalizadas.</p>
+                  </div>
+                  <a
+                    href="#contacto"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold text-black bg-[#10B981] hover:bg-[#34D399] transition-all duration-300 shadow-[0_0_25px_rgba(16,185,129,0.3)] hover:scale-105 whitespace-nowrap"
+                  >
+                    Cotizar ruta
+                    <ArrowRight className="w-4 h-4" />
+                  </a>
+                </div>
+              </div>
+            </div>
+          </AnimatedSection>
+        )}      </div>
     </section>
   )
 }

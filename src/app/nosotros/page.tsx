@@ -198,13 +198,22 @@ export default function NosotrosPage() {
               visibleSections.has('mission') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`}>
               {/* Mission */}
-              <div className="group relative p-8 md:p-10 rounded-3xl bg-white/[0.03] border border-[#00E676]/10 backdrop-blur-sm hover:border-[#00E676]/30 transition-all duration-500">
+              <div className="group relative p-8 md:p-10 rounded-3xl bg-white/[0.03] border border-[#00E676]/10 backdrop-blur-sm hover:border-[#00E676]/30 transition-all duration-500 overflow-hidden">
                 <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"
                   style={{ boxShadow: 'inset 0 0 60px rgba(0,230,118,0.1), 0 0 30px rgba(0,230,118,0.1)' }}
                 />
                 <div className="relative z-10">
-                  <div className="w-16 h-16 rounded-2xl bg-[#00E676]/10 flex items-center justify-center mb-6">
-                    <Target className="w-8 h-8 text-[#00E676]" />
+                  <div className="relative w-full h-48 md:h-56 -mt-2 mb-6 rounded-2xl overflow-hidden border border-[#00E676]/15">
+                    <img
+                      src="/nosotros-mision.webp"
+                      alt="Misión Ecotaxi — transporte sostenible y confiable"
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0a0e17]/60 to-transparent" />
+                    <div className="absolute top-3 left-3 w-12 h-12 rounded-xl bg-[#00E676]/15 backdrop-blur-md border border-[#00E676]/30 flex items-center justify-center">
+                      <Target className="w-6 h-6 text-[#00E676]" />
+                    </div>
                   </div>
                   <h3 className="text-2xl font-bold text-white mb-4">Misión</h3>
                   <p className="text-white/60 leading-relaxed">
@@ -216,13 +225,22 @@ export default function NosotrosPage() {
                 </div>
               </div>
               {/* Vision */}
-              <div className="group relative p-8 md:p-10 rounded-3xl bg-white/[0.03] border border-[#0077BD]/10 backdrop-blur-sm hover:border-[#0077BD]/30 transition-all duration-500">
+              <div className="group relative p-8 md:p-10 rounded-3xl bg-white/[0.03] border border-[#0077BD]/10 backdrop-blur-sm hover:border-[#0077BD]/30 transition-all duration-500 overflow-hidden">
                 <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"
                   style={{ boxShadow: 'inset 0 0 60px rgba(0,119,189,0.1), 0 0 30px rgba(0,119,189,0.1)' }}
                 />
                 <div className="relative z-10">
-                  <div className="w-16 h-16 rounded-2xl bg-[#0077BD]/10 flex items-center justify-center mb-6">
-                    <Eye className="w-8 h-8 text-[#0077BD]" />
+                  <div className="relative w-full h-48 md:h-56 -mt-2 mb-6 rounded-2xl overflow-hidden border border-[#0077BD]/15">
+                    <img
+                      src="/nosotros-vision.webp"
+                      alt="Visión Ecotaxi — liderazgo en movilidad corporativa en Bolivia"
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0a0e17]/60 to-transparent" />
+                    <div className="absolute top-3 left-3 w-12 h-12 rounded-xl bg-[#0077BD]/15 backdrop-blur-md border border-[#0077BD]/30 flex items-center justify-center">
+                      <Eye className="w-6 h-6 text-[#0077BD]" />
+                    </div>
                   </div>
                   <h3 className="text-2xl font-bold text-white mb-4">Visión</h3>
                   <p className="text-white/60 leading-relaxed">
@@ -313,8 +331,13 @@ export default function NosotrosPage() {
                     una de las más de 200 empresas que confían en nosotros como su aliado estratégico de movilidad.
                   </p>
                   <div className="flex items-center justify-center gap-4">
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#0077BD] to-[#00E676] flex items-center justify-center text-white font-bold text-xl">
-                      OO
+                    <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-[#00E676]/40 shadow-[0_0_30px_rgba(0,230,118,0.25)] shrink-0">
+                      <img
+                        src="/nosotros-ceo.webp"
+                        alt="Oscar E. Oroza P. — General Manager de Ecotaxi"
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
                     </div>
                     <div className="text-left">
                       <p className="text-white font-semibold">Oscar E. Oroza P.</p>
