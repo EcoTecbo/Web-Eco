@@ -10,3 +10,5 @@ Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allow
 [06:57:18.147] Server  LOG     ✓ Compiled in 275ms
 [06:57:22.978] Browser ERROR   uncaughtError: SyntaxError: Failed to execute 'appendChild' on 'Node': Identifier 'C' has already been declared
 [06:57:22.978] Browser ERROR   uncaughtError: SyntaxError: Failed to execute 'appendChild' on 'Node': Identifier 'C' has already been declared
+[10:07:24.795] Browser ERROR   uncaughtError: TypeError: Cannot set properties of null (setting 'textContent')
+[10:07:24.795] Browser ERROR   uncaughtError: SyntaxError: Failed to execute 'appendChild' on 'Node': Identifier 'C' has already been declared
