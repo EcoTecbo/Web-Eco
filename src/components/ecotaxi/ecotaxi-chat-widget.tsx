@@ -132,23 +132,49 @@ export function EcotaxiChatWidget() {
     fetch('/ecotaxi-chat-widget.html')
       .then(r => r.text())
       .then(html => {
-        // Extract the <style> content
-        const styleMatch = html.match(/<style>([\s\S]*?)<\/style>/)
-        if (styleMatch) {
+        // Extract ALL <style>...</style> blocks and inject into head
+        const styleMatches = html.match(/<style>([\s\S]*?)<\/style>/g)
+        if (styleMatches) {
           const style = document.createElement('style')
           style.id = 'ecotaxi-widget-styles'
-          style.textContent = styleMatch[1]
+          style.textContent = styleMatches.map(s => s.replace(/<\/?style>/g, '')).join('\n\n')
           document.head.appendChild(style)
         }
 
-        // Extract the body content (HTML elements)
+        // Extract the widget HTML body
+        // Strategy 1: If file has <body>...</body>, use that
+        // Strategy 2: Otherwise, take everything AFTER the last </style> and BEFORE the first <script>
+        let bodyContent = ''
         const bodyMatch = html.match(/<body>([\s\S]*?)<\/body>/)
         if (bodyMatch) {
-          let bodyContent = bodyMatch[1]
-          // Remove any <style> tags from body content (already injected in head)
-          bodyContent = bodyContent.replace(/<style>[\s\S]*?<\/style>/g, '')
-          // Remove any <script> tags from body content (will inject separately)
-          bodyContent = bodyContent.replace(/<script[\s\S]*?<\/script>/g, '')
+          bodyContent = bodyMatch[1]
+        } else {
+          // Fallback: content between last </style> and first <script>
+          const lastStyleEnd = html.lastIndexOf('</style>')
+          const firstScriptStart = html.indexOf('<script>', lastStyleEnd >= 0 ? lastStyleEnd : 0)
+          if (lastStyleEnd >= 0 && firstScriptStart >= 0) {
+            bodyContent = html.slice(lastStyleEnd + '</style>'.length, firstScriptStart)
+          } else if (lastStyleEnd >= 0) {
+            bodyContent = html.slice(lastStyleEnd + '</style>'.length)
+          } else {
+            // Last resort: strip all <style>, <script>, <html>, <head>, <body> tags and use what's left
+            bodyContent = html
+              .replace(/<!--[\s\S]*?-->/g, '')
+              .replace(/<style>[\s\S]*?<\/style>/g, '')
+              .replace(/<script[\s\S]*?<\/script>/g, '')
+              .replace(/<!DOCTYPE[^>]*>/gi, '')
+              .replace(/<\/?(html|head|body|title|meta|link)[^>]*>/gi, '')
+          }
+        }
+
+        // Remove any leftover <style>, <script>, <html>, <head>, <body> tags from body content
+        bodyContent = bodyContent
+          .replace(/<style>[\s\S]*?<\/style>/g, '')
+          .replace(/<script[\s\S]*?<\/script>/g, '')
+          .replace(/<\/?(html|head|body|title|meta|link)[^>]*>/gi, '')
+          .trim()
+
+        if (bodyContent) {
           // Create a container div with fixed positioning
           const container = document.createElement('div')
           container.id = 'ecotaxi-widget-container'
@@ -156,7 +182,8 @@ export function EcotaxiChatWidget() {
           document.body.appendChild(container)
         }
 
-        // Extract and run the JavaScript
+        // Extract and run ALL <script>...</script> blocks (the widget file may have inline scripts)
+        // Note: scripts with src= are loaded separately by the head section above
         const scriptMatches = html.match(/<script>([\s\S]*?)<\/script>/g)
         if (scriptMatches) {
           scriptMatches.forEach(match => {
