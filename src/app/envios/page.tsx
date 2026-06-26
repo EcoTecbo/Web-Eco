@@ -54,8 +54,15 @@ function AnimatedSection({ children, className = '', delay = 0 }: {
 function HeroSection() {
   return (
     <section className="relative min-h-[92vh] flex items-center justify-center overflow-hidden">
-      {/* Background with overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1320] to-[#0a0e17]" />
+      {/* Hero background image */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url('/envios-hero.webp')` }}
+      />
+
+      {/* Dark overlay for legibility */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17]/85 via-[#0d1320]/75 to-[#0a0e17]/90" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#0a0e17]/70 via-transparent to-[#0a0e17]/70" />
 
       {/* Grid pattern */}
       <div
@@ -90,9 +97,9 @@ function HeroSection() {
 
         {/* Title */}
         <AnimatedSection delay={100}>
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6 drop-shadow-[0_2px_20px_rgba(0,0,0,0.6)]">
             ¡Lo que quieras,{' '}
-            <span className="bg-gradient-to-r from-[#FF9800] via-[#F44336] to-[#FF9800] bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[#FF9800] via-[#F44336] to-[#FF9800] bg-clip-text text-transparent drop-shadow-[0_2px_15px_rgba(255,152,0,0.4)]">
               lo llevamos!
             </span>
           </h1>

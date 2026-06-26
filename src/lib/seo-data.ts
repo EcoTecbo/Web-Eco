@@ -11,7 +11,7 @@
 
 export const SITE = {
   name: 'Ecotaxi Bolivia',
-  domain: 'https://www.ecotaxi-bo.com',
+  domain: 'https://www.ecotaxi.com.bo',
   phone: '+591-3-3296885',
   whatsapp: '59173662803',
   email: 'ecotaxi@oyc-srl.com',
@@ -80,14 +80,14 @@ export const PAGES: Record<string, PageSeoData> = {
   },
 
   '/por-hora': {
-    title: 'Taxi por Hora en Bolivia — Alquila tu Taxi con Chofer',
-    description: 'Alquila un taxi por hora con chofer profesional en Bolivia. Ideal para diligencias, citas médicas, compras o turismo. Tarifa fija por hora sin sorpresas, conductor espera contigo y te lleva a múltiples destinos.',
+    title: 'Muévete a tu Ritmo: Vehículo por Hora a tu Disposición — Ecotaxi Bolivia',
+    description: 'Alquila un vehículo por hora con chofer profesional en Bolivia. Ideal para diligencias, citas médicas, compras o turismo. Tarifa fija desde Bs 50/hora sin sorpresas, conductor espera contigo y te lleva a múltiples destinos.',
     keywords: [
       'taxi por hora', 'alquilar taxi con chofer', 'taxi hora Bolivia',
       'taxi por hora Santa Cruz', 'rentar taxi hora', 'chofer por hora',
       'taxi dispuesto hora', 'taxi múltiples paradas', 'taxi espera',
       'servicio taxi horas', 'taxi con conductor hora', 'taxi privado hora',
-      'taxi turismo hora Bolivia', 'chofer profesional hora', 'taxi itinerary',
+      'taxi turismo hora Bolivia', 'chofer profesional hora', 'vehículo por hora Bolivia',
     ],
     canonical: `${SITE.domain}/por-hora`,
     changeFrequency: 'monthly',

@@ -19,4 +19,4 @@ Allow: /
 Disallow: /api/
 Disallow: /_next/
 
-Sitemap: https://www.ecotaxi-bo.com/sitemap.xml
+Sitemap: https://www.ecotaxi.com.bo/sitemap.xml
