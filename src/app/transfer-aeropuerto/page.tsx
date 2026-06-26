@@ -11,6 +11,54 @@ import { BoliviaMap } from '@/components/aeropuerto/bolivia-map'
 
 export default function TransferAeropuertoPage() {
   const [flightChecked, setFlightChecked] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [formSubmitted, setFormSubmitted] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+    const form = e.currentTarget as HTMLFormElement
+    const formData = new FormData(form)
+    const fields: Record<string, string | string[]> = {}
+    // Handle checkboxes (multiple values)
+    const checkboxes = form.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')
+    const checkedExtras: string[] = []
+    checkboxes.forEach(cb => {
+      if (cb.checked && cb.name !== 'extras' && !cb.name) {
+        // The extras checkboxes don't have a name attribute — use their label text
+        checkedExtras.push(cb.parentElement?.querySelector('span')?.textContent || 'Extra')
+      }
+    })
+    if (checkedExtras.length > 0) fields.serviciosIncluidos = checkedExtras
+    // Handle named fields
+    formData.forEach((value, key) => {
+      if (key === 'extras') return
+      fields[key] = String(value)
+    })
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'transfer-aeropuerto',
+          fields,
+          meta: { page: '/transfer-aeropuerto', submittedAt: new Date().toISOString() },
+        }),
+      })
+      if (res.ok) {
+        setFormSubmitted(true)
+      } else {
+        alert('No se pudo enviar por correo. Te redirigimos a WhatsApp.')
+        window.open('https://wa.me/59173662803?text=' + encodeURIComponent('Hola, quiero reservar un transfer aeropuerto.'), '_blank')
+      }
+    } catch (err) {
+      console.error('[transfer-aeropuerto] submit error:', err)
+      alert('Error de conexión. Te redirigimos a WhatsApp.')
+      window.open('https://wa.me/59173662803', '_blank')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
   const heroRef = useRef<HTMLDivElement>(null)
   const planeRef = useRef<SVGSVGElement>(null)
 
@@ -264,7 +312,7 @@ export default function TransferAeropuertoPage() {
 
             {/* Form */}
             <div className="p-6 md:p-10 rounded-3xl bg-white/[0.03] border border-white/[0.06]">
-              <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+              <form className="space-y-6" onSubmit={handleSubmit}>
                 {/* Row 1: Service Type */}
                 <div>
                   <label className="block text-sm font-medium text-white/60 mb-2">Tipo de Servicio</label>
@@ -287,7 +335,7 @@ export default function TransferAeropuertoPage() {
                 {/* Row 2: Airport */}
                 <div>
                   <label className="block text-sm font-medium text-white/60 mb-2">Aeropuerto</label>
-                  <select className="w-full p-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white/80 text-sm focus:border-[#00E676]/50 focus:outline-none">
+                  <select name="aeropuerto" className="w-full p-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white/80 text-sm focus:border-[#00E676]/50 focus:outline-none">
                     <option value="">Selecciona el aeropuerto</option>
                     <option value="LPB">LPB - Aeropuerto Internacional El Alto (La Paz)</option>
                     <option value="VVI">VVI - Aeropuerto Internacional Viru Viru (Santa Cruz)</option>
@@ -305,11 +353,11 @@ export default function TransferAeropuertoPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-white/60 mb-2">Número de Vuelo</label>
-                    <input type="text" placeholder="Ej: OB770, AV98" className="w-full p-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white/80 text-sm placeholder:text-white/20 focus:border-[#00E676]/50 focus:outline-none" />
+                    <input type="text" name="numeroVuelo" placeholder="Ej: OB770, AV98" className="w-full p-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white/80 text-sm placeholder:text-white/20 focus:border-[#00E676]/50 focus:outline-none" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-white/60 mb-2">Fecha y Hora</label>
-                    <input type="datetime-local" className="w-full p-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white/80 text-sm focus:border-[#00E676]/50 focus:outline-none" />
+                    <input type="datetime-local" name="fechaHora" className="w-full p-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white/80 text-sm focus:border-[#00E676]/50 focus:outline-none" />
                   </div>
                 </div>
 
@@ -317,11 +365,11 @@ export default function TransferAeropuertoPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-white/60 mb-2">Nombre del Pasajero</label>
-                    <input type="text" placeholder="Nombre completo (para el cartel)" className="w-full p-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white/80 text-sm placeholder:text-white/20 focus:border-[#00E676]/50 focus:outline-none" />
+                    <input type="text" name="nombrePasajero" placeholder="Nombre completo (para el cartel)" className="w-full p-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white/80 text-sm placeholder:text-white/20 focus:border-[#00E676]/50 focus:outline-none" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-white/60 mb-2">Email</label>
-                    <input type="email" placeholder="correo@ejemplo.com" className="w-full p-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white/80 text-sm placeholder:text-white/20 focus:border-[#00E676]/50 focus:outline-none" />
+                    <input type="email" name="email" placeholder="correo@ejemplo.com" className="w-full p-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white/80 text-sm placeholder:text-white/20 focus:border-[#00E676]/50 focus:outline-none" />
                   </div>
                 </div>
 
@@ -329,11 +377,11 @@ export default function TransferAeropuertoPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-white/60 mb-2">Destino / Hotel</label>
-                    <input type="text" placeholder="Dirección o nombre del hotel" className="w-full p-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white/80 text-sm placeholder:text-white/20 focus:border-[#00E676]/50 focus:outline-none" />
+                    <input type="text" name="destino" placeholder="Dirección o nombre del hotel" className="w-full p-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white/80 text-sm placeholder:text-white/20 focus:border-[#00E676]/50 focus:outline-none" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-white/60 mb-2">Vehículo</label>
-                    <select className="w-full p-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white/80 text-sm focus:border-[#00E676]/50 focus:outline-none">
+                    <select name="vehiculo" className="w-full p-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white/80 text-sm focus:border-[#00E676]/50 focus:outline-none">
                       <option value="sedan">Sedan Confort (4 pasajeros)</option>
                       <option value="suv">SUV Confort (4 pasajeros)</option>
                       <option value="sedan-vip">Sedan VIP (4 pasajeros)</option>
@@ -397,10 +445,11 @@ export default function TransferAeropuertoPage() {
                 {/* Submit */}
                 <button
                   type="submit"
-                  className="w-full px-8 py-4 rounded-full text-lg font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_30px_rgba(0,230,118,0.3)] hover:shadow-[0_0_50px_rgba(0,230,118,0.5)] flex items-center justify-center gap-2"
+                  disabled={isSubmitting || formSubmitted}
+                  className="w-full px-8 py-4 rounded-full text-lg font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_30px_rgba(0,230,118,0.3)] hover:shadow-[0_0_50px_rgba(0,230,118,0.5)] flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  Confirmar Reserva
-                  <ArrowRight className="w-5 h-5" />
+                  {formSubmitted ? '✓ Reserva Enviada' : isSubmitting ? 'Enviando...' : 'Confirmar Reserva'}
+                  {!formSubmitted && <ArrowRight className="w-5 h-5" />}
                 </button>
 
                 <p className="text-center text-white/20 text-xs">

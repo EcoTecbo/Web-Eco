@@ -827,15 +827,39 @@ function ContactSection() {
     mensaje: '',
   })
   const [submitted, setSubmitted] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setSubmitted(true)
-    setTimeout(() => setSubmitted(false), 4000)
+    setIsSubmitting(true)
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'logistica',
+          fields: formData,
+          meta: { page: '/logistica', submittedAt: new Date().toISOString() },
+        }),
+      })
+      if (res.ok) {
+        setSubmitted(true)
+        setTimeout(() => setSubmitted(false), 4000)
+      } else {
+        alert('No se pudo enviar por correo. Te redirigimos a WhatsApp.')
+        window.open('https://wa.me/59173662803?text=' + encodeURIComponent('Hola, necesito un servicio de logística.'), '_blank')
+      }
+    } catch (err) {
+      console.error('[logistica] submit error:', err)
+      alert('Error de conexión. Te redirigimos a WhatsApp.')
+      window.open('https://wa.me/59173662803', '_blank')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const inputClasses = "w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white text-sm placeholder:text-white/25 focus:outline-none focus:border-[#0077BD]/40 focus:bg-white/[0.06] transition-all duration-300"
@@ -970,10 +994,11 @@ function ContactSection() {
                 <div className="flex flex-col sm:flex-row items-center gap-4">
                   <button
                     type="submit"
-                    className="w-full sm:w-auto px-8 py-4 rounded-full text-lg font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_30px_rgba(0,230,118,0.3)] hover:shadow-[0_0_50px_rgba(0,230,118,0.5)] hover:scale-105 flex items-center justify-center gap-2"
+                    disabled={isSubmitting}
+                    className="w-full sm:w-auto px-8 py-4 rounded-full text-lg font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_30px_rgba(0,230,118,0.3)] hover:shadow-[0_0_50px_rgba(0,230,118,0.5)] hover:scale-105 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
                   >
                     <Send className="w-5 h-5" />
-                    Solicitar Propuesta
+                    {isSubmitting ? 'Enviando...' : 'Solicitar Propuesta'}
                   </button>
 
                   <a

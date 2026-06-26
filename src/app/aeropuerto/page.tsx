@@ -129,8 +129,45 @@ const scheduledIncludes = [
 export default function AeropuertoPage() {
   const [selectedAirport, setSelectedAirport] = useState<string>('viruviru')
   const [formSubmitted, setFormSubmitted] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [clientType, setClientType] = useState<'local' | 'extranjero' | null>(null)
   const [hoveredAirport, setHoveredAirport] = useState<string | null>(null)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+    const form = e.currentTarget as HTMLFormElement
+    const formData = new FormData(form)
+    const fields: Record<string, string> = {}
+    formData.forEach((value, key) => {
+      fields[key] = key === 'welcomeSign'
+        ? (value === 'on' ? 'Sí' : String(value))
+        : String(value)
+    })
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'aeropuerto',
+          fields,
+          meta: { page: '/aeropuerto', submittedAt: new Date().toISOString() },
+        }),
+      })
+      if (res.ok) {
+        setFormSubmitted(true)
+      } else {
+        alert('No se pudo enviar por correo. Te redirigimos a WhatsApp.')
+        window.open('https://wa.me/59173662803?text=' + encodeURIComponent('Hola, quiero reservar un traslado al aeropuerto.'), '_blank')
+      }
+    } catch (err) {
+      console.error('[aeropuerto] submit error:', err)
+      alert('Error de conexión. Te redirigimos a WhatsApp.')
+      window.open('https://wa.me/59173662803', '_blank')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
   const mapRef = useRef<HTMLDivElement>(null)
 
   const selected = airports.find(a => a.id === selectedAirport)
@@ -638,19 +675,19 @@ export default function AeropuertoPage() {
                   </div>
                 </div>
 
-                <form onSubmit={(e) => { e.preventDefault(); setFormSubmitted(true) }} className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm text-white/40 mb-2">Nombre completo *</label>
-                      <input type="text" required className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white placeholder-white/20 focus:border-[#00E676]/30 focus:outline-none transition-colors" placeholder="Juan Pérez" />
+                      <input type="text" name="nombreCompleto" required className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white placeholder-white/20 focus:border-[#00E676]/30 focus:outline-none transition-colors" placeholder="Juan Pérez" />
                     </div>
                     <div>
                       <label className="block text-sm text-white/40 mb-2">Teléfono / WhatsApp *</label>
-                      <input type="tel" required className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white placeholder-white/20 focus:border-[#00E676]/30 focus:outline-none transition-colors" placeholder="+591 70000000" />
+                      <input type="tel" name="telefono" required className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white placeholder-white/20 focus:border-[#00E676]/30 focus:outline-none transition-colors" placeholder="+591 70000000" />
                     </div>
                     <div>
                       <label className="block text-sm text-white/40 mb-2">Aeropuerto de llegada *</label>
-                      <select required className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white focus:border-[#00E676]/30 focus:outline-none transition-colors">
+                      <select name="aeropuerto" required className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white focus:border-[#00E676]/30 focus:outline-none transition-colors">
                         <option value="" className="bg-[#0a0e17]">Seleccionar aeropuerto</option>
                         {airports.map(apt => (
                           <option key={apt.iata} value={apt.iata} className="bg-[#0a0e17]">{apt.iata} - {apt.name}</option>
@@ -659,23 +696,23 @@ export default function AeropuertoPage() {
                     </div>
                     <div>
                       <label className="block text-sm text-white/40 mb-2">Número de vuelo *</label>
-                      <input type="text" required className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white placeholder-white/20 focus:border-[#00E676]/30 focus:outline-none transition-colors" placeholder="OB 123" />
+                      <input type="text" name="numeroVuelo" required className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white placeholder-white/20 focus:border-[#00E676]/30 focus:outline-none transition-colors" placeholder="OB 123" />
                     </div>
                     <div>
                       <label className="block text-sm text-white/40 mb-2">Fecha de llegada *</label>
-                      <input type="date" required className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white focus:border-[#00E676]/30 focus:outline-none transition-colors" />
+                      <input type="date" name="fechaLlegada" required className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white focus:border-[#00E676]/30 focus:outline-none transition-colors" />
                     </div>
                     <div>
                       <label className="block text-sm text-white/40 mb-2">Hora estimada *</label>
-                      <input type="time" required className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white focus:border-[#00E676]/30 focus:outline-none transition-colors" />
+                      <input type="time" name="horaLlegada" required className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white focus:border-[#00E676]/30 focus:outline-none transition-colors" />
                     </div>
                     <div>
                       <label className="block text-sm text-white/40 mb-2">Destino (hotel/dirección) *</label>
-                      <input type="text" required className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white placeholder-white/20 focus:border-[#00E676]/30 focus:outline-none transition-colors" placeholder="Hotel Las Americas, Santa Cruz" />
+                      <input type="text" name="destino" required className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white placeholder-white/20 focus:border-[#00E676]/30 focus:outline-none transition-colors" placeholder="Hotel Las Americas, Santa Cruz" />
                     </div>
                     <div>
                       <label className="block text-sm text-white/40 mb-2">Tipo de vehículo</label>
-                      <select className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white focus:border-[#00E676]/30 focus:outline-none transition-colors">
+                      <select name="tipoVehiculo" className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white focus:border-[#00E676]/30 focus:outline-none transition-colors">
                         <option value="sedan" className="bg-[#0a0e17]">Sedan Confort</option>
                         <option value="suv" className="bg-[#0a0e17]">SUV</option>
                         <option value="van" className="bg-[#0a0e17]">Van VIP</option>
@@ -684,15 +721,15 @@ export default function AeropuertoPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <input type="checkbox" id="sign-local" defaultChecked className="w-4 h-4 rounded accent-[#00E676]" />
+                    <input type="checkbox" id="sign-local" name="welcomeSign" defaultChecked className="w-4 h-4 rounded accent-[#00E676]" />
                     <label htmlFor="sign-local" className="text-sm text-white/60">Necesito cartel de bienvenida con mi nombre</label>
                   </div>
                   <div>
                     <label className="block text-sm text-white/40 mb-2">Notas especiales</label>
-                    <textarea rows={3} className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white placeholder-white/20 focus:border-[#00E676]/30 focus:outline-none transition-colors resize-none" placeholder="Equipaje adicional, silla de bebé, etc." />
+                    <textarea name="notas" rows={3} className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white placeholder-white/20 focus:border-[#00E676]/30 focus:outline-none transition-colors resize-none" placeholder="Equipaje adicional, silla de bebé, etc." />
                   </div>
-                  <button type="submit" className="w-full px-8 py-4 rounded-full text-lg font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_30px_rgba(0,230,118,0.3)] hover:shadow-[0_0_50px_rgba(0,230,118,0.5)]">
-                    Enviar Reserva al Sistema de Despacho
+                  <button type="submit" disabled={isSubmitting} className="w-full px-8 py-4 rounded-full text-lg font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_30px_rgba(0,230,118,0.3)] hover:shadow-[0_0_50px_rgba(0,230,118,0.5)] disabled:opacity-60 disabled:cursor-not-allowed">
+                    {isSubmitting ? 'Enviando...' : 'Enviar Reserva al Sistema de Despacho'}
                   </button>
                   <p className="text-center text-white/30 text-xs">
                     Su reserva será procesada por nuestro sistema de despacho y recibirá confirmación por WhatsApp.

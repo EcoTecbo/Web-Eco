@@ -1208,9 +1208,40 @@ function ContactSection() {
     fecha: '',
     mensaje: '',
   })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [formSubmitted, setFormSubmitted] = useState(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'maquinaria',
+          fields: formData,
+          meta: { page: '/maquinaria', submittedAt: new Date().toISOString() },
+        }),
+      })
+      if (res.ok) {
+        setFormSubmitted(true)
+        setTimeout(() => setFormSubmitted(false), 5000)
+      } else {
+        alert('No se pudo enviar por correo. Te redirigimos a WhatsApp.')
+        window.open('https://wa.me/59173662803?text=' + encodeURIComponent('Hola, necesito cotizar maquinaria pesada.'), '_blank')
+      }
+    } catch (err) {
+      console.error('[maquinaria] submit error:', err)
+      alert('Error de conexión. Te redirigimos a WhatsApp.')
+      window.open('https://wa.me/59173662803', '_blank')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -1307,7 +1338,7 @@ function ContactSection() {
           {/* Form */}
           <AnimatedSection className="lg:col-span-3" delay={200}>
             <form
-              onSubmit={(e) => e.preventDefault()}
+              onSubmit={handleSubmit}
               className="p-6 md:p-8 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm space-y-5"
             >
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -1433,10 +1464,11 @@ function ContactSection() {
 
               <button
                 type="submit"
-                className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl font-semibold text-black bg-[#EAB308] hover:bg-[#FBBF24] transition-all duration-300 shadow-[0_0_25px_rgba(234,179,8,0.3)] hover:shadow-[0_0_40px_rgba(234,179,8,0.5)] hover:scale-[1.02]"
+                disabled={isSubmitting || formSubmitted}
+                className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl font-semibold text-black bg-[#EAB308] hover:bg-[#FBBF24] transition-all duration-300 shadow-[0_0_25px_rgba(234,179,8,0.3)] hover:shadow-[0_0_40px_rgba(234,179,8,0.5)] hover:scale-[1.02] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
               >
                 <Send className="w-5 h-5" />
-                Enviar Solicitud de Cotización
+                {formSubmitted ? '✓ Solicitud Enviada' : isSubmitting ? 'Enviando...' : 'Enviar Solicitud de Cotización'}
               </button>
             </form>
           </AnimatedSection>

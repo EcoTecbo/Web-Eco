@@ -893,15 +893,39 @@ function ContactSection() {
     mensaje: '',
   })
   const [submitted, setSubmitted] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setSubmitted(true)
-    setTimeout(() => setSubmitted(false), 4000)
+    setIsSubmitting(true)
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'transporte-salud',
+          fields: formData,
+          meta: { page: '/transporte-salud', submittedAt: new Date().toISOString() },
+        }),
+      })
+      if (res.ok) {
+        setSubmitted(true)
+        setTimeout(() => setSubmitted(false), 4000)
+      } else {
+        alert('No se pudo enviar por correo. Te redirigimos a WhatsApp.')
+        window.open('https://wa.me/59173662803?text=' + encodeURIComponent('Hola, necesito transporte para personal de salud.'), '_blank')
+      }
+    } catch (err) {
+      console.error('[transporte-salud] submit error:', err)
+      alert('Error de conexión. Te redirigimos a WhatsApp.')
+      window.open('https://wa.me/59173662803', '_blank')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -1083,10 +1107,11 @@ function ContactSection() {
 
                   <button
                     type="submit"
-                    className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl text-lg font-bold text-black bg-[#14B8A6] hover:bg-[#2DD4BF] transition-all duration-300 shadow-[0_0_30px_rgba(20,184,166,0.3)] hover:shadow-[0_0_50px_rgba(20,184,166,0.5)]"
+                    disabled={isSubmitting}
+                    className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl text-lg font-bold text-black bg-[#14B8A6] hover:bg-[#2DD4BF] transition-all duration-300 shadow-[0_0_30px_rgba(20,184,166,0.3)] hover:shadow-[0_0_50px_rgba(20,184,166,0.5)] disabled:opacity-60 disabled:cursor-not-allowed"
                   >
-                    Enviar Solicitud
-                    <ArrowRight className="w-5 h-5" />
+                    {isSubmitting ? 'Enviando...' : 'Enviar Solicitud'}
+                    {!isSubmitting && <ArrowRight className="w-5 h-5" />}
                   </button>
                 </form>
               )}
