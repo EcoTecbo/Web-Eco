@@ -23,7 +23,7 @@ const airports = [
     desc: 'El aeropuerto más grande de Bolivia. Principal puerta de entrada al oriente boliviano con vuelos internacionales directos.',
     color: '#00E676',
     bgImage: '/viru-viru-bg.png',
-    mapPosition: { x: 69, y: 53 },
+    mapPosition: { x: 70, y: 55 },
   },
   {
     id: 'elalto',
@@ -34,7 +34,7 @@ const airports = [
     desc: 'Aeropuerto internacional más alto del mundo a 4,061 msnm. Hub internacional de Bolivia con vuelos a todo el continente.',
     color: '#0077BD',
     bgImage: '/el-alto-bg.png',
-    mapPosition: { x: 29, y: 32 },
+    mapPosition: { x: 18, y: 40 },
   },
   {
     id: 'wilstermann',
@@ -45,7 +45,7 @@ const airports = [
     desc: 'Hub nacional de conexiones. Ubicado en el corazón de Bolivia, conecta con todas las ciudades principales del país.',
     color: '#FF9800',
     bgImage: '/airport-cocha.png',
-    mapPosition: { x: 46, y: 56 },
+    mapPosition: { x: 40, y: 55 },
   },
   {
     id: 'tarija',
@@ -55,7 +55,7 @@ const airports = [
     city: 'Tarija',
     desc: 'Puerta de entrada al sur de Bolivia y la región vinícola. Vuelos nacionales regulares.',
     color: '#8B5CF6',
-    mapPosition: { x: 46, y: 79 },
+    mapPosition: { x: 50, y: 92 },
   },
   {
     id: 'sucre',
@@ -65,7 +65,7 @@ const airports = [
     city: 'Sucre',
     desc: 'Aeropuerto de la capital constitucional de Bolivia. Conexiones con las principales ciudades.',
     color: '#E91E63',
-    mapPosition: { x: 47, y: 68 },
+    mapPosition: { x: 45, y: 78 },
   },
   {
     id: 'oruro',
@@ -75,7 +75,7 @@ const airports = [
     city: 'Oruro',
     desc: 'Aeropuerto de la capital folklórica de Bolivia. Servicio de vuelos nacionales.',
     color: '#00BCD4',
-    mapPosition: { x: 32, y: 45 },
+    mapPosition: { x: 25, y: 65 },
   },
   {
     id: 'potosi',
@@ -85,7 +85,7 @@ const airports = [
     city: 'Potosí',
     desc: 'Puerta de entrada a Potosí y el Salar de Uyuni. Vuelos nacionales.',
     color: '#9C27B0',
-    mapPosition: { x: 38, y: 66 },
+    mapPosition: { x: 30, y: 80 },
   },
   {
     id: 'trinidad',
@@ -95,7 +95,7 @@ const airports = [
     city: 'Trinidad, Beni',
     desc: 'Aeropuerto de Trinidad, puerta de entrada a la Amazonía boliviana.',
     color: '#4CAF50',
-    mapPosition: { x: 48, y: 32 },
+    mapPosition: { x: 40, y: 28 },
   },
   {
     id: 'cobija',
@@ -105,7 +105,7 @@ const airports = [
     city: 'Cobija, Pando',
     desc: 'Aeropuerto de Cobija, en la región amazónica norte de Bolivia.',
     color: '#FF5722',
-    mapPosition: { x: 15, y: 23 },
+    mapPosition: { x: 22, y: 12 },
   },
 ]
 
@@ -611,40 +611,86 @@ export default function AeropuertoPage() {
 
             {/* Client Type Selection */}
             {clientType === null && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
                 {/* Local Bolivia Client */}
                 <button
                   onClick={() => setClientType('local')}
-                  className="group p-8 rounded-3xl bg-white/[0.03] border border-white/[0.06] hover:border-[#00E676]/30 text-left transition-all duration-500 hover:bg-white/[0.05]"
+                  className="group relative p-8 rounded-3xl bg-white/[0.03] border border-white/[0.06] hover:border-[#00E676]/40 text-left transition-all duration-500 hover:bg-white/[0.05] overflow-hidden"
                 >
-                  <div className="w-14 h-14 rounded-2xl bg-[#00E676]/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    <Phone className="w-7 h-7 text-[#00E676]" />
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-3">Cliente en Bolivia</h3>
-                  <p className="text-sm text-white/50 leading-relaxed mb-4">
-                    Si te encuentras en Bolivia, reserva directamente a través de nuestro formulario vinculado al sistema de despacho. Pago en efectivo o transferencia.
-                  </p>
-                  <div className="flex items-center gap-2 text-[#00E676] text-sm font-medium">
-                    <span>Reservar ahora</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  {/* Glow on hover */}
+                  <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    style={{ boxShadow: 'inset 0 0 60px rgba(0,230,118,0.08), 0 0 30px rgba(0,230,118,0.1)' }} />
+
+                  <div className="relative z-10">
+                    <div className="w-14 h-14 rounded-2xl bg-[#00E676]/10 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-[#00E676]/15 transition-all duration-300">
+                      <Phone className="w-7 h-7 text-[#00E676]" />
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-3">Cliente en Bolivia</h3>
+                    <p className="text-sm text-white/50 leading-relaxed mb-5">
+                      Si te encuentras en Bolivia, reserva directamente a través de nuestro formulario vinculado al sistema de despacho. Pago en efectivo o transferencia.
+                    </p>
+
+                    {/* Benefits list */}
+                    <ul className="space-y-2 mb-6">
+                      <li className="flex items-center gap-2 text-xs text-white/60">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[#00E676]" /> Confirmación inmediata por WhatsApp
+                      </li>
+                      <li className="flex items-center gap-2 text-xs text-white/60">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[#00E676]" /> Pago en efectivo o transferencia
+                      </li>
+                      <li className="flex items-center gap-2 text-xs text-white/60">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[#00E676]" /> Sin cargos por reserva
+                      </li>
+                    </ul>
+
+                    {/* CTA Button */}
+                    <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold text-black bg-[#00E676] group-hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.25)] group-hover:shadow-[0_0_35px_rgba(0,230,118,0.45)] group-hover:scale-105">
+                      <Phone className="w-4 h-4" />
+                      <span>Reservar Ahora</span>
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                    <p className="text-[11px] text-white/30 mt-3">Respuesta en menos de 5 minutos</p>
                   </div>
                 </button>
 
                 {/* Foreign Client */}
                 <button
                   onClick={() => setClientType('extranjero')}
-                  className="group p-8 rounded-3xl bg-white/[0.03] border border-white/[0.06] hover:border-[#0077BD]/30 text-left transition-all duration-500 hover:bg-white/[0.05]"
+                  className="group relative p-8 rounded-3xl bg-white/[0.03] border border-white/[0.06] hover:border-[#0077BD]/40 text-left transition-all duration-500 hover:bg-white/[0.05] overflow-hidden"
                 >
-                  <div className="w-14 h-14 rounded-2xl bg-[#0077BD]/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    <CreditCard className="w-7 h-7 text-[#0077BD]" />
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-3">Cliente en el Extranjero</h3>
-                  <p className="text-sm text-white/50 leading-relaxed mb-4">
-                    Si te encuentras fuera de Bolivia y deseas reservar con pago con tarjeta de crédito/débito, utiliza nuestro sistema de reserva online seguro.
-                  </p>
-                  <div className="flex items-center gap-2 text-[#0077BD] text-sm font-medium">
-                    <span>Reservar y pagar</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  {/* Glow on hover */}
+                  <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    style={{ boxShadow: 'inset 0 0 60px rgba(0,119,189,0.08), 0 0 30px rgba(0,119,189,0.1)' }} />
+
+                  <div className="relative z-10">
+                    <div className="w-14 h-14 rounded-2xl bg-[#0077BD]/10 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-[#0077BD]/15 transition-all duration-300">
+                      <CreditCard className="w-7 h-7 text-[#0077BD]" />
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-3">Cliente en el Extranjero</h3>
+                    <p className="text-sm text-white/50 leading-relaxed mb-5">
+                      Si te encuentras fuera de Bolivia y deseas reservar con pago con tarjeta de crédito/débito, utiliza nuestro sistema de reserva online seguro.
+                    </p>
+
+                    {/* Benefits list */}
+                    <ul className="space-y-2 mb-6">
+                      <li className="flex items-center gap-2 text-xs text-white/60">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[#0077BD]" /> Pago seguro con tarjeta internacional
+                      </li>
+                      <li className="flex items-center gap-2 text-xs text-white/60">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[#0077BD]" /> Disponible en inglés y español
+                      </li>
+                      <li className="flex items-center gap-2 text-xs text-white/60">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[#0077BD]" /> Confirmación instantánea por email
+                      </li>
+                    </ul>
+
+                    {/* CTA Button */}
+                    <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold text-white bg-[#0077BD] group-hover:bg-[#0088d4] transition-all duration-300 shadow-[0_0_20px_rgba(0,119,189,0.25)] group-hover:shadow-[0_0_35px_rgba(0,119,189,0.45)] group-hover:scale-105">
+                      <CreditCard className="w-4 h-4" />
+                      <span>Reservar y Pagar Online</span>
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                    <p className="text-[11px] text-white/30 mt-3">Plataforma segura · Visa · Mastercard · Amex</p>
                   </div>
                 </button>
               </div>

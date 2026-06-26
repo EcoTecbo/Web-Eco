@@ -50,9 +50,9 @@ export const metadata: Metadata = {
   authors: [{ name: "O&C Ingeniería y Representaciones SRL" }],
   creator: "O&C Ingeniería y Representaciones SRL",
   publisher: "Ecotaxi Bolivia",
-  metadataBase: new URL("https://www.ecotaxi-bo.com"),
+  metadataBase: new URL("https://www.ecotaxi.com.bo"),
   alternates: {
-    canonical: "https://www.ecotaxi-bo.com",
+    canonical: "https://www.ecotaxi.com.bo",
   },
   robots: {
     index: true,
@@ -76,7 +76,7 @@ export const metadata: Metadata = {
     title: "Ecotaxi Bolivia - Transporte Inteligente, Compromiso Ecológico",
     description:
       "Primera empresa de transporte en Bolivia con neutralización de CO2. Taxi, traslado aeropuerto, mudanzas profesionales.",
-    url: "https://www.ecotaxi-bo.com/",
+    url: "https://www.ecotaxi.com.bo/",
     siteName: "Ecotaxi Bolivia",
     type: "website",
     locale: "es_BO",

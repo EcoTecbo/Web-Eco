@@ -502,7 +502,7 @@ export default function TransferAeropuertoPage() {
       {/* Footer */}
       <footer className="bg-[#060a12] border-t border-white/5 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-white/20 text-xs">&copy; {new Date().getFullYear()} ecotaxi-bo.com — O&C Ingeniería y Representaciones SRL</p>
+          <p className="text-white/20 text-xs">&copy; {new Date().getFullYear()} ecotaxi.com.bo — O&C Ingeniería y Representaciones SRL</p>
           <div className="flex items-center gap-4">
             <a href="/" className="text-white/20 hover:text-white/40 text-xs transition-colors">Inicio</a>
             <a href="/nosotros" className="text-white/20 hover:text-white/40 text-xs transition-colors">Nosotros</a>

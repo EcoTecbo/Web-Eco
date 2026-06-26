@@ -53,17 +53,14 @@ function AnimatedSection({ children, className = '', delay = 0 }: {
 function HeroSection() {
   return (
     <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-[#0d1320] to-[#0a0e17]" />
-
-      {/* Grid pattern */}
+      {/* Background image: taxi woman / servicio corporativo */}
       <div
-        className="absolute inset-0 opacity-[0.03]"
-        style={{
-          backgroundImage: `linear-gradient(rgba(0,230,118,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(0,230,118,0.3) 1px, transparent 1px)`,
-          backgroundSize: '60px 60px',
-        }}
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url('/corporativo-hero.webp')` }}
       />
+      {/* Dark gradient overlay for readability */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17]/85 via-[#0a0e17]/75 to-[#0a0e17]" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#0a0e17]/80 via-transparent to-[#0a0e17]/80" />
 
       {/* Glow orbs */}
       <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full bg-[#0077BD]/15 blur-[120px] animate-pulse" />
@@ -735,9 +732,18 @@ function ProfessionalDriversSection() {
    7. 200+ SATISFIED CLIENTS SECTION
    ═══════════════════════════════════════════════════════════════════════════════ */
 const clientNames = [
-  'Colgate-Palmolive', 'Banco BISA', 'Gloria', 'Coca-Cola', 'YPFB',
-  'Entel', 'Vinto', 'Cemento Nacional', 'Hidrocarbonos', 'Arcor',
-  'Grupo Económico', 'Banco Unión', 'PETROBRAS', 'Brady', 'FANCESA',
+  'Aldeas Infantiles SOS', 'Alicorp', 'Atlas Copco', 'BCP', 'CNPC',
+  'Copidsuj', 'Caja de Salud de la Banca Privada', 'Eurofarma', 'Fagal', 'Nestlé',
+  'Farmadical', 'Hanna', 'Hipermaxi S.A.', 'Madisa', 'Newage',
+  'Petrobras', 'Polysistema', 'PPO Abogados', 'Proesa', 'Turbin Solar',
+  'Tecnofarma', 'TIGO', 'UDABOL', 'Unifranz', 'What Tower',
+  'La Sante', 'Bioceanico', 'AHS Cosmetics', 'Belia Bolivia', 'Banco Mercantil Santa Cruz',
+  'Cainco', 'Colegio Alemán', 'DHL', 'DXN', 'EsSEN',
+  'Farmacrop', 'Floranet', 'Halliburton', 'Incotec', 'Meglod',
+  'Nacional Seguro', 'Pedido Ya', 'Rohling', 'Scanbioteck', 'Impuestos Nacionales',
+  'Sintesis', 'Sisegusa', 'Thayne', 'Tienda Amiga', 'Union Agronegocios',
+  'Valencia Citruz', 'Tribunal Departamental Electoral', 'Yanbal', 'Medio Producciones', 'Mathiesen',
+  'Banco Sol', 'Bovinsa', 'Oriental Consulting', 'Tigre S.A.', 'Prodem',
 ]
 
 const testimonials = [
@@ -869,6 +875,10 @@ function SatisfiedClientsSection() {
     </section>
   )
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   7b. TRUSTED COMPANIES - se eliminó (la cinta corrediza de SatisfiedClientsSection ya muestra el listado completo)
+   ═══════════════════════════════════════════════════════════════════════════════ */
 
 /* ═══════════════════════════════════════════════════════════════════════════════
    8. CONTACT / CTA SECTION
@@ -1093,7 +1103,7 @@ function ContactSection() {
                   </a>
 
                   <a
-                    href="mailto:info@ecotaxi-bo.com"
+                    href="mailto:info@ecotaxi.com.bo"
                     className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:border-[#00E676]/20 transition-all group"
                   >
                     <div className="w-10 h-10 rounded-xl bg-[#00E676]/10 flex items-center justify-center shrink-0">
@@ -1101,7 +1111,7 @@ function ContactSection() {
                     </div>
                     <div>
                       <div className="text-xs text-white/40">Email</div>
-                      <div className="text-sm text-white/80 group-hover:text-white transition-colors">info@ecotaxi-bo.com</div>
+                      <div className="text-sm text-white/80 group-hover:text-white transition-colors">info@ecotaxi.com.bo</div>
                     </div>
                   </a>
 

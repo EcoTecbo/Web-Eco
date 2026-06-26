@@ -935,9 +935,9 @@ function RegistrationSection() {
                     <Phone className="w-5 h-5 text-[#00E676]" />
                     <span>+591 73662803 (WhatsApp)</span>
                   </a>
-                  <a href="mailto:agencias@ecotaxi-bo.com" className="flex items-center gap-3 text-white/70 hover:text-[#00E676] transition-colors">
+                  <a href="mailto:agencias@ecotaxi.com.bo" className="flex items-center gap-3 text-white/70 hover:text-[#00E676] transition-colors">
                     <Mail className="w-5 h-5 text-[#0077BD]" />
-                    <span>agencias@ecotaxi-bo.com</span>
+                    <span>agencias@ecotaxi.com.bo</span>
                   </a>
                   <div className="flex items-center gap-3 text-white/70">
                     <MapPin className="w-5 h-5 text-[#FF9800]" />
