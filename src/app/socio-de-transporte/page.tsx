@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Car, Users, Shield, DollarSign, Clock, Headphones, CheckCircle, ArrowRight } from 'lucide-react'
+import { Car, Users, Shield, DollarSign, Clock, Headphones, CheckCircle, ArrowRight, CalendarCheck } from 'lucide-react'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
@@ -55,6 +55,15 @@ export default function SocioDeTransportePage() {
               >
                 Aplicar Ahora
                 <ArrowRight className="w-5 h-5" />
+              </a>
+              <a
+                href="https://crm.oyc-srl.com/appointly/appointments_public/book"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm md:text-base font-semibold text-white bg-[#0077BD] hover:bg-[#0088d4] transition-all duration-300 shadow-[0_0_25px_rgba(0,119,189,0.3)] hover:shadow-[0_0_35px_rgba(0,119,189,0.5)]"
+              >
+                <CalendarCheck className="w-5 h-5" />
+                Reservar Cita en Oficinas
               </a>
               <Link
                 href="/#flota"
@@ -122,15 +131,26 @@ export default function SocioDeTransportePage() {
               <p className="text-white/50 mb-6 leading-relaxed">
                 Completa tu registro y en menos de 48 horas podrás estar rodando con Ecotaxi. Nuestro equipo te guiará en cada paso del proceso.
               </p>
-              <a
-                href="https://wa.me/59173662803?text=Hola%2C%20quiero%20registrarme%20como%20conductor%20Ecotaxi"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300"
-              >
-                Contactar por WhatsApp
-                <ArrowRight className="w-4 h-4" />
-              </a>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <a
+                  href="https://wa.me/59173662803?text=Hola%2C%20quiero%20registrarme%20como%20conductor%20Ecotaxi"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300"
+                >
+                  Contactar por WhatsApp
+                  <ArrowRight className="w-4 h-4" />
+                </a>
+                <a
+                  href="https://crm.oyc-srl.com/appointly/appointments_public/book"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold text-white bg-[#0077BD] hover:bg-[#0088d4] transition-all duration-300 shadow-[0_0_20px_rgba(0,119,189,0.25)] hover:shadow-[0_0_30px_rgba(0,119,189,0.4)]"
+                >
+                  <CalendarCheck className="w-5 h-5" />
+                  Reservar Cita en Oficinas
+                </a>
+              </div>
             </div>
           </div>
         </div>

@@ -380,21 +380,34 @@ function ContactSection() {
           </AnimatedSection>
           <AnimatedSection delay={200} className="lg:col-span-3">
             <div className="p-8 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm">
-              <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+              <form className="space-y-4" onSubmit={async (e) => {
+                e.preventDefault()
+                const form = e.currentTarget
+                const data: Record<string, string> = {}
+                new FormData(form).forEach((value, key) => { data[key] = value.toString() })
+                try {
+                  await fetch('/api/contact', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: 'interurbano', formData: data }),
+                  })
+                } catch (err) { console.error('Error sending form:', err) }
+                alert('Solicitud enviada correctamente. Nos comunicaremos con usted pronto.')
+              }}>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div><label className="text-xs text-white/40 uppercase tracking-wider mb-1 block">Nombre</label><input className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white text-sm placeholder-white/20 focus:outline-none focus:border-[#0EA5E9]/50 transition-colors" placeholder="Tu nombre" /></div>
-                  <div><label className="text-xs text-white/40 uppercase tracking-wider mb-1 block">Teléfono</label><input className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white text-sm placeholder-white/20 focus:outline-none focus:border-[#0EA5E9]/50 transition-colors" placeholder="+591 XXXXXXXX" /></div>
+                  <div><label className="text-xs text-white/40 uppercase tracking-wider mb-1 block">Nombre</label><input name="nombre" className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white text-sm placeholder-white/20 focus:outline-none focus:border-[#0EA5E9]/50 transition-colors" placeholder="Tu nombre" /></div>
+                  <div><label className="text-xs text-white/40 uppercase tracking-wider mb-1 block">Teléfono</label><input name="telefono" className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white text-sm placeholder-white/20 focus:outline-none focus:border-[#0EA5E9]/50 transition-colors" placeholder="+591 XXXXXXXX" /></div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div><label className="text-xs text-white/40 uppercase tracking-wider mb-1 block">Origen</label><input className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white text-sm placeholder-white/20 focus:outline-none focus:border-[#0EA5E9]/50 transition-colors" placeholder="Ciudad de origen" /></div>
-                  <div><label className="text-xs text-white/40 uppercase tracking-wider mb-1 block">Destino</label><input className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white text-sm placeholder-white/20 focus:outline-none focus:border-[#0EA5E9]/50 transition-colors" placeholder="Ciudad de destino" /></div>
+                  <div><label className="text-xs text-white/40 uppercase tracking-wider mb-1 block">Origen</label><input name="origen" className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white text-sm placeholder-white/20 focus:outline-none focus:border-[#0EA5E9]/50 transition-colors" placeholder="Ciudad de origen" /></div>
+                  <div><label className="text-xs text-white/40 uppercase tracking-wider mb-1 block">Destino</label><input name="destino" className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white text-sm placeholder-white/20 focus:outline-none focus:border-[#0EA5E9]/50 transition-colors" placeholder="Ciudad de destino" /></div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div><label className="text-xs text-white/40 uppercase tracking-wider mb-1 block">Fecha</label><input type="date" className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white text-sm focus:outline-none focus:border-[#0EA5E9]/50 transition-colors" /></div>
-                  <div><label className="text-xs text-white/40 uppercase tracking-wider mb-1 block">Pasajeros</label><select className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white text-sm focus:outline-none focus:border-[#0EA5E9]/50 transition-colors"><option value="" className="bg-[#0a0e17]">Seleccionar</option><option value="1" className="bg-[#0a0e17]">1</option><option value="2" className="bg-[#0a0e17]">2</option><option value="3-4" className="bg-[#0a0e17]">3-4</option><option value="5-8" className="bg-[#0a0e17]">5-8</option><option value="9+" className="bg-[#0a0e17]">9+</option></select></div>
-                  <div><label className="text-xs text-white/40 uppercase tracking-wider mb-1 block">Tipo</label><select className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white text-sm focus:outline-none focus:border-[#0EA5E9]/50 transition-colors"><option value="" className="bg-[#0a0e17]">Seleccionar</option><option value="interurbano" className="bg-[#0a0e17]">Interurbano</option><option value="turismo" className="bg-[#0a0e17]">Turismo</option><option value="ida-vuelta" className="bg-[#0a0e17]">Ida y Vuelta</option></select></div>
+                  <div><label className="text-xs text-white/40 uppercase tracking-wider mb-1 block">Fecha</label><input type="date" name="fecha" className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white text-sm focus:outline-none focus:border-[#0EA5E9]/50 transition-colors" /></div>
+                  <div><label className="text-xs text-white/40 uppercase tracking-wider mb-1 block">Pasajeros</label><select name="pasajeros" className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white text-sm focus:outline-none focus:border-[#0EA5E9]/50 transition-colors"><option value="" className="bg-[#0a0e17]">Seleccionar</option><option value="1" className="bg-[#0a0e17]">1</option><option value="2" className="bg-[#0a0e17]">2</option><option value="3-4" className="bg-[#0a0e17]">3-4</option><option value="5-8" className="bg-[#0a0e17]">5-8</option><option value="9+" className="bg-[#0a0e17]">9+</option></select></div>
+                  <div><label className="text-xs text-white/40 uppercase tracking-wider mb-1 block">Tipo</label><select name="tipo" className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white text-sm focus:outline-none focus:border-[#0EA5E9]/50 transition-colors"><option value="" className="bg-[#0a0e17]">Seleccionar</option><option value="interurbano" className="bg-[#0a0e17]">Interurbano</option><option value="turismo" className="bg-[#0a0e17]">Turismo</option><option value="ida-vuelta" className="bg-[#0a0e17]">Ida y Vuelta</option></select></div>
                 </div>
-                <div><label className="text-xs text-white/40 uppercase tracking-wider mb-1 block">Mensaje</label><textarea rows={3} className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white text-sm placeholder-white/20 focus:outline-none focus:border-[#0EA5E9]/50 transition-colors resize-none" placeholder="Requisitos adicionales..." /></div>
+                <div><label className="text-xs text-white/40 uppercase tracking-wider mb-1 block">Mensaje</label><textarea name="mensaje" rows={3} className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white text-sm placeholder-white/20 focus:outline-none focus:border-[#0EA5E9]/50 transition-colors resize-none" placeholder="Requisitos adicionales..." /></div>
                 <button type="submit" className="w-full flex items-center justify-center gap-3 px-8 py-4 rounded-xl text-lg font-bold text-black bg-[#0EA5E9] hover:bg-[#38BDF8] transition-all duration-300 shadow-[0_0_40px_rgba(14,165,233,0.3)] hover:shadow-[0_0_60px_rgba(14,165,233,0.5)] hover:scale-[1.02]">Solicitar Cotización <ArrowRight className="w-5 h-5" /></button>
               </form>
             </div>

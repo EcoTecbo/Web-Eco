@@ -129,6 +129,7 @@ const scheduledIncludes = [
 export default function AeropuertoPage() {
   const [selectedAirport, setSelectedAirport] = useState<string>('viruviru')
   const [formSubmitted, setFormSubmitted] = useState(false)
+  const [formSending, setFormSending] = useState(false)
   const [clientType, setClientType] = useState<'local' | 'extranjero' | null>(null)
   const [hoveredAirport, setHoveredAirport] = useState<string | null>(null)
   const mapRef = useRef<HTMLDivElement>(null)
@@ -638,19 +639,37 @@ export default function AeropuertoPage() {
                   </div>
                 </div>
 
-                <form onSubmit={(e) => { e.preventDefault(); setFormSubmitted(true) }} className="space-y-6">
+                <form onSubmit={async (e) => {
+                  e.preventDefault()
+                  setFormSending(true)
+                  try {
+                    const form = e.currentTarget
+                    const data: Record<string, string> = {}
+                    new FormData(form).forEach((value, key) => { data[key] = value.toString() })
+                    data.aeropuertoSeleccionado = selectedAirport
+                    await fetch('/api/contact', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ type: 'aeropuerto', formData: data }),
+                    })
+                  } catch (err) {
+                    console.error('Error sending form:', err)
+                  }
+                  setFormSending(false)
+                  setFormSubmitted(true)
+                }} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm text-white/40 mb-2">Nombre completo *</label>
-                      <input type="text" required className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white placeholder-white/20 focus:border-[#00E676]/30 focus:outline-none transition-colors" placeholder="Juan Pérez" />
+                      <input type="text" name="nombre" required className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white placeholder-white/20 focus:border-[#00E676]/30 focus:outline-none transition-colors" placeholder="Juan Pérez" />
                     </div>
                     <div>
                       <label className="block text-sm text-white/40 mb-2">Teléfono / WhatsApp *</label>
-                      <input type="tel" required className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white placeholder-white/20 focus:border-[#00E676]/30 focus:outline-none transition-colors" placeholder="+591 70000000" />
+                      <input type="tel" name="telefono" required className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white placeholder-white/20 focus:border-[#00E676]/30 focus:outline-none transition-colors" placeholder="+591 70000000" />
                     </div>
                     <div>
                       <label className="block text-sm text-white/40 mb-2">Aeropuerto de llegada *</label>
-                      <select required className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white focus:border-[#00E676]/30 focus:outline-none transition-colors">
+                      <select name="aeropuerto" required className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white focus:border-[#00E676]/30 focus:outline-none transition-colors">
                         <option value="" className="bg-[#0a0e17]">Seleccionar aeropuerto</option>
                         {airports.map(apt => (
                           <option key={apt.iata} value={apt.iata} className="bg-[#0a0e17]">{apt.iata} - {apt.name}</option>
@@ -659,23 +678,23 @@ export default function AeropuertoPage() {
                     </div>
                     <div>
                       <label className="block text-sm text-white/40 mb-2">Número de vuelo *</label>
-                      <input type="text" required className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white placeholder-white/20 focus:border-[#00E676]/30 focus:outline-none transition-colors" placeholder="OB 123" />
+                      <input type="text" name="vuelo" required className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white placeholder-white/20 focus:border-[#00E676]/30 focus:outline-none transition-colors" placeholder="OB 123" />
                     </div>
                     <div>
                       <label className="block text-sm text-white/40 mb-2">Fecha de llegada *</label>
-                      <input type="date" required className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white focus:border-[#00E676]/30 focus:outline-none transition-colors" />
+                      <input type="date" name="fecha" required className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white focus:border-[#00E676]/30 focus:outline-none transition-colors" />
                     </div>
                     <div>
                       <label className="block text-sm text-white/40 mb-2">Hora estimada *</label>
-                      <input type="time" required className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white focus:border-[#00E676]/30 focus:outline-none transition-colors" />
+                      <input type="time" name="hora" required className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white focus:border-[#00E676]/30 focus:outline-none transition-colors" />
                     </div>
                     <div>
                       <label className="block text-sm text-white/40 mb-2">Destino (hotel/dirección) *</label>
-                      <input type="text" required className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white placeholder-white/20 focus:border-[#00E676]/30 focus:outline-none transition-colors" placeholder="Hotel Las Americas, Santa Cruz" />
+                      <input type="text" name="destino" required className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white placeholder-white/20 focus:border-[#00E676]/30 focus:outline-none transition-colors" placeholder="Hotel Las Americas, Santa Cruz" />
                     </div>
                     <div>
                       <label className="block text-sm text-white/40 mb-2">Tipo de vehículo</label>
-                      <select className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white focus:border-[#00E676]/30 focus:outline-none transition-colors">
+                      <select name="vehiculo" className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white focus:border-[#00E676]/30 focus:outline-none transition-colors">
                         <option value="sedan" className="bg-[#0a0e17]">Sedan Confort</option>
                         <option value="suv" className="bg-[#0a0e17]">SUV</option>
                         <option value="van" className="bg-[#0a0e17]">Van VIP</option>
@@ -684,15 +703,15 @@ export default function AeropuertoPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <input type="checkbox" id="sign-local" defaultChecked className="w-4 h-4 rounded accent-[#00E676]" />
+                    <input type="checkbox" id="sign-local" name="cartelBienvenida" value="si" defaultChecked className="w-4 h-4 rounded accent-[#00E676]" />
                     <label htmlFor="sign-local" className="text-sm text-white/60">Necesito cartel de bienvenida con mi nombre</label>
                   </div>
                   <div>
                     <label className="block text-sm text-white/40 mb-2">Notas especiales</label>
-                    <textarea rows={3} className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white placeholder-white/20 focus:border-[#00E676]/30 focus:outline-none transition-colors resize-none" placeholder="Equipaje adicional, silla de bebé, etc." />
+                    <textarea name="notas" rows={3} className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white placeholder-white/20 focus:border-[#00E676]/30 focus:outline-none transition-colors resize-none" placeholder="Equipaje adicional, silla de bebé, etc." />
                   </div>
-                  <button type="submit" className="w-full px-8 py-4 rounded-full text-lg font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_30px_rgba(0,230,118,0.3)] hover:shadow-[0_0_50px_rgba(0,230,118,0.5)]">
-                    Enviar Reserva al Sistema de Despacho
+                  <button type="submit" disabled={formSending} className="w-full px-8 py-4 rounded-full text-lg font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_30px_rgba(0,230,118,0.3)] hover:shadow-[0_0_50px_rgba(0,230,118,0.5)] disabled:opacity-60 disabled:cursor-not-allowed">
+                    {formSending ? 'Enviando...' : 'Enviar Reserva al Sistema de Despacho'}
                   </button>
                   <p className="text-center text-white/30 text-xs">
                     Su reserva será procesada por nuestro sistema de despacho y recibirá confirmación por WhatsApp.

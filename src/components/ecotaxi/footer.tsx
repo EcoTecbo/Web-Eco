@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Leaf, Facebook, Instagram, Linkedin, Youtube, Phone, Mail, MapPin } from 'lucide-react'
+import { Leaf, Facebook, Instagram, Linkedin, Youtube, Phone, Mail, MapPin, ExternalLink } from 'lucide-react'
 
 const serviceLinks = [
   { label: 'Puerta a Puerta', href: '/puerta-a-puerta' },
@@ -30,6 +30,7 @@ const workLinks = [
   { label: 'Conductores', href: '/socio-de-transporte' },
   { label: 'Eventos y Congresos', href: '/eventos-y-congresos' },
   { label: 'Aerolíneas', href: '/aeropuerto' },
+  { label: 'Reservar Cita', href: 'https://crm.oyc-srl.com/appointly/appointments_public/book', external: true },
 ]
 
 const benefitLinks = [
@@ -115,9 +116,16 @@ export function Footer() {
             <ul className="space-y-2">
               {workLinks.map((link) => (
                 <li key={link.label}>
-                  <Link href={link.href} className="text-white/40 hover:text-[#00E676] text-sm transition-colors duration-200">
-                    {link.label}
-                  </Link>
+                  {'external' in link && link.external ? (
+                    <a href={link.href} target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-[#00E676] text-sm transition-colors duration-200 inline-flex items-center gap-1">
+                      {link.label}
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  ) : (
+                    <Link href={link.href} className="text-white/40 hover:text-[#00E676] text-sm transition-colors duration-200">
+                      {link.label}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>

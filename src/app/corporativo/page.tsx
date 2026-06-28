@@ -885,13 +885,25 @@ function ContactSection() {
     mensaje: '',
   })
   const [submitted, setSubmitted] = useState(false)
+  const [sending, setSending] = useState(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setSending(true)
+    try {
+      await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'corporativo', formData }),
+      })
+    } catch (err) {
+      console.error('Error sending form:', err)
+    }
+    setSending(false)
     setSubmitted(true)
     setTimeout(() => setSubmitted(false), 4000)
   }
