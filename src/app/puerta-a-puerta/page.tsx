@@ -84,16 +84,15 @@ export default function PuertaAPuertaPage() {
         {/* Hero Section */}
         <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden pt-20">
           <div className="absolute inset-0 z-0">
-            <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17]/50 via-[#0a0e17]/80 to-[#0a0e17]" />
-            <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full bg-[#0077BD]/15 blur-[120px] animate-pulse" />
-            <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full bg-[#00E676]/10 blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
+            {/* Imagen de portada */}
             <div
-              className="absolute inset-0 opacity-[0.03]"
-              style={{
-                backgroundImage: `linear-gradient(rgba(0,119,189,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(0,119,189,0.3) 1px, transparent 1px)`,
-                backgroundSize: '60px 60px',
-              }}
+              className="absolute inset-0 bg-cover bg-center"
+              style={{ backgroundImage: `url('/puerta-a-puerta-hero.webp')` }}
             />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17]/75 via-[#0a0e17]/80 to-[#0a0e17]" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#0a0e17]/70 via-transparent to-[#0a0e17]/40" />
+            <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full bg-[#0077BD]/15 blur-[150px] animate-pulse" />
+            <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full bg-[#00E676]/10 blur-[150px] animate-pulse" style={{ animationDelay: '1s' }} />
           </div>
 
           {/* Animated taxi icon */}
@@ -102,17 +101,17 @@ export default function PuertaAPuertaPage() {
           </div>
 
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00E676]/10 border border-[#00E676]/20 mb-8 animate-fade-in backdrop-blur-sm">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00E676]/10 border border-[#00E676]/30 mb-8 animate-fade-in backdrop-blur-md">
               <MapPin className="w-4 h-4 text-[#00E676]" />
               <span className="text-sm text-[#00E676]">Servicio Urbano</span>
             </div>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6 animate-fade-in-up">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6 animate-fade-in-up drop-shadow-lg">
               Servicio{' '}
               <span className="bg-gradient-to-r from-[#00E676] via-[#0077BD] to-[#00E676] bg-clip-text text-transparent">
                 Puerta a Puerta
               </span>
             </h1>
-            <p className="text-lg md:text-xl text-white/60 max-w-3xl mx-auto mb-8 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+            <p className="text-lg md:text-xl text-white/85 max-w-3xl mx-auto mb-8 animate-fade-in-up drop-shadow" style={{ animationDelay: '0.2s' }}>
               El taxi urbano más económico, seguro y transparente de Bolivia. Subasta tu viaje, comparte el costo, 
               y llega a tu destino con la tranquilidad de una central humana respaldándote.
             </p>
@@ -266,28 +265,47 @@ export default function PuertaAPuertaPage() {
                 </div>
               </div>
 
-              {/* Auction Steps */}
+              {/* Auction image + steps */}
               <div className={`transition-all duration-1000 ${
                 visibleSections.has('auction') ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12'
               }`}>
-                <div className="space-y-4">
+                {/* Imagen de subasta */}
+                <div className="mb-5 relative rounded-3xl overflow-hidden border border-[#FF9800]/15 shadow-[0_0_50px_rgba(255,152,0,0.15)]">
+                  <img
+                    src="/puerta-a-puerta-subasta.webp"
+                    alt="Subasta de viajes Ecotaxi — tú propones el precio, los choferes compiten"
+                    className="w-full h-[260px] sm:h-[320px] object-cover"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0a0e17]/85 via-[#0a0e17]/20 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Gavel className="w-4 h-4 text-[#FF9800]" />
+                      <span className="text-xs text-[#FF9800] font-semibold uppercase tracking-widest">Tú pones el precio</span>
+                    </div>
+                    <h3 className="text-lg md:text-xl font-bold text-white">Los choferes compiten por ti</h3>
+                  </div>
+                </div>
+
+                {/* Auction Steps */}
+                <div className="space-y-3">
                   {auctionSteps.map((step, i) => (
                     <div
                       key={step.step}
-                      className="group flex gap-4 p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] hover:border-[#FF9800]/20 transition-all duration-300"
+                      className="group flex gap-3 p-4 rounded-2xl bg-white/[0.03] border border-white/[0.06] hover:border-[#FF9800]/20 transition-all duration-300"
                       style={{ transitionDelay: `${i * 100}ms` }}
                     >
                       <div className="shrink-0">
-                        <div className="w-12 h-12 rounded-xl bg-[#FF9800]/10 flex items-center justify-center">
-                          <step.icon className="w-6 h-6 text-[#FF9800]" />
+                        <div className="w-10 h-10 rounded-xl bg-[#FF9800]/10 flex items-center justify-center">
+                          <step.icon className="w-5 h-5 text-[#FF9800]" />
                         </div>
                       </div>
                       <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-xs font-bold text-[#FF9800]">PASO {step.step}</span>
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <span className="text-[10px] font-bold text-[#FF9800]">PASO {step.step}</span>
                         </div>
-                        <h3 className="text-white font-semibold mb-1">{step.title}</h3>
-                        <p className="text-sm text-white/40 leading-relaxed">{step.desc}</p>
+                        <h3 className="text-white font-semibold text-sm">{step.title}</h3>
+                        <p className="text-xs text-white/40 leading-relaxed">{step.desc}</p>
                       </div>
                     </div>
                   ))}
@@ -319,57 +337,76 @@ export default function PuertaAPuertaPage() {
               </p>
             </div>
 
-            {/* Shared Ride Visual */}
+            {/* Shared Ride Visual: imagen + comparacion de costo */}
             <div className={`mb-16 transition-all duration-1000 ${
               visibleSections.has('shared') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`}>
-              <div className="relative max-w-4xl mx-auto p-8 md:p-10 rounded-3xl bg-white/[0.03] border border-[#00E676]/10">
-                {/* Route visualization */}
-                <div className="flex items-center justify-between mb-8">
-                  {/* Passenger 1 */}
-                  <div className="text-center">
-                    <div className="w-12 h-12 rounded-full bg-[#0077BD]/20 flex items-center justify-center mx-auto mb-2">
-                      <Users className="w-6 h-6 text-[#0077BD]" />
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-5xl mx-auto items-stretch">
+                {/* Imagen real de viajes compartidos */}
+                <div className="relative rounded-3xl overflow-hidden border border-[#00E676]/15 shadow-[0_0_50px_rgba(0,230,118,0.15)]">
+                  <img
+                    src="/puerta-a-puerta-compartido.webp"
+                    alt="Viajes compartidos Ecotaxi — divide el costo con otro pasajero"
+                    className="w-full h-[260px] sm:h-[320px] lg:h-full object-cover"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0a0e17]/80 via-[#0a0e17]/10 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Users className="w-4 h-4 text-[#00E676]" />
+                      <span className="text-xs text-[#00E676] font-semibold uppercase tracking-widest">Comparte el viaje</span>
                     </div>
-                    <p className="text-xs text-white/40">Pasajero 1</p>
-                    <p className="text-xs text-[#0077BD] font-medium">Punto A</p>
-                  </div>
-
-                  {/* Route line with car */}
-                  <div className="flex-1 relative mx-4">
-                    <div className="h-0.5 bg-gradient-to-r from-[#0077BD] via-[#00E676] to-[#FF9800]" />
-                    {/* Car icon on route */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                      <div className="w-10 h-10 rounded-full bg-[#00E676]/20 flex items-center justify-center">
-                        <Car className="w-5 h-5 text-[#00E676]" />
-                      </div>
-                    </div>
-                    {/* Stop point */}
-                    <div className="absolute top-1/2 left-[65%] -translate-y-1/2">
-                      <div className="w-3 h-3 rounded-full bg-[#FF9800] ring-2 ring-[#FF9800]/30" />
-                    </div>
-                  </div>
-
-                  {/* Passenger 2 */}
-                  <div className="text-center">
-                    <div className="w-12 h-12 rounded-full bg-[#FF9800]/20 flex items-center justify-center mx-auto mb-2">
-                      <UserPlus className="w-6 h-6 text-[#FF9800]" />
-                    </div>
-                    <p className="text-xs text-white/40">Pasajero 2</p>
-                    <p className="text-xs text-[#FF9800] font-medium">Punto B</p>
+                    <h3 className="text-lg md:text-xl font-bold text-white">Misma ruta, mitad de precio</h3>
                   </div>
                 </div>
 
-                {/* Cost comparison */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06] text-center">
-                    <p className="text-xs text-white/30 mb-1">Sin compartir</p>
-                    <p className="text-2xl font-bold text-white/40 line-through">Bs 45</p>
+                {/* Route visualization + comparacion de costo */}
+                <div className="relative p-6 md:p-8 rounded-3xl bg-white/[0.03] border border-[#00E676]/10 flex flex-col justify-center">
+                  {/* Route visualization */}
+                  <div className="flex items-center justify-between mb-6">
+                    {/* Passenger 1 */}
+                    <div className="text-center">
+                      <div className="w-12 h-12 rounded-full bg-[#0077BD]/20 flex items-center justify-center mx-auto mb-2">
+                        <Users className="w-6 h-6 text-[#0077BD]" />
+                      </div>
+                      <p className="text-xs text-white/40">Pasajero 1</p>
+                      <p className="text-xs text-[#0077BD] font-medium">Punto A</p>
+                    </div>
+
+                    {/* Route line with car */}
+                    <div className="flex-1 relative mx-4">
+                      <div className="h-0.5 bg-gradient-to-r from-[#0077BD] via-[#00E676] to-[#FF9800]" />
+                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                        <div className="w-10 h-10 rounded-full bg-[#00E676]/20 flex items-center justify-center">
+                          <Car className="w-5 h-5 text-[#00E676]" />
+                        </div>
+                      </div>
+                      <div className="absolute top-1/2 left-[65%] -translate-y-1/2">
+                        <div className="w-3 h-3 rounded-full bg-[#FF9800] ring-2 ring-[#FF9800]/30" />
+                      </div>
+                    </div>
+
+                    {/* Passenger 2 */}
+                    <div className="text-center">
+                      <div className="w-12 h-12 rounded-full bg-[#FF9800]/20 flex items-center justify-center mx-auto mb-2">
+                        <UserPlus className="w-6 h-6 text-[#FF9800]" />
+                      </div>
+                      <p className="text-xs text-white/40">Pasajero 2</p>
+                      <p className="text-xs text-[#FF9800] font-medium">Punto B</p>
+                    </div>
                   </div>
-                  <div className="p-4 rounded-xl bg-[#00E676]/5 border border-[#00E676]/20 text-center">
-                    <p className="text-xs text-[#00E676] mb-1">Compartiendo</p>
-                    <p className="text-2xl font-bold text-[#00E676]">Bs 22.5</p>
-                    <p className="text-xs text-[#00E676]/60 mt-1">50% de ahorro</p>
+
+                  {/* Cost comparison */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06] text-center">
+                      <p className="text-xs text-white/30 mb-1">Sin compartir</p>
+                      <p className="text-2xl font-bold text-white/40 line-through">Bs 45</p>
+                    </div>
+                    <div className="p-4 rounded-xl bg-[#00E676]/5 border border-[#00E676]/20 text-center">
+                      <p className="text-xs text-[#00E676] mb-1">Compartiendo</p>
+                      <p className="text-2xl font-bold text-[#00E676]">Bs 22.5</p>
+                      <p className="text-xs text-[#00E676]/60 mt-1">50% de ahorro</p>
+                    </div>
                   </div>
                 </div>
               </div>

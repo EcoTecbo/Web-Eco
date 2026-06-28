@@ -8,3 +8,5 @@ db/
 *.log
 tool-results/
 upload/
+backup_images_before_rembg/
+backup_images_before_transparent/

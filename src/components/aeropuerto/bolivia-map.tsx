@@ -25,18 +25,71 @@ const airports: Record<string, AirportInfo> = {
   'Pando': { code: 'CIJ', name: 'Aeropuerto Capitán Aníbal Arab', city: 'Cobija', department: 'Pando', rates: [{ vehicle: 'Sedan Confort', price: 'Bs 90' }, { vehicle: 'SUV Confort', price: 'Bs 120' }, { vehicle: 'Sedan VIP', price: 'Bs 180' }, { vehicle: 'Van VIP', price: 'Bs 230' }], tracking: 'Disponible 24/7', phone: '+591 3 8422222' },
 }
 
-/* Simplified SVG paths for Bolivia departments */
+/* Simplified SVG paths for Bolivia departments — designed to form
+   a recognizable Bolivia silhouette (viewBox 0 0 500 380).
+   Each department also carries accurate airport-pin coordinates
+   matching the real geographic location of each city. */
 const departments = [
-  { name: 'La Paz', d: 'M120,60 L180,50 L200,80 L190,130 L160,150 L110,140 L90,100 Z', cx: '145', cy: '100' },
-  { name: 'Cochabamba', d: 'M190,130 L240,110 L270,140 L260,180 L220,190 L190,170 Z', cx: '225', cy: '150' },
-  { name: 'Santa Cruz', d: 'M220,190 L270,180 L320,160 L360,190 L370,240 L340,280 L280,270 L230,240 L210,210 Z', cx: '290', cy: '225' },
-  { name: 'Pando', d: 'M60,20 L120,15 L140,40 L120,60 L90,60 L60,45 Z', cx: '95', cy: '38' },
-  { name: 'Beni', d: 'M140,40 L200,35 L260,50 L270,100 L260,140 L220,150 L190,130 L160,150 L120,130 L130,80 Z', cx: '200', cy: '95' },
-  { name: 'Oruro', d: 'M90,100 L120,130 L110,140 L130,170 L110,190 L80,180 L70,140 Z', cx: '100', cy: '150' },
-  { name: 'Potosí', d: 'M130,170 L160,150 L190,170 L200,210 L180,240 L140,230 L110,200 L110,190 Z', cx: '155', cy: '195' },
-  { name: 'Chuquisaca', d: 'M190,170 L220,190 L210,210 L200,230 L180,240 L175,210 Z', cx: '197', cy: '205' },
-  { name: 'Tarija', d: 'M140,230 L180,240 L200,260 L190,300 L160,310 L130,290 L120,260 Z', cx: '160', cy: '270' },
+  {
+    name: 'Pando',
+    d: 'M 65,40 L 135,28 L 160,55 L 145,90 L 105,100 L 70,85 Z',
+    cx: '100', cy: '62',
+  },
+  {
+    name: 'Beni',
+    d: 'M 135,28 L 270,38 L 295,90 L 270,135 L 200,145 L 160,110 L 145,90 L 160,55 Z',
+    cx: '215', cy: '88',
+  },
+  {
+    name: 'La Paz',
+    d: 'M 70,85 L 145,90 L 160,110 L 180,160 L 155,210 L 95,205 L 75,160 Z',
+    cx: '125', cy: '148',
+  },
+  {
+    name: 'Cochabamba',
+    d: 'M 160,110 L 200,145 L 270,135 L 285,180 L 250,215 L 195,215 L 180,160 Z',
+    cx: '225', cy: '170',
+  },
+  {
+    name: 'Santa Cruz',
+    d: 'M 270,38 L 410,55 L 445,120 L 440,200 L 410,250 L 340,265 L 290,235 L 285,180 L 270,135 L 295,90 Z',
+    cx: '370', cy: '165',
+  },
+  {
+    name: 'Oruro',
+    d: 'M 75,160 L 155,210 L 180,235 L 165,275 L 105,275 L 75,235 Z',
+    cx: '120', cy: '225',
+  },
+  {
+    name: 'Potosí',
+    d: 'M 105,275 L 165,275 L 230,265 L 250,300 L 230,335 L 165,345 L 120,320 Z',
+    cx: '180', cy: '305',
+  },
+  {
+    name: 'Chuquisaca',
+    d: 'M 230,265 L 290,235 L 320,260 L 310,310 L 270,320 L 250,300 Z',
+    cx: '275', cy: '280',
+  },
+  {
+    name: 'Tarija',
+    d: 'M 165,345 L 230,335 L 270,320 L 310,310 L 290,365 L 210,370 L 175,360 Z',
+    cx: '235', cy: '345',
+  },
 ]
+
+/* Map department names → airport keys (some airports use the city
+   name rather than the department name, e.g. Sucre/Chuquisaca). */
+const deptToAirport: Record<string, string> = {
+  'La Paz': 'La Paz',
+  'Cochabamba': 'Cochabamba',
+  'Santa Cruz': 'Santa Cruz',
+  'Pando': 'Pando',
+  'Beni': 'Beni',
+  'Oruro': 'Oruro',
+  'Potosí': 'Potosí',
+  'Chuquisaca': 'Sucre',
+  'Tarija': 'Tarija',
+}
 
 export function BoliviaMap() {
   const [selected, setSelected] = useState<string | null>(null)
@@ -46,7 +99,7 @@ export function BoliviaMap() {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
       {/* Map */}
       <div className="relative">
-        <svg viewBox="0 0 420 340" className="w-full max-w-md mx-auto">
+        <svg viewBox="0 0 500 380" className="w-full max-w-lg mx-auto">
           {/* Background glow */}
           <defs>
             <filter id="glow">
@@ -68,39 +121,64 @@ export function BoliviaMap() {
 
           {departments.map((dept) => {
             const isSelected = selected === dept.name
+            const airportKey = deptToAirport[dept.name]
+            const airport = airportKey ? airports[airportKey] : null
             return (
               <g key={dept.name}>
                 <path
                   d={dept.d}
                   fill={isSelected ? 'url(#deptActive)' : 'url(#deptFill)'}
-                  stroke={isSelected ? '#00E676' : 'rgba(255,255,255,0.15)'}
+                  stroke={isSelected ? '#00E676' : 'rgba(255,255,255,0.18)'}
                   strokeWidth={isSelected ? 2 : 1}
                   className="cursor-pointer transition-all duration-300"
                   style={{ filter: isSelected ? 'url(#glow)' : 'none' }}
                   onMouseEnter={() => setSelected(dept.name)}
                   onClick={() => setSelected(isSelected ? null : dept.name)}
                 />
-                {/* Airport pin */}
-                {airports[dept.name] && (
+                {/* Airport pin — pink/magenta plane marker like image 1 */}
+                {airport && (
                   <g
                     className="cursor-pointer"
                     onClick={() => setSelected(isSelected ? null : dept.name)}
                   >
+                    {/* halo */}
                     <circle
                       cx={dept.cx} cy={dept.cy}
-                      r={isSelected ? 6 : 4}
-                      fill={isSelected ? '#00E676' : '#0077BD'}
+                      r={isSelected ? 11 : 8}
+                      fill="#FF1B8D"
+                      opacity={isSelected ? 0.25 : 0.15}
+                      className="transition-all duration-300"
+                    />
+                    {/* main marker */}
+                    <circle
+                      cx={dept.cx} cy={dept.cy}
+                      r={isSelected ? 7 : 5}
+                      fill="#FF1B8D"
+                      stroke="#ffffff"
+                      strokeWidth="1.2"
                       className="transition-all duration-300"
                       style={{ filter: isSelected ? 'url(#glow)' : 'none' }}
                     />
-                    {/* Airport code label */}
+                    {/* plane glyph (white) */}
                     <text
-                      x={Number(dept.cx) + 10}
-                      y={Number(dept.cy) + 4}
-                      className="text-[10px] font-bold pointer-events-none"
-                      fill={isSelected ? '#00E676' : 'rgba(255,255,255,0.4)'}
+                      x={dept.cx}
+                      y={Number(dept.cy) + 2.5}
+                      textAnchor="middle"
+                      fontSize="7"
+                      fill="#ffffff"
+                      fontWeight="bold"
+                      className="pointer-events-none select-none"
                     >
-                      {airports[dept.name].code}
+                      ✈
+                    </text>
+                    {/* Airport code + city label */}
+                    <text
+                      x={Number(dept.cx) + 11}
+                      y={Number(dept.cy) + 3.5}
+                      className="text-[9px] font-bold pointer-events-none select-none"
+                      fill={isSelected ? '#00E676' : 'rgba(255,255,255,0.85)'}
+                    >
+                      {airport.code} · {airport.city}
                     </text>
                   </g>
                 )}

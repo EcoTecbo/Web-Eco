@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/api/', '/_next/'],
       },
     ],
-    sitemap: 'https://www.ecotaxi-bo.com/sitemap.xml',
+    sitemap: 'https://www.ecotaxi.com.bo/sitemap.xml',
   }
 }

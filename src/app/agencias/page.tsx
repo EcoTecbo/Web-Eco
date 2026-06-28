@@ -864,15 +864,39 @@ function RegistrationSection() {
     mensaje: '',
   })
   const [submitted, setSubmitted] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setSubmitted(true)
-    setTimeout(() => setSubmitted(false), 5000)
+    setIsSubmitting(true)
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'agencias',
+          fields: formData,
+          meta: { page: '/agencias', submittedAt: new Date().toISOString() },
+        }),
+      })
+      if (res.ok) {
+        setSubmitted(true)
+        setTimeout(() => setSubmitted(false), 5000)
+      } else {
+        alert('No se pudo enviar por correo. Te redirigimos a WhatsApp.')
+        window.open('https://wa.me/59173662803?text=' + encodeURIComponent('Hola, quiero registrar mi agencia.'), '_blank')
+      }
+    } catch (err) {
+      console.error('[agencias] submit error:', err)
+      alert('Error de conexión. Te redirigimos a WhatsApp.')
+      window.open('https://wa.me/59173662803', '_blank')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -911,9 +935,9 @@ function RegistrationSection() {
                     <Phone className="w-5 h-5 text-[#00E676]" />
                     <span>+591 73662803 (WhatsApp)</span>
                   </a>
-                  <a href="mailto:agencias@ecotaxi-bo.com" className="flex items-center gap-3 text-white/70 hover:text-[#00E676] transition-colors">
+                  <a href="mailto:agencias@ecotaxi.com.bo" className="flex items-center gap-3 text-white/70 hover:text-[#00E676] transition-colors">
                     <Mail className="w-5 h-5 text-[#0077BD]" />
-                    <span>agencias@ecotaxi-bo.com</span>
+                    <span>agencias@ecotaxi.com.bo</span>
                   </a>
                   <div className="flex items-center gap-3 text-white/70">
                     <MapPin className="w-5 h-5 text-[#FF9800]" />
@@ -1051,10 +1075,11 @@ function RegistrationSection() {
 
                   <button
                     type="submit"
-                    className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl text-base font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.2)] hover:shadow-[0_0_30px_rgba(0,230,118,0.4)] hover:scale-[1.01]"
+                    disabled={isSubmitting}
+                    className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl text-base font-semibold text-black bg-[#00E676] hover:bg-[#00ff88] transition-all duration-300 shadow-[0_0_20px_rgba(0,230,118,0.2)] hover:shadow-[0_0_30px_rgba(0,230,118,0.4)] hover:scale-[1.01] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
                   >
-                    Enviar Solicitud de Registro
-                    <ArrowRight className="w-5 h-5" />
+                    {isSubmitting ? 'Enviando...' : 'Enviar Solicitud de Registro'}
+                    {!isSubmitting && <ArrowRight className="w-5 h-5" />}
                   </button>
                 </form>
               )}
