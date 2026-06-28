@@ -3,7 +3,7 @@
 import {
   Phone, Smartphone, Globe, Building2,
   HandshakeIcon, Hotel, Users, ArrowRight, Monitor,
-  MapPin,
+  MapPin, CalendarCheck,
 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
@@ -100,6 +100,10 @@ const portalAccess = [
     buttonClass:
       'border-[#8B5CF6] text-[#8B5CF6] hover:bg-[#8B5CF6] hover:text-white hover:shadow-[0_4px_20px_rgba(139,92,246,0.35)]',
     href: 'https://play.google.com/store/apps/details?id=taxi.id3251&pcampaignid=web_share',
+    secondaryButton: {
+      label: 'Reservar Cita en Oficinas',
+      href: 'https://crm.oyc-srl.com/appointly/appointments_public/book',
+    },
   },
 ]
 
@@ -483,11 +487,8 @@ export function Multicanal() {
           {/* Portal Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {portalAccess.map((portal, i) => (
-              <a
+              <div
                 key={portal.title}
-                href={portal.href}
-                target="_blank"
-                rel="noopener noreferrer"
                 className={`group relative p-6 rounded-2xl bg-white/[0.03] border backdrop-blur-sm transition-all duration-500 hover:-translate-y-1 ${portal.borderColor} hover:bg-white/[0.05] ${
                   visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                 }`}
@@ -507,17 +508,30 @@ export function Multicanal() {
                   <p className="text-sm text-white/50 leading-relaxed mb-5 flex-1">
                     {portal.description}
                   </p>
-                  {/* Outline CTA button — fills on hover with brand color */}
-                  <button
-                    type="button"
-                    tabIndex={-1}
+                  {/* Primary CTA button */}
+                  <a
+                    href={portal.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className={`w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full text-sm font-semibold border-2 transition-all duration-300 ${portal.buttonClass}`}
                   >
                     {portal.buttonLabel}
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-                  </button>
+                  </a>
+                  {/* Secondary button (only for Conductores) */}
+                  {'secondaryButton' in portal && portal.secondaryButton && (
+                    <a
+                      href={portal.secondaryButton.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 mt-3 rounded-full text-sm font-semibold border-2 border-[#0077BD] text-[#0077BD] hover:bg-[#0077BD] hover:text-white transition-all duration-300 hover:shadow-[0_4px_20px_rgba(0,119,189,0.35)]"
+                    >
+                      <CalendarCheck className="w-4 h-4" />
+                      {portal.secondaryButton.label}
+                    </a>
+                  )}
                 </div>
-              </a>
+              </div>
             ))}
           </div>
         </div>
