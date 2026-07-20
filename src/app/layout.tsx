@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
@@ -111,6 +112,19 @@ export default function RootLayout({
     <html lang="es" suppressHydrationWarning className="dark">
       <head>
         <SchemaOrg />
+
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-1E8FY5D2VL"
+          strategy="afterInteractive"
+          />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-1E8FY5D2VL');
+          `}
+        </Script>
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#0a0e17] text-white`}
